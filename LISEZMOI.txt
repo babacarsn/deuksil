@@ -1,0 +1,17 @@
+DEUKSIL - Démonstration front-end
+
+1. Décompressez ce dossier.
+2. Double-cliquez sur index.html (Chrome, Edge ou Firefox).
+3. Comptes de test (mot de passe demo123, admin : admin123) :
+   Client        1900000000002
+   Propriétaire  1900000000003
+   Agence        1900000000004
+   Admin         1900000000001
+
+Assistant : bouton rond en bas à droite (une fois connecté) et encart "Assistant de recherche"
+sur la page Rechercher. Il fonctionne hors ligne, sans IA externe.
+Exemples : "appartement meublé à Almadies moins de 400 000", "quels sont les tarifs ?".
+La dictée vocale (micro) fonctionne dans Chrome et Edge.
+
+Une connexion internet est utile uniquement pour charger les polices Google Fonts.
+Les données sont stockées dans le navigateur (localStorage).
