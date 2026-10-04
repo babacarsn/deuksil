@@ -1,17 +1,74 @@
-DEUKSIL - Démonstration front-end
+DEUKSIL — Plateforme immobilière et SaaS de gestion (Sénégal)
+Version de démonstration · octobre 2026
 
-1. Décompressez ce dossier.
-2. Double-cliquez sur index.html (Chrome, Edge ou Firefox).
-3. Comptes de test (mot de passe demo123, admin : admin123) :
-   Client        1900000000002
-   Propriétaire  1900000000003
-   Agence        1900000000004
-   Admin         1900000000001
+-----------------------------------------------------------------
+OUVRIR L'APPLICATION
+-----------------------------------------------------------------
+Décompressez l'archive et ouvrez index.html dans un navigateur
+(Chrome, Edge, Firefox ou Safari). Aucune installation, aucun
+serveur : tout tient dans ce fichier unique.
 
-Assistant : bouton rond en bas à droite (une fois connecté) et encart "Assistant de recherche"
-sur la page Rechercher. Il fonctionne hors ligne, sans IA externe.
-Exemples : "appartement meublé à Almadies moins de 400 000", "quels sont les tarifs ?".
-La dictée vocale (micro) fonctionne dans Chrome et Edge.
+Pour un test sur téléphone, placez index.html sur un service de
+fichiers partagé, ou ouvrez la version publiée en ligne.
 
-Une connexion internet est utile uniquement pour charger les polices Google Fonts.
-Les données sont stockées dans le navigateur (localStorage).
+-----------------------------------------------------------------
+COMPTES DE TEST  (mot de passe : demo123, sauf l'administrateur)
+-----------------------------------------------------------------
+  Administrateur   1900000000001   (mot de passe : admin123)
+  Client           1900000000002
+  Propriétaire     1900000000003
+  Agence           1900000000004
+  Gestionnaire     1900000000011   (équipe du propriétaire)
+  Agent            1900000000012   (équipe de l'agence)
+  Locataire        1900000000013
+  Investisseur     1900000000021
+  Promoteur        1900000000022
+
+Vous pouvez aussi créer un compte via « S'inscrire », avec une CNI
+fictive de 13 chiffres.
+
+-----------------------------------------------------------------
+CE QUE CONTIENT LA DÉMONSTRATION
+-----------------------------------------------------------------
+  Marketplace : recherche, filtres, favoris, visites, messagerie,
+    signalement d'annonce, niveaux de vérification.
+  Gestion locative : baux, unités d'immeuble, loyers, quittances,
+    fiches locataires, contrats, prestataires, maintenance.
+  Finances : devis, proformas, factures, avoirs, paiements
+    partiels, reçus, dépenses, rentabilité, rapports, journal.
+  Documents : coffre rangé en tiroirs par catégorie, PDF générés
+    avec le logo (factures, reçus, quittances, contrats, rapports).
+  Rôles et permissions : propriétaire, agence, gestionnaire, agent,
+    locataire, client, investisseur, promoteur, administrateur.
+
+-----------------------------------------------------------------
+À SAVOIR AVANT DE TESTER
+-----------------------------------------------------------------
+  - Les données sont enregistrées dans votre navigateur. Deux
+    personnes sur deux appareils ne voient pas les actions l'une
+    de l'autre. Pour simuler un échange entre un propriétaire et
+    son locataire, restez dans le même navigateur et changez de
+    compte avec « Se déconnecter ».
+  - DEUKSIL est gratuit : aucun frais d'inscription, aucun
+    abonnement, aucune commission. Les comptes sont actifs dès
+    leur création.
+  - Les paiements de loyer entre locataire et propriétaire
+    (Wave, Orange Money, Free Money) sont simulés : aucun débit
+    réel. L'intégration PayDunya reste à brancher.
+  - La génération des PDF nécessite une connexion Internet.
+  - Les contrats produits sont des modèles indicatifs, à faire
+    valider par un juriste avant tout usage réel.
+  - Les mots de passe ne sont pas protégés et les droits d'accès
+    ne sont appliqués que dans le navigateur : un serveur est
+    nécessaire avant toute mise en production.
+  - Pour repartir de zéro : « Réinitialiser la démonstration »
+    dans les paramètres du compte administrateur.
+
+-----------------------------------------------------------------
+FICHIERS DE L'ARCHIVE
+-----------------------------------------------------------------
+  index.html    l'application complète (un seul fichier)
+  README.md     documentation technique détaillée, module par
+                module, y compris l'audit des bugs corrigés et
+                le système de design de la refonte
+  LISEZMOI.txt  ce fichier

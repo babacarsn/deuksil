@@ -424,3 +424,207 @@ Security        HTTPS strict, rate limiting, journalisation, chiffrement au repo
 
 La migration côté front se limite à remplacer les six méthodes de `DB` par des appels API : le reste du
 code ne connaît pas le `localStorage`.
+
+## 40. Gestion complète (propriétaires et agences)
+
+Nouveau menu **Gestion** (`#/manage/...`) : baux et locataires (échéancier généré, alerte de fin de bail), loyers
+(encaissement, quittance téléchargeable, relance WhatsApp des retards), maintenance (coûts, statuts), pipeline de
+ventes (prospect → vendu, le bien passe en « Vendu ») et finances (encaissé, impayés, charges, net, taux
+d'occupation, rentabilité par bien). Collections : `deuksil_leases`, `deuksil_rents`, `deuksil_tickets`, `deuksil_deals`.
+
+## 41. V2 — cycle commercial, dépenses, rentabilité, journal
+
+Onglets Gestion : **Devis & Factures** (DEV/PF/FAC/AV numérotés, cycle devis → proforma → facture, liés par `parentId`),
+**Paiements** (PAY + reçu REC, paiement partiel, mode Wave/Orange Money/espèces…), **Dépenses** (DEP, 12 catégories),
+**Finances** (facturé, encaissé, impayés, net, graphique 6 mois, rentabilité par bien) et **Journal** d'audit.
+Collections : `deuksil_docs`, `deuksil_fpay`, `deuksil_expenses`, `deuksil_audit`. Documents téléchargeables en HTML imprimable en PDF.
+
+## 42. V3 — contrats, prestataires, exports, téléchargements
+
+Onglets Gestion : **Contrats** (CTR-AAAA-NNNNN ; location, mandat, vente, prestation ; brouillon → actif → expiré / résilié /
+renouvelé ; expiration automatique à l'affichage ; renouvellement qui crée un nouveau contrat lié), **Prestataires**
+(annuaire d'artisans), et bouton **Exporter en CSV** sur baux, loyers, contrats, devis/factures, paiements, dépenses.
+Les téléchargements (quittances, factures, reçus, contrats, CSV) passent par `saveFile()` : capacité `downloads` sur la
+page publiée, téléchargement classique quand le fichier est ouvert en local.
+
+## 43. V4 — rôles et permissions (RBAC)
+
+Nouveaux rôles : **gestionnaire** et **agent** (membres d'équipe d'un propriétaire ou d'une agence, permissions configurables
+parmi biens, visites, messagerie, gestion, finances, documents) et **locataire** (espace dédié : logement, loyers, signalement
+de maintenance). L'administration du compte, l'abonnement et l'équipe ne sont jamais délégables.
+Application côté logique : garde de routes (`permFor`), menus filtrés, onglets filtrés, et blocage des actions injectées
+(écouteurs en phase de capture). Création : Gestion > « Équipe & accès ».
+Comptes de démo (mot de passe `demo123`) : gestionnaire `1900000000011` (équipe du propriétaire 3), agent `1900000000012`
+(agence 4), locataire `1900000000013` (bail Fatou Ndiaye).
+
+## 44. V5 — confiance : signalements et vérification
+
+Bouton **Signaler** sur la fiche d'un bien (9 motifs, un signalement ouvert par utilisateur et par bien, notification aux admins).
+Page admin **Signalements** : examiner, demander des modifications (message au propriétaire), suspendre (annonce en pause),
+restaurer, supprimer (cascade), classer sans suite. Page admin **Vérifications** : niveaux non vérifié / identité vérifiée /
+professionnel vérifié (comptes) et annonce vérifiée / bien vérifié (annonces), affichés sur la fiche avec un avertissement
+précisant que cela ne vaut pas validation juridique ou foncière. Collection : `deuksil_reports`.
+
+## 45. V6 — documents PDF
+
+Devis, proformas, factures, avoirs, reçus, quittances de loyer et contrats (location, mandat, vente, prestation) sont
+générés en **PDF A4** avec le logo DEUKSIL : émetteur (nom, adresse, téléphone, e-mail, NINEA, RCCM), client, lignes,
+remise, TVA 18 % optionnelle, totaux, paiements reçus, reste à payer, montant en lettres (reçus et quittances), coordonnées
+de paiement, zones de signature, pied de page avec pagination. Un aperçu s'ouvre juste après la création, avec le bouton
+« Télécharger le PDF ». Gestion > « Mes informations » renseigne l'émetteur. jsPDF 2.5.1 est chargé à la demande depuis
+cdnjs (connexion Internet requise). Le droit de générer un PDF suit les permissions (finances / gestion).
+
+## 46. V7 — coffre de documents en tiroirs
+
+Entrée **Documents** dans le menu de chaque espace (`#/coffre`, `#/coffre/<tiroir>`). Les documents générés (factures, devis et
+proformas, avoirs, reçus, quittances, contrats) sont rangés automatiquement ; les documents déposés (pièces d'identité,
+titres et propriété, assurances, techniques, justificatifs de revenus, autres) le sont dans le tiroir choisi, avec bien
+concerné et date d'expiration facultatifs (alerte à 30 jours). Tiroirs par rôle : propriétaire/agence/admin (11), locataire (5),
+client (3). Recherche, aperçu, PDF, téléchargement et suppression. Le locataire télécharge ses quittances et son contrat en PDF
+au nom de son bailleur ; l'admin consulte tous les documents. Les permissions des membres d'équipe s'appliquent par tiroir.
+
+## 47. V8 — icône dessinée de l'assistant
+
+L'icône générique de l'assistant est remplacée par une icône propre à DEUKSIL : une **bulle de discussion en forme de maison**
+(immobilier + conversation) avec une **étincelle dorée** (intelligence). Le bouton flottant reçoit un fond dégradé bleu nuit,
+un anneau doré, une légère pulsation (désactivée si « réduire les animations ») et une infobulle « Assistant DEUKSIL » au survol.
+L'icône (`ICONS.sparkle`) s'adapte aux thèmes clair/sombre et remplace aussi l'ancienne étincelle dans la recherche IA.
+
+## 48. V9 — unités, fiches locataires, rapports, rappels, maintenance, tableaux
+
+- **Unités** (Gestion > Unités) : un immeuble contient des unités (A01, A02…) avec étage, surface, pièces, loyer, charges et statut
+  libre / occupée / en maintenance. « Louer » crée le bail et l'échéancier ; la fin de bail libère l'unité. Taux d'occupation.
+- **Fiches locataires** : contact, bien et unité, bail, caution, loyers payés ou en retard, maintenance, appel et WhatsApp.
+- **Rapports** (permission finances) : revenus par mois, revenus par bien, dépenses par catégorie, impayés, occupation,
+  rentabilité par bien, par année ; export PDF (avec logo) et CSV.
+- **Rappels automatiques** (sans doublon) : loyer bientôt dû ou en retard (propriétaire et locataire), facture en retard,
+  contrat qui expire sous 30 jours, document expiré ou expirant.
+- **Maintenance complète** : MNT-AAAA-NNNNN, priorité, prestataire, photo, étapes ouvert → assigné → en cours → résolu → fermé,
+  dépense DEP créée à la résolution et liée au bien (non comptée deux fois), notification au locataire.
+- **Tableaux** : tri par clic sur l'en-tête, pagination (10 lignes), recherche sur les listes principales.
+
+## 49. V10 — propriétaires, locataire en ligne, investisseur, promoteur, audit
+
+- **Fiches propriétaires** (Gestion > Propriétaires) : mandants d'une agence (identité, type, commission %), biens rattachés,
+  revenus, dépenses, commission et montant à reverser ; **relevé de gestion PDF**.
+- **Locataire** : paiement du loyer en ligne (Wave, Orange Money, Free Money — simulé, PayDunya à brancher), quittance
+  automatique dans Documents, et **messagerie** avec le propriétaire (Gestion > Messages locataires côté bailleur).
+- **Investisseur** (`#/invest/home`) : actifs, valeur, plus-value, rendement net, cash-flow, relevé de patrimoine PDF.
+- **Promoteur** (`#/promo/home`) : programmes, lots (disponible / réservé / vendu avec acquéreur), avancement et CA vendu.
+  Les deux rôles sont proposés à l'inscription (frais provisoires : 3 000 et 10 000 FCFA, à valider).
+- **Journal d'audit détaillé** : ancienne et nouvelle valeur de chaque modification (documents, contrats, baux, loyers,
+  dépenses, biens, propriétaires), export CSV.
+- Statut de bien **« En maintenance »** ajouté (le statut « Archivé » existait déjà).
+Comptes de démo (demo123) : investisseur `1900000000021`, promoteur `1900000000022` ; l'agence `1900000000004` a deux mandants.
+
+## 50. Audit des bugs et de la logique (corrections)
+
+Corrigé : tableaux sans en-tête qui bloquaient tri et pagination ; tri des dates ; numéros de référence en double après
+suppression (maintenant : plus grand numéro de l'année + 1) ; date de fin de bail (mois calendaires, plus de dérive de 5 jours) ;
+rendement affiché sur les biens en location (calculé seulement pour les biens à vendre) ; un locataire ne voit plus les contrats
+d'un autre locataire du même bien ; droits des membres d'équipe sur les exports CSV financiers, l'aperçu des factures et les
+documents déposés ; suppression d'un bien ou d'un compte (unités, tickets, baux, loyers, données liées nettoyés) ;
+suppression d'une dépense liée à un ticket (le coût disparaissait des rapports) ; avoir limité au reste à payer ;
+expiration automatique des contrats sans ouvrir l'onglet ; double paiement d'un loyer ; rappels dédupliqués dans la base (et non
+par navigateur) ; bail classique refusé sur un bien qui a des unités ; nom, téléphone et journal d'un document généré par un
+membre d'équipe (l'émetteur est le titulaire du compte).
+Limites connues : voir le rapport d'audit remis avec cette version (sécurité côté serveur, mots de passe, stockage local).
+
+## 51. Refonte de l'interface d'après les références
+
+Système de design relevé sur les 9 captures fournies et appliqué à toute l'application :
+navy profond #00192F (en-tête, barre latérale, pastille de navigation), feuille de contenu blanche aux coins
+supérieurs arrondis (26 px) remontant sous l'en-tête, cartes blanches à filet 1 px sans ombre, pastilles d'icônes
+teintées (bleu / vert / orange / doré), accent doré #F0B429 réservé au bouton central et aux actions clés,
+typographie sans serif unique (les titres ne sont plus en serif), rayons 12/16/26 px, ombres quasi supprimées.
+Composants ajoutés d'après les références : `.trow` (ligne-tuile icône + titre + sous-titre + chevron), `.choices`
+(grille de tuiles de choix), `.steps` et `.progress-seg` (étapes et progression), `.itile` (pastille d'icône).
+Tiroirs du coffre refaits sur le modèle « Mes demandes ». Mobile : galerie d'un bien en carrousel horizontal à
+accroche, modale en feuille montante à en-tête collant, bande d'onglets Gestion défilante.
+
+## 52. Allègement de l'interface mobile
+
+Barre du bas : 91 → 61 px (libellés .58rem, icônes 21 px, bouton central 40 px). En-tête mobile resserré, logo 24 → 19 px.
+Échelle typographique mobile : corps 15 → 14 px, titres de page 24 → 20 px, boutons, champs, tableaux et badges réduits
+en proportion ; densité des cartes, pastilles d'icônes (46 → 40 px) et cellules de tableau resserrée.
+Accueil : barre de recherche 66 → 48 px, tuiles de catégorie 131 → 101 px (icônes 64 → 46 px), bloc « Le marché en un
+coup d'œil » 202 → 161 px. La silhouette de carte du Sénégal, qui chevauchait le titre de ce bloc, a été supprimée
+(markup et styles `.mapo`).
+
+## 53. Photothèque de démonstration
+
+Les décors dessinés en SVG sont remplacés par 12 photos réelles fournies, compressées (760 px, JPEG progressif) et
+encodées dans le fichier : `PHOTOS` et `PHOTO_SETS` associent un jeu de photos à chaque type de bien (villa, maison,
+appartement, studio, chambre, duplex, immeuble, terrain, bureau, local commercial). `photoHtml()` utilise d'abord les
+photos propres au bien, puis ce jeu par défaut. Photo de couverture : villa contemporaine avec piscine au crépuscule,
+cadrée en 16/9 — retenue car son ciel dégagé et sa zone sombre à gauche laissent le titre lisible. Elle est utilisée
+sur le bandeau public et sur les bandeaux des espaces propriétaire, agence et client. Le fichier passe de 1,0 à 2,2 Mo.
+
+## 54. Bandeaux des espaces et états de la barre du bas
+
+Bandeaux : quatre photos de villa recadrées en 16/6 (1280×480) pour rester lisibles à faible hauteur, une par espace —
+`bnClient` (villa avec piscine, ciel bleu), `bnOwner` (villa éclairée au crépuscule), `bnAgency` (villa avec allée),
+`bnPromo` (villa avec auvent). Le bandeau du tableau de bord client, auparavant un simple dégradé, reçoit sa photo avec
+voile dégradé (`.hero-photo`) afin que le titre et la barre de recherche restent lisibles.
+Barre du bas : le surlignage de l'onglet actif n'entoure plus tout l'onglet (icône + libellé) mais seulement l'icône,
+soit une pastille de 47×27 px. Ajout des états `:hover` (pastille discrète et libellé en blanc, bouton central éclairci)
+et `:active` (léger enfoncement), limités aux appareils avec pointeur via `@media (hover:hover)`.
+
+## 55. Gestion présentée en tiroirs
+
+`#/manage` devient l'accueil de la Gestion : les 18 sections sont rangées en tiroirs (mêmes cartes que le coffre
+documents) répartis en 5 catégories — Location, Relation, Technique, Finances, Administration. Chaque tiroir porte une
+icône adaptée, une description et un compteur calculé en direct (baux actifs, loyers en retard, unités occupées,
+factures à encaisser, messages non lus, membres d'équipe…). Les tiroirs sont filtrés selon les permissions du membre.
+Sur une section, la longue bande d'onglets défilante est remplacée par un fil de retour compact
+(flèche + « Gestion › Section ») et un sélecteur pour sauter directement à une autre section.
+
+## 56. Plateforme gratuite — suppression de la monétisation
+
+Retiré : constante `PRICING`, formules d'agence (BASIC / BUSINESS / PRO) et leurs limites de biens et d'agents, frais
+d'inscription, abonnement mensuel propriétaire, renouvellement, pages Abonnement (propriétaire, agence) et pages admin
+Paiements et Abonnements, bandeau et notification d'expiration, blocage de connexion « frais non réglés », blocage de
+publication pour abonnement expiré, données de démonstration (paiements, abonnements). `ownerSubscriptionActive()`
+renvoie toujours vrai : plus aucune annonce n'est retirée pour non-paiement. Les anciennes adresses redirigent vers le
+tableau de bord. Textes mis à jour : accueil public, FAQ, conditions, assistant, choix du rôle à l'inscription,
+paramètres admin. Indicateurs admin « Abonnements actifs » et « Revenus simulés » remplacés par « Signalements à
+traiter » et « Messages échangés ». Un compte créé est actif immédiatement.
+Conservé : le paiement du loyer par le locataire à son propriétaire, et la facturation que propriétaires et agences
+adressent à leurs propres clients — ce sont leurs revenus, pas ceux de la plateforme.
+Barre du bas réduite une nouvelle fois : 61 → 52 px (libellés .54rem, icônes 19 px, bouton central 36 px).
+
+## 57. Archivage automatique en PDF
+
+Dès qu'un document est créé, son PDF est produit et rangé tout seul dans le tiroir correspondant : devis et proforma →
+Devis & proformas, facture → Factures, avoir → Avoirs, reçu de paiement → Reçus, quittance (encaissement par le bailleur
+ou paiement en ligne du locataire) → Quittances, contrat (création et renouvellement) → Contrats. `autoFile()` génère,
+encode et enregistre la pièce avec un `srcRef` ; `vaultItems()` fusionne alors l'entrée calculée et la pièce archivée
+pour n'afficher qu'une ligne, avec « Voir » et « Télécharger ». Aucun doublon si le document est recréé.
+Les pièces déposées en image (CNI, titre foncier, attestation) sont converties en PDF A4 via un canvas — tout format
+lisible par le navigateur est accepté, l'image est réduite à 1600 px et titrée avec la date de dépôt.
+Si la connexion manque, la création aboutit quand même et seul le PDF est différé (message explicite).
+Bouton central de la barre du bas : 36 → 30 px, avec un peu d'air au-dessus et au-dessous.
+
+## 58. Signature : le logo tient lieu de D
+
+Le symbole du logo étant un D, le mot qui l'accompagne devient « EUKSIL » : l'ensemble se lit « DEUKSIL ». Appliqué aux
+six emplacements (barre publique, barre latérale, en-tête mobile, tiroir de navigation, pied de page, écran d'accueil).
+L'espace entre le symbole et le mot est resserré à 3 px pour que les deux se lisent d'un seul tenant. Le nom complet
+reste écrit en entier partout ailleurs : titre du navigateur, PDF, textes, attribut `alt` des images.
+
+## 59. Catégories : les cinq tiennent sur une ligne
+
+La bande de catégories, auparavant un défilement horizontal où la cinquième tuile restait coupée, devient une grille
+fixe de 5 colonnes égales : plus aucun débordement, vérifié de 320 à 430 px de large. Sur mobile, les libellés passent
+à une version courte (Tous, Maisons, Apparts, Terrains, Locaux), les pastilles d'icône descendent à 42 px et les écarts
+à 5 px ; le libellé complet reste affiché sur les écrans larges. L'ensemble est posé dans un bloc blanc à filet fin,
+coins arrondis et ombre douce, qui le détache du fond.
+
+## 60. Suppression de la vue carte
+
+La bascule Liste / Carte de la recherche est retirée, ainsi que tout ce qui en dépendait : silhouette du Sénégal
+(`senegalMapSvg`, style `.senegal-map`), vue `mapViewHtml()`, grille des villes par région (`mapCityGrid`),
+positions `REGION_POS`, compteurs `regionCounts()`, état `searchView` / `mapSelectedRegion` et les actions
+`map-region`, `map-region-clear`, `map-city`, `map-region-view-all`, `set-search-view`. La recherche affiche
+directement la liste des résultats. Motif : la carte n'était pas géoréférencée et n'apportait pas de repère fiable ;
+une vraie carte demandera un fond cartographique et les coordonnées des biens.
