@@ -628,3 +628,202 @@ positions `REGION_POS`, compteurs `regionCounts()`, état `searchView` / `mapSel
 `map-region`, `map-region-clear`, `map-city`, `map-region-view-all`, `set-search-view`. La recherche affiche
 directement la liste des résultats. Motif : la carte n'était pas géoréférencée et n'apportait pas de repère fiable ;
 une vraie carte demandera un fond cartographique et les coordonnées des biens.
+
+## 61. Chaîne agence : mandat → commission → reversement
+
+Deux tiroirs ajoutés dans la catégorie Relation.
+**Mandats de gestion** (`MDT-AAAA-NNNNN`) : propriétaire mandant, biens confiés (cochés, rattachés automatiquement),
+commission en %, période, services inclus, statut actif / expiré / résilié (expiration automatique à l'affichage).
+Le mandat fait foi pour la commission : `commissionRate()` prend le taux du mandat actif, sinon le taux de la fiche.
+Le PDF du mandat (5 articles) est généré et rangé dans le tiroir Contrats dès la création.
+**Reversements** (`REV-AAAA-NNNNN`) : pour chaque propriétaire et chaque mois, loyers encaissés − dépenses − commission
+= montant dû ; enregistrement du versement (mode, référence), statut à reverser / reversé, reçu consultable.
+**Recherche globale** en tête de l'accueil Gestion : biens, propriétaires, locataires, unités, devis et factures,
+paiements, contrats — résultats groupés par type avec lien direct vers la section.
+
+## 62. Tableau de bord selon le cahier des charges
+
+Le tableau de bord du propriétaire et celui de l'agence répondent aux quatre questions attendues, en gardant leur bandeau.
+**Ce que vous gérez** : biens, unités, unités occupées, unités vacantes, taux d'occupation. Un bien sans unité déclarée
+compte pour une unité, ce qui évite de forcer la saisie d'unités sur une maison individuelle.
+**Ce que vous gagnez** (mois en cours) : loyers attendus, encaissé, impayés, dépenses, revenu net.
+**À traiter** : uniquement ce qui demande une action — loyers en retard, baux échus sous 45 jours, demandes de
+maintenance ouvertes, devis sans réponse, contrats à renouveler, demandes de visite, messages de locataires non lus et,
+pour l'agence, les reversements du mois non effectués. Chaque ligne mène directement à l'écran concerné.
+**Actions rapides** : les cinq du cahier des charges, différentes pour le propriétaire et pour l'agence.
+
+## 63. Fiche d'un bien en six onglets
+
+Nouvelle page `#/bien/<id>/<onglet>`, atteinte par « Ouvrir » depuis Mes biens. Six onglets :
+**Vue générale** (photo, informations, description, propriétaire mandant et sa commission ; à droite le revenu mensuel
+avec le taux d'occupation, le détail du mois en cours et un bloc « À traiter » limité à ce bien), **Unités**
+(indicateurs puis une carte par unité, loyer en retard signalé, bouton Louer si vacante ; un bien sans unité déclarée
+compte pour une seule unité), **Finances** (revenus, impayés, dépenses, net, loyers du bien, dépenses par poste,
+rentabilité calculée seulement pour un bien en vente), **Maintenance**, **Documents** (contrats et pièces du bien) et
+**Historique** (baux, loyers payés, interventions, dépenses, contrats, du plus récent au plus ancien).
+Aucun débordement horizontal, vérifié de 320 à 430 px : sur mobile les six onglets passent en grille fixe avec libellé
+court, les tableaux deviennent des cartes, les textes longs sont coupés par des points de suspension et les montants
+peuvent aller à la ligne dans leur carte.
+
+## 64. Derniers points du cahier des charges
+
+**§13 Maintenance** : trois états seulement — nouvelle → en cours → terminée (les anciens états sont convertis à la
+volée) — et six catégories : plomberie, électricité, climatisation, peinture, serrurerie, autre. Le locataire choisit
+aussi la catégorie en signalant un problème. La dépense liée est créée à la clôture, et l'export CSV reprend catégorie,
+priorité et prestataire.
+**§9 Jour d'échéance** : réglable de 1 à 28 à la création d'un bail, qu'il porte sur un bien entier ou sur une unité.
+Le retard d'un loyer est calculé d'après ce jour, et non plus d'après le 5 fixe.
+**§7 Unité archivée** : quatrième statut, avec un bouton Archiver / Réactiver. Les unités archivées sortent des listes
+et des compteurs ; un bouton les réaffiche à la demande.
+**§14 Devis à valider** : une agence règle son seuil dans Gestion › Mes informations (100 000 FCFA par défaut).
+Au-delà, un devis portant sur un bien sous mandat passe en « Accord du propriétaire attendu » et ne peut devenir une
+proforma tant que l'accord n'est pas enregistré, avec le nom de la personne qui l'a donné, ou refusé.
+
+## 65. Menus par rôle et documents rattachés
+
+**§3 Propriétaire** (11 entrées) : Tableau de bord, Mes biens, Locataires, Loyers, Dépenses, Maintenance, Documents,
+Rapports, Messages, Gestion, Paramètres. **§18 Agence** (15) : Tableau de bord, Propriétaires, Mandats, Biens, Unités,
+Locataires, Loyers, Devis & Factures, Dépenses, Maintenance, Reversements, Documents, Rapports, Gestion, Paramètres —
+Devis et Factures sont réunis, puisqu'ils partagent le même écran. **§23 Locataire** (7) : Mon logement, Mon loyer,
+Mes paiements, Mes quittances, Maintenance, Documents, Messages. L'entrée « Gestion » est conservée pour les sections
+qui ne sont pas au premier niveau (unités, baux, contrats, prestataires, finances, équipe, journal). La barre mobile
+suit les mêmes destinations.
+Deux écrans locataire : **Mes paiements** (historique, mode, référence, total versé, caution) et **Mes quittances**
+(une carte par loyer réglé, PDF téléchargeable).
+**§24 Documents rattachés** : justificatif facultatif au moment d'enregistrer une dépense (converti en PDF, rangé dans
+le coffre, consultable depuis la ligne de la dépense), et bouton « Joindre » sur chaque bail pour le bail signé, les
+états des lieux d'entrée et de sortie et l'attestation d'assurance, rangés dans le tiroir Contrats.
+
+## 66. Plus de paiement dans l'application
+
+Le paiement du loyer en ligne par le locataire est retiré : écran, formulaire et traitement supprimés. Aucun argent ne
+transite par DEUKSIL. Le locataire consulte ses loyers, leur état et le mode de règlement enregistré.
+En contrepartie, **l'enregistrement d'un paiement** par le bailleur devient complet (§11) : montant reçu, date du
+paiement, mode (espèces, virement, Wave, Orange Money, carte, autre) et référence. L'enregistrement met le loyer à
+« payé », trace l'opération au journal, prévient le locataire, génère la quittance et l'archive dans son tiroir.
+Le mode apparaît ensuite dans Mes loyers et Mes paiements côté locataire.
+
+## 67. Correction : barre du bas disparue sur les tableaux de bord
+
+La refonte du tableau de bord (§62) découpait le HTML du shell jusqu'au dernier `</div>` : la barre du bas et le bouton
+de l'assistant étaient emportés avec la coupe, sur les tableaux de bord propriétaire et agence seulement. Le tableau de
+bord est désormais reconstruit en entier (`dashHero()` + `dashHtml()` passés à `shellApp`), sans découpe.
+Deux effets de bord des menus allégés (§65) sont corrigés dans la foulée : le bouton central ne dépend plus d'une entrée
+de menu (il avait disparu puisque « Ajouter un bien » n'est plus au menu), et les pages sorties du menu restent
+atteignables grâce à un bloc **Autres espaces** sur l'accueil Gestion — demandes de visite, statistiques, profil pour le
+propriétaire ; agents, clients, visites, commissions, profil pour l'agence. Messages est rendu au menu de l'agence.
+
+## 68. Icônes sur les indicateurs du tableau de bord
+
+Les dix indicateurs du tableau de bord passent de la carte sobre à la carte à pastille d'icône (`kpiRich`), comme
+partout ailleurs dans l'application : Biens (maison), Unités (immeuble), Unités occupées (coche), Unités vacantes
+(porte), Taux d'occupation (courbe), Loyers attendus (calendrier), Encaissé (pièce), Impayés (alerte), Dépenses
+(flèches), Revenu net (tendance). Chaque pastille reprend la teinte de son état : vert pour l'encaissé, rouge pour les
+impayés, doré pour les dépenses.
+
+## 69. Une seule barre de recherche
+
+Toutes les barres de recherche adoptent le dessin de celle de l'accueil Gestion : une carte blanche à filet fin
+contenant le champ pleine largeur et un bouton carré bleu nuit à loupe. Un helper unique, `sBar(placeholder)`, les
+produit toutes — listes de la Gestion (dépenses, baux, loyers, contrats, ventes, journal, prestataires, locataires,
+unités), maintenance, propriétaires et coffre documents. Le filtrage en direct est inchangé ; la touche Entrée ne
+recharge plus la page. Sur mobile la carte et le bouton se resserrent, sans débordement.
+
+## 70. Un seul fil de retour
+
+Tous les retours adoptent le dessin du fil de la Gestion : une flèche dans un carré encadré, puis le chemin
+« Origine › Page en cours ». Un helper unique, `backBar(lien, libellé, page)`, les produit tous — tiroir du coffre
+(« Tous les tiroirs › Factures »), fiche d'un bien (« Mes biens › titre du bien »), section de la Gestion
+(« Gestion › Loyers »), fiche publique d'une annonce et pages légales. Les anciens liens soulignés « ← Tous les
+tiroirs » et « ← Mes biens » disparaissent. Le style vit désormais dans la feuille principale et non dans un module.
+Sur mobile le carré et les écarts se resserrent, et un titre long est coupé par des points de suspension.
+
+## 71. Panneau de compte et retrait des biens loués
+
+**Panneau de compte** : il s'ouvre désormais en superposition, juste sous l'en-tête, à n'importe quel endroit de la
+page — plus besoin de remonter en haut. Il descend avec une animation courte (220 ms, désactivée si l'appareil réduit
+les animations), assombrit le fond, se ferme en touchant ce fond et se referme au changement de page.
+**Un bien loué quitte la recherche** : `listable()` remplace l'ancien filtre. Un bien au statut loué, vendu, en
+maintenance ou archivé n'apparaît plus aux visiteurs, et un bien portant un bail actif non plus, même si son statut
+n'a pas suivi. Un immeuble reste visible tant qu'au moins une unité est libre, et disparaît quand toutes sont prises.
+Dès qu'une unité se libère ou qu'un bail prend fin, l'annonce revient. Le message affiché à la création d'un bail
+l'annonce explicitement. Les données de démonstration sont rendues cohérentes (le bien loué à Fatou Ndiaye passe au
+statut loué).
+
+## 72. Animations et carrousel des biens
+
+Couche d'animations courte et régulière, toutes coupées sous `prefers-reduced-motion` :
+entrée de page (les blocs montent de 10 px en 340 ms, décalés de 40 ms), contenu d'un onglet (glissement depuis la
+droite, 300 ms), cartes et lignes de liste (apparition décalée), indicateurs (léger agrandissement), fenêtres et
+messages (montée douce), survol (carte soulevée de 3 px, pastille d'icône agrandie de 7 %) et appui (léger
+enfoncement). Aucune animation ne dépasse 340 ms.
+**Carrousel** : au-delà de trois biens, la bande « Recommandés pour vous » défile toute seule de la droite vers la
+gauche, en boucle continue (les cartes sont écrites deux fois), avec un fondu sur les bords. Elle s'arrête au survol et
+au doigt, et la vitesse s'adapte au nombre de biens ainsi qu'à la taille de l'écran. En dessous de quatre biens, la
+bande reste un simple défilement manuel.
+
+## 73. Page de connexion en deux panneaux
+
+Nouvel écran de connexion d'après la maquette fournie. À gauche, un panneau pleine hauteur : photo de villa sous un
+voile dégradé, logo, promesse « Votre immobilier, simplement maîtrisé » avec la seconde ligne en doré, phrase
+d'accroche et trois repères (Biens, Clients, Gestion simplifiée). À droite, le formulaire centré : logo, pastille
+« Espace sécurisé », titre, sous-titre, champ CNI et champ mot de passe à icône avec œil, lien « Mot de passe
+oublié ? » (qui explique honnêtement que la réinitialisation n'est pas branchée dans cette démonstration), bouton
+« Se connecter → » pleine largeur, lien vers l'inscription, séparateur « ou » et accès secondaire.
+Les comptes de démonstration sont conservés sous le formulaire, enrichis du compte locataire. Sous 980 px le panneau
+de gauche disparaît et le formulaire prend toute la largeur. Une icône `lock` a été ajoutée au jeu d'icônes, et la
+classe du conteneur d'icône renommée pour éviter la collision avec la classe `ic` des SVG.
+
+## 74. Panneau de compte animé et lien « Mot de passe oublié »
+
+Le panneau de compte glisse maintenant dans les deux sens : il descend à l'ouverture (260 ms, léger rebond) et remonte
+à la fermeture, au lieu de disparaître d'un coup — `visibility` différée remplace la bascule `display`. Son contenu
+suit en cascade (avatar agrandi, puis les trois entrées décalées de 40 ms), et le chevron à côté des notifications
+pivote de 180°. Tout est coupé sous `prefers-reduced-motion`.
+Le lien « Mot de passe oublié ? » devient une pastille encadrée avec une icône, alignée à droite sous le champ, qui se
+teinte au survol et s'enfonce légèrement au clic.
+
+## 75. Animations : compléments après audit
+
+Un audit des styles a montré que les cartes de la page Recherche portent la classe `.prop` et non `.pc` : elles
+n'avaient donc aucune animation. Ajouté : apparition décalée des résultats, carte soulevée de 4 px au survol et léger
+zoom de la photo (500 ms). Ajouté aussi : battement du cœur quand on met un bien en favori, agrandissement du cœur au
+survol, transitions sur les badges, les lignes de tableau et le voile du tiroir latéral. Tout reste coupé sous
+`prefers-reduced-motion`.
+
+## 76. Connexion par compte Google (simulée)
+
+La connexion ne passe plus par le numéro de CNI mais par l'adresse Gmail. Deux chemins :
+un bouton **« Continuer avec Google »** qui ouvre un
+sélecteur listant les comptes « présents sur cet appareil », avec avatar, nom, adresse et rôle, plus l'entrée
+« Utiliser un autre compte » ; et le formulaire **adresse Gmail + mot de passe**. `Auth.login()` accepte désormais
+l'adresse comme le numéro de CNI, ce qui n'invalide aucun ancien accès. Chaque compte reçoit une adresse Gmail
+construite à partir de son nom.
+Aucun échange n'a lieu avec Google : il n'y a ni serveur ni OAuth. Le sélecteur le dit explicitement en bas du panneau.
+Un vrai « Se connecter avec Google » exigera un identifiant client OAuth et une vérification du jeton côté serveur.
+
+## 77. Connexion : ajustements
+
+La barre « Continuer en tant que … » est retirée : l'écran s'ouvre directement sur « Continuer avec Google », puis le
+formulaire. L'icône du champ d'adresse passe de la bulle de message à la silhouette, plus juste pour un identifiant.
+
+## 78. Bulles dégradées sur les cartes d'indicateur
+
+Chaque carte d'indicateur reçoit deux bulles en dégradé radial, une grande en haut à droite et une plus discrète en bas
+à gauche, placées sous le contenu. Leur teinte suit l'état de la carte (`data-tone`) : bleu pour le portefeuille, vert
+pour l'encaissé, rouge pour les impayés, doré pour les dépenses et les unités vacantes. Les bulles s'agrandissent
+doucement au survol. Les cartes d'action rapide reçoivent une bulle unique, en bleu. Rendu vérifié en thème clair et
+sombre, sans débordement.
+
+## 79. Accueil : hiérarchie, repères et premiers pas
+
+Les dix cartes égales laissent place à trois niveaux. **Le revenu net** devient une carte large en dégradé bleu avec sa
+bulle dorée ; Encaissé et Impayés restent à côté. **Une variation par rapport au mois précédent** s'affiche sous chaque
+montant, avec sa flèche et sa couleur (`variation()` compare le mois en cours au précédent et dit « Premier mois
+enregistré » quand la comparaison n'a pas de sens). **Un graphique des revenus sur six mois** (barres animées, mois en
+cours en bleu plein), **un anneau d'occupation** en `conic-gradient` et **une carte Patrimoine** regroupent les chiffres
+secondaires : biens, unités, locataires, dépenses du mois.
+**Compte neuf** : un propriétaire sans bien ne voit plus dix zéros mais un accueil « Premiers pas » en trois étapes
+numérotées, seule la première étant active.
+Mobile : le revenu net garde sa largeur, les autres cartes passent à deux colonnes, le graphique et l'anneau prennent
+toute la largeur.

@@ -519,8 +519,14 @@ tbody tr:hover{background:var(--surface-2)}
 .mhead,.upanel{display:none}
 
 /* Panneau utilisateur (réf. menu compte) */
-.upanel{background:var(--nav);color:#fff;padding:6px 28px 26px}
-.upanel.open{display:block}
+.upanel{position:fixed;left:0;right:0;z-index:60;background:var(--nav);color:#fff;padding:6px 20px 26px;
+  box-shadow:0 22px 40px -18px rgba(0,0,0,.6);border-radius:0 0 22px 22px;
+  transform:translateY(-14px);opacity:0;pointer-events:none;transition:transform .22s cubic-bezier(.2,.8,.3,1),opacity .18s}
+.upanel.open{display:block;transform:translateY(0);opacity:1;pointer-events:auto;visibility:visible;
+  transition:transform .26s cubic-bezier(.2,.8,.3,1),opacity .2s,visibility 0s}
+.upanel-back{position:fixed;inset:0;z-index:59;background:rgba(0,12,24,.45);opacity:0;pointer-events:none;transition:opacity .2s}
+.upanel-back.open{opacity:1;pointer-events:auto}
+@media (prefers-reduced-motion:reduce){.upanel{transition:none}.upanel-back{transition:none}}
 .upanel .who{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 0 18px}
 .upanel .who b{font-size:1.3rem;font-weight:600}
 .upanel .who span{color:var(--nav-text)}
@@ -679,7 +685,17 @@ footer.site{background:var(--nav)}
   .mhead .mbell{position:relative}
   .mhead .mbell b{position:absolute;top:-4px;right:-5px;background:var(--yellow);color:#00192F;font-size:.62rem;border-radius:999px;padding:1px 5px;font-weight:700}
   .mhead .muser{display:flex;align-items:center;gap:6px;background:none;border:0;color:#fff;cursor:pointer;padding:0}
-  .upanel{margin-top:-2px}
+  .upanel{display:block;visibility:hidden;margin-top:-2px;
+    transition:transform .26s cubic-bezier(.34,1.3,.5,1),opacity .2s,visibility 0s linear .26s}
+  .mhead .muser svg{transition:transform .26s cubic-bezier(.2,.8,.3,1)}
+  .mhead .muser.on svg{transform:rotate(180deg)}
+  .upanel a,.upanel button{transform:translateY(-6px);opacity:0;transition:transform .3s cubic-bezier(.2,.8,.3,1),opacity .25s}
+  .upanel.open a,.upanel.open button{transform:none;opacity:1}
+  .upanel.open a:nth-of-type(1){transition-delay:.06s}
+  .upanel.open a:nth-of-type(2){transition-delay:.1s}
+  .upanel.open button{transition-delay:.14s}
+  .upanel .who{transform:scale(.94);opacity:0;transition:transform .3s cubic-bezier(.2,.8,.3,1),opacity .25s}
+  .upanel.open .who{transform:none;opacity:1}
   .main > .content{border-radius:var(--sheet-r) 0 0 0;padding:22px 18px calc(92px + env(safe-area-inset-bottom));min-height:calc(100dvh - 76px)}
   .page-head h2{font-size:1.75rem}
   .tabbar{display:flex;align-items:flex-end;position:fixed;left:14px;right:14px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:60;background:var(--nav);border:0;border-radius:30px;padding:5px 6px 6px;box-shadow:0 16px 38px -10px rgba(0,25,47,.6),0 0 0 1px rgba(255,255,255,.05)}
@@ -913,6 +929,27 @@ th,td{padding:13px 15px}
 .cat{flex:initial;min-width:0;gap:7px}
 .cat .lg{display:block} .cat .sm{display:none}
 .cat > span:last-child{width:100%;overflow-wrap:anywhere;line-height:1.2}
+/* aucun montant long ne pousse la page : on coupe dans la carte, jamais au-delà */
+.bgrid > *{min-width:0}
+.bgrid .row-between{gap:10px;flex-wrap:wrap}
+/* Barre de recherche : un seul dessin dans toute l'application */
+.sbar{padding:12px;margin-bottom:16px}
+.sbar .row{flex-wrap:nowrap}
+.sbar .input{flex:1;min-width:0;max-width:none}
+.sbar .btn{flex:none;width:46px;height:46px;padding:0;display:grid;place-items:center;border-radius:12px}
+@media (max-width:760px){.sbar{padding:10px}.sbar .btn{width:42px;height:42px}}
+/* Fil de retour : flèche encadrée + chemin, identique partout */
+.gback{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.gback .bk{width:36px;height:36px;border-radius:11px;border:1px solid var(--line-strong);background:var(--surface);display:grid;place-items:center;color:var(--ink);text-decoration:none;flex:none;transition:border-color .16s,color .16s}
+.gback .bk:hover{border-color:var(--brand);color:var(--brand)}
+.gback a.small{text-decoration:none}
+.gback a.small:hover{color:var(--brand)}
+.gback .cur{font-weight:700;color:var(--ink);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gback .sep{color:var(--muted)}
+@media (max-width:760px){.gback{gap:8px;margin-bottom:13px}.gback .bk{width:32px;height:32px;border-radius:10px}}
+.kpi,.kpi-rich,.kpis > *{min-width:0}
+.kpi .n,.kpi-rich .n,.kpi .l,.kpi-rich .l{overflow-wrap:anywhere}
+.bcard .sub,.trow .sub{overflow-wrap:anywhere}
 .main > .content{padding:28px;max-width:none;background:var(--bg);border-radius:var(--r-sheet) 0 0 0;flex:1}
 
 /* ---- Mobile : en-tête navy + feuille blanche arrondie + barre flottante ---- */
@@ -1020,6 +1057,162 @@ th,td{padding:13px 15px}
 @media (min-width:761px) and (max-width:1100px){
   .main > .content{padding:24px 20px}
   .kpis{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+}
+
+
+/* ==========================================================================
+   ANIMATIONS — courtes, régulières, et toutes coupées si l'appareil demande
+   de réduire les animations.
+   ========================================================================== */
+@keyframes dcUp   {from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none}}
+@keyframes dcIn   {from{opacity:0} to{opacity:1}}
+@keyframes dcSlide{from{opacity:0;transform:translateX(14px)} to{opacity:1;transform:none}}
+@keyframes dcPop  {from{opacity:0;transform:scale(.96)} to{opacity:1;transform:none}}
+@keyframes dcRun  {from{transform:translateX(0)} to{transform:translateX(-50%)}}
+
+/* Entrée de page : le contenu monte légèrement, les blocs se succèdent */
+.main > .content > *{animation:dcUp .34s cubic-bezier(.2,.8,.3,1) both}
+.main > .content > *:nth-child(1){animation-delay:0s}
+.main > .content > *:nth-child(2){animation-delay:.04s}
+.main > .content > *:nth-child(3){animation-delay:.08s}
+.main > .content > *:nth-child(4){animation-delay:.12s}
+.main > .content > *:nth-child(5){animation-delay:.16s}
+.main > .content > *:nth-child(n+6){animation-delay:.2s}
+
+/* Contenu d'un onglet : glissement court depuis la droite */
+.main > .content .btabs ~ *, .main > .content .gtabs ~ *,
+.main > .content > .btabs ~ *, .main > .content > .gtabs ~ *{animation:dcSlide .3s cubic-bezier(.2,.8,.3,1) both;animation-delay:0s}
+.btabs a, .gtabs a, .seg button{transition:color .18s,background .18s,border-color .18s}
+.btabs a::after{transition:transform .22s}
+
+/* Cartes et lignes de liste : apparition décalée */
+.main > .content .coffre .drawer, .main > .content .bcard, .main > .content .trow,
+.coffre .drawer, .bcard, .trow{animation:dcUp .3s cubic-bezier(.2,.8,.3,1) both}
+.coffre .drawer:nth-child(2),.bcard:nth-child(2),.trow:nth-child(2){animation-delay:.03s}
+.coffre .drawer:nth-child(3),.bcard:nth-child(3),.trow:nth-child(3){animation-delay:.06s}
+.coffre .drawer:nth-child(4),.bcard:nth-child(4),.trow:nth-child(4){animation-delay:.09s}
+.coffre .drawer:nth-child(n+5),.bcard:nth-child(n+5),.trow:nth-child(n+5){animation-delay:.12s}
+.kpi,.kpi-rich{animation:dcPop .32s cubic-bezier(.2,.8,.3,1) both}
+.kpis > *:nth-child(2){animation-delay:.04s} .kpis > *:nth-child(3){animation-delay:.08s}
+.kpis > *:nth-child(4){animation-delay:.12s} .kpis > *:nth-child(n+5){animation-delay:.16s}
+
+/* Réactions au survol et au doigt */
+.card,.pc,.quick-card{transition:transform .2s cubic-bezier(.2,.8,.3,1),border-color .2s,box-shadow .2s}
+.pc:hover,.quick-card:hover{transform:translateY(-3px)}
+.btn{transition:background .18s,border-color .18s,color .18s,transform .12s}
+.btn:active,.bcard:active,.drawer:active{transform:scale(.985)}
+tbody tr{transition:background .16s}
+.itile,.dico,.kpi-icon{transition:transform .2s}
+.drawer:hover .dico,.trow:hover .itile{transform:scale(1.07)}
+
+/* Fenêtres et messages */
+.modal{animation:dcUp .26s cubic-bezier(.2,.8,.3,1) both}
+.modal-backdrop,.dialog-backdrop{animation:dcIn .2s both}
+.toast{animation:dcUp .26s cubic-bezier(.2,.8,.3,1) both}
+
+/* Carrousel : les biens défilent tout seuls, de la droite vers la gauche */
+.runner{overflow:hidden;position:relative;padding:2px 0 12px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent);mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent)}
+.runner .track{display:flex;gap:16px;width:max-content;animation:dcRun var(--run,42s) linear infinite}
+.runner:hover .track,.runner:focus-within .track{animation-play-state:paused}
+.runner .pc{flex:0 0 288px}
+@media (max-width:760px){.runner .pc{flex:0 0 252px}.runner .track{animation-duration:var(--run-m,34s)}}
+
+/* Tableau de bord : indicateur principal, graphique, anneau, premiers pas */
+.dash-top{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr) minmax(0,1fr);gap:14px;margin-bottom:14px}
+.dash-mid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr) minmax(0,1fr);gap:14px}
+.hero-kpi{position:relative;overflow:hidden;border-radius:18px;padding:22px;color:#fff;
+  background:linear-gradient(135deg,var(--brand) 0%,#123F63 100%)}
+.hero-kpi::before{content:"";position:absolute;width:200px;height:200px;right:-66px;top:-82px;border-radius:50%;
+  background:radial-gradient(circle at 35% 35%,rgba(240,180,41,.34),transparent 70%);transition:transform .45s cubic-bezier(.2,.8,.3,1)}
+.hero-kpi:hover::before{transform:scale(1.15) translate(-6px,6px)}
+.hero-kpi > *{position:relative}
+.hk-ic{width:36px;height:36px;border-radius:12px;background:rgba(255,255,255,.14);color:var(--gold);display:grid;place-items:center;flex:none}
+.hk-n{font-size:2.3rem;font-weight:700;letter-spacing:-.03em;line-height:1.08;overflow-wrap:anywhere}
+.kvar{display:flex;align-items:center;gap:6px;margin-top:9px;font-size:.78rem;font-weight:600;color:rgba(255,255,255,.8)}
+.kvar.ok{color:#8FE3B0} .kvar.bad{color:#F6A9AF}
+.kpi-rich .kvar{color:var(--muted)} .kpi-rich .kvar.ok{color:var(--ok)} .kpi-rich .kvar.bad{color:var(--bad)}
+.bars{display:flex;align-items:flex-end;gap:12px;height:126px}
+.bars .bar{flex:1;text-align:center;min-width:0}
+.bars .col{height:98px;display:flex;align-items:flex-end}
+.bars i{width:100%;background:var(--surface-3);border-radius:5px 5px 0 0;display:block;min-height:3px;
+  animation:dcGrow .5s cubic-bezier(.2,.8,.3,1) both}
+@keyframes dcGrow{from{transform:scaleY(.05);transform-origin:bottom} to{transform:none}}
+.ring-card{display:flex;align-items:center;gap:16px}
+.ring{width:92px;height:92px;border-radius:50%;flex:none;display:grid;place-items:center;
+  background:conic-gradient(var(--brand) 0% calc(var(--pc,0) * 1%),var(--surface-3) calc(var(--pc,0) * 1%) 100%)}
+.ring .hole{width:68px;height:68px;border-radius:50%;background:var(--surface);display:grid;place-items:center;font-weight:700;letter-spacing:-.02em}
+.qa-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.onb-hero{position:relative;overflow:hidden;border-radius:22px;padding:30px 32px;color:#fff;margin-bottom:22px;
+  background:linear-gradient(135deg,var(--brand) 0%,#123F63 100%)}
+.onb-hero::before{content:"";position:absolute;width:280px;height:280px;right:-86px;top:-116px;border-radius:50%;
+  background:radial-gradient(circle at 35% 35%,rgba(240,180,41,.3),transparent 70%)}
+.onb-hero > *{position:relative}
+.onb-hero h2{color:#fff}
+.onb-steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.onb{position:relative} .onb.soon{opacity:.7}
+.onb-n{position:absolute;top:16px;right:18px;font-size:1.9rem;font-weight:700;color:var(--surface-3);letter-spacing:-.03em;line-height:1}
+@media (max-width:980px){.dash-top,.dash-mid{grid-template-columns:1fr 1fr}.hero-kpi{grid-column:1 / -1}}
+@media (max-width:760px){
+  .dash-top,.dash-mid{grid-template-columns:1fr 1fr;gap:10px}
+  .dash-mid > .card:first-child,.ring-card{grid-column:1 / -1}
+  .hk-n{font-size:1.85rem}
+  .bars{height:98px} .bars .col{height:72px} .bars{gap:8px}
+  .ring{width:74px;height:74px} .ring .hole{width:54px;height:54px;font-size:.95rem}
+  .onb-hero{padding:22px 18px}
+}
+@media (prefers-reduced-motion:reduce){.bars i{animation:none}.hero-kpi:hover::before{transform:none}}
+/* Cartes d'indicateur : deux bulles dégradées teintées par l'état */
+.kpi-rich{position:relative;overflow:hidden;isolation:isolate}
+.kpi-rich::before,.kpi-rich::after{content:"";position:absolute;border-radius:50%;z-index:-1;pointer-events:none;
+  transition:transform .45s cubic-bezier(.2,.8,.3,1),opacity .35s}
+.kpi-rich::before{width:148px;height:148px;right:-54px;top:-62px;opacity:.85;
+  background:radial-gradient(circle at 32% 32%,var(--kc,var(--brand-soft)) 0%,transparent 72%)}
+.kpi-rich::after{width:96px;height:96px;left:-40px;bottom:-48px;opacity:.5;
+  background:radial-gradient(circle at 60% 40%,var(--kc,var(--brand-soft)) 0%,transparent 70%)}
+.kpi-rich:hover::before{transform:scale(1.18) translate(-6px,6px)}
+.kpi-rich:hover::after{transform:scale(1.12)}
+.kpi-rich[data-tone="brand"]{--kc:var(--brand-soft)}
+.kpi-rich[data-tone="ok"]{--kc:var(--ok-soft)}
+.kpi-rich[data-tone="bad"]{--kc:var(--bad-soft)}
+.kpi-rich[data-tone="warn"],.kpi-rich[data-tone="gold"]{--kc:var(--gold-soft)}
+.kpi-rich[data-tone="info"]{--kc:var(--info-soft)}
+.kpi-rich .kpi-icon,.kpi-rich .n,.kpi-rich .l,.kpi-rich .trend{position:relative;z-index:1}
+/* Actions rapides : une bulle discrète dans le coin */
+.quick-card{position:relative;overflow:hidden;isolation:isolate}
+.quick-card::before{content:"";position:absolute;width:120px;height:120px;right:-46px;top:-52px;border-radius:50%;z-index:-1;
+  background:radial-gradient(circle at 34% 34%,var(--brand-soft) 0%,transparent 72%);opacity:.75;transition:transform .45s cubic-bezier(.2,.8,.3,1)}
+.quick-card:hover::before{transform:scale(1.2) translate(-5px,5px)}
+@media (prefers-reduced-motion:reduce){.kpi-rich::before,.kpi-rich::after,.quick-card::before{transition:none}
+  .kpi-rich:hover::before,.kpi-rich:hover::after,.quick-card:hover::before{transform:none}}
+/* Cartes de la recherche (.prop) : même traitement que les autres */
+.main > .content .prop,.prop{animation:dcUp .32s cubic-bezier(.2,.8,.3,1) both;transition:transform .2s cubic-bezier(.2,.8,.3,1),border-color .2s,box-shadow .2s}
+.props > .prop:nth-child(2){animation-delay:.04s} .props > .prop:nth-child(3){animation-delay:.08s}
+.props > .prop:nth-child(4){animation-delay:.12s} .props > .prop:nth-child(5){animation-delay:.16s}
+.props > .prop:nth-child(n+6){animation-delay:.2s}
+.prop:hover{transform:translateY(-4px)}
+.prop .photo img,.pc .photo img{transition:transform .5s cubic-bezier(.2,.8,.3,1)}
+.prop:hover .photo img,.pc:hover .photo img{transform:scale(1.05)}
+/* Favori : petit battement quand on l'active */
+@keyframes dcBeat{0%{transform:scale(1)}35%{transform:scale(1.28)}60%{transform:scale(.92)}100%{transform:scale(1)}}
+.fav.on,.fav[aria-pressed="true"]{animation:dcBeat .42s cubic-bezier(.2,.8,.3,1)}
+.fav{transition:transform .16s,background .18s,color .18s}
+.fav:hover{transform:scale(1.1)}
+/* Lignes de tableau et badges */
+.badge{transition:background .18s,color .18s}
+.table-wrap tbody tr{transition:background .16s}
+/* Tiroir latéral : glissement déjà en place, on adoucit le voile */
+.sdrawer-back{transition:opacity .22s}
+@media (prefers-reduced-motion:reduce){
+  .prop,.fav.on,.fav[aria-pressed="true"]{animation:none}
+  .prop:hover,.fav:hover{transform:none}
+  .prop:hover .photo img,.pc:hover .photo img{transform:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .main > .content > *,.coffre .drawer,.bcard,.trow,.kpi,.kpi-rich,.modal,.toast,.btabs ~ *,.gtabs ~ *,
+  .modal-backdrop,.dialog-backdrop{animation:none}
+  .runner .track{animation:none}
+  .runner{overflow-x:auto;-webkit-mask-image:none;mask-image:none}
+  .pc:hover,.quick-card:hover,.btn:active{transform:none}
 }
 
 </style>
@@ -1177,6 +1370,8 @@ function photoHtml(p, opts = {}) {
    MODULE : icons.js — jeu d'icônes SVG inline (aucun emoji, aucune police externe)
    ========================================================================== */
 const ICONS = {
+  trendDown:'<path d="M3 7l6 6 4-4 8 8"/><path d="M21 12v5h-5"/>',
+  lock:'<rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/><path d="M12 14.6v2.3"/>',
   grid:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/>',
   search:'<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/>',
   heart:'<path d="M20.8 5.6a5 5 0 0 0-7.1 0L12 7.3l-1.7-1.7a5 5 0 1 0-7.1 7.1l8.8 8.8 8.8-8.8a5 5 0 0 0 0-7.1z"/>',
@@ -1607,8 +1802,9 @@ function resetSessionUiState() {
 const Auth = {
   current() { try { const id = JSON.parse(localStorage.getItem(DB.K.session)); return id ? DB.findItem(DB.K.users, id.id) : null; } catch { return null; } },
   login(cni, password) {
-    const u = DB.findItem(DB.K.users, x => x.cni === String(cni).trim());
-    if (!u) return {error: "Aucun compte n'est associé à ce numéro de CNI."};
+    const v = String(cni).trim().toLowerCase();
+    const u = DB.findItem(DB.K.users, x => x.cni === v || String(x.email || '').toLowerCase() === v);
+    if (!u) return {error: "Aucun compte n'est associé à cette adresse."};
     if (u.password !== password) return {error: 'Mot de passe incorrect.'};
     if (u.status === 'suspendu') return {error: 'Compte suspendu. Contactez le support DEUKSIL.'};
     resetSessionUiState();
@@ -1880,10 +2076,10 @@ function periodTrend(records, days = 7) {
   return {label: `${pct > 0 ? '+' : ''}${pct}% cette semaine`, tone: pct > 0 ? 'ok' : 'bad'};
 }
 function kpiRich(n, l, iconName, tone, trend) {
-  return `<div class="kpi-rich">
+  return `<div class="kpi-rich" data-tone="${tone || 'brand'}">
     <div class="kpi-icon" style="background:var(--${tone}-soft);color:var(--${tone})">${icon(iconName, 19)}</div>
     <div class="n">${n}</div><div class="l">${esc(l)}</div>
-    ${trend ? `<div class="trend ${trend.tone}">${trend.tone === 'ok' ? icon('trendUp', 11) : ''}${esc(trend.label)}</div>` : ''}
+    ${trend ? `<div class="kvar ${trend.tone || ''}">${trend.up === undefined ? '' : icon(trend.up ? 'trendUp' : 'trendDown', 12)}${esc(trend.label)}</div>` : ''}
   </div>`;
 }
 function badge(text, tone = '') { return `<span class="badge ${tone}"><i class="dot"></i>${esc(text)}</span>`; }
@@ -2324,7 +2520,16 @@ function ownerSubscriptionActive(ownerId) {
   if (!owner || !['owner', 'agency'].includes(owner.role)) return true;
   return true;   /* plateforme gratuite : aucune annonce n'est retirée pour non-paiement */
 }
-const published = () => DB.filterItems(DB.K.properties, p => p.listingStatus === 'publiee' && !['archive'].includes(p.status) && ownerSubscriptionActive(p.ownerId));
+/* Un bien déjà loué ou vendu ne doit plus apparaître aux visiteurs : on ne peut pas
+   louer deux fois le même logement. Un immeuble reste visible tant qu'une unité est libre. */
+const listable = p => {
+  if (p.listingStatus !== 'publiee') return false;
+  const us = DB.getData(DB.K.units).filter(x => x.propertyId === p.id && x.status !== 'archivee');
+  if (us.length) return us.some(x => x.status === 'libre');
+  if (['loue', 'vendu', 'archive', 'maintenance'].includes(p.status)) return false;
+  return !DB.getData(DB.K.leases).some(l => l.propertyId === p.id && !l.unitId && l.status === 'actif');
+};
+const published = () => DB.filterItems(DB.K.properties, p => listable(p) && ownerSubscriptionActive(p.ownerId));
 
 /* ==========================================================================
    VUES : pages légales (contenu de démonstration)
@@ -2352,7 +2557,7 @@ const LEGAL_PAGES = {
 route(/^\/legal\/(mentions|cgu|confidentialite)$/, key => {
   const pg = LEGAL_PAGES[key];
   return shellPublic(`<section class="section" style="border:0"><div class="wrap" style="max-width:760px">
-    <a class="linkbtn small" href="#/">${icon('arrowLeft', 14)} Retour à l'accueil</a>
+    ${backBar('#/', 'Accueil')}
     <h2 style="margin-top:16px">${pg.title}</h2>
     <div class="card" style="margin-top:18px">${pg.body}</div>
   </div></section>`);
@@ -2599,7 +2804,7 @@ route(/^\/property\/([\w]+)$/, id => {
   const isFav = u && DB.findItem(DB.K.favorites, f => f.userId === u.id && f.propertyId === p.id);
   const ownerName = owner.role === 'agency' ? owner.agencyName : `${owner.firstName} ${owner.lastName}`;
   const body = `
-    <a class="linkbtn small" href="#/search">${icon('arrowLeft', 14)} Retour aux résultats</a>
+    ${backBar('#/search', 'Résultats de recherche')}
     <div class="grid" style="grid-template-columns:2fr 1fr;align-items:start;margin-top:14px" id="detail-grid">
       <div class="stack" style="gap:18px">
         <div class="gallery">
@@ -2941,6 +3146,7 @@ function listingsTable(u, props) {
         ${Object.entries(STATUS_LABEL).map(([k, l]) => `<option value="${k}" ${p.status === k ? 'selected' : ''}>${l}</option>`).join('')}</select></td>
       <td>${p.views || 0}</td>
       <td><div class="row" style="gap:6px">
+        <a class="btn sm" href="#/bien/${p.id}">Ouvrir</a>
         <a class="btn ghost sm" href="#/owner/property/${p.id}">Modifier</a>
         ${p.listingStatus === 'brouillon' || p.listingStatus === 'refusee' ? `<button class="btn sm" data-action="publish" data-id="${p.id}">Publier</button>` : ''}
         ${p.listingStatus === 'publiee' ? `<button class="btn ghost sm" data-action="pause" data-id="${p.id}">Mettre en pause</button>` : ''}
@@ -3867,6 +4073,15 @@ document.addEventListener('submit', e => {
 Object.assign(DB.K, {leases:'deuksil_leases', rents:'deuksil_rents', tickets:'deuksil_tickets', deals:'deuksil_deals'});
 ['owner', 'agency'].forEach(r => MENUS[r].splice(2, 0, ['#/manage/leases', 'Gestion', 'briefcase']));
 
+/* Fil de retour unique : flèche encadrée + chemin, partout dans l'application. */
+const backBar = (href, label, current) => `<div class="gback">
+  <a class="bk" href="${href}" aria-label="Retour : ${esc(label)}">${icon('arrowLeft', 18)}</a>
+  <a href="${href}" class="small muted">${esc(label)}</a>${current ? `<span class="sep">›</span><span class="cur">${esc(current)}</span>` : ''}</div>`;
+
+/* Barre de recherche unique : même dessin partout (voir l'accueil Gestion). */
+const sBar = (ph = 'Rechercher…') => `<form class="card sbar" data-action="sb-noop"><div class="row" style="gap:10px">
+  <input class="input" data-gsearch placeholder="${esc(ph)}" autocomplete="off">
+  <button class="btn" type="submit" aria-label="Rechercher">${icon('search', 16)}</button></div></form>`;
 const GTABS = [['leases','Locataires & baux'], ['rents','Loyers'], ['tickets','Maintenance'], ['deals','Ventes'], ['finance','Finances']];
 const STAGES = [['prospect','Prospect'], ['visite','Visite'], ['offre','Offre'], ['promesse','Promesse'], ['signe','Vendu']];
 const TICKET_NEXT = {ouvert:'en cours', 'en cours':'resolu', resolu:'ouvert'};
@@ -3898,7 +4113,8 @@ function gTab(u, tab) {
         <div class="field"><label>Loyer mensuel (FCFA)</label><input class="input" type="number" min="1" name="rent" required></div>
         <div class="field"><label>Caution (FCFA)</label><input class="input" type="number" min="0" name="deposit" value="0"></div>
         <div class="field"><label>Début</label><input class="input" type="date" name="start" value="${now().slice(0, 10)}" required></div>
-        <div class="field"><label>Durée (mois)</label><input class="input" type="number" min="1" max="36" name="months" value="12" required></div></div>
+        <div class="field"><label>Durée (mois)</label><input class="input" type="number" min="1" max="36" name="months" value="12" required></div>
+        <div class="field"><label>Jour d'échéance</label><input class="input" type="number" min="1" max="28" name="dueDay" value="5" required></div></div>
       <button class="btn">Créer le bail et l'échéancier</button><p class="err" id="g-err"></p></form>` +
     gTable(['Bien', 'Locataire', 'Loyer', 'Période', 'Statut', ''], leases.slice().reverse().map(l => {
       const p = gProp(l.propertyId), end = leaseEnd(l), left = daysBetween(now(), end);
@@ -3974,7 +4190,14 @@ document.addEventListener('click', e => {
   const el = e.target.closest('[data-action^="g-"]'); if (!el || el.tagName === 'FORM' || el.tagName === 'SELECT') return;
   const a = el.dataset.action, id = el.dataset.id, u = Auth.current(); if (!u) return;
   const own = (k) => DB.findItem(DB.K[k], x => x.id === id && x.ownerId === u.id);
-  if (a === 'g-pay' && own('rents')) { DB.updateItem(DB.K.rents, id, {paidAt: now()}); render(); showCreated('quit', id); autoFileThen('quittance', DB.findItem(DB.K.rents, id), 'Loyer encaissé'); }
+  if (a === 'g-pay' && own('rents')) { const r = own('rents'), l = DB.findItem(DB.K.leases, r.leaseId) || {};
+    modal('Enregistrer le paiement', `<p class="small muted">${esc(l.tenant || '')} · loyer de <b>${monthLabel(r.month)}</b></p>
+      <form data-action="g-pay-save" data-id="${id}"><div class="form-grid">
+        <div class="field"><label>Montant reçu (FCFA)</label><input class="input" type="number" min="1" name="amount" value="${r.amount}" required></div>
+        <div class="field"><label>Date du paiement</label><input class="input" type="date" name="date" value="${ymd()}" required></div>
+        <div class="field"><label>Mode de paiement</label><select class="input" name="method">${PAYM.map(x => `<option>${x}</option>`).join('')}</select></div>
+        <div class="field"><label>Référence (facultatif)</label><input class="input" name="ref" placeholder="N° de transaction, reçu…"></div></div>
+      <button class="btn block">Enregistrer et générer la quittance</button></form>`); }
   if (a === 'g-receipt' && own('rents')) gReceipt(own('rents'));
   if (a === 'g-end-lease' && own('leases')) confirmDialog({title: 'Mettre fin au bail', message: 'Les loyers non encaissés seront supprimés et le bien redeviendra disponible.', confirmLabel: 'Mettre fin', danger: true, onConfirm: () => {
     const l = own('leases'); DB.updateItem(DB.K.leases, id, {status: 'termine'});
@@ -3990,6 +4213,19 @@ document.addEventListener('change', e => {
   if (el.value === 'signe') { DB.updateItem(DB.K.properties, d.propertyId, {status: 'vendu'}); toast('Vente conclue : le bien passe en « Vendu ».'); }
 });
 document.addEventListener('submit', e => {
+  const pf = e.target.closest('[data-action="g-pay-save"]'), uu = Auth.current();
+  if (pf && uu) {
+    e.preventDefault(); const r = DB.findItem(DB.K.rents, x => x.id === pf.dataset.id && x.ownerId === uu.id);
+    if (!r || r.paidAt) { closeModal(); return; }
+    const d = formData(pf);
+    DB.updateItem(DB.K.rents, r.id, {paidAt: (d.date || ymd()) + 'T12:00:00.000Z', amount: +d.amount || r.amount,
+      method: PAYM.includes(d.method) ? d.method : 'Espèces', payRef: (d.ref || '').trim()});
+    audit('Loyer encaissé', `${monthLabel(r.month)} · ${money(+d.amount || r.amount)} · ${d.method}`);
+    const t = DB.findItem(DB.K.users, x => x.leaseId === r.leaseId);
+    if (t) notify(t.id, `Votre loyer de ${monthLabel(r.month)} a été enregistré comme payé.`, '#/tenant/quittances');
+    closeModal(); render(); showCreated('quit', r.id); autoFileThen('quittance', DB.findItem(DB.K.rents, r.id), 'Paiement enregistré');
+    return;
+  }
   const form = e.target.closest('[data-action^="g-"]'), u = Auth.current(); if (!form || !u) return;
   e.preventDefault(); const a = form.dataset.action, d = formData(form);
   if (!myProps(u).some(p => p.id === d.propertyId)) { toast('Choisissez un de vos biens.', 'bad'); return; }
@@ -3998,10 +4234,10 @@ document.addEventListener('submit', e => {
     if (!d.tenant.trim() || rent <= 0) { $('#g-err').textContent = 'Locataire et loyer sont obligatoires.'; return; }
     if (DB.findItem(DB.K.leases, l => l.propertyId === d.propertyId && l.status === 'actif')) { $('#g-err').textContent = 'Ce bien a déjà un bail actif.'; return; }
     if (gMine('units', u).some(x => x.propertyId === d.propertyId)) { $('#g-err').textContent = 'Ce bien a des unités : louez-les depuis l\'onglet Unités.'; return; }
-    const l = DB.addItem(DB.K.leases, {ownerId: u.id, propertyId: d.propertyId, tenant: d.tenant.trim(), phone: d.phone, rent, deposit: +d.deposit || 0, start: d.start, months: n, status: 'actif'});
+    const l = DB.addItem(DB.K.leases, {ownerId: u.id, propertyId: d.propertyId, tenant: d.tenant.trim(), phone: d.phone, rent, deposit: +d.deposit || 0, start: d.start, months: n, dueDay: Math.min(28, Math.max(1, +d.dueDay || 5)), status: 'actif'});
     const s = new Date(d.start);
     for (let i = 0; i < n; i++) { const m = new Date(s.getFullYear(), s.getMonth() + i, 1); DB.addItem(DB.K.rents, {ownerId: u.id, leaseId: l.id, month: `${m.getFullYear()}-${String(m.getMonth() + 1).padStart(2, '0')}`, amount: rent, paidAt: null}); }
-    DB.updateItem(DB.K.properties, d.propertyId, {status: 'loue'}); toast(`Bail créé : ${n} loyers planifiés.`);
+    DB.updateItem(DB.K.properties, d.propertyId, {status: 'loue'}); toast(`Bail créé : ${n} loyers planifiés. Le bien ne s'affiche plus dans la recherche.`);
   }
   if (a === 'g-ticket') DB.addItem(DB.K.tickets, {ownerId: u.id, propertyId: d.propertyId, title: d.title.trim(), cost: +d.cost || 0, status: 'ouvert'});
   if (a === 'g-deal') DB.addItem(DB.K.deals, {ownerId: u.id, propertyId: d.propertyId, buyer: d.buyer.trim(), offer: +d.offer || 0, stage: 'prospect'});
@@ -4060,7 +4296,7 @@ const _gTab = gTab;
 gTab = function (u, tab) {
   if (!['docs', 'fpay', 'expenses', 'finance', 'audit'].includes(tab)) return _gTab(u, tab);
   const props = myProps(u), docs = gMine('docs', u), pays = gMine('fpay', u), exps = gMine('expenses', u), fac = docs.filter(x => x.type === 'FAC');
-  const search = `<input class="input" data-gsearch placeholder="Rechercher…" style="max-width:260px">`;
+  const search = sBar();
   if (tab === 'docs') return `<div class="row-between" style="margin-bottom:14px">${search}<div class="row" style="gap:8px">${['DEV', 'PF', 'FAC'].map(t => `<button class="btn sm" data-action="g2-new" data-id="${t}">+ ${DT[t]}</button>`).join('')}</div></div>` +
     gTable(['Référence', 'Client', 'Total', 'Reste', 'État', ''], docs.slice().reverse().map(d => {
       const [l, t] = dState(d), fc = d.type === 'FAC';
@@ -4076,7 +4312,7 @@ gTab = function (u, tab) {
       <div class="field"><label>Bien</label><select class="input" name="propertyId" required>${gOpts(props)}</select></div><div class="field"><label>Fournisseur</label><input class="input" name="supplier" required></div>
       <div class="field"><label>Catégorie</label><select class="input" name="cat">${EXPC.map(c => `<option>${c}</option>`).join('')}</select></div><div class="field"><label>Montant (FCFA)</label><input class="input" type="number" min="1" name="amount" required></div>
       <div class="field"><label>Mode</label><select class="input" name="method">${PAYM.map(c => `<option>${c}</option>`).join('')}</select></div><div class="field"><label>Date</label><input class="input" type="date" name="date" value="${now().slice(0, 10)}"></div></div><button class="btn">Enregistrer la dépense</button></form>` +
-    gTable(['Réf.', 'Bien', 'Fournisseur', 'Catégorie', 'Montant', 'Date', ''], exps.slice().reverse().map(x => `<tr><td class="small"><b>${x.ref}</b></td><td class="small">${esc((gProp(x.propertyId) || {}).title || '')}</td><td class="small">${esc(x.supplier)}</td><td class="small">${x.cat}</td><td>${money(x.amount)}</td><td class="small muted">${dateFr(x.date)}</td><td><button class="btn ghost sm" data-action="g2-delx" data-id="${x.id}" aria-label="Supprimer">${icon('trash', 14)}</button></td></tr>`), ['Aucune dépense', 'Enregistrez les charges de chaque bien pour calculer la rentabilité.']);
+    gTable(['Réf.', 'Bien', 'Fournisseur', 'Catégorie', 'Montant', 'Date', ''], exps.slice().reverse().map(x => `<tr><td class="small"><b>${x.ref}</b></td><td class="small">${esc((gProp(x.propertyId) || {}).title || '')}</td><td class="small">${esc(x.supplier)}</td><td class="small">${x.cat}</td><td>${money(x.amount)}</td><td class="small muted">${dateFr(x.date)}</td><td><div class="row" style="gap:6px">${x.proofId ? `<button class="btn ghost sm" data-action="g7-view" data-id="${x.proofId}">Justificatif</button>` : ''}<button class="btn ghost sm" data-action="g2-delx" data-id="${x.id}" aria-label="Supprimer">${icon('trash', 14)}</button></div></td></tr>`), ['Aucune dépense', 'Enregistrez les charges de chaque bien pour calculer la rentabilité.']);
   if (tab === 'audit') return gTable(['Date', 'Utilisateur', 'Action', 'Détail'], gMine('audit', u).slice().reverse().slice(0, 100).map(a => `<tr><td class="small muted">${dateTimeFr(a.createdAt)}</td><td class="small">${esc(a.who)}</td><td class="small"><b>${esc(a.action)}</b></td><td class="small">${esc(a.detail)}</td></tr>`), ['Journal vide', 'Les actions sensibles (création, paiement, suppression) sont tracées ici.']);
   /* finance : rentabilité */
   const rents = gMine('rents', u).filter(r => r.paidAt), tk = gMine('tickets', u), leaseProp = id => (DB.findItem(DB.K.leases, id) || {}).propertyId;
@@ -4371,15 +4607,16 @@ route(/^\/tenant\/(home|rents|tickets)$/, tab => {
     `<div class="kpis">${kpi(money(l.rent), 'Loyer mensuel')}${kpi(next ? monthLabel(next.month) : '—', 'Prochaine échéance')}${kpi(late.length, 'Loyers en retard', late.length ? 'bad' : 'ok')}${kpi(money(l.deposit), 'Caution versée')}</div>
     <div class="card" style="margin-top:18px"><b>${esc(p ? p.title : '')}</b><p class="small muted">${p ? esc(p.quartier + ', ' + p.city) : ''}</p>
     <p class="small">Bail du ${dateFr(l.start)} au ${dateFr(leaseEnd(l))} · ${l.status === 'actif' ? 'actif' : 'terminé'}</p></div>`);
-  if (tab === 'rents') return shellApp(u, page('Mes loyers', 'Historique et échéances.') + gTable(['Mois', 'Montant', 'État', 'Payé le', ''], rents.map(r => { const [lab, t] = rentState(r); return `<tr><td class="small">${monthLabel(r.month)}</td><td>${money(r.amount)}</td><td>${badge(lab, t)}</td><td class="small muted">${dateFr(r.paidAt)}</td><td>${r.paidAt ? '' : `<button class="btn sm" data-action="g9-pay" data-id="${r.id}">Payer</button>`}</td></tr>`; }), ['Aucun loyer', 'Vos échéances apparaîtront ici.']));
+  if (tab === 'rents') return shellApp(u, page('Mes loyers', 'Historique et échéances.') + gTable(['Mois', 'Montant', 'État', 'Payé le', 'Mode'], rents.map(r => { const [lab, t] = rentState(r); return `<tr><td class="small">${monthLabel(r.month)}</td><td>${money(r.amount)}</td><td>${badge(lab, t)}</td><td class="small muted">${dateFr(r.paidAt)}</td><td class="small muted">${r.paidAt ? esc(r.method || '') : ''}</td></tr>`; }), ['Aucun loyer', 'Vos échéances apparaîtront ici.']));
   const tk = DB.filterItems(DB.K.tickets, t => t.tenantId === u.id).slice().reverse();
-  return shellApp(u, page('Maintenance', 'Signalez un problème dans votre logement.') + `<form class="card" data-action="t-ticket" style="margin-bottom:18px"><div class="field"><label>Quel est le problème ?</label><input class="input" name="title" required placeholder="Fuite d'eau, panne de courant…"></div><button class="btn">Envoyer au propriétaire</button></form>` +
+  return shellApp(u, page('Maintenance', 'Signalez un problème dans votre logement.') + `<form class="card" data-action="t-ticket" style="margin-bottom:18px"><div class="field"><label>Quel est le problème ?</label><input class="input" name="title" required placeholder="Fuite d'eau, panne de courant…"></div>
+    <div class="field"><label>Catégorie</label><select class="input" name="category">${MCAT.map(c => `<option>${c}</option>`).join('')}</select></div><button class="btn">Envoyer au propriétaire</button></form>` +
     gTable(['Problème', 'Statut', 'Date'], tk.map(t => `<tr><td class="small"><b>${esc(t.title)}</b></td><td>${badge(TICKET_LABEL[t.status], TICKET_TONE[t.status])}</td><td class="small muted">${dateFr(t.createdAt)}</td></tr>`), ['Aucune demande', 'Vos signalements et leur avancement s\'affichent ici.']));
 });
 document.addEventListener('submit', e => {
   const f = e.target.closest('[data-action="t-ticket"]'), u = Auth.current(); if (!f || !u || u.role !== 'tenant') return;
   e.preventDefault(); const l = DB.findItem(DB.K.leases, u.leaseId), t = formData(f).title.trim(); if (!l || !t) return;
-  DB.addItem(DB.K.tickets, {ownerId: l.ownerId, propertyId: l.propertyId, title: t, cost: 0, status: 'ouvert', tenantId: u.id});
+  DB.addItem(DB.K.tickets, {ownerId: l.ownerId, propertyId: l.propertyId, title: t, category: MCAT.includes(formData(f).category) ? formData(f).category : 'Autre', cost: 0, status: 'nouvelle', tenantId: u.id});
   notify(l.ownerId, `Maintenance signalée par ${u.firstName} : ${t}`, '#/manage/tickets'); toast('Demande envoyée.'); render();
 });
 
@@ -4395,6 +4632,7 @@ function seedV4() {
   const s = new Date(l.start);
   for (let i = 0; i < 12; i++) { const m = new Date(s.getFullYear(), s.getMonth() + i, 1); DB.addItem(DB.K.rents, {ownerId: owner.id, leaseId: l.id, month: `${m.getFullYear()}-${String(m.getMonth() + 1).padStart(2, '0')}`, amount: l.rent, paidAt: i < 2 ? addDays(l.start, i * 30) : null}); }
   DB.addItem(DB.K.users, {...base, cni: '1900000000013', firstName: 'Fatou', lastName: 'Ndiaye', phone: '770000013', role: 'tenant', leaseId: l.id, ownerRef: owner.id});
+  DB.updateItem(DB.K.properties, pr.id, {status: 'loue'});
 }
 const _seed = seedIfNeeded;
 seedIfNeeded = function (f) { _seed(f); seedV4(); };
@@ -4685,15 +4923,17 @@ routes.find(r => /manage/.test(r.re.source)).re = /^\/manage\/(leases|rents|tick
 const _g6 = gTab;
 gTab = function (u, tab) {
   if (tab !== 'identity') return _g6(u, tab);
-  if (u.member) return ''; const I = issuer(u), f = (k, l, ph) => `<div class="field"><label>${l}</label><input class="input" name="${k}" value="${esc(I[k] || '')}" placeholder="${ph || ''}"></div>`;
+  if (u.member) return ''; const I = {...issuer(u), seuil: (u.docInfo || {}).seuil}, f = (k, l, ph) => `<div class="field"><label>${l}</label><input class="input" name="${k}" value="${esc(I[k] || '')}" placeholder="${ph || ''}"></div>`;
   return `<form class="card" data-action="g4-identity"><h4 style="margin-top:0">Informations de l'émetteur</h4><p class="small muted">Elles figurent sur tous vos PDF (factures, devis, reçus, quittances, contrats).</p><div class="form-grid">
-    ${f('name', 'Nom ou raison sociale')}${f('address', 'Adresse', 'Quartier, ville')}${f('phone', 'Téléphone')}${f('email', 'E-mail')}${f('ninea', 'NINEA')}${f('rccm', 'RCCM')}</div>
+    ${f('name', 'Nom ou raison sociale')}${f('address', 'Adresse', 'Quartier, ville')}${f('phone', 'Téléphone')}${f('email', 'E-mail')}${f('ninea', 'NINEA')}${f('rccm', 'RCCM')}
+    ${u.role === 'agency' ? `<div class="field"><label>Seuil de validation d'un devis (FCFA)</label><input class="input" type="number" min="0" name="seuil" value="${esc(I.seuil == null ? 100000 : I.seuil)}"><div class="small muted" style="margin-top:4px">Au-delà, un devis sur un bien géré attend l'accord du propriétaire.</div></div>` : ''}</div>
     <div class="field"><label>Coordonnées de paiement (RIB, Wave, Orange Money…)</label><textarea name="bank">${esc(I.bank)}</textarea></div>
     <div class="field"><label>Conditions de paiement (facultatif)</label><textarea name="terms">${esc(I.terms)}</textarea></div><button class="btn">Enregistrer</button></form>`;
 };
 document.addEventListener('submit', e => {
   const f = e.target.closest('[data-action="g4-identity"]'), u = Auth.current(); if (!f || !u || u.member) return;
   e.preventDefault(); const d = formData(f), info = {}; ['name', 'address', 'phone', 'email', 'ninea', 'rccm', 'bank', 'terms'].forEach(k => info[k] = String(d[k] || '').trim().slice(0, 400));
+  if (u.role === 'agency') info.seuil = Math.max(0, +d.seuil || 0);
   DB.updateItem(DB.K.users, u.id, {docInfo: info}); audit('Informations émetteur modifiées', info.name); toast('Informations enregistrées.'); render();
 });
 
@@ -4745,7 +4985,7 @@ function vaultItems(u) {
 }
 function vTable(u, items, showCat) {
   const adm = u.role === 'admin', head = ['Document', ...(showCat ? ['Tiroir'] : []), 'Date', 'Détails', ''];
-  return `<div style="margin:0 0 12px"><input class="input" data-gsearch placeholder="Rechercher un document, un client, un bien…" style="max-width:340px"></div>` + gTable(head, items.slice(0, 300).map(i => {
+  return sBar('Rechercher un document, un client, un bien…') + gTable(head, items.slice(0, 300).map(i => {
     const acts = i.kind === 'up'
       ? `<button class="btn ghost sm" data-action="g7-view" data-id="${i.id}">Voir</button><button class="btn ghost sm" data-action="g7-dl" data-id="${i.id}">Télécharger</button>${adm ? '' : `<button class="btn ghost sm" data-action="g7-del" data-id="${i.id}" aria-label="Supprimer">${icon('trash', 14)}</button>`}`
       : `${!adm && u.role !== 'tenant' ? `<button class="btn ghost sm" data-action="g7-prev" data-id="${esc(i.name)}">Aperçu</button>` : ''}<button class="btn sm" data-action="g6-pdf" data-id="${esc(i.name)}">PDF</button>`;
@@ -4769,7 +5009,7 @@ route(/^\/coffre\/(\w+)$/, cat => {
   const u = vaultGuard(); if (!u) return false;
   if (!(DRAWERS[u.role] || []).includes(cat) || !memberOk(u, cat)) { toast('Ce tiroir n\'est pas disponible pour votre profil.', 'bad'); go('#/coffre'); return false; }
   const items = vaultItems(u).filter(i => i.cat === cat), [t, ic, ds] = VCAT[cat];
-  return shellApp(u, `<a class="small" href="#/coffre">← Tous les tiroirs</a>` + page(t, ds + ' · ' + items.length + ' document' + (items.length > 1 ? 's' : '')) + `<div style="margin-bottom:14px">${(UPCATS[u.role] || []).includes(cat) ? addBtn(u, cat) : ''}</div>` + vTable(u, items, false));
+  return shellApp(u, backBar('#/coffre', 'Tous les tiroirs', t) + page(t, ds + ' · ' + items.length + ' document' + (items.length > 1 ? 's' : '')) + `<div style="margin-bottom:14px">${(UPCATS[u.role] || []).includes(cat) ? addBtn(u, cat) : ''}</div>` + vTable(u, items, false));
 });
 
 /* Menus : une entrée « Documents » pour chaque espace */
@@ -4857,7 +5097,7 @@ GTABS.splice(GTABS.findIndex(t => t[0] === 'audit'), 0, ['reports', 'Rapports'])
 routes.find(r => /manage/.test(r.re.source)).re = /^\/manage\/(leases|rents|tickets|deals|docs|fpay|expenses|finance|audit|contracts|providers|team|identity|units|tenants|reports)$/;
 const TKS = ['ouvert', 'assigné', 'en cours', 'résolu', 'fermé'], PRIO = {basse:['Basse', ''], normale:['Normale', 'info'], haute:['Haute', 'warn'], urgente:['Urgente', 'bad']};
 Object.assign(TICKET_LABEL, {'assigné':'Assigné', 'résolu':'Résolu', 'fermé':'Fermé'}); Object.assign(TICKET_TONE, {'assigné':'info', 'résolu':'ok', 'fermé':''});
-const tkSt = t => t.status === 'resolu' ? 'résolu' : t.status;
+let tkSt = t => t.status === 'resolu' ? 'résolu' : t.status;
 const csvBtn = k => `<div class="row" style="justify-content:flex-end;margin-bottom:10px"><button class="btn ghost sm" data-action="g3-csv" data-id="${k}">Exporter en CSV</button></div>`;
 const tenantOf = l => DB.findItem(DB.K.users, x => x.leaseId === l.id);
 const provName = id => (DB.findItem(DB.K.providers, id) || {}).name || '';
@@ -4893,15 +5133,15 @@ const _g8 = gTab;
 gTab = function (u, tab) {
   const props = myProps(u);
   if (tab === 'units') {
-    const us = gMine('units', u).sort((a, b) => ((gProp(a.propertyId) || {}).title || '') + a.ref < ((gProp(b.propertyId) || {}).title || '') + b.ref ? -1 : 1), occ = us.filter(x => x.status === 'occupée').length;
-    return csvBtn('units') + `<div class="kpis">${kpi(us.length, 'Unités')}${kpi(occ, 'Occupées', 'ok')}${kpi(us.length - occ, 'Libres ou en maintenance')}${kpi((us.length ? Math.round(occ / us.length * 100) : 0) + ' %', 'Taux d\'occupation', 'brand')}</div>
+    const us = gMine('units', u).filter(x => x.status !== 'archivee' || GSHOW_ARCH).sort((a, b) => ((gProp(a.propertyId) || {}).title || '') + a.ref < ((gProp(b.propertyId) || {}).title || '') + b.ref ? -1 : 1), occ = us.filter(x => x.status === 'occupée').length;
+    return csvBtn('units') + `<div class="kpis">${kpi(us.length, 'Unités')}${kpi(occ, 'Occupées', 'ok')}${kpi(us.filter(x => x.status === 'libre').length, 'Libres')}${kpi((us.length ? Math.round(occ / us.length * 100) : 0) + ' %', 'Taux d\'occupation', 'brand')}</div>
     <form class="card" data-action="g8-unit" style="margin:18px 0"><h4 style="margin-top:0">Nouvelle unité</h4><div class="form-grid"><div class="field"><label>Immeuble / bien</label><select class="input" name="propertyId" required>${gOpts(props)}</select></div>
       <div class="field"><label>Référence</label><input class="input" name="ref" required placeholder="A01"></div><div class="field"><label>Étage</label><input class="input" name="floor" placeholder="RDC, 1er…"></div>
       <div class="field"><label>Surface (m²)</label><input class="input" type="number" min="0" name="surface"></div><div class="field"><label>Pièces</label><input class="input" type="number" min="0" name="rooms"></div>
       <div class="field"><label>Loyer (FCFA)</label><input class="input" type="number" min="0" name="rent" required></div><div class="field"><label>Charges (FCFA)</label><input class="input" type="number" min="0" name="charges" value="0"></div></div><button class="btn">Ajouter l'unité</button></form>` +
-      gTable(['Bien', 'Unité', 'Étage', 'Surface', 'Loyer', 'Statut', 'Locataire', ''], us.map(x => { const l = x.leaseId && DB.findItem(DB.K.leases, x.leaseId), tone = {libre:'ok', 'occupée':'info', maintenance:'warn'}[x.status];
-        return `<tr><td class="small">${esc((gProp(x.propertyId) || {}).title || '')}</td><td><b>${esc(x.ref)}</b></td><td class="small">${esc(x.floor || '—')}</td><td class="small">${x.surface ? x.surface + ' m²' : '—'}</td><td>${money(x.rent)}</td><td>${badge(x.status, tone)}</td><td class="small">${l ? esc(l.tenant) : '—'}</td>
-        <td><div class="row" style="gap:6px">${x.status === 'libre' ? `<button class="btn sm" data-action="g8-rent" data-id="${x.id}">Louer</button>` : ''}${x.status !== 'occupée' ? `<button class="btn ghost sm" data-action="g8-umaint" data-id="${x.id}">${x.status === 'libre' ? 'Mettre en maintenance' : 'Remettre libre'}</button><button class="btn ghost sm" data-action="g8-udel" data-id="${x.id}" aria-label="Supprimer">${icon('trash', 14)}</button>` : ''}</div></td></tr>`; }),
+      gTable(['Bien', 'Unité', 'Étage', 'Surface', 'Loyer', 'Statut', 'Locataire', ''], us.map(x => { const l = x.leaseId && DB.findItem(DB.K.leases, x.leaseId), tone = {libre:'ok', 'occupée':'info', maintenance:'warn', archivee:''}[x.status], slab = x.status === 'archivee' ? 'archivée' : x.status;
+        return `<tr><td class="small">${esc((gProp(x.propertyId) || {}).title || '')}</td><td><b>${esc(x.ref)}</b></td><td class="small">${esc(x.floor || '—')}</td><td class="small">${x.surface ? x.surface + ' m²' : '—'}</td><td>${money(x.rent)}</td><td>${badge(slab, tone)}</td><td class="small">${l ? esc(l.tenant) : '—'}</td>
+        <td><div class="row" style="gap:6px">${x.status === 'libre' ? `<button class="btn sm" data-action="g8-rent" data-id="${x.id}">Louer</button>` : ''}${x.status !== 'occupée' ? `${x.status !== 'archivee' ? `<button class="btn ghost sm" data-action="g8-umaint" data-id="${x.id}">${x.status === 'libre' ? 'Mettre en maintenance' : 'Remettre libre'}</button>` : ''}<button class="btn ghost sm" data-action="g8-uarch" data-id="${x.id}">${x.status === 'archivee' ? 'Réactiver' : 'Archiver'}</button><button class="btn ghost sm" data-action="g8-udel" data-id="${x.id}" aria-label="Supprimer">${icon('trash', 14)}</button>` : ''}</div></td></tr>`; }),
         ['Aucune unité', 'Un immeuble peut contenir plusieurs unités (A01, A02…) louées séparément.']);
   }
   if (tab === 'tenants') { const ls = gMine('leases', u).slice().reverse();
@@ -4916,12 +5156,13 @@ gTab = function (u, tab) {
   if (tab !== 'tickets') return _g8(u, tab);
   const tks = gMine('tickets', u).filter(t => { if (!t.ref) { t.ref = nref('MNT', 'tickets'); DB.updateItem(DB.K.tickets, t.id, {ref: t.ref}); } return true; }).reverse(), provs = gMine('providers', u);
   return csvBtn('tickets') + `<form class="card" data-action="g8-ticket" style="margin-bottom:18px"><h4 style="margin-top:0">Nouvelle intervention</h4><div class="form-grid"><div class="field"><label>Bien</label><select class="input" name="propertyId" required>${gOpts(props)}</select></div>
-    <div class="field"><label>Problème</label><input class="input" name="title" required></div><div class="field"><label>Priorité</label><select class="input" name="priority">${Object.entries(PRIO).map(([k, v]) => `<option value="${k}" ${k === 'normale' ? 'selected' : ''}>${v[0]}</option>`).join('')}</select></div>
+    <div class="field"><label>Problème</label><input class="input" name="title" required></div>
+    <div class="field"><label>Catégorie</label><select class="input" name="category">${MCAT.map(c => `<option>${c}</option>`).join('')}</select></div><div class="field"><label>Priorité</label><select class="input" name="priority">${Object.entries(PRIO).map(([k, v]) => `<option value="${k}" ${k === 'normale' ? 'selected' : ''}>${v[0]}</option>`).join('')}</select></div>
     <div class="field"><label>Prestataire</label><select class="input" name="providerId"><option value="">À assigner</option>${provs.map(p => `<option value="${p.id}">${esc(p.name)} (${esc(p.job)})</option>`).join('')}</select></div>
     <div class="field"><label>Coût estimé (FCFA)</label><input class="input" type="number" min="0" name="cost" value="0"></div><div class="field"><label>Photo (facultatif)</label><input class="input" type="file" name="photo" accept="image/*"></div></div><button class="btn">Enregistrer</button></form>
-    <div style="margin-bottom:12px"><input class="input" data-gsearch placeholder="Rechercher…" style="max-width:260px"></div>` +
+    ${sBar()}` +
     gTable(['Réf.', 'Bien', 'Problème', 'Prestataire', 'Coût', 'Statut', ''], tks.map(t => { const s = tkSt(t), next = TKS[TKS.indexOf(s) + 1];
-      return `<tr><td class="small"><b>${t.ref}</b></td><td class="small">${esc((gProp(t.propertyId) || {}).title || '')}</td><td class="small"><b>${esc(t.title)}</b><br>${badge(...(PRIO[t.priority] || PRIO.normale))}</td><td class="small">${esc(provName(t.providerId) || '—')}</td><td>${money(t.cost)}</td>
+      return `<tr><td class="small"><b>${t.ref}</b></td><td class="small">${esc((gProp(t.propertyId) || {}).title || '')}</td><td class="small"><b>${esc(t.title)}</b><br><span class="muted">${esc(t.category || 'Autre')}</span> ${badge(...(PRIO[t.priority] || PRIO.normale))}</td><td class="small">${esc(provName(t.providerId) || '—')}</td><td>${money(t.cost)}</td>
       <td>${next ? `<button class="btn ghost sm" data-action="g8-tnext" data-id="${t.id}" title="Passer à : ${TICKET_LABEL[next]}">${badge(TICKET_LABEL[s], TICKET_TONE[s])} →</button>` : badge('Fermé', '')}</td>
       <td><div class="row" style="gap:6px">${t.photo ? `<button class="btn ghost sm" data-action="g8-tphoto" data-id="${t.id}">Photo</button>` : ''}${t.expenseId ? badge('Dépense liée', 'ok') : ''}<button class="btn ghost sm" data-action="g8-tdel" data-id="${t.id}" aria-label="Supprimer">${icon('trash', 14)}</button></div></td></tr>`; }), ['Aucune intervention', 'Suivez chaque panne : assignation, travaux, résolution, dépense.']);
 };
@@ -4929,13 +5170,13 @@ gTab = function (u, tab) {
 const _g9 = gTab;
 gTab = function (u, tab) {
   const h = _g9(u, tab);
-  return ['expenses', 'leases', 'rents', 'contracts', 'deals', 'audit', 'providers', 'tenants', 'units'].includes(tab) ? `<div style="margin-bottom:12px"><input class="input" data-gsearch placeholder="Rechercher…" style="max-width:260px"></div>` + h : h;
+  return ['expenses', 'leases', 'rents', 'contracts', 'deals', 'audit', 'providers', 'tenants', 'units'].includes(tab) ? sBar() + h : h;
 };
 
 /* ---------- Actions ---------- */
 function tkAdvance(u, t, cost) {
   const s = tkSt(t), next = TKS[TKS.indexOf(s) + 1]; if (!next) return; const patch = {status: next};
-  if (next === 'résolu') { if (cost !== null && cost >= 0) patch.cost = cost; const c = patch.cost ?? t.cost;
+  if (next === 'terminée') { if (cost !== null && cost >= 0) patch.cost = cost; const c = patch.cost ?? t.cost;
     if (c > 0 && !t.expenseId) { const x = DB.addItem(DB.K.expenses, {ownerId: u.id, ref: nref('DEP', 'expenses'), propertyId: t.propertyId, supplier: provName(t.providerId) || 'Prestataire', cat: 'maintenance', amount: c, method: 'Espèces', date: now().slice(0, 10), ticketId: t.id}); patch.expenseId = x.id; } }
   DB.updateItem(DB.K.tickets, t.id, patch); audit('Maintenance ' + t.ref, TICKET_LABEL[next]); if (t.tenantId) notify(t.tenantId, `Votre demande ${t.ref} est maintenant : ${TICKET_LABEL[next]}.`, '#/tenant/tickets'); render();
 }
@@ -4944,7 +5185,8 @@ document.addEventListener('click', async e => {
   const a = el.dataset.action, id = el.dataset.id, mine = k => DB.findItem(DB.K[k], x => x.id === id && x.ownerId === u.id);
   if (a === 'g8-rent' && mine('units')) { const x = mine('units'); modal('Louer ' + x.ref, `<form data-action="g8-lease" data-id="${id}"><div class="form-grid"><div class="field"><label>Locataire</label><input class="input" name="tenant" required></div><div class="field"><label>Téléphone</label><input class="input" name="phone"></div>
     <div class="field"><label>Loyer (FCFA)</label><input class="input" type="number" min="1" name="rent" value="${x.rent}" required></div><div class="field"><label>Caution (FCFA)</label><input class="input" type="number" min="0" name="deposit" value="${x.rent * 2}"></div>
-    <div class="field"><label>Début</label><input class="input" type="date" name="start" value="${now().slice(0, 10)}"></div><div class="field"><label>Durée (mois)</label><input class="input" type="number" min="1" max="36" name="months" value="12"></div></div><button class="btn block">Créer le bail</button></form>`); }
+    <div class="field"><label>Début</label><input class="input" type="date" name="start" value="${now().slice(0, 10)}"></div><div class="field"><label>Durée (mois)</label><input class="input" type="number" min="1" max="36" name="months" value="12"></div>
+    <div class="field"><label>Jour d'échéance</label><input class="input" type="number" min="1" max="28" name="dueDay" value="5"></div></div><button class="btn block">Créer le bail</button></form>`); }
   if (a === 'g8-umaint' && mine('units')) { const x = mine('units'); DB.updateItem(DB.K.units, id, {status: x.status === 'libre' ? 'maintenance' : 'libre'}); audit('Unité ' + x.ref, x.status === 'libre' ? 'mise en maintenance' : 'remise libre'); render(); }
   if (a === 'g8-udel' && mine('units')) confirmDialog({title: 'Supprimer l\'unité', message: mine('units').ref + ' sera supprimée.', confirmLabel: 'Supprimer', danger: true, onConfirm: () => { DB.deleteItem(DB.K.units, id); render(); }});
   if (a === 'g8-tfiche' && mine('leases')) { const l = mine('leases'), rs = gMine('rents', u).filter(r => r.leaseId === id), late = rs.filter(r => !r.paidAt && rentState(r)[1] === 'bad'), tk = DB.filterItems(DB.K.tickets, t => tenantOf(l) && t.tenantId === tenantOf(l).id), wa = String(l.phone).replace(/\D/g, '');
@@ -4953,9 +5195,9 @@ document.addEventListener('click', async e => {
       <p class="small"><b>Loyers :</b> ${rs.filter(r => r.paidAt).length} payés / ${rs.length} · ${late.length ? badge(late.length + ' en retard (' + money(late.reduce((s, r) => s + r.amount, 0)) + ')', 'bad') : badge('À jour', 'ok')}</p>
       <p class="small"><b>Maintenance :</b> ${tk.length} demande(s)</p></div><div class="row" style="gap:8px;margin-top:12px"><a class="btn" href="${telHref(l.phone)}">Appeler</a><a class="btn ghost" target="_blank" rel="noopener" href="https://wa.me/${wa.length === 9 ? '221' + wa : wa}">WhatsApp</a></div>`); }
   if (a === 'g8-tnext' && mine('tickets')) { const t = mine('tickets'), s = tkSt(t);
-    if (s === 'ouvert' && !t.providerId) { const provs = gMine('providers', u); if (!provs.length) { toast('Ajoutez d\'abord un prestataire (onglet Prestataires).', 'bad'); return; }
+    if (s === 'nouvelle' && !t.providerId) { const provs = gMine('providers', u); if (!provs.length) { toast('Ajoutez d\'abord un prestataire (onglet Prestataires).', 'bad'); return; }
       modal('Assigner un prestataire', `<form data-action="g8-assign" data-id="${id}"><div class="field"><label>Prestataire</label><select class="input" name="providerId">${provs.map(p => `<option value="${p.id}">${esc(p.name)} (${esc(p.job)})</option>`).join('')}</select></div><button class="btn block">Assigner</button></form>`); return; }
-    if (TKS[TKS.indexOf(s) + 1] === 'résolu') promptDialog({title: 'Résoudre ' + t.ref, label: 'Coût final (FCFA)', value: String(t.cost || 0), onConfirm: v => tkAdvance(u, t, Math.max(0, +v || 0))}); else tkAdvance(u, t, null); }
+    if (TKS[TKS.indexOf(s) + 1] === 'terminée') promptDialog({title: 'Clôturer ' + t.ref, label: 'Coût final (FCFA)', value: String(t.cost || 0), onConfirm: v => tkAdvance(u, t, Math.max(0, +v || 0))}); else tkAdvance(u, t, null); }
   if (a === 'g8-tphoto' && mine('tickets')) modal(mine('tickets').ref, `<img src="${mine('tickets').photo}" alt="" style="max-width:100%;border-radius:8px">`);
   if (a === 'g8-tdel' && mine('tickets')) confirmDialog({title: 'Supprimer l\'intervention', message: mine('tickets').ref + ' sera supprimée (la dépense liée est conservée).', confirmLabel: 'Supprimer', danger: true, onConfirm: () => { DB.deleteItem(DB.K.tickets, id); render(); }});
   if (a === 'g8-rcsv' || a === 'g8-rpdf') {
@@ -4979,12 +5221,13 @@ document.addEventListener('submit', async e => {
   if (a === 'g8-unit') { if (gMine('units', u).some(x => x.propertyId === d.propertyId && x.ref.toLowerCase() === d.ref.trim().toLowerCase())) { toast('Cette référence existe déjà dans ce bien.', 'bad'); return; }
     const x = DB.addItem(DB.K.units, {ownerId: u.id, propertyId: d.propertyId, ref: d.ref.trim(), floor: d.floor, surface: +d.surface || 0, rooms: +d.rooms || 0, rent: +d.rent || 0, charges: +d.charges || 0, status: 'libre', leaseId: ''}); audit('Unité créée', x.ref); toast('Unité ajoutée.'); render(); }
   if (a === 'g8-lease') { const x = DB.findItem(DB.K.units, y => y.id === f.dataset.id && y.ownerId === u.id && y.status === 'libre'), rent = +d.rent, n = Math.min(36, Math.max(1, +d.months)); if (!x || !d.tenant.trim() || !(rent > 0)) return;
-    const l = DB.addItem(DB.K.leases, {ownerId: u.id, propertyId: x.propertyId, unitId: x.id, unitRef: x.ref, tenant: d.tenant.trim(), phone: d.phone, rent, deposit: +d.deposit || 0, start: d.start, months: n, status: 'actif'}), s = new Date(d.start);
+    const l = DB.addItem(DB.K.leases, {ownerId: u.id, propertyId: x.propertyId, unitId: x.id, unitRef: x.ref, tenant: d.tenant.trim(), phone: d.phone, rent, deposit: +d.deposit || 0, start: d.start, months: n, dueDay: Math.min(28, Math.max(1, +d.dueDay || 5)), status: 'actif'}), s = new Date(d.start);
     for (let i = 0; i < n; i++) { const m = new Date(s.getFullYear(), s.getMonth() + i, 1); DB.addItem(DB.K.rents, {ownerId: u.id, leaseId: l.id, month: `${m.getFullYear()}-${String(m.getMonth() + 1).padStart(2, '0')}`, amount: rent, paidAt: null}); }
-    DB.updateItem(DB.K.units, x.id, {status: 'occupée', leaseId: l.id}); audit('Bail unité ' + x.ref, d.tenant); closeModal(); toast(`${x.ref} louée : ${n} loyers planifiés.`); render(); }
+    DB.updateItem(DB.K.units, x.id, {status: 'occupée', leaseId: l.id}); audit('Bail unité ' + x.ref, d.tenant); closeModal();
+    toast(`${x.ref} louée : ${n} loyers planifiés.${listable(gProp(x.propertyId)) ? '' : ' Toutes les unités sont prises : le bien quitte la recherche.'}`); render(); }
   if (a === 'g8-assign') { const t = DB.findItem(DB.K.tickets, y => y.id === f.dataset.id && y.ownerId === u.id); if (!t || !DB.findItem(DB.K.providers, y => y.id === d.providerId && y.ownerId === u.id)) return; DB.updateItem(DB.K.tickets, t.id, {providerId: d.providerId}); closeModal(); tkAdvance(u, {...t, providerId: d.providerId}, null); }
   if (a === 'g8-ticket') { let photo = ''; const file = f.querySelector('[type=file]').files[0]; if (file) { try { photo = await readImageAsDataUrl(file); } catch { toast('Photo illisible.', 'bad'); return; } }
-    const pid = DB.findItem(DB.K.providers, y => y.id === d.providerId && y.ownerId === u.id) ? d.providerId : '', t = DB.addItem(DB.K.tickets, {ownerId: u.id, propertyId: d.propertyId, title: d.title.trim(), priority: d.priority, providerId: pid, cost: +d.cost || 0, photo, status: pid ? 'assigné' : 'ouvert', ref: nref('MNT', 'tickets')});
+    const pid = DB.findItem(DB.K.providers, y => y.id === d.providerId && y.ownerId === u.id) ? d.providerId : '', t = DB.addItem(DB.K.tickets, {ownerId: u.id, propertyId: d.propertyId, title: d.title.trim(), category: MCAT.includes(d.category) ? d.category : 'Autre', priority: d.priority, providerId: pid, cost: +d.cost || 0, photo, status: pid ? 'en cours' : 'nouvelle', ref: nref('MNT', 'tickets')});
     audit('Maintenance créée', t.ref); toast(t.ref + ' créé.'); render(); }
 });
 
@@ -5005,7 +5248,8 @@ function autoNotifyTick() {
   }
   DB.getData(DB.K.documents).filter(x => x.ownerId === u.id && x.expiry && daysTo(x.expiry) <= 30).forEach(x => push('de|' + x.id + '|' + (daysTo(x.expiry) < 0 ? 'x' : 'o'), u.id, `Document « ${x.name} » ${daysTo(x.expiry) < 0 ? 'expiré' : 'bientôt expiré'}.`, '#/coffre'));
 }
-window.addEventListener('hashchange', () => setTimeout(autoNotifyTick, 400)); setTimeout(autoNotifyTick, 1500);
+window.addEventListener('hashchange', () => { const p = document.getElementById('upanel'), bk = document.querySelector('.upanel-back'), ch = document.querySelector('.mhead .muser');
+  if (p) p.classList.remove('open'); if (bk) bk.classList.remove('open'); if (ch) ch.classList.remove('on'); setTimeout(autoNotifyTick, 400); }); setTimeout(autoNotifyTick, 1500);
 
 /* ---------- Tableaux : tri par colonne et pagination ---------- */
 function enhanceTable(t) {
@@ -5053,7 +5297,7 @@ DB.updateItem = function (k, id, patch) {
 };
 const _g10 = gTab;
 gTab = function (u, tab) {
-  const search = `<div style="margin-bottom:12px"><input class="input" data-gsearch placeholder="Rechercher…" style="max-width:260px"></div>`;
+  const search = sBar();
   if (tab === 'audit') return csvBtn('audit') + search + gTable(['Date', 'Utilisateur', 'Action', 'Détail', 'Changements'], gMine('audit', u).slice().reverse().slice(0, 300).map(a => `<tr><td class="small muted">${dateTimeFr(a.createdAt)}</td><td class="small">${esc(a.who)}</td><td class="small"><b>${esc(a.action)}</b></td><td class="small">${esc(a.detail)}</td>
     <td class="small">${(a.changes || []).map(c => `<div><span class="muted">${esc(c.f)} :</span> <s>${esc(c.o)}</s> → <b>${esc(c.n)}</b></div>`).join('') || '—'}</td></tr>`), ['Journal vide', 'Les actions et modifications (ancienne et nouvelle valeur) sont tracées ici.']);
   if (tab === 'owners') return ownersTab(u, search);
@@ -5087,7 +5331,7 @@ function ownerFiche(u, o) {
     <div class="row" style="gap:8px;margin-top:12px"><button class="btn" data-action="g9-opdf" data-id="${o.id}">Relevé de gestion (PDF)</button><a class="btn ghost" href="${telHref(o.phone)}">Appeler</a></div>`);
 }
 
-/* ---------- Locataire : paiement du loyer en ligne et messagerie ---------- */
+/* ---------- Locataire : messagerie avec le bailleur ---------- */
 const tl = id => DB.findItem(DB.K.leases, id);
 route(/^\/tenant\/messages$/, () => {
   const u = Auth.current(); if (!u || u.role !== 'tenant') { toast('Espace réservé aux locataires.', 'bad'); go('#/login'); return false; }
@@ -5153,9 +5397,6 @@ document.addEventListener('click', async e => {
     const m = DB.filterItems(DB.K.tmsgs, x => x.leaseId === id);
     modal('Messages · ' + l.tenant, `<div style="max-height:45vh;overflow:auto">${m.map(x => `<div style="display:flex;justify-content:${x.from === 'owner' ? 'flex-end' : 'flex-start'};margin:6px 0"><div style="max-width:78%;padding:8px 12px;border-radius:12px;background:${x.from === 'owner' ? 'var(--brand)' : 'var(--surface-2)'};color:${x.from === 'owner' ? 'var(--brand-ink)' : 'var(--ink)'}"><div class="small">${esc(x.text)}</div><div style="opacity:.7;font-size:11px">${dateTimeFr(x.createdAt)}</div></div></div>`).join('') || '<p class="small muted">Aucun message.</p>'}</div>
       ${t ? `<form data-action="g9-osend" data-id="${id}" class="row" style="gap:8px;margin-top:12px"><input class="input" name="text" required maxlength="500" placeholder="Votre réponse…" autocomplete="off"><button class="btn">Envoyer</button></form>` : '<p class="small muted" style="margin-top:10px">Ce locataire n\'a pas d\'accès en ligne (Gestion > Équipe & accès).</p>'}`); }
-  if (a === 'g9-pay' && u.role === 'tenant') { const r = DB.findItem(DB.K.rents, x => x.id === id && x.leaseId === u.leaseId && !x.paidAt); if (!r) return;
-    modal('Payer mon loyer', `<p class="small">Loyer de <b>${monthLabel(r.month)}</b> : <b>${money(r.amount)}</b></p><form data-action="g9-payok" data-id="${id}"><div class="field"><label>Moyen de paiement</label><select class="input" name="method"><option>Wave</option><option>Orange Money</option><option>Free Money</option></select></div>
-      <div class="field"><label>Numéro de téléphone</label><input class="input" name="phone" required value="${esc(u.phone || '')}"></div><p class="small muted">Mode démonstration : aucun argent réel n'est débité. Le paiement réel passera par PayDunya.</p><button class="btn block">Confirmer le paiement</button></form>`); }
   if (a === 'g9-ival' && u.role === 'investor') { const x = mine('iassets'); if (x) promptDialog({title: 'Valeur de ' + x.title, label: 'Nouvelle valeur estimée (FCFA)', value: String(x.value), onConfirm: v => { DB.updateItem(DB.K.iassets, id, {value: Math.max(0, +v || 0)}); toast('Valeur mise à jour.'); render(); }}); }
   if (a === 'g9-idel' && u.role === 'investor' && mine('iassets')) confirmDialog({title: 'Supprimer l\'actif', message: 'Cet investissement sera retiré de votre patrimoine.', confirmLabel: 'Supprimer', danger: true, onConfirm: () => { DB.deleteItem(DB.K.iassets, id); render(); }});
   if (a === 'g9-ipdf' && u.role === 'investor') { try { const A = DB.filterItems(DB.K.iassets, x => x.ownerId === u.id), inv = sumA(A, x => x.buy), val = sumA(A, x => x.value), rows = A.map(x => [x.title, fc(x.buy), fc(x.value), fc(x.value - x.buy), x.buy ? (((x.rent - x.charges) * 12) / x.buy * 100).toFixed(1) + ' %' : '-']);
@@ -5176,8 +5417,6 @@ document.addEventListener('submit', e => {
   if (a === 'g9-oattach') { const o = mine2(f.dataset.id), p = myProps(u).find(x => x.id === d.propertyId && !x.clientOwnerId); if (o && p) { DB.updateItem(DB.K.properties, p.id, {clientOwnerId: o.id}); ownerFiche(u, o); } }
   if (a === 'g9-tsend' && u.role === 'tenant') { const l = tl(u.leaseId); if (l && d.text.trim()) { sendMsg(l.id, 'tenant', d.text.trim(), l.ownerId, '#/manage/tmsgs'); render(); } }
   if (a === 'g9-osend') { const l = DB.findItem(DB.K.leases, x => x.id === f.dataset.id && x.ownerId === u.id), t = l && DB.findItem(DB.K.users, x => x.leaseId === l.id); if (l && t && d.text.trim()) { sendMsg(l.id, 'owner', d.text.trim(), t.id, '#/tenant/messages'); closeModal(); toast('Message envoyé.'); } }
-  if (a === 'g9-payok' && u.role === 'tenant') { const r = DB.findItem(DB.K.rents, x => x.id === f.dataset.id && x.leaseId === u.leaseId && !x.paidAt); if (!r) return; const btn = f.querySelector('button'); btn.disabled = true; btn.textContent = 'Paiement en cours…';
-    setTimeout(() => { const r2 = DB.findItem(DB.K.rents, r.id); if (!r2 || r2.paidAt) { closeModal(); return; } DB.updateItem(DB.K.rents, r.id, {paidAt: now(), method: d.method, payRef: 'PAYT-' + String(Date.now()).slice(-8)}); notify(r.ownerId, `${u.firstName} ${u.lastName} a payé le loyer de ${monthLabel(r.month)} (${d.method}).`, '#/manage/rents'); closeModal(); render(); autoFileThen('quittance', DB.findItem(DB.K.rents, r.id), 'Paiement confirmé'); }, 1100); }
   if (a === 'g9-iasset' && u.role === 'investor') { DB.addItem(DB.K.iassets, {ownerId: u.id, title: d.title.trim(), type: d.type, city: d.city, buy: +d.buy || 0, value: +d.value || +d.buy || 0, date: d.date, rent: +d.rent || 0, charges: +d.charges || 0}); toast('Investissement ajouté.'); render(); }
   if (a === 'g9-prog' && u.role === 'promoter') { DB.addItem(DB.K.programs, {ownerId: u.id, name: d.name.trim(), city: d.city, status: PSTAT.includes(d.status) ? d.status : PSTAT[0], delivery: d.delivery}); toast('Programme créé.'); render(); }
   if (a === 'g9-lot' && u.role === 'promoter') { if (!DB.findItem(DB.K.programs, x => x.id === d.programId && x.ownerId === u.id)) { toast('Créez d\'abord un programme.', 'bad'); return; } DB.addItem(DB.K.lots, {ownerId: u.id, programId: d.programId, ref: d.ref.trim(), surface: +d.surface || 0, price: +d.price || 0, status: 'disponible', buyer: ''}); toast('Lot ajouté.'); render(); }
@@ -5223,7 +5462,7 @@ tabBarHtml = function (u, path) {
   const menu = MENUS[u.role], has = h => menu.find(m => m[0] === h), cfg = PILL[u.role];
   const item = h => { const m = has(h); return m ? `<a href="${h}" class="tab-item ${path === h.slice(1) || (h !== '#/' && path.startsWith(h.slice(1) + '/')) ? 'active' : ''}">${icon(m[2], 21)}<span>${esc(SHORT[m[1]] || m[1])}</span></a>` : ''; };
   if (!cfg) return `<nav class="tabbar" aria-label="Navigation principale">${menu.slice(0, 5).map(m => `<a href="${m[0]}" class="tab-item ${path === m[0].slice(1) ? 'active' : ''}">${icon(m[2], 21)}<span>${esc(SHORT[m[1]] || m[1])}</span></a>`).join('')}</nav>`;
-  const [L, F, R] = cfg, fab = has(F[0]);
+  const [L, F, R] = cfg, fab = !!F;
   return `<nav class="tabbar" aria-label="Navigation principale">${L.map(item).join('')}${fab ? `<a class="tab-fab" href="${F[0]}"><i>${icon(F[2], 22)}</i><span>${F[1]}</span></a>` : ''}${R.map(item).join('')}</nav>`;
 };
 const mhead = u => { const unread = DB.filterItems(DB.K.notifications, n => n.userId === u.id && !n.read).length;
@@ -5257,7 +5496,20 @@ document.addEventListener('click', e => {
   if (a === 'open-drawer' && u) openDrawer(MENUS[u.role], `<a href="#/" data-action="close-drawer">${icon('home', 20)}<span>Site public</span></a><a href="#" data-action="logout" style="color:#FFB3B8">${icon('logout', 20)}<span>Se déconnecter</span></a>`);
   if (a === 'open-pub-menu') openDrawer([['#/', 'Accueil', 'home'], ['#/search', 'Rechercher', 'search'], ['#/#comment', 'Comment ça marche', 'compass'], ['#/#proprietaires', 'Propriétaires', 'building'], ['#/#agences', 'Agences', 'briefcase'], ['#/login', 'Se connecter', 'user'], ['#/register', 'Créer un compte', 'plus']]);
   if (a === 'close-drawer') closeDrawer();
-  if (a === 'toggle-upanel') { const p = document.getElementById('upanel'); if (p) p.classList.toggle('open'); }
+  if (a === 'toggle-upanel' || a === 'close-upanel') {
+    const p = document.getElementById('upanel'); if (!p) return;
+    const chev = document.querySelector('.mhead .muser');
+    let back = document.querySelector('.upanel-back');
+    if (!back) { back = document.createElement('div'); back.className = 'upanel-back'; back.dataset.action = 'close-upanel'; document.body.appendChild(back); }
+    const open = a === 'toggle-upanel' && !p.classList.contains('open');
+    if (open) {
+      /* le panneau descend sous l'en-tête, où que l'on soit dans la page */
+      const head = document.querySelector('.mhead');
+      p.style.top = (head ? Math.round(head.getBoundingClientRect().bottom) : 0) + 'px';
+      p.classList.add('open'); if (chev) chev.classList.add('on');
+      requestAnimationFrame(() => back.classList.add('open'));
+    } else { p.classList.remove('open'); back.classList.remove('open'); if (chev) chev.classList.remove('on'); }
+  }
   if (a === 'home-cat') { e.preventDefault(); searchState = {...searchState, type: el.dataset.t || '', transaction: '', page: 1}; go('#/search'); }
   if (a === 'home-filters') go('#/search');
 });
@@ -5293,7 +5545,15 @@ const pcard = (p, favIds = []) => `<article class="pc"><div class="ph">${photoHt
   <div class="sp">${p.transaction === 'terrain' ? `<span>${icon('area', 14)} ${p.surface} m²</span>` : `<span>${icon('bed', 14)} ${p.rooms}</span><span>${icon('bath', 14)} ${p.baths}</span><span>${icon('area', 14)} ${p.surface} m²</span>`}</div>
   <a class="go" href="#/property/${p.id}">Voir le détail ${icon('arrowRight', 15)}</a></div></article>`;
 const mixed = (pubs, n = 8) => { const by = {location: [], vente: [], terrain: []}; [...pubs].sort((a, b) => (b.views || 0) - (a.views || 0)).forEach(p => (by[p.transaction] || by.vente).push(p)); const out = []; for (let i = 0; out.length < n && i < 6; i++) ['location', 'vente', 'terrain'].forEach(k => by[k][i] && out.length < n && out.push(by[k][i])); return out; };
-const recoHtml = (list, favIds) => `<div class="sect-h"><h3>${icon('star', 22)} Recommandés pour vous</h3><a href="#/search">Voir tout →</a></div><div class="hscroll">${list.map(p => pcard(p, favIds)).join('') || '<p class="muted small">Aucune annonce disponible pour le moment.</p>'}</div>`;
+const recoHtml = (list, favIds) => {
+  const cards = list.map(p => pcard(p, favIds)).join('');
+  /* Au-delà de trois biens, la bande défile toute seule ; elle s'arrête au survol et au doigt.
+     Les cartes sont écrites deux fois pour que la boucle soit continue. */
+  const body = !cards ? '<p class="muted small">Aucune annonce disponible pour le moment.</p>'
+    : list.length > 3 ? `<div class="runner" style="--run:${Math.max(28, list.length * 7)}s;--run-m:${Math.max(22, list.length * 5.5)}s"><div class="track">${cards}${cards}</div></div>`
+    : `<div class="hscroll">${cards}</div>`;
+  return `<div class="sect-h"><h3>${icon('star', 22)} Recommandés pour vous</h3><a href="#/search">Voir tout →</a></div>${body}`;
+};
 function activityHtml(u) {
   const n = DB.filterItems(DB.K.notifications, x => x.userId === u.id).slice().reverse().slice(0, 3), ic = t => /visite/i.test(t) ? ['calendar', 'var(--info)'] : /message/i.test(t) ? ['message', 'var(--brand)'] : /favori|aimé/i.test(t) ? ['heart', 'var(--bad)'] : ['eye', 'var(--ok)'];
   if (!n.length) return '';
@@ -5442,7 +5702,7 @@ const GMETA = {
   tmsgs:    ['message', 'Échanges avec vos locataires', u => { const ids = gMine('leases', u).map(l => l.id), n = DB.getData(DB.K.tmsgs).filter(m => ids.includes(m.leaseId) && m.from === 'tenant' && !m.read).length; return n ? n + ' non lu(s)' : 'À jour'; }],
   contracts:['file', 'Location, mandat, vente, prestation', u => gMine('contracts', u).filter(c => c.status === 'actif').length + ' actif(s)'],
   rents:    ['money', 'Encaissement, quittances et relances', u => { const n = gMine('rents', u).filter(r => !r.paidAt && rentState(r)[1] === 'bad').length; return n ? n + ' en retard' : 'Aucun retard'; }],
-  tickets:  ['settings', 'Pannes, travaux et interventions', u => { const n = gMine('tickets', u).filter(t => !['résolu', 'fermé', 'resolu'].includes(tkSt(t))).length; return n ? n + ' en cours' : 'Rien en cours'; }],
+  tickets:  ['settings', 'Pannes, travaux et interventions', u => { const n = gMine('tickets', u).filter(t => tkSt(t) !== 'terminée').length; return n ? n + ' en cours' : 'Rien en cours'; }],
   providers:['agent', 'Plombiers, électriciens, artisans', u => gMine('providers', u).length + ' prestataire(s)'],
   deals:    ['trendUp', 'Du prospect à la signature', u => gMine('deals', u).filter(d => d.stage !== 'signe').length + ' en cours'],
   docs:     ['layers', 'Devis, proformas, factures, avoirs', u => { const n = gMine('docs', u).filter(d => d.type === 'FAC' && dRest(d) > 0).length; return n ? n + ' facture(s) à encaisser' : 'Tout est soldé'; }],
@@ -5470,8 +5730,10 @@ function manageHub(u) {
     return `<a class="drawer" href="#/manage/${k}"><div class="dico">${icon(m[0], 20)}</div>
       <div class="txt"><b>${esc(gLabel(k))}</b><div class="small muted desk">${esc(m[1])}</div><div class="small muted mob">${esc(info)}</div></div>
       <span class="dn">${esc(info)}</span>${icon('arrowRight', 18)}</a>`; };
+  const extra = (EXTRA[u.role] || []).filter(() => !u.member);
+  const extraHtml = extra.length ? `<div class="gsection"><h3>Autres espaces</h3><p class="small muted">Les pages qui ne sont pas dans le menu principal</p><div class="coffre">${extra.map(([h, t, ic, d]) => `<a class="drawer" href="${h}"><div class="dico">${icon(ic, 20)}</div><div class="txt"><b>${esc(t)}</b><div class="small muted desk">${esc(d)}</div><div class="small muted mob">${esc(d)}</div></div>${icon('arrowRight', 18)}</a>`).join('')}</div></div>` : '';
   const groups = GGROUPS.map(([t, d, keys]) => { const ks = keys.filter(k => gAllowed(u, k)); if (!ks.length) return '';
-    return `<div class="gsection"><h3>${t}</h3><p class="small muted">${d}</p><div class="coffre">${ks.map(card).join('')}</div></div>`; }).join('');
+    return `<div class="gsection"><h3>${t}</h3><p class="small muted">${d}</p><div class="coffre">${ks.map(card).join('')}</div></div>`; }).join('') + extraHtml;
   return shellApp(u, page('Gestion', 'Chaque domaine dans son tiroir : ouvrez celui dont vous avez besoin.') + groups);
 }
 route(/^\/manage$/, () => {
@@ -5559,6 +5821,888 @@ async function imageToPdf(dataUrl, name) {
   doc.setFont('helvetica', 'normal').setFontSize(7).setTextColor(116, 132, 150).text('Document déposé sur DEUKSIL le ' + d8(now()), 15, 287);
   return doc.output('blob');
 }
+
+/* ==========================================================================
+   MODULE : gestion2.js — chaîne agence du cahier des charges :
+   PROPRIÉTAIRE → MANDAT → BIENS → LOYERS → COMMISSION → REVERSEMENT,
+   plus la recherche globale, la maintenance en trois états et le jour
+   d'échéance du bail.
+   ========================================================================== */
+Object.assign(DB.K, {mandates:'deuksil_mandates', transfers:'deuksil_transfers'});
+GTABS.splice(GTABS.findIndex(t => t[0] === 'owners') + 1, 0, ['mandates', 'Mandats de gestion'], ['transfers', 'Reversements']);
+routes.find(r => /manage/.test(r.re.source)).re = /^\/manage\/(leases|rents|tickets|deals|docs|fpay|expenses|finance|audit|contracts|providers|team|identity|units|tenants|reports|owners|tmsgs|mandates|transfers)$/;
+Object.assign(GMETA, {
+  mandates: ['file', 'Le droit de gérer les biens d\'un propriétaire', u => { const a = gMine('mandates', u).filter(m => m.status === 'actif').length; return a + ' mandat(s) actif(s)'; }],
+  transfers:['repeat', 'Ce que vous devez reverser à chaque propriétaire', u => { const n = gMine('transfers', u).filter(t => t.status === 'à reverser').length; return n ? n + ' à reverser' : 'Rien en attente'; }]
+});
+GGROUPS[1][2] = ['owners', 'mandates', 'transfers', 'tmsgs', 'deals'];
+const MSERV = ['Recherche de locataires', 'Encaissement des loyers', 'Suivi technique', 'Relances et impayés', 'Reporting mensuel'];
+const MST = {actif:'ok', 'expiré':'bad', 'résilié':''};
+
+/* ---------- Mandats ---------- */
+const mandateOf = (u, ownerId) => gMine('mandates', u).find(m => m.ownerId2 === ownerId && m.status === 'actif');
+const commissionRate = (u, o) => { const m = mandateOf(u, o.id); return m ? m.rate : (o.rate || 0); };
+function syncMandates(u) {
+  const today = ymd();
+  gMine('mandates', u).filter(m => m.status === 'actif' && m.end && m.end < today).forEach(m => { DB.updateItem(DB.K.mandates, m.id, {status: 'expiré'}); audit('Mandat expiré', m.ref); });
+}
+function mandatesTab(u) {
+  syncMandates(u);
+  const list = gMine('mandates', u).slice().reverse(), owners = gMine('owners', u), props = myProps(u);
+  const pname = id => (gProp(id) || {}).title || '';
+  return `<form class="card" data-action="m-new" style="margin-bottom:18px"><h4 style="margin-top:0">Nouveau mandat de gestion</h4>
+    <p class="small muted" style="margin-top:0">Sans mandat actif, un bien ne devrait pas être géré pour le compte d'un propriétaire.</p>
+    <div class="form-grid"><div class="field"><label>Propriétaire</label><select class="input" name="ownerId2" required>${owners.map(o => `<option value="${o.id}">${esc(o.name)}</option>`).join('') || '<option value="">Ajoutez d\'abord un propriétaire</option>'}</select></div>
+      <div class="field"><label>Commission (%)</label><input class="input" type="number" min="0" max="50" step="0.5" name="rate" value="8" required></div>
+      <div class="field"><label>Début</label><input class="input" type="date" name="start" value="${ymd()}" required></div>
+      <div class="field"><label>Fin</label><input class="input" type="date" name="end" value="${addDays(now(), 365).slice(0, 10)}" required></div></div>
+    <div class="field"><label>Biens confiés</label><div class="row" style="gap:12px;flex-wrap:wrap">${props.map(p => `<label class="small"><input type="checkbox" name="p_${p.id}"> ${esc(p.title)}</label>`).join('') || '<span class="small muted">Aucun bien</span>'}</div></div>
+    <div class="field"><label>Services inclus</label><div class="row" style="gap:12px;flex-wrap:wrap">${MSERV.map((sv, i) => `<label class="small"><input type="checkbox" name="s_${i}" ${i < 3 ? 'checked' : ''}> ${sv}</label>`).join('')}</div></div>
+    <button class="btn">Créer le mandat</button></form>` +
+    gTable(['N°', 'Propriétaire', 'Biens', 'Commission', 'Période', 'Statut', ''], list.map(m => {
+      const o = DB.findItem(DB.K.owners, m.ownerId2) || {}, soon = m.status === 'actif' && daysBetween(ymd(), m.end) <= 30;
+      return `<tr><td class="small"><b>${m.ref}</b></td><td class="small">${esc(o.name || '—')}</td>
+        <td class="small">${m.properties.map(pname).filter(Boolean).join(', ') || '<span class="muted">aucun</span>'}</td><td>${m.rate} %</td>
+        <td class="small muted">${dateFr(m.start)} → ${dateFr(m.end)}${soon ? '<br>' + badge('Expire dans ' + daysBetween(ymd(), m.end) + ' j', 'warn') : ''}</td>
+        <td>${badge(m.status, MST[m.status])}</td>
+        <td><div class="row" style="gap:6px"><button class="btn ghost sm" data-action="m-view" data-id="${m.id}">Voir</button>
+        ${m.status === 'actif' ? `<button class="btn ghost sm" data-action="m-end" data-id="${m.id}">Résilier</button>` : ''}</div></td></tr>`;
+    }), ['Aucun mandat', 'Le mandat fixe la commission et les biens que vous gérez pour un propriétaire.']);
+}
+function mandateHtml(m, u) {
+  const o = DB.findItem(DB.K.owners, m.ownerId2) || {}, me = ownerLabel(u);
+  return `<div style="font-family:sans-serif;color:#0F3057"><h2>MANDAT DE GESTION IMMOBILIÈRE</h2><p><b>N° ${m.ref}</b> — ${m.status}</p>
+    <p><b>Le mandant :</b> ${esc(o.name)}${o.cni ? ', CNI ' + esc(o.cni) : ''}${o.address ? ', ' + esc(o.address) : ''}<br><b>Le mandataire :</b> ${esc(me)}</p>
+    <p><b>Biens confiés :</b> ${m.properties.map(id => esc((gProp(id) || {}).title || '')).filter(Boolean).join(' · ') || 'à préciser'}</p>
+    <p><b>Durée :</b> du ${dateFr(m.start)} au ${dateFr(m.end)}.<br><b>Commission :</b> ${m.rate} % des loyers encaissés.</p>
+    <p><b>Services inclus :</b> ${m.services.join(' · ') || '—'}</p>
+    <p>Le mandataire rend compte au mandant des loyers encaissés, des dépenses engagées et du solde reversé.</p>
+    <p style="margin-top:36px">Signatures du mandant et du mandataire</p><small>Modèle indicatif, à faire valider par un professionnel du droit.</small></div>`;
+}
+
+/* ---------- Reversements ---------- */
+function ownerBalance(u, o, month) {
+  const ids = myProps(u).filter(p => p.clientOwnerId === o.id).map(p => p.id), lp = id => (DB.findItem(DB.K.leases, id) || {}).propertyId;
+  const inM = d => !month || (d || '').slice(0, 7) === month;
+  const loyers = gMine('rents', u).filter(r => r.paidAt && inM(r.paidAt) && ids.includes(lp(r.leaseId))).reduce((s, r) => s + r.amount, 0);
+  const autres = gMine('fpay', u).filter(x => inM(x.createdAt) && ids.includes(x.propertyId)).reduce((s, x) => s + x.amount, 0);
+  const dep = gMine('expenses', u).filter(x => inM(x.date) && ids.includes(x.propertyId)).reduce((s, x) => s + x.amount, 0);
+  const encaisse = loyers + autres, rate = commissionRate(u, o), com = Math.round(encaisse * rate / 100);
+  return {encaisse, dep, rate, com, net: encaisse - dep - com};
+}
+const monthsBack = n => [...Array(n)].map((_, i) => { const d = new Date(); d.setMonth(d.getMonth() - i); return d.toISOString().slice(0, 7); });
+function transfersTab(u) {
+  const owners = gMine('owners', u), done = gMine('transfers', u);
+  const paid = (oid, m) => done.find(t => t.ownerId2 === oid && t.month === m);
+  const rows = [];
+  monthsBack(4).forEach(m => owners.forEach(o => { const b = ownerBalance(u, o, m); if (b.encaisse <= 0 && b.dep <= 0) return;
+    const t = paid(o.id, m); rows.push({o, m, b, t}); }));
+  const due = rows.filter(r => !r.t).reduce((s, r) => s + Math.max(0, r.b.net), 0);
+  return `<div class="kpis">${kpi(money(due), 'Reste à reverser', due ? 'bad' : 'ok')}${kpi(money(rows.filter(r => r.t).reduce((s, r) => s + r.t.amount, 0)), 'Déjà reversé', 'ok')}${kpi(money(rows.reduce((s, r) => s + r.b.com, 0)), 'Commission agence', 'brand')}</div>
+  <p class="small muted" style="margin:14px 0 10px">Loyers encaissés − dépenses − commission = montant dû au propriétaire, mois par mois.</p>` +
+    gTable(['Mois', 'Propriétaire', 'Encaissé', 'Dépenses', 'Commission', 'À reverser', 'Statut', ''], rows.map(({o, m, b, t}) => `<tr>
+      <td class="small">${monthLabel(m)}</td><td class="small"><b>${esc(o.name)}</b></td><td>${money(b.encaisse)}</td><td>${money(b.dep)}</td>
+      <td>${money(b.com)} <span class="muted small">(${b.rate} %)</span></td><td><b>${money(Math.max(0, b.net))}</b></td>
+      <td>${t ? badge('Reversé le ' + dateFr(t.createdAt), 'ok') : badge('À reverser', 'warn')}</td>
+      <td>${t ? `<button class="btn ghost sm" data-action="t-recu" data-id="${t.id}">Reçu</button>`
+        : `<button class="btn sm" data-action="t-pay" data-o="${o.id}" data-m="${m}" data-a="${Math.max(0, b.net)}">Reverser</button>`}</td></tr>`),
+      ['Aucun reversement', 'Dès qu\'un loyer est encaissé pour un propriétaire, son reversement apparaît ici.']);
+}
+
+/* ---------- Recherche globale ---------- */
+let GSEARCH = '';
+function globalSearch(u, q) {
+  const s = q.trim().toLowerCase(); if (s.length < 2) return [];
+  const hit = v => String(v || '').toLowerCase().includes(s), out = [];
+  myProps(u).filter(p => hit(p.title) || hit(p.city) || hit(p.quartier)).forEach(p => out.push(['Bien', p.title, `${p.quartier}, ${p.city}`, '#/manage/units']));
+  gMine('owners', u).filter(o => hit(o.name) || hit(o.phone)).forEach(o => out.push(['Propriétaire', o.name, o.phone, '#/manage/owners']));
+  gMine('leases', u).filter(l => hit(l.tenant) || hit(l.phone)).forEach(l => out.push(['Locataire', l.tenant, `${(gProp(l.propertyId) || {}).title || ''}${l.unitRef ? ' · ' + l.unitRef : ''} · ${money(l.rent)}`, '#/manage/tenants']));
+  gMine('units', u).filter(x => hit(x.ref)).forEach(x => out.push(['Unité', x.ref, `${(gProp(x.propertyId) || {}).title || ''} · ${x.status}`, '#/manage/units']));
+  gMine('docs', u).filter(d => hit(d.ref) || hit(d.client)).forEach(d => out.push([DT[d.type], d.ref, `${d.client} · ${money(dTot(d))}`, '#/manage/docs']));
+  gMine('fpay', u).filter(p => hit(p.ref) || hit(p.rec) || hit(p.client)).forEach(p => out.push(['Paiement', p.ref, `${p.client} · ${money(p.amount)}`, '#/manage/fpay']));
+  gMine('contracts', u).filter(c => hit(c.ref) || hit(c.party)).forEach(c => out.push(['Contrat', c.ref, `${c.party} · ${c.status}`, '#/manage/contracts']));
+  return out.slice(0, 30);
+}
+const EXTRA = {
+  owner:  [['#/owner/property/new', 'Ajouter un bien', 'plus', 'Publier une nouvelle annonce'], ['#/owner/visits', 'Demandes de visite', 'calendar', 'Confirmer ou refuser une visite'],
+           ['#/owner/statistics', 'Statistiques', 'chart', 'Vues et performance de vos annonces'], ['#/owner/profile', 'Mon profil', 'user', 'Vos informations de compte']],
+  agency: [['#/owner/property/new', 'Ajouter un bien', 'plus', 'Publier une nouvelle annonce'], ['#/agency/agents', 'Agents', 'agent', 'Votre équipe commerciale'],
+           ['#/agency/clients', 'Clients', 'users', 'Prospects et acheteurs suivis'], ['#/agency/visits', 'Visites', 'calendar', 'Demandes à confirmer'],
+           ['#/agency/commissions', 'Commissions', 'money', 'Ce que l\'agence a gagné'], ['#/owner/profile', 'Profil agence', 'user', 'Vos informations publiques']]
+};
+const _hub = manageHub;
+manageHub = function (u) {
+  const html = _hub(u);
+  const bar = `<form class="card sbar" data-action="gs-form">
+    <div class="row" style="gap:10px"><input class="input" name="q" id="gs-q" placeholder="Rechercher un bien, un locataire, une facture…" value="${esc(GSEARCH)}" autocomplete="off">
+    <button class="btn" type="submit" aria-label="Rechercher">${icon('search', 16)}</button></div></form>`;
+  const res = GSEARCH ? globalSearch(u, GSEARCH) : [];
+  const list = GSEARCH ? (res.length ? `<div class="card" style="margin-bottom:20px">${res.map(([t, n, d, h]) => `<a class="trow" href="${h}"><span class="badge info">${esc(t)}</span><div class="txt" style="min-width:0"><b>${esc(n)}</b><div class="sub">${esc(d)}</div></div>${icon('arrowRight', 16)}</a>`).join('')}</div>`
+    : `<div class="empty" style="margin-bottom:20px"><b>Aucun résultat</b><p class="small">Rien ne correspond à « ${esc(GSEARCH)} ».</p></div>`) : '';
+  return html.replace('<div class="gsection">', bar + list + '<div class="gsection">');
+};
+document.addEventListener('submit', e => {
+  if (e.target.closest('[data-action="sb-noop"]')) { e.preventDefault(); return; }
+  const f = e.target.closest('[data-action="gs-form"]'); if (!f) return;
+  e.preventDefault(); GSEARCH = (formData(f).q || '').trim(); render();
+  setTimeout(() => { const i = $('#gs-q'); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }, 30);
+});
+
+/* ---------- Onglets ---------- */
+const _gt2 = gTab;
+gTab = function (u, tab) {
+  if (tab === 'mandates') return mandatesTab(u);
+  if (tab === 'transfers') return transfersTab(u);
+  return _gt2(u, tab);
+};
+/* commission : le mandat fait foi */
+const _ownerStats = ownerStats;
+ownerStats = function (u, o, y) { const s = _ownerStats(u, o, y), r = commissionRate(u, o); s.com = Math.round(s.rev * r / 100); s.net = s.rev - s.dep - s.com; return s; };
+
+/* ---------- Actions ---------- */
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-action^="m-"],[data-action^="t-"]'), u = Auth.current(); if (!el || !u || el.tagName === 'FORM') return;
+  const a = el.dataset.action, id = el.dataset.id, mine = k => DB.findItem(DB.K[k], x => x.id === id && x.ownerId === u.id);
+  if (a === 'm-view' && mine('mandates')) { const m = mine('mandates'); modal(m.ref, `<div class="card pad-s">${mandateHtml(m, u)}</div><div style="margin-top:12px">${pdfBtn(m.ref)}</div>`); }
+  if (a === 'm-end' && mine('mandates')) confirmDialog({title: 'Résilier le mandat', message: 'Vous ne gérerez plus les biens de ce propriétaire.', confirmLabel: 'Résilier', danger: true,
+    onConfirm: () => { DB.updateItem(DB.K.mandates, id, {status: 'résilié'}); audit('Mandat résilié', mine('mandates').ref); render(); }});
+  if (a === 't-pay') { const o = DB.findItem(DB.K.owners, x => x.id === el.dataset.o && x.ownerId === u.id); if (!o) return;
+    const amount = +el.dataset.a, m = el.dataset.m;
+    modal('Reverser à ' + o.name, `<p class="small muted">Période : <b>${monthLabel(m)}</b> · Montant dû : <b>${money(amount)}</b></p>
+      <form data-action="t-save" data-o="${o.id}" data-m="${m}"><div class="field"><label>Montant versé (FCFA)</label><input class="input" type="number" min="0" name="amount" value="${amount}" required></div>
+      <div class="field"><label>Mode</label><select class="input" name="method">${PAYM.map(x => `<option>${x}</option>`).join('')}</select></div>
+      <div class="field"><label>Référence (facultatif)</label><input class="input" name="ref"></div><button class="btn block">Enregistrer le reversement</button></form>`); }
+  if (a === 't-recu' && mine('transfers')) { const t = mine('transfers'), o = DB.findItem(DB.K.owners, t.ownerId2) || {};
+    const html = `<div style="font-family:sans-serif;color:#0F3057"><h2>REÇU DE REVERSEMENT ${t.ref}</h2>
+      <p>Versé à <b>${esc(o.name)}</b> la somme de <b>${money(t.amount)}</b> (${esc(t.method)}) au titre de la gestion de ${monthLabel(t.month)}, le ${dateFr(t.createdAt)}.</p>
+      <p class="small">Encaissé ${money(t.encaisse)} · dépenses ${money(t.dep)} · commission ${money(t.com)} (${t.rate} %).</p>${t.payRef ? `<p>Référence : ${esc(t.payRef)}</p>` : ''}</div>`;
+    modal('Reçu ' + t.ref, `<div class="card pad-s">${html}</div>`); }
+});
+document.addEventListener('submit', e => {
+  const f = e.target.closest('[data-action="m-new"],[data-action="t-save"]'), u = Auth.current(); if (!f || !u) return;
+  e.preventDefault(); const d = formData(f);
+  if (f.dataset.action === 'm-new') {
+    const o = DB.findItem(DB.K.owners, x => x.id === d.ownerId2 && x.ownerId === u.id); if (!o) { toast('Choisissez un propriétaire.', 'bad'); return; }
+    if (d.end <= d.start) { toast('La date de fin doit suivre la date de début.', 'bad'); return; }
+    const props = myProps(u).filter(p => d['p_' + p.id]).map(p => p.id), services = MSERV.filter((sv, i) => d['s_' + i]);
+    const m = DB.addItem(DB.K.mandates, {ownerId: u.id, ownerId2: o.id, ref: nref('MDT', 'mandates'), rate: Math.min(50, Math.max(0, +d.rate || 0)),
+      start: d.start, end: d.end, properties: props, services, status: 'actif'});
+    props.forEach(pid => DB.updateItem(DB.K.properties, pid, {clientOwnerId: o.id}));
+    DB.updateItem(DB.K.owners, o.id, {rate: m.rate});
+    audit('Mandat créé', `${m.ref} · ${o.name}`); render(); autoFileThen('mandate', m, m.ref + ' créé');
+  }
+  if (f.dataset.action === 't-save') {
+    const o = DB.findItem(DB.K.owners, x => x.id === f.dataset.o && x.ownerId === u.id), m = f.dataset.m; if (!o) return;
+    if (DB.findItem(DB.K.transfers, x => x.ownerId === u.id && x.ownerId2 === o.id && x.month === m)) { closeModal(); toast('Ce mois est déjà reversé.', 'bad'); return; }
+    const b = ownerBalance(u, o, m);
+    const t = DB.addItem(DB.K.transfers, {ownerId: u.id, ownerId2: o.id, ref: nref('REV', 'transfers'), month: m, amount: +d.amount || 0,
+      method: d.method, payRef: (d.ref || '').trim(), encaisse: b.encaisse, dep: b.dep, com: b.com, rate: b.rate, status: 'reversé'});
+    audit('Reversement', `${t.ref} · ${o.name} · ${money(t.amount)}`); notify(u.id, `Reversement ${t.ref} enregistré pour ${o.name}.`, '#/manage/transfers');
+    closeModal(); toast(`Reversement enregistré : ${money(t.amount)}.`); render();
+  }
+});
+/* le mandat s'archive en PDF comme les autres documents */
+function pdfMandate(m, u) {
+  const I = issuer(u), o = DB.findItem(DB.K.owners, m.ownerId2) || {};
+  const [doc, y0] = pdfBegin('MANDAT DE GESTION', m.ref, m.createdAt, m.ref);
+  let y = pdfParties(doc, y0, {t: 'Le mandataire', lines: issuerLines(I)}, {t: 'Le mandant', lines: [o.name, o.phone && 'Tél : ' + o.phone, o.address].filter(Boolean)});
+  y = pdfPara(doc, y, 'Article 1 — Objet', `Le mandant confie au mandataire la gestion des biens suivants : ${m.properties.map(id => (gProp(id) || {}).title).filter(Boolean).join(', ') || 'à préciser'}.`);
+  y = pdfPara(doc, y, 'Article 2 — Durée', `Le mandat est conclu du ${d8(m.start)} au ${d8(m.end)}.`);
+  y = pdfPara(doc, y, 'Article 3 — Commission', `Le mandataire perçoit ${m.rate} % des loyers encaissés, prélevés avant reversement au mandant.`);
+  y = pdfPara(doc, y, 'Article 4 — Services inclus', m.services.join(' · ') || 'Selon accord des parties.');
+  y = pdfPara(doc, y, 'Article 5 — Reddition de comptes', 'Un relevé des loyers encaissés, des dépenses et du solde reversé est remis au mandant à chaque période convenue.');
+  pdfSign(doc, y + 2, 'Le mandant', 'Le mandataire');
+  return pdfEnd(doc, u, m.ref);
+}
+const _autoFile = autoFile;
+autoFile = async function (kind, obj) {
+  if (kind !== 'mandate') return _autoFile(kind, obj);
+  const u = Auth.current(); if (!u || !obj || archived(obj.ref)) return null;
+  try {
+    await loadPdf(); const f = pdfMandate(obj, u);
+    const rec = DB.addItem(DB.K.documents, {ownerId: u.id, name: f.name, mime: 'application/pdf', dataUrl: await b64(f.blob),
+      cat: 'contrats', propertyId: '', expiry: '', srcRef: obj.ref, auto: true});
+    return DB.lastWriteOk ? rec : null;
+  } catch { return null; }
+};
+const _pdfFor = pdfFor;
+pdfFor = function (name, u) {
+  if (/^MDT-/.test(name)) { const m = DB.findItem(DB.K.mandates, x => x.ref === name && x.ownerId === u.id); return m && ['gestion', pdfMandate, m, u]; }
+  return _pdfFor(name, u);
+};
+
+/* ==========================================================================
+   MODULE : dashboard.js — tableau de bord du propriétaire et de l'agence
+   répondant aux quatre questions du cahier des charges : ce que je gère,
+   ce que je gagne, ce qui pose problème, ce que je dois faire maintenant.
+   ========================================================================== */
+const curMonth = () => now().slice(0, 7);
+function dashStats(u) {
+  const props = myProps(u), units = gMine('units', u), leases = gMine('leases', u), actifs = leases.filter(l => l.status === 'actif');
+  /* une unité déclarée compte comme unité ; un bien sans unité compte pour une */
+  const withUnits = new Set(units.map(x => x.propertyId));
+  const nUnits = units.length + props.filter(p => !withUnits.has(p.id)).length;
+  const occUnits = units.filter(x => x.status === 'occupée').length + props.filter(p => !withUnits.has(p.id) && actifs.some(l => l.propertyId === p.id && !l.unitId)).length;
+  const m = curMonth(), rents = gMine('rents', u);
+  const duMois = rents.filter(r => r.month === m);
+  const attendus = duMois.reduce((s, r) => s + r.amount, 0);
+  const encaisses = rents.filter(r => r.paidAt && r.paidAt.slice(0, 7) === m).reduce((s, r) => s + r.amount, 0)
+    + gMine('fpay', u).filter(p => p.createdAt.slice(0, 7) === m).reduce((s, p) => s + p.amount, 0);
+  const retards = rents.filter(r => !r.paidAt && rentState(r)[1] === 'bad');
+  const impayes = retards.reduce((s, r) => s + r.amount, 0)
+    + gMine('docs', u).filter(d => d.type === 'FAC' && dRest(d) > 0 && d.due < ymd()).reduce((s, d) => s + dRest(d), 0);
+  const depenses = gMine('expenses', u).filter(x => x.date.slice(0, 7) === m).reduce((s, x) => s + x.amount, 0)
+    + gMine('tickets', u).filter(t => !t.expenseId && (t.createdAt || '').slice(0, 7) === m).reduce((s, t) => s + t.cost, 0);
+  return {props, nUnits, occUnits, vacantes: nUnits - occUnits, attendus, encaisses, impayes, depenses, net: encaisses - depenses, retards, actifs};
+}
+/* « À traiter » : uniquement ce qui demande une action aujourd'hui */
+function todoList(u, s) {
+  const t = [];
+  if (s.retards.length) t.push([`${s.retards.length} loyer${s.retards.length > 1 ? 's' : ''} en retard`, money(s.retards.reduce((x, r) => x + r.amount, 0)), '#/manage/rents', 'money', 'bad']);
+  const finBail = s.actifs.filter(l => { const d = daysBetween(ymd(), leaseEnd(l)); return d >= 0 && d <= 45; });
+  if (finBail.length) t.push([`${finBail.length} bail${finBail.length > 1 ? 's' : ''} bientôt échu${finBail.length > 1 ? 's' : ''}`, finBail.map(l => l.tenant).join(', '), '#/manage/leases', 'briefcase', 'warn']);
+  const mnt = gMine('tickets', u).filter(x => tkSt(x) !== 'terminée');
+  if (mnt.length) t.push([`${mnt.length} demande${mnt.length > 1 ? 's' : ''} de maintenance`, mnt.map(x => x.title).slice(0, 2).join(', '), '#/manage/tickets', 'settings', 'info']);
+  const devis = gMine('docs', u).filter(d => d.type === 'DEV' && d.status === 'envoyé');
+  if (devis.length) t.push([`${devis.length} devis en attente de réponse`, devis.map(d => d.client).slice(0, 2).join(', '), '#/manage/docs', 'layers', 'info']);
+  const ctr = gMine('contracts', u).filter(c => c.status === 'actif' && daysBetween(ymd(), c.end) >= 0 && daysBetween(ymd(), c.end) <= 30);
+  if (ctr.length) t.push([`${ctr.length} contrat${ctr.length > 1 ? 's' : ''} à renouveler`, ctr.map(c => c.ref).join(', '), '#/manage/contracts', 'file', 'warn']);
+  const vis = DB.filterItems(DB.K.visits, v => v.ownerId === u.id && v.status === 'attente');
+  if (vis.length) t.push([`${vis.length} demande${vis.length > 1 ? 's' : ''} de visite`, 'À confirmer ou refuser', `#/${u.role}/visits`, 'calendar', 'info']);
+  if (u.role === 'agency') {
+    const owners = gMine('owners', u), done = gMine('transfers', u), m = curMonth();
+    const due = owners.filter(o => !done.find(x => x.ownerId2 === o.id && x.month === m) && ownerBalance(u, o, m).net > 0);
+    if (due.length) t.push([`${due.length} reversement${due.length > 1 ? 's' : ''} à effectuer`, due.map(o => o.name).slice(0, 2).join(', '), '#/manage/transfers', 'repeat', 'warn']);
+  }
+  const msg = DB.filterItems(DB.K.tmsgs, x => x.from === 'tenant' && !x.read && gMine('leases', u).some(l => l.id === x.leaseId));
+  if (msg.length) t.push([`${msg.length} message${msg.length > 1 ? 's' : ''} de locataire`, 'Non lu(s)', '#/manage/tmsgs', 'message', 'info']);
+  return t;
+}
+const dashKpi = (n, l, ic, tone) => kpiRich(n, l, ic, tone || 'brand', null);
+function monthIncome(u, m) {
+  return gMine('rents', u).filter(r => r.paidAt && r.paidAt.slice(0, 7) === m).reduce((x, r) => x + r.amount, 0)
+    + gMine('fpay', u).filter(p => p.createdAt.slice(0, 7) === m).reduce((x, p) => x + p.amount, 0);
+}
+function monthSpend(u, m) {
+  return gMine('expenses', u).filter(x => x.date.slice(0, 7) === m).reduce((t, x) => t + x.amount, 0)
+    + gMine('tickets', u).filter(t => !t.expenseId && (t.createdAt || '').slice(0, 7) === m).reduce((t, x) => t + x.cost, 0);
+}
+const prevMonth = m => { const d = new Date(m + '-01'); d.setMonth(d.getMonth() - 1); return d.toISOString().slice(0, 7); };
+/* variation par rapport au mois précédent, affichée seulement si elle a du sens */
+function variation(now_, before, goodWhenUp = true) {
+  if (!before) return now_ ? {label: 'Premier mois enregistré', tone: ''} : null;
+  const pc = Math.round((now_ - before) / before * 100);
+  if (!pc) return {label: 'Stable par rapport au mois dernier', tone: ''};
+  const up = pc > 0, good = up === goodWhenUp;
+  return {label: `${up ? '+' : ''}${pc} % par rapport au mois dernier`, tone: good ? 'ok' : 'bad', up};
+}
+const vHtml = v => v ? `<div class="kvar ${v.tone}">${v.up === undefined ? '' : icon(v.up ? 'trendUp' : 'trendDown', 13)}${esc(v.label)}</div>` : '';
+
+/* Premiers pas : un compte sans bien n'affiche pas un mur de zéros */
+function dashOnboarding(u) {
+  const steps = [['Ajoutez un bien', 'Adresse, type, surface et photos. Un immeuble peut ensuite recevoir ses unités.', 'home', '#/owner/property/new', 'Commencer'],
+    ['Créez le bail', 'Locataire, loyer, caution, durée. Les échéances se créent toutes seules.', 'users', '', ''],
+    ['Encaissez les loyers', 'Chaque paiement enregistré produit sa quittance et alimente vos revenus.', 'money', '', '']];
+  return `<div class="onb-hero"><span class="badge info">Premiers pas</span>
+      <h2 style="margin:12px 0 6px">Bienvenue ${esc(u.firstName)}, commençons par votre premier bien</h2>
+      <p class="small" style="margin:0;max-width:56ch;opacity:.86">Trois étapes suffisent pour suivre vos loyers, vos dépenses et vos locataires depuis DEUKSIL.</p></div>
+    <div class="onb-steps">${steps.map(([t, d, ic, href, cta], i) => `<div class="card onb${i ? ' soon' : ''}"><span class="onb-n">${i + 1}</span>
+      <span class="itile">${icon(ic, 19)}</span><b style="display:block;margin:12px 0 5px">${t}</b>
+      <p class="small muted" style="margin:0 0 ${cta ? '15px' : '0'}">${d}</p>
+      ${cta ? `<a class="btn sm" href="${href}">${cta} ${icon('arrowRight', 14)}</a>` : ''}</div>`).join('')}</div>`;
+}
+
+function dashHtml(u) {
+  const s = dashStats(u), todo = todoList(u, s), occ = s.nUnits ? Math.round(s.occUnits / s.nUnits * 100) : 0;
+  if (!s.props.length) return dashOnboarding(u);
+  const m = curMonth(), pm = prevMonth(m);
+  const netNow = s.encaisses - s.depenses, netBefore = monthIncome(u, pm) - monthSpend(u, pm);
+  const months = [...Array(6)].map((_, i) => { const d = new Date(); d.setMonth(d.getMonth() - 5 + i); return d.toISOString().slice(0, 7); });
+  const vals = months.map(x => monthIncome(u, x)), max = Math.max(1, ...vals);
+  const actions = u.role === 'agency'
+    ? [['#/manage/owners', 'Ajouter un propriétaire', 'user'], ['#/agency/add', 'Ajouter un bien', 'plus'], ['#/manage/rents', 'Encaisser un loyer', 'money'], ['#/manage/docs', 'Créer une facture', 'layers']]
+    : [['#/owner/property/new', 'Ajouter un bien', 'plus'], ['#/manage/leases', 'Ajouter un locataire', 'users'], ['#/manage/rents', 'Encaisser un loyer', 'money'], ['#/manage/expenses', 'Ajouter une dépense', 'repeat']];
+  return `
+    <h3 style="margin:22px 0 12px">Ce que vous gagnez <span class="small muted" style="font-weight:500">· ${monthLabel(m)}</span></h3>
+    <div class="dash-top">
+      <div class="hero-kpi">
+        <div class="row" style="gap:9px;align-items:center;margin-bottom:12px">
+          <span class="hk-ic">${icon('trendUp', 18)}</span><span class="small" style="opacity:.86">Revenu net du mois</span></div>
+        <div class="hk-n">${money(netNow)}</div>
+        ${vHtml(variation(netNow, netBefore))}
+      </div>
+      ${kpiRich(money(s.encaisses), 'Encaissé', 'money', 'ok', variation(s.encaisses, monthIncome(u, pm)))}
+      ${kpiRich(money(s.impayes), 'Impayés', 'alert', s.impayes ? 'bad' : 'ok', s.retards.length ? {label: `${s.retards.length} loyer${s.retards.length > 1 ? 's' : ''} en retard`, tone: 'bad'} : null)}
+    </div>
+
+    <div class="dash-mid">
+      <div class="card"><div class="row-between" style="margin-bottom:14px"><b>Revenus des 6 derniers mois</b><span class="small muted">encaissé</span></div>
+        <div class="bars">${months.map((x, i) => `<div class="bar"><div class="col"><i style="height:${Math.round(vals[i] / max * 100)}%${i === 5 ? ';background:var(--brand)' : ''}" title="${money(vals[i])}"></i></div>
+          <span class="small ${i === 5 ? '' : 'muted'}">${x.slice(5)}</span></div>`).join('')}</div></div>
+      <div class="card ring-card">
+        <div class="ring" style="--pc:${occ}"><div class="hole">${occ} %</div></div>
+        <div style="min-width:0"><b>Occupation</b><div class="small muted" style="margin-top:3px">${s.occUnits} unité${s.occUnits > 1 ? 's' : ''} louée${s.occUnits > 1 ? 's' : ''} sur ${s.nUnits}</div>
+          ${s.vacantes ? `<div class="small" style="color:var(--warn);font-weight:600;margin-top:6px">${s.vacantes} vacante${s.vacantes > 1 ? 's' : ''}</div>` : ''}</div></div>
+      <div class="card"><b>Patrimoine</b>
+        <div class="row-between small" style="padding:6px 0;margin-top:8px"><span class="muted">Biens</span><b>${s.props.length}</b></div>
+        <div class="row-between small" style="padding:6px 0"><span class="muted">Unités</span><b>${s.nUnits}</b></div>
+        <div class="row-between small" style="padding:6px 0"><span class="muted">Locataires</span><b>${s.actifs.length}</b></div>
+        <div class="row-between small" style="padding:6px 0"><span class="muted">Dépenses du mois</span><b>${money(s.depenses)}</b></div></div>
+    </div>
+
+    <div class="two-col" style="margin-top:24px;align-items:start">
+      <div class="card"><div class="row-between" style="margin-bottom:12px"><h3 style="margin:0">À traiter</h3>${todo.length ? `<span class="badge bad">${todo.length}</span>` : ''}</div>
+        ${todo.length ? todo.map(([t, d, h, ic, tone]) => `<a class="trow" href="${h}"><span class="itile sm ${tone === 'bad' ? 'orange' : tone === 'warn' ? 'gold' : ''}">${icon(ic, 17)}</span>
+          <div class="txt" style="min-width:0"><b>${esc(t)}</b><div class="sub">${esc(d)}</div></div>${icon('arrowRight', 16)}</a>`).join('')
+          : `<div class="empty" style="padding:28px 16px;border:0;background:transparent"><b>Rien à traiter</b><p class="small">Aucun retard, aucune demande en attente.</p></div>`}</div>
+      <div><h3 style="margin:0 0 10px">Actions rapides</h3><div class="qa-grid">
+        ${actions.map(([h, l, ic]) => `<a class="quick-card" href="${h}"><div class="ic-bubble" style="background:var(--brand-soft);color:var(--brand)">${icon(ic, 17)}</div><b>${l}</b></a>`).join('')}
+      </div></div>
+    </div>`;
+}
+/* Le tableau de bord est reconstruit en entier : bandeau puis les quatre réponses. */
+function dashHero(u) {
+  const agency = u.role === 'agency';
+  return `<div class="hero-banner" style="min-height:170px">
+      <div class="scene-bg"><img src="${agency ? PHOTOS.bnAgency : PHOTOS.bnOwner}" alt="" loading="lazy"></div>
+      <div class="content">
+        <span class="wave">Bonjour ${esc(u.firstName)}</span>
+        <h1 style="font-size:1.5rem">${agency ? 'Votre portefeuille et vos mandats' : 'Votre portefeuille en un coup d\'œil'}</h1>
+        <div class="hero-pills">
+          <a href="#/owner/property/new">${icon('plus', 15)} Ajouter un bien</a>
+          <a href="#/${u.role}/visits">${icon('calendar', 15)} Demandes de visite</a>
+        </div>
+      </div>
+    </div>`;
+}
+['owner', 'agency'].forEach(role => {
+  const r = routes.find(x => x.re.source === `^\\/${role}\\/dashboard$`); if (!r) return;
+  r.fn = () => { const u = Auth.guard(role); if (!u) return false; return shellApp(u, dashHero(u) + dashHtml(u)); };
+});
+
+/* ==========================================================================
+   MODULE : fiche.js — fiche d'un bien en six onglets (§6 du cahier des
+   charges). Aucun défilement horizontal sur mobile : onglets en grille fixe
+   et listes en cartes au lieu de tableaux.
+   ========================================================================== */
+const BTABS = [['apercu', 'Vue générale', 'Vue', 'home'], ['unites', 'Unités', 'Unités', 'building'], ['finances', 'Finances', 'Finances', 'money'],
+  ['travaux', 'Maintenance', 'Travaux', 'settings'], ['docs', 'Documents', 'Docs', 'file'], ['suivi', 'Historique', 'Suivi', 'clock']];
+const USTAT = {vacante:['Vacante', 'warn'], 'occupée':['Louée', 'info'], maintenance:['En maintenance', 'warn'], archivee:['Archivée', '']};
+document.head.insertAdjacentHTML('beforeend', '<style>'
+  + '.btabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:20px;overflow:visible}'
+  + '.btabs a{display:flex;align-items:center;gap:7px;padding:11px 13px;text-decoration:none;color:var(--muted);font-size:.9rem;font-weight:500;border-bottom:2.5px solid transparent;white-space:nowrap}'
+  + '.btabs a.on{color:var(--ink);font-weight:600;border-bottom-color:var(--brand)}'
+  + '.btabs a .lb{display:inline} .btabs a .sb{display:none}'
+  + '.bcard{display:block;text-decoration:none;color:var(--ink);border:1px solid var(--line);border-radius:var(--r-card);padding:13px 14px;margin-bottom:9px}'
+  + '.bcard:hover{border-color:var(--brand)}'
+  + '.bcard .top{display:flex;align-items:center;gap:9px;margin-bottom:5px;min-width:0}'
+  + '.bcard .top > b{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}'
+  + '.bcard .top > .badge{flex:none;max-width:45%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}'
+  + '.bcard .amt{margin-left:auto;font-weight:700;flex:none}'
+  + '.bcard .sub{font-size:.8rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}'
+  + '.bgrid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:18px;align-items:start}'
+  + '.binfo{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px 18px}'
+  + '.binfo .k{font-size:.75rem;color:var(--muted);margin-bottom:2px} .binfo .v{font-weight:600}'
+  + '@media (max-width:760px){'
+  + '.btabs{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;background:var(--surface-2);border:1px solid var(--line);border-radius:14px;padding:6px 5px;margin-bottom:14px}'
+  + '.btabs a{flex-direction:column;gap:3px;padding:5px 1px;border-radius:10px;border-bottom:0;font-size:.56rem;font-weight:600;min-width:0;text-align:center}'
+  + '.btabs a.on{background:var(--brand);color:var(--brand-ink)}'
+  + '.btabs a .lb{display:none} .btabs a .sb{display:inline}'
+  + '.bgrid{grid-template-columns:1fr;gap:14px}'
+  + '.binfo{grid-template-columns:1fr 1fr}'
+  + '}</style>');
+
+const bUnits = (u, p) => gMine('units', u).filter(x => x.propertyId === p.id);
+const bLeases = (u, p) => gMine('leases', u).filter(l => l.propertyId === p.id);
+const bRents = (u, p) => { const ids = bLeases(u, p).map(l => l.id); return gMine('rents', u).filter(r => ids.includes(r.leaseId)); };
+const bExp = (u, p) => gMine('expenses', u).filter(x => x.propertyId === p.id);
+const bTick = (u, p) => gMine('tickets', u).filter(t => t.propertyId === p.id);
+function bFin(u, p, year) {
+  const Y = String(year), rents = bRents(u, p).filter(r => r.paidAt && r.paidAt.startsWith(Y)).reduce((s, r) => s + r.amount, 0);
+  const fact = gMine('fpay', u).filter(x => x.propertyId === p.id && x.createdAt.startsWith(Y)).reduce((s, x) => s + x.amount, 0);
+  const dep = bExp(u, p).filter(x => x.date.startsWith(Y)).reduce((s, x) => s + x.amount, 0)
+    + bTick(u, p).filter(t => !t.expenseId && (t.createdAt || '').startsWith(Y)).reduce((s, t) => s + t.cost, 0);
+  const impayes = bRents(u, p).filter(r => !r.paidAt && rentState(r)[1] === 'bad').reduce((s, r) => s + r.amount, 0);
+  return {rev: rents + fact, dep, impayes, net: rents + fact - dep};
+}
+/* une unité implicite pour un bien sans unité déclarée */
+function bUnitRows(u, p) {
+  const us = bUnits(u, p), act = bLeases(u, p).filter(l => l.status === 'actif');
+  if (us.length) return us.map(x => { const l = x.leaseId && DB.findItem(DB.K.leases, x.leaseId);
+    return {ref: x.ref, meta: [x.floor, x.rooms ? x.rooms + ' pièces' : '', x.surface ? x.surface + ' m²' : ''].filter(Boolean).join(' · '),
+      rent: x.rent, status: x.status, lease: l, id: x.id}; });
+  const l = act.find(x => !x.unitId);
+  return [{ref: p.title, meta: [p.type, p.rooms ? p.rooms + ' pièces' : '', p.surface ? p.surface + ' m²' : ''].filter(Boolean).join(' · '),
+    rent: l ? l.rent : p.price, status: l ? 'occupée' : 'vacante', lease: l, id: '', implicite: true}];
+}
+function unitCard(u, row) {
+  const late = row.lease && gMine('rents', u).some(r => r.leaseId === row.lease.id && !r.paidAt && rentState(r)[1] === 'bad');
+  const [lab, tone] = late ? ['Loyer en retard', 'bad'] : (USTAT[row.status] || USTAT.vacante);
+  const sub = row.lease ? `${esc(row.lease.tenant)}${row.meta ? ' · ' + esc(row.meta) : ''} · bail jusqu'au ${dateFr(leaseEnd(row.lease))}` : `Libre${row.meta ? ' · ' + esc(row.meta) : ''}`;
+  const href = row.lease ? '#/manage/tenants' : '#/manage/units';
+  return `<a class="bcard" href="${href}"${late ? ' style="border-color:#F3D3D6;background:var(--bad-soft)"' : ''}>
+    <div class="top"><b>${esc(row.ref)}</b>${badge(lab, tone)}<span class="amt">${money(row.rent)}</span></div>
+    <div class="sub">${sub}</div></a>`;
+}
+function ficheTab(u, p, tab) {
+  const y = yr();
+  if (tab === 'unites') {
+    const rows = bUnitRows(u, p), occ = rows.filter(r => r.status === 'occupée').length;
+    return `<div class="kpis" style="margin-bottom:16px">${kpi(rows.length, 'Unités')}${kpi(occ, 'Louées', 'ok')}${kpi(rows.length - occ, 'Vacantes', rows.length - occ ? 'warn' : '')}${kpi((rows.length ? Math.round(occ / rows.length * 100) : 0) + ' %', 'Occupation', 'brand')}</div>
+      ${rows.map(r => unitCard(u, r)).join('')}
+      ${bUnits(u, p).length ? '' : '<p class="small muted">Ce bien n\'a pas d\'unités déclarées : il compte pour une seule unité. Ajoutez-en depuis Gestion &rsaquo; Unités si c\'est un immeuble.</p>'}
+      <div style="margin-top:14px"><a class="btn sm" href="#/manage/units">${icon('plus', 15)} Ajouter une unité</a></div>`;
+  }
+  if (tab === 'finances') {
+    const f = bFin(u, p, y), cats = {};
+    bExp(u, p).filter(x => x.date.startsWith(String(y))).forEach(x => cats[x.cat] = (cats[x.cat] || 0) + x.amount);
+    const rend = p.transaction !== 'location' && p.price ? (f.net / p.price * 100).toFixed(1) + ' %' : '—';
+    return `<div class="kpis" style="margin-bottom:16px">${kpi(money(f.rev), 'Revenus ' + y, 'ok')}${kpi(money(f.impayes), 'Impayés', f.impayes ? 'bad' : '')}${kpi(money(f.dep), 'Dépenses')}${kpi(money(f.net), 'Revenu net', 'brand')}</div>
+      <div class="bgrid">
+        <div class="card"><h3 style="margin-top:0">Loyers du bien</h3>
+          ${bRents(u, p).slice().sort((a, b) => a.month < b.month ? 1 : -1).slice(0, 8).map(r => { const [lab, tone] = rentState(r), l = DB.findItem(DB.K.leases, r.leaseId) || {};
+            return `<div class="bcard" style="cursor:default"><div class="top"><b>${monthLabel(r.month)}</b>${badge(lab, tone)}<span class="amt">${money(r.amount)}</span></div><div class="sub">${esc(l.tenant || '')}</div></div>`; }).join('')
+            || '<p class="small muted">Aucun loyer enregistré pour ce bien.</p>'}</div>
+        <div class="stack" style="gap:14px">
+          <div class="card"><h3 style="margin-top:0;font-size:.95rem">Dépenses par poste</h3>
+            ${Object.entries(cats).map(([c, v]) => `<div class="row-between small" style="padding:6px 0"><span>${esc(c)}</span><b>${money(v)}</b></div>`).join('') || '<p class="small muted">Aucune dépense cette année.</p>'}</div>
+          <div class="card"><h3 style="margin-top:0;font-size:.95rem">Rentabilité</h3><div style="font-size:1.6rem;font-weight:700">${rend}</div>
+            <p class="small muted" style="margin:5px 0 0">${p.transaction === 'location' ? 'Calculée uniquement pour un bien mis en vente, dont le prix sert de base.' : 'Revenu net rapporté au prix du bien.'}</p></div>
+        </div></div>`;
+  }
+  if (tab === 'travaux') {
+    const tk = bTick(u, p).slice().reverse();
+    return tk.map(t => `<a class="bcard" href="#/manage/tickets"><div class="top"><b>${esc(t.title)}</b>${badge(TICKET_LABEL[tkSt(t)] || tkSt(t), TICKET_TONE[tkSt(t)] || '')}<span class="amt">${money(t.cost)}</span></div>
+      <div class="sub">${t.ref || ''}${t.providerId ? ' · ' + esc(provName(t.providerId)) : ''} · ${dateFr(t.createdAt)}</div></a>`).join('')
+      || '<div class="empty"><b>Aucune intervention</b><p class="small">Les pannes et travaux de ce bien apparaîtront ici.</p></div>';
+  }
+  if (tab === 'docs') {
+    const docs = DB.filterItems(DB.K.documents, d => d.ownerId === u.id && d.propertyId === p.id);
+    const ctr = gMine('contracts', u).filter(c => c.propertyId === p.id);
+    return (docs.length || ctr.length ? '' : '<div class="empty"><b>Aucun document</b><p class="small">Les contrats et pièces rattachés à ce bien apparaîtront ici.</p></div>')
+      + ctr.map(c => `<a class="bcard" href="#/manage/contracts"><div class="top"><b>${c.ref}</b>${badge(CTYPE[c.type], 'info')}${badge(c.status, CTONE[c.status])}</div><div class="sub">${esc(c.party)} · ${dateFr(c.start)} → ${dateFr(c.end)}</div></a>`).join('')
+      + docs.map(d => `<a class="bcard" href="#/coffre/${d.cat}"><div class="top"><b>${esc(d.name)}</b>${badge(VCAT[d.cat] ? VCAT[d.cat][0] : 'Document', '')}</div><div class="sub">Déposé le ${dateFr(d.createdAt)}</div></a>`).join('')
+      + `<div style="margin-top:14px"><a class="btn sm ghost" href="#/coffre">${icon('plus', 15)} Ajouter un document</a></div>`;
+  }
+  if (tab === 'suivi') {
+    const ev = [];
+    bLeases(u, p).forEach(l => ev.push([l.createdAt, `Bail créé · ${l.tenant}`, money(l.rent) + ' / mois']));
+    bRents(u, p).filter(r => r.paidAt).forEach(r => ev.push([r.paidAt, `Loyer payé · ${monthLabel(r.month)}`, money(r.amount)]));
+    bTick(u, p).forEach(t => ev.push([t.createdAt, `Maintenance · ${t.title}`, TICKET_LABEL[tkSt(t)] || '']));
+    bExp(u, p).forEach(x => ev.push([x.date, `Dépense · ${x.cat}`, money(x.amount)]));
+    gMine('contracts', u).filter(c => c.propertyId === p.id).forEach(c => ev.push([c.createdAt, `Contrat ${c.ref}`, CTYPE[c.type]]));
+    ev.sort((a, b) => (a[0] || '') < (b[0] || '') ? 1 : -1);
+    return ev.length ? ev.slice(0, 40).map(([d, t, s]) => `<div class="bcard" style="cursor:default"><div class="top"><b>${esc(t)}</b><span class="amt small muted">${dateFr(d)}</span></div><div class="sub">${esc(s)}</div></div>`).join('')
+      : '<div class="empty"><b>Aucun événement</b><p class="small">Les opérations sur ce bien seront tracées ici.</p></div>';
+  }
+  /* vue générale */
+  const rows = bUnitRows(u, p), occ = rows.filter(r => r.status === 'occupée').length, pc = rows.length ? Math.round(occ / rows.length * 100) : 0;
+  const loyer = rows.filter(r => r.status === 'occupée').reduce((s, r) => s + r.rent, 0);
+  const m = curMonth(), rs = bRents(u, p);
+  const att = rs.filter(r => r.month === m).reduce((s, r) => s + r.amount, 0);
+  const enc = rs.filter(r => r.paidAt && r.paidAt.slice(0, 7) === m).reduce((s, r) => s + r.amount, 0);
+  const imp = rs.filter(r => !r.paidAt && rentState(r)[1] === 'bad').reduce((s, r) => s + r.amount, 0);
+  const dep = bExp(u, p).filter(x => x.date.slice(0, 7) === m).reduce((s, x) => s + x.amount, 0);
+  const o = p.clientOwnerId && DB.findItem(DB.K.owners, p.clientOwnerId);
+  const todo = [];
+  if (imp) todo.push([`Loyer en retard`, money(imp), '#/manage/rents', 'money', 'orange']);
+  const mnt = bTick(u, p).filter(t => tkSt(t) !== 'terminée');
+  if (mnt.length) todo.push([`${mnt.length} intervention${mnt.length > 1 ? 's' : ''} en cours`, mnt[0].title, '#/manage/tickets', 'settings', '']);
+  return `<div class="bgrid">
+    <div class="stack" style="gap:18px;min-width:0">
+      ${photoHtml(p, {style:'aspect-ratio:16/10;border-radius:var(--r-card)'})}
+      <div class="card"><h3 style="margin-top:0">Informations principales</h3>
+        <div class="binfo">
+          <div><div class="k">Type</div><div class="v">${esc(p.type || '—')}</div></div>
+          <div><div class="k">Surface</div><div class="v">${p.surface ? p.surface + ' m²' : '—'}</div></div>
+          <div><div class="k">Pièces</div><div class="v">${p.rooms || '—'}</div></div>
+          <div><div class="k">Région</div><div class="v">${esc(p.region || '—')}</div></div>
+          <div><div class="k">Ville</div><div class="v">${esc(p.city || '—')}</div></div>
+          <div><div class="k">Quartier</div><div class="v">${esc(p.quartier || '—')}</div></div>
+        </div>
+        ${p.description ? `<div style="height:1px;background:var(--line);margin:16px 0"></div><div class="k small muted" style="margin-bottom:4px">Description</div><p class="small" style="margin:0;line-height:1.6">${esc(p.description)}</p>` : ''}
+      </div>
+      ${o ? `<div class="card"><div class="row-between" style="margin-bottom:10px"><h3 style="margin:0">Propriétaire</h3><a class="small" href="#/manage/owners">Voir la fiche</a></div>
+        <div class="row" style="gap:12px"><span class="itile sm">${icon('user', 17)}</span><div><b>${esc(o.name)}</b><div class="small muted">Commission ${commissionRate(u, o)} %</div></div></div></div>` : ''}
+    </div>
+    <div class="stack" style="gap:14px;min-width:0">
+      <div class="card"><div class="small muted">Revenu mensuel</div><div style="font-size:1.55rem;font-weight:700;letter-spacing:-.02em">${money(loyer)}</div>
+        <div style="height:8px;border-radius:6px;background:var(--surface-3);margin-top:12px"><div style="height:8px;width:${pc}%;border-radius:6px;background:var(--brand)"></div></div>
+        <div class="small muted" style="margin-top:6px">${occ} unité${occ > 1 ? 's' : ''} louée${occ > 1 ? 's' : ''} sur ${rows.length} · ${pc} % d'occupation</div></div>
+      <div class="card"><h3 style="margin-top:0;font-size:.95rem">${monthLabel(m)}</h3>
+        <div class="row-between small" style="padding:6px 0"><span class="muted">Loyers attendus</span><b>${money(att)}</b></div>
+        <div class="row-between small" style="padding:6px 0"><span class="muted">Encaissés</span><b style="color:var(--ok)">${money(enc)}</b></div>
+        <div class="row-between small" style="padding:6px 0"><span class="muted">Impayés</span><b style="color:var(--bad)">${money(imp)}</b></div>
+        <div class="row-between small" style="padding:6px 0"><span class="muted">Dépenses</span><b>${money(dep)}</b></div>
+        <div style="height:1px;background:var(--line);margin:8px 0"></div>
+        <div class="row-between"><b>Revenu net</b><b>${money(enc - dep)}</b></div></div>
+      ${todo.length ? `<div class="card"><h3 style="margin-top:0;font-size:.95rem">À traiter sur ce bien</h3>
+        ${todo.map(([t, d, h, ic, tint]) => `<a class="trow" href="${h}"><span class="itile sm ${tint}">${icon(ic, 16)}</span><div class="txt" style="min-width:0"><b>${esc(t)}</b><div class="sub">${esc(d)}</div></div>${icon('arrowRight', 16)}</a>`).join('')}</div>` : ''}
+    </div></div>`;
+}
+route(/^\/bien\/([\w]+)(?:\/(apercu|unites|finances|travaux|docs|suivi))?$/, (pid, tab) => {
+  const u = Auth.current();
+  if (!u || !['owner', 'agency'].includes(u.role)) { toast('Espace réservé aux propriétaires et agences.', 'bad'); go('#/login'); return false; }
+  const p = DB.findItem(DB.K.properties, pid);
+  if (!p || p.ownerId !== u.id) { toast('Ce bien ne vous appartient pas.', 'bad'); go(`#/${u.role}/properties`); return false; }
+  tab = tab || 'apercu';
+  const rows = bUnitRows(u, p);
+  const head = `<div class="row-between" style="gap:16px;flex-wrap:wrap;margin-bottom:18px">
+      <div style="min-width:0"><div class="row" style="gap:10px;flex-wrap:wrap;align-items:center">
+        <h2 style="margin:0">${esc(p.title)}</h2>${badge(STATUS_LABEL[p.status] || p.status, STATUS_TONE[p.status] || '')}</div>
+        <p class="small muted" style="margin:5px 0 0">${esc(p.type)} · ${esc(p.quartier)}, ${esc(p.city)} · ${rows.length} unité${rows.length > 1 ? 's' : ''}</p></div>
+      <div class="row" style="gap:8px;flex-wrap:wrap">
+        <a class="btn ghost sm" href="#/owner/property/${p.id}">Modifier</a>
+        <a class="btn sm" href="#/manage/units">Ajouter une unité</a></div></div>`;
+  const nav = `<div class="btabs">${BTABS.map(([k, lg, sb, ic]) => `<a class="${k === tab ? 'on' : ''}" href="#/bien/${p.id}/${k}">${icon(ic, 17)}<span class="lb">${lg}</span><span class="sb">${sb}</span></a>`).join('')}</div>`;
+  return shellApp(u, backBar(`#/${u.role}/properties`, 'Mes biens', p.title) + head + nav + ficheTab(u, p, tab));
+});
+
+/* ==========================================================================
+   MODULE : reste.js — derniers points du cahier des charges :
+   maintenance en trois états avec catégories (§13), jour d'échéance du bail
+   (§9), statut « archivée » pour une unité (§7), devis soumis à la validation
+   du propriétaire au-delà d'un seuil (§14).
+   ========================================================================== */
+
+/* ---------- §13 : trois états, six catégories ---------- */
+const MCAT = ['Plomberie', 'Électricité', 'Climatisation', 'Peinture', 'Serrurerie', 'Autre'];
+const MOLD = {ouvert:'nouvelle', 'assigné':'en cours', resolu:'terminée', 'résolu':'terminée', 'fermé':'terminée'};
+TKS.splice(0, TKS.length, 'nouvelle', 'en cours', 'terminée');
+Object.assign(TICKET_LABEL, {nouvelle:'Nouvelle', 'en cours':'En cours', 'terminée':'Terminée'});
+Object.assign(TICKET_TONE, {nouvelle:'warn', 'en cours':'info', 'terminée':'ok'});
+tkSt = t => MOLD[t.status] || (TKS.includes(t.status) ? t.status : 'nouvelle');
+EXP.tickets = u => [['Bien', 'Problème', 'Catégorie', 'Priorité', 'Prestataire', 'Coût', 'Statut'],
+  gMine('tickets', u).map(t => [(gProp(t.propertyId) || {}).title, t.title, t.category || 'Autre', t.priority || 'normale', provName(t.providerId), t.cost, tkSt(t)])];
+
+/* ---------- §9 : jour d'échéance du bail ---------- */
+const dueDayOf = l => Math.min(28, Math.max(1, +(l && l.dueDay) || 5));
+rentState = function (r) {
+  if (r.paidAt) return ['Payé', 'ok'];
+  const l = DB.findItem(DB.K.leases, r.leaseId), d = String(dueDayOf(l)).padStart(2, '0');
+  return `${r.month}-${d}` < ymd() ? ['En retard', 'bad'] : ['À venir', 'info'];
+};
+
+/* ---------- §7 : unité archivée ---------- */
+let GSHOW_ARCH = false;
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-action="g8-uarch"],[data-action="g8-arch-toggle"],[data-action="q-ok"],[data-action="q-no"]'), u = Auth.current(); if (!el || !u) return;
+  const id = el.dataset.id, a = el.dataset.action;
+  if (a === 'g8-arch-toggle') { GSHOW_ARCH = !GSHOW_ARCH; render(); return; }
+  if (a === 'g8-uarch') { const x = DB.findItem(DB.K.units, y => y.id === id && y.ownerId === u.id); if (!x || x.status === 'occupée') return;
+    const back = x.status === 'archivee';
+    DB.updateItem(DB.K.units, id, {status: back ? 'libre' : 'archivee'});
+    audit('Unité ' + x.ref, back ? 'réactivée' : 'archivée'); toast(back ? x.ref + ' réactivée.' : x.ref + ' archivée.'); render(); return; }
+  /* ---------- §14 : accord du propriétaire sur un devis ---------- */
+  const d = DB.findItem(DB.K.docs, y => y.id === id && y.ownerId === u.id); if (!d) return;
+  if (a === 'q-no') { DB.updateItem(DB.K.docs, id, {status: 'refusé', ownerDecision: 'refusé', decidedAt: now()}); audit('Devis refusé par le propriétaire', d.ref); render(); return; }
+  const o = DB.findItem(DB.K.owners, (gProp(d.propertyId) || {}).clientOwnerId) || {};
+  promptDialog({title: 'Accord du propriétaire', label: 'Qui a donné son accord ?', value: o.name || '',
+    onConfirm: v => { DB.updateItem(DB.K.docs, id, {status: 'envoyé', ownerDecision: 'approuvé', decidedBy: v, decidedAt: now()});
+      audit('Devis approuvé par le propriétaire', `${d.ref} · ${v}`); toast('Accord enregistré : le devis suit son cours.'); render(); }});
+});
+const seuilOf = u => { const v = (u.docInfo || {}).seuil; return v == null || v === '' ? 100000 : +v; };
+const needsOwnerOk = (u, d) => { if (u.role !== 'agency' || d.type !== 'DEV') return false;
+  const p = gProp(d.propertyId); return !!(p && p.clientOwnerId) && dTot(d) > seuilOf(u); };
+const _mkDoc = mkDoc;
+mkDoc = function (u, type, o) {
+  const d = _mkDoc(u, type, o);
+  if (needsOwnerOk(u, d)) { DB.updateItem(DB.K.docs, d.id, {status: 'à valider', ownerDecision: 'attente'}); toast('Montant au-dessus du seuil : ce devis attend l\'accord du propriétaire.', 'bad'); return DB.findItem(DB.K.docs, d.id); }
+  return d;
+};
+const _dState = dState;
+dState = d => d.status === 'à valider' ? ['Accord du propriétaire attendu', 'warn'] : _dState(d);
+const _gtR = gTab;
+gTab = function (u, tab) {
+  if (tab === 'units') return _gtR(u, tab) + `<div style="margin-top:12px"><button class="btn ghost sm" data-action="g8-arch-toggle">${GSHOW_ARCH ? 'Masquer' : 'Afficher'} les unités archivées</button></div>`;
+  if (tab !== 'docs') return _gtR(u, tab);
+  return _gtR(u, tab).replace(/<button class="btn sm" data-action="g2-ok" data-id="([\w]+)">Accepter<\/button><button class="btn ghost sm" data-action="g2-no" data-id="\1">Refuser<\/button>/g,
+    (m, id) => { const d = DB.findItem(DB.K.docs, id);
+      return d && d.status === 'à valider'
+        ? `<button class="btn sm" data-action="q-ok" data-id="${id}">Accord reçu</button><button class="btn ghost sm" data-action="q-no" data-id="${id}">Refusé</button>` : m; });
+};
+
+/* ==========================================================================
+   MODULE : menus.js — menus conformes au cahier des charges (§3, §18, §23)
+   et documents rattachés à leur objet : justificatif d'une dépense, pièces
+   d'un bail (§24).
+   ========================================================================== */
+
+/* ---------- §3 : propriétaire ---------- */
+MENUS_RAW.owner = [
+  ['#/owner/dashboard', 'Tableau de bord', 'grid'], ['#/owner/properties', 'Mes biens', 'home'],
+  ['#/manage/tenants', 'Locataires', 'users'], ['#/manage/rents', 'Loyers', 'money'],
+  ['#/manage/expenses', 'Dépenses', 'repeat'], ['#/manage/tickets', 'Maintenance', 'settings'],
+  ['#/coffre', 'Documents', 'file'], ['#/manage/reports', 'Rapports', 'chart'],
+  ['#/owner/messages', 'Messages', 'message'], ['#/manage', 'Gestion', 'briefcase'],
+  ['#/owner/profile', 'Paramètres', 'user']];
+
+/* ---------- §18 : agence ---------- */
+MENUS_RAW.agency = [
+  ['#/agency/dashboard', 'Tableau de bord', 'grid'], ['#/manage/owners', 'Propriétaires', 'user'],
+  ['#/manage/mandates', 'Mandats', 'file'], ['#/agency/properties', 'Biens', 'building'],
+  ['#/manage/units', 'Unités', 'layers'], ['#/manage/tenants', 'Locataires', 'users'],
+  ['#/manage/rents', 'Loyers', 'money'], ['#/manage/docs', 'Devis & Factures', 'card'],
+  ['#/manage/expenses', 'Dépenses', 'repeat'], ['#/manage/tickets', 'Maintenance', 'settings'],
+  ['#/manage/transfers', 'Reversements', 'trendUp'], ['#/coffre', 'Documents', 'file'],
+  ['#/manage/reports', 'Rapports', 'chart'], ['#/agency/messages', 'Messages', 'message'],
+  ['#/manage', 'Gestion', 'briefcase'], ['#/agency/settings', 'Paramètres', 'settings']];
+
+/* ---------- §23 : locataire ---------- */
+MENUS_RAW.tenant = [
+  ['#/tenant/home', 'Mon logement', 'home'], ['#/tenant/rents', 'Mon loyer', 'money'],
+  ['#/tenant/payments', 'Mes paiements', 'card'], ['#/tenant/quittances', 'Mes quittances', 'checkCircle'],
+  ['#/tenant/tickets', 'Maintenance', 'settings'], ['#/coffre', 'Documents', 'file'],
+  ['#/tenant/messages', 'Messages', 'message']];
+Object.assign(PILL, {
+  owner:  [['#/owner/dashboard', '#/owner/properties'], ['#/owner/property/new', 'Publier', 'plus'], ['#/manage/rents', '#/owner/messages']],
+  agency: [['#/agency/dashboard', '#/agency/properties'], ['#/owner/property/new', 'Publier', 'plus'], ['#/manage/rents', '#/agency/messages']],
+  tenant: [['#/tenant/home', '#/tenant/rents'], ['#/tenant/tickets', 'Signaler', 'plus'], ['#/tenant/quittances', '#/coffre']]
+});
+DRAWERS.tenant = ['quittances', 'contrats', 'identite', 'assurance', 'autres'];
+
+/* ---------- Espace locataire : paiements et quittances ---------- */
+const tLease = u => DB.findItem(DB.K.leases, u.leaseId);
+route(/^\/tenant\/(payments|quittances)$/, which => {
+  const u = Auth.current();
+  if (!u || u.role !== 'tenant') { toast('Espace réservé aux locataires.', 'bad'); go('#/login'); return false; }
+  const l = tLease(u), rents = DB.filterItems(DB.K.rents, r => r.leaseId === u.leaseId && r.paidAt).sort((a, b) => a.paidAt < b.paidAt ? 1 : -1);
+  if (which === 'payments') {
+    const total = rents.reduce((s, r) => s + r.amount, 0);
+    return shellApp(u, page('Mes paiements', 'Tout ce que vous avez déjà réglé.') +
+      `<div class="kpis" style="margin-bottom:16px">${kpi(rents.length, 'Paiements')}${kpi(money(total), 'Total versé', 'ok')}${kpi(l ? money(l.deposit) : '—', 'Caution versée')}</div>` +
+      (rents.length ? rents.map(r => `<div class="bcard" style="cursor:default"><div class="top"><b>${monthLabel(r.month)}</b>${badge(esc(r.method || 'Encaissé par le bailleur'), 'info')}<span class="amt">${money(r.amount)}</span></div>
+        <div class="sub">Payé le ${dateFr(r.paidAt)}${r.payRef ? ' · réf. ' + esc(r.payRef) : ''}</div></div>`).join('')
+        : '<div class="empty"><b>Aucun paiement</b><p class="small">Vos règlements apparaîtront ici.</p></div>'));
+  }
+  return shellApp(u, page('Mes quittances', 'Une quittance par loyer payé, téléchargeable en PDF.') +
+    (rents.length ? rents.map(r => `<div class="bcard" style="cursor:default"><div class="top"><b>Quittance de ${monthLabel(r.month)}</b><span class="amt">${money(r.amount)}</span></div>
+      <div class="sub">Payé le ${dateFr(r.paidAt)}</div><div style="margin-top:9px">${pdfBtn('QUIT-' + r.id)}</div></div>`).join('')
+      : '<div class="empty"><b>Aucune quittance</b><p class="small">Dès qu\'un loyer est réglé, sa quittance arrive ici.</p></div>'));
+});
+
+/* ---------- §24 : justificatif d'une dépense, pièces d'un bail ---------- */
+async function attachDoc(u, file, name, cat, propertyId, srcRef) {
+  let dataUrl = await readFileAsDataUrl(file), mime = file.type, n = name || file.name;
+  if ((mime || '').startsWith('image/')) { try { const pdf = await imageToPdf(dataUrl, n.replace(/\.[^.]+$/, '')); dataUrl = await b64(pdf); mime = 'application/pdf'; n = n.replace(/\.[^.]+$/, '') + '.pdf'; } catch {} }
+  const rec = DB.addItem(DB.K.documents, {ownerId: u.id, name: n, mime, dataUrl, cat, propertyId: propertyId || '', expiry: '', srcRef: srcRef || ''});
+  return DB.lastWriteOk ? rec : null;
+}
+const _gtM = gTab;
+gTab = function (u, tab) {
+  const h = _gtM(u, tab);
+  if (tab === 'expenses') return h.replace('<button class="btn">Enregistrer la dépense</button>',
+    '<div class="field"><label>Justificatif (facultatif)</label><input class="input" type="file" name="proof" accept=".pdf,image/*"></div><button class="btn">Enregistrer la dépense</button>');
+  if (tab !== 'leases') return h;
+  /* bouton « Joindre » sur chaque bail */
+  return h.replace(/<button class="btn ghost sm" data-action="g-end-lease" data-id="([\w]+)">Mettre fin<\/button>/g,
+    (m, id) => `<button class="btn ghost sm" data-action="l-doc" data-id="${id}">Joindre</button>` + m);
+};
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-action="l-doc"]'), u = Auth.current(); if (!el || !u) return;
+  const l = DB.findItem(DB.K.leases, x => x.id === el.dataset.id && x.ownerId === u.id); if (!l) return;
+  const joint = DB.filterItems(DB.K.documents, d => d.ownerId === u.id && d.srcRef === 'BAIL-' + l.id);
+  modal('Pièces du bail · ' + l.tenant, `<form data-action="l-doc-save" data-id="${l.id}">
+    <div class="field"><label>Document</label><select class="input" name="kind"><option>Bail signé</option><option>État des lieux d'entrée</option><option>État des lieux de sortie</option><option>Attestation d'assurance</option><option>Autre pièce</option></select></div>
+    <div class="field"><label>Fichier (PDF ou image, 4 Mo max)</label><input class="input" type="file" name="file" accept=".pdf,image/*" required></div>
+    <button class="btn block">Joindre au bail</button></form>
+    ${joint.length ? `<p class="small muted" style="margin:14px 0 6px">Déjà joint à ce bail</p>` + joint.map(d => `<div class="bcard" style="cursor:default"><div class="top"><b>${esc(d.name)}</b><span class="amt small muted">${dateFr(d.createdAt)}</span></div></div>`).join('') : ''}`);
+});
+document.addEventListener('submit', async e => {
+  const f = e.target.closest('[data-action="l-doc-save"]'), u = Auth.current(); if (!f || !u) return;
+  e.preventDefault(); const l = DB.findItem(DB.K.leases, x => x.id === f.dataset.id && x.ownerId === u.id);
+  const file = f.querySelector('[type=file]').files[0], d = formData(f); if (!l || !file) return;
+  try {
+    const rec = await attachDoc(u, file, `${d.kind} · ${l.tenant}`, 'contrats', l.propertyId, 'BAIL-' + l.id);
+    if (!rec) return; audit('Pièce jointe au bail', `${d.kind} · ${l.tenant}`); closeModal(); toast('Pièce jointe au bail et rangée dans « Contrats ».'); render();
+  } catch { toast('Fichier trop volumineux (4 Mo max) ou illisible.', 'bad'); }
+});
+/* justificatif au moment d'enregistrer une dépense */
+document.addEventListener('submit', e => {
+  const f = e.target.closest('[data-action="g2-expense"]'), u = Auth.current(); if (!f || !u) return;
+  const input = f.querySelector('[name=proof]'), file = input && input.files[0]; if (!file) return;
+  setTimeout(async () => {
+    const x = gMine('expenses', u).slice(-1)[0]; if (!x) return;
+    try { const rec = await attachDoc(u, file, `Justificatif ${x.ref}`, 'autres', x.propertyId, 'DEP-' + x.id);
+      if (rec) { DB.updateItem(DB.K.expenses, x.id, {proofId: rec.id}); toast('Justificatif rangé avec la dépense.'); render(); } } catch {}
+  }, 60);
+});
+
+/* ==========================================================================
+   VUE : connexion — écran en deux panneaux (photo et promesse à gauche,
+   formulaire à droite), d'après la maquette fournie.
+   ========================================================================== */
+document.head.insertAdjacentHTML('beforeend', '<style>'
+  + '.auth{display:grid;grid-template-columns:1fr 1fr;min-height:100vh;background:var(--surface-2)}'
+  + '.auth-side{position:relative;overflow:hidden;background:var(--nav);color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:42px 46px}'
+  + '.auth-side img.bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}'
+  + '.auth-side::after{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(105deg,rgba(0,25,47,.95) 0%,rgba(0,25,47,.82) 42%,rgba(0,25,47,.52) 100%),linear-gradient(0deg,rgba(0,25,47,.7),transparent 45%)}'
+  + '.auth-side > *{position:relative;z-index:2}'
+  + '.auth-side .logo{color:#fff;font-size:1.5rem;font-weight:700}.auth-side .logo .mark{width:34px;height:34px}'
+  + '.auth-side h1{color:#fff;font-size:clamp(1.8rem,2.6vw,2.4rem);font-weight:700;letter-spacing:-.03em;line-height:1.18;margin:0 0 14px;max-width:15ch;text-shadow:0 2px 18px rgba(0,16,32,.55)}'
+  + '.auth-side h1 span{color:var(--gold);display:block}'
+  + '.auth-side p{color:#D2DEEA;font-size:1rem;line-height:1.6;max-width:34ch;margin:0 0 26px;text-shadow:0 1px 10px rgba(0,16,32,.5)}'
+  + '.auth-feat{display:flex;align-items:center;gap:22px;flex-wrap:wrap;color:#E6EDF4;font-size:.9rem;font-weight:500}'
+  + '.auth-feat span{display:flex;align-items:center;gap:9px}.auth-feat svg{color:var(--gold)}'
+  + '.auth-main{display:flex;flex-direction:column;padding:26px 32px 40px;overflow-y:auto}'
+  + '.auth-top{display:flex;justify-content:flex-end}'
+  + '.auth-box{width:100%;max-width:430px;margin:auto;padding:14px 0}'
+  + '.auth-box .logo{justify-content:center;margin-bottom:18px;font-size:1.55rem}'
+  + '.auth-badge{display:flex;width:max-content;margin:0 auto 18px;align-items:center;gap:8px;padding:7px 14px;border-radius:99px;background:var(--brand-soft);color:var(--brand);font-size:.76rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase}'
+  + '.auth-box h2{text-align:center;margin:0 0 6px;font-size:1.75rem}'
+  + '.auth-box .lede{text-align:center;color:var(--muted);margin:0 0 24px}'
+  + '.auth-box .field{margin-bottom:16px}'
+  + '.ifield{position:relative}.ifield .ifx{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none;display:flex;align-items:center}'
+  + '.ifield .input{padding-left:48px;padding-right:46px;min-height:52px;border-radius:14px}'
+  + '.ifield .pw-toggle{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:0;color:var(--muted);cursor:pointer;padding:8px;border-radius:9px}'
+  + '.ifield .pw-toggle:hover{color:var(--brand)}'
+  + '.auth-forgot{display:inline-flex;align-items:center;gap:6px;float:right;margin:-2px 0 22px;padding:7px 12px;border-radius:99px;'
+  + 'background:var(--surface);border:1px solid var(--line);color:var(--brand);font-size:.8rem;font-weight:600;text-decoration:none;transition:background .18s,border-color .18s,transform .14s}'
+  + '.auth-forgot:hover{background:var(--brand-soft);border-color:var(--brand)}'
+  + '.auth-forgot:active{transform:scale(.97)}'
+  + '.auth-forgot svg{opacity:.8}'
+  + '.auth-box form::after{content:"";display:block;clear:both}'
+  + '.auth-box .btn.block{min-height:54px;border-radius:14px;font-size:.98rem;gap:10px}'
+  + '.auth-or{display:flex;align-items:center;gap:14px;margin:22px 0;color:var(--muted);font-size:.82rem}'
+  + '.auth-or::before,.auth-or::after{content:"";flex:1;height:1px;background:var(--line)}'
+  + '.auth-demo{margin-top:26px;border:1px solid var(--line);border-radius:var(--r-card);background:var(--surface);padding:16px}'
+  + '.auth-demo .row-between{padding:7px 0;gap:10px}'
+  + '@media (max-width:980px){.auth{grid-template-columns:1fr}.auth-side{display:none}.auth-main{min-height:100vh;padding:18px 16px 32px}}'
+  + '</style>');
+
+const DEMO_ACCOUNTS = [['Client', '1900000000002', 'demo123'], ['Propriétaire', '1900000000003', 'demo123'],
+  ['Agence', '1900000000004', 'demo123'], ['Locataire', '1900000000013', 'demo123'], ['Administrateur', '1900000000001', 'admin123']];
+
+routes.find(r => r.re.source === '^\\/login$').fn = () => `<div class="auth">
+  <aside class="auth-side">
+    <img class="bg" src="${PHOTOS.cover}" alt="" loading="eager">
+    <a class="logo" href="#/"><img src="${LOGO_LIGHT}" alt="DEUKSIL" class="mark"><span>EUKSIL</span></a>
+    <div>
+      <h1>Votre immobilier,<span>simplement maîtrisé.</span></h1>
+      <p>Recherchez, gérez et développez vos biens depuis un espace unique.</p>
+      <div class="auth-feat">
+        <span>${icon('home', 19)} Biens</span>
+        <span>${icon('users', 19)} Clients</span>
+        <span>${icon('checkCircle', 19)} Gestion simplifiée</span>
+      </div>
+    </div>
+    <p class="small" style="margin:0;color:#8FA6BC">DEUKSIL © ${new Date().getFullYear()} · Sénégal</p>
+  </aside>
+
+  <main class="auth-main">
+    <div class="auth-top"><a class="small muted" href="#/" style="display:flex;align-items:center;gap:7px;text-decoration:none">${icon('arrowLeft', 16)} Retour à l'accueil</a></div>
+    <div class="auth-box">
+      <a class="logo" href="#/"><img src="${LOGO_DARK}" alt="DEUKSIL" class="mark"><span>EUKSIL</span></a>
+      <span class="auth-badge">${icon('lock', 14)} Espace sécurisé</span>
+      <h2>Bienvenue sur DEUKSIL</h2>
+      <p class="lede">Connectez-vous à votre espace immobilier.</p>
+
+      <button type="button" class="g-btn" data-action="g-choose">${gLogo(19)} Continuer avec Google</button>
+      <div class="auth-or">ou avec votre adresse Gmail</div>
+
+      <form data-action="login">
+        <div class="field"><label for="au-cni">Adresse Gmail</label>
+          <div class="ifield"><span class="ifx">${icon('user', 18)}</span>
+            <input class="input" id="au-cni" name="cni" type="email" placeholder="prenom.nom@gmail.com" required autocomplete="username"></div></div>
+        <div class="field" style="margin-bottom:6px"><label for="au-pwd">Mot de passe</label>
+          <div class="ifield"><span class="ifx">${icon('lock', 18)}</span>
+            <input class="input" id="au-pwd" name="password" type="password" placeholder="Votre mot de passe" required autocomplete="current-password">
+            <button type="button" class="pw-toggle" data-action="toggle-pw" aria-label="Afficher le mot de passe">${icon('eye', 18)}</button></div></div>
+        <a class="auth-forgot" href="#/login" data-action="forgot-pw">${icon('alert', 14)} Mot de passe oublié ?</a>
+        <div id="login-err"></div>
+        <button class="btn block">Se connecter ${icon('arrowRight', 17)}</button>
+      </form>
+
+      <p class="small muted" style="text-align:center;margin:18px 0 0">Vous n'avez pas encore de compte ? <a href="#/register"><b>Créer un compte</b></a></p>
+
+
+      <div class="auth-demo">
+        <b class="small">Comptes de démonstration</b>
+        <div style="margin-top:8px">
+          ${DEMO_ACCOUNTS.map(([r, c, p]) => { const u = DB.findItem(DB.K.users, x => x.cni === c) || {};
+            return `<div class="row-between small"><span style="min-width:0"><b>${r}</b><br><span class="muted">${esc(u.email || c)} · ${p}</span></span>
+            <button class="btn ghost sm" data-action="fill-login" data-cni="${esc(u.email || c)}" data-pwd="${p}">Utiliser</button></div>`; }).join('')}
+        </div>
+        <p class="small muted" style="margin:10px 0 0">Démonstration : les mots de passe sont stockés en clair dans le navigateur.</p>
+      </div>
+    </div>
+  </main>
+</div>`;
+
+document.addEventListener('click', e => {
+  const f = e.target.closest('[data-action="forgot-pw"]');
+  if (f) { e.preventDefault(); modal('Mot de passe oublié', `<p class="small">Dans cette démonstration, la réinitialisation n'est pas branchée : il n'y a ni serveur ni envoi de SMS.</p>
+    <p class="small muted">Utilisez un compte de démonstration, ou créez-en un nouveau avec une CNI fictive.</p>
+    <div class="row" style="gap:8px;margin-top:12px"><button class="btn" data-action="close-modal">J'ai compris</button><a class="btn ghost" href="#/register" data-action="close-modal">Créer un compte</a></div>`); }
+});
+
+/* ==========================================================================
+   MODULE : google.js — connexion par compte Google (simulation).
+   Aucun échange réel avec Google : pas de serveur, pas d'OAuth. Le sélecteur
+   reproduit le comportement attendu pour la démonstration, et le dit.
+   ========================================================================== */
+const gmailOf = u => u.email || `${(u.firstName || 'user').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')}.${(u.lastName || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\W+/g, '')}@gmail.com`.replace(/\.@/, '@');
+/* chaque compte de démonstration reçoit une adresse Gmail stable */
+function seedEmails() {
+  DB.getData(DB.K.users).filter(u => !u.email).forEach(u => DB.updateItem(DB.K.users, u.id, {email: gmailOf(u)}));
+}
+const _seedG = seedIfNeeded; seedIfNeeded = function (f) { _seedG(f); seedEmails(); };
+setTimeout(seedEmails, 900);
+
+/* le « compte du téléphone » : le dernier utilisé, sinon le client de démonstration */
+const DEVICE_KEY = 'deuksil_device_account';
+const deviceAccount = () => {
+  const id = localStorage.getItem(DEVICE_KEY);
+  return (id && DB.findItem(DB.K.users, id)) || DB.findItem(DB.K.users, u => u.cni === '1900000000002') || DB.getData(DB.K.users)[0];
+};
+const googleAccounts = () => DB.filterItems(DB.K.users, u => !u.parentId).slice(0, 6);
+const ROLE_FR = {client:'Client', owner:'Propriétaire', agency:'Agence', tenant:'Locataire', admin:'Administration', investor:'Investisseur', promoter:'Promoteur', manager:'Gestionnaire', agent:'Agent'};
+const gLogo = (s = 18) => `<svg width="${s}" height="${s}" viewBox="0 0 48 48" aria-hidden="true"><path fill="#4285F4" d="M45.1 24.5c0-1.6-.1-2.7-.4-4H24v7.3h12.1c-.2 1.9-1.6 4.9-4.5 6.9l-.1.3 6.5 5 .5.1c4.1-3.8 6.6-9.4 6.6-15.6"/><path fill="#34A853" d="M24 46c5.9 0 10.9-2 14.5-5.3l-6.9-5.4c-1.8 1.3-4.3 2.2-7.6 2.2-5.8 0-10.7-3.8-12.5-9.1l-.3 0-6.7 5.2-.1.3C7.9 41 15.4 46 24 46"/><path fill="#FBBC05" d="M11.5 28.4c-.5-1.4-.7-2.9-.7-4.4s.3-3 .7-4.4l0-.3-6.8-5.3-.2.1C2.9 17.1 2 20.4 2 24s.9 6.9 2.5 9.9l7-5.5"/><path fill="#EA4335" d="M24 9.5c4.1 0 6.9 1.8 8.5 3.3l6.2-6C34.9 3.4 29.9 1 24 1 15.4 1 7.9 6 4.5 13.2l7 5.4C13.3 13.3 18.2 9.5 24 9.5"/></svg>`;
+const gAvatar = u => `<span class="g-av" style="background:${avatarColor(u.id)}">${esc((u.firstName || '?')[0])}${esc((u.lastName || '')[0] || '')}</span>`;
+
+document.head.insertAdjacentHTML('beforeend', '<style>'
+  + '.g-btn{display:flex;align-items:center;justify-content:center;gap:11px;width:100%;min-height:52px;border-radius:14px;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);font:600 .95rem var(--font);cursor:pointer;transition:background .18s,border-color .18s,transform .12s}'
+  + '.g-btn:hover{background:var(--surface-2);border-color:var(--brand)} .g-btn:active{transform:scale(.985)}'
+  + '.g-one{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:12px 14px;border-radius:16px;border:1px solid var(--line);background:var(--surface);cursor:pointer;font:inherit;color:var(--ink);margin-bottom:12px;transition:border-color .18s,background .18s,transform .12s;box-shadow:var(--sh-2)}'
+  + '.g-one:hover{border-color:var(--brand);background:var(--surface-2)} .g-one:active{transform:scale(.99)}'
+  + '.g-one .txt{min-width:0;flex:1} .g-one b{display:block;font-size:.92rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}'
+  + '.g-one .sub{font-size:.78rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}'
+  + '.g-av{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:.85rem;flex:none}'
+  + '.g-row{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:11px 12px;border:0;border-radius:12px;background:none;cursor:pointer;font:inherit;color:var(--ink);transition:background .16s}'
+  + '.g-row:hover{background:var(--surface-2)}'
+  + '.g-row .txt{min-width:0;flex:1}.g-row b{display:block;font-size:.92rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}'
+  + '.g-row .sub{display:block;font-size:.78rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}'
+  + '.g-row svg{flex:none;color:var(--muted)}'
+  + '.g-head{display:flex;align-items:center;gap:10px;margin-bottom:4px;font-weight:600}'
+  + '.g-note{font-size:.76rem;color:var(--muted);line-height:1.5;margin:12px 0 0}'
+  + '</style>');
+
+/* Sélecteur de compte, à la manière d'un téléphone Android */
+function googleChooser() {
+  const list = googleAccounts();
+  modal('Choisir un compte', `
+    <div class="g-head">${gLogo(20)} <span>Se connecter avec Google</span></div>
+    <p class="small muted" style="margin:0 0 12px">Comptes présents sur cet appareil</p>
+    ${list.map(u => `<button class="g-row" data-action="g-pick" data-id="${u.id}">${gAvatar(u)}
+      <span class="txt"><b>${esc(u.firstName)} ${esc(u.lastName || u.agencyName || '')}</b><span class="sub">${esc(u.email || gmailOf(u))} · ${ROLE_FR[u.role] || u.role}</span></span>
+      ${icon('arrowRight', 16)}</button>`).join('')}
+    <div style="height:1px;background:var(--line);margin:10px 0"></div>
+    <button class="g-row" data-action="g-other">${icon('plus', 18)}<span class="txt"><b>Utiliser un autre compte</b><span class="sub">Créer un compte DEUKSIL</span></span></button>
+    <p class="g-note">Démonstration : aucun échange n'a lieu avec Google. Cette liste reprend les comptes de test enregistrés dans ce navigateur.</p>`);
+}
+document.addEventListener('click', e => {
+  const pick = e.target.closest('[data-action="g-pick"]');
+  if (pick) {
+    const u = DB.findItem(DB.K.users, pick.dataset.id); if (!u) return;
+    if (u.status === 'suspendu') { toast('Ce compte est suspendu.', 'bad'); return; }
+    localStorage.setItem(DEVICE_KEY, u.id);
+    localStorage.setItem(DB.K.session, JSON.stringify({id: u.id, at: now()}));
+    closeModal(); toast(`Connecté en tant que ${u.firstName}.`); go(Auth.home(Auth.current() || u)); render();
+    return;
+  }
+  if (e.target.closest('[data-action="g-other"]')) { closeModal(); go('#/register'); return; }
+  if (e.target.closest('[data-action="g-choose"]')) googleChooser();
+});
 
 /* ==========================================================================
    Démarrage

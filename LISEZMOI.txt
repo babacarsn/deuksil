@@ -14,7 +14,7 @@ fichiers partagé, ou ouvrez la version publiée en ligne.
 -----------------------------------------------------------------
 COMPTES DE TEST  (mot de passe : demo123, sauf l'administrateur)
 -----------------------------------------------------------------
-  Administrateur   1900000000001   (mot de passe : admin123)
+  Administrateur   awa.diallo@gmail.com      (admin123)
   Client           1900000000002
   Propriétaire     1900000000003
   Agence           1900000000004
@@ -52,9 +52,10 @@ CE QUE CONTIENT LA DÉMONSTRATION
   - DEUKSIL est gratuit : aucun frais d'inscription, aucun
     abonnement, aucune commission. Les comptes sont actifs dès
     leur création.
-  - Les paiements de loyer entre locataire et propriétaire
-    (Wave, Orange Money, Free Money) sont simulés : aucun débit
-    réel. L'intégration PayDunya reste à brancher.
+  - Aucun paiement ne transite par l'application. Le loyer se
+    règle hors plateforme (espèces, Wave, Orange Money, virement) ;
+    le bailleur enregistre ensuite le paiement dans DEUKSIL, avec
+    son mode et sa référence, ce qui génère la quittance.
   - La génération des PDF nécessite une connexion Internet.
   - Les contrats produits sont des modèles indicatifs, à faire
     valider par un juriste avant tout usage réel.
