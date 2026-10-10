@@ -83,7 +83,7 @@ retoucheGestion(['expenses', 'leases', 'rents', 'contracts', 'providers', 'tenan
 function tkAdvance(u, t, cost) {
   const s = tkSt(t), next = TKS[TKS.indexOf(s) + 1]; if (!next) return; const patch = {status: next};
   if (next === 'terminée') { if (cost !== null && cost >= 0) patch.cost = cost; const c = patch.cost ?? t.cost;
-    if (c > 0 && !t.expenseId) { const x = DB.addItem(DB.K.expenses, {ownerId: u.id, ref: nref('DEP', 'expenses'), propertyId: t.propertyId, supplier: provName(t.providerId) || 'Prestataire', cat: 'maintenance', amount: c, method: 'Espèces', date: now().slice(0, 10), ticketId: t.id}); patch.expenseId = x.id; } }
+    if (c > 0 && !t.expenseId) { const x = DB.addItem(DB.K.expenses, {ownerId: u.id, ref: nref('DEP', 'expenses'), propertyId: t.propertyId, supplier: provName(t.providerId) || (t.enRegie ? 'Réalisé par le propriétaire' : 'Prestataire'), cat: 'maintenance', amount: c, method: 'Espèces', date: now().slice(0, 10), ticketId: t.id}); patch.expenseId = x.id; } }
   DB.updateItem(DB.K.tickets, t.id, patch); audit('Maintenance ' + t.ref, TICKET_LABEL[next]); if (t.tenantId) notify(t.tenantId, `Votre demande ${t.ref} est maintenant : ${TICKET_LABEL[next]}.`, '#/tenant/tickets'); render();
 }
 document.addEventListener('click', async e => {
@@ -101,8 +101,11 @@ document.addEventListener('click', async e => {
       <p class="small"><b>Loyers :</b> ${rs.filter(r => r.paidAt).length} payés / ${rs.length} · ${late.length ? badge(late.length + ' en retard (' + money(late.reduce((s, r) => s + r.amount, 0)) + ')', 'bad') : badge('À jour', 'ok')}</p>
       <p class="small"><b>Maintenance :</b> ${tk.length} demande(s)</p></div><div class="row" style="gap:8px;margin-top:12px"><a class="btn" href="${telHref(l.phone)}">Appeler</a><a class="btn ghost" target="_blank" rel="noopener" href="https://wa.me/${wa.length === 9 ? '221' + wa : wa}">WhatsApp</a></div>`); }
   if (a === 'g8-tnext' && mine('tickets')) { const t = mine('tickets'), s = tkSt(t);
-    if (s === 'nouvelle' && !t.providerId) { const provs = gMine('providers', u); if (!provs.length) { toast('Ajoutez d\'abord un prestataire (onglet Prestataires).', 'bad'); return; }
-      modal('Assigner un prestataire', `<form data-action="g8-assign" data-id="${id}"><div class="field"><label>Prestataire</label><select class="input" name="providerId">${provs.map(p => `<option value="${p.id}">${esc(p.name)} (${esc(p.job)})</option>`).join('')}</select></div><button class="btn block">Assigner</button></form>`); return; }
+    if (s === 'nouvelle' && !t.providerId && !t.enRegie) { const provs = gMine('providers', u);
+      /* sans prestataire enregistré, l'intervention restait bloquée à « Nouvelle » :
+         le propriétaire peut aussi s'en charger lui-même */
+      modal('Qui intervient ?', `<form data-action="g8-assign" data-id="${id}"><div class="field"><label>Prestataire</label><select class="input" name="providerId">${provs.map(p => `<option value="${p.id}">${esc(p.name)} (${esc(p.job)})</option>`).join('')}<option value="moi">Je m'en occupe moi-même</option></select>
+        ${provs.length ? '' : `<div class="small muted" style="margin-top:6px">Aucun prestataire enregistré. <a href="#/manage/providers" data-action="nav-close-modal">Ajouter un prestataire</a></div>`}</div><button class="btn block">Passer à « En cours »</button></form>`); return; }
     if (TKS[TKS.indexOf(s) + 1] === 'terminée') promptDialog({title: 'Clôturer ' + t.ref, label: 'Coût final (FCFA)', value: String(t.cost || 0), onConfirm: v => tkAdvance(u, t, Math.max(0, +v || 0))}); else tkAdvance(u, t, null); }
   if (a === 'g8-tphoto' && mine('tickets')) modal(mine('tickets').ref, `<img src="${mine('tickets').photo}" alt="" style="max-width:100%;border-radius:8px">`);
   if (a === 'g8-tdel' && mine('tickets')) confirmDialog({title: 'Supprimer l\'intervention', message: mine('tickets').ref + ' sera supprimée (la dépense liée est conservée).', confirmLabel: 'Supprimer', danger: true, onConfirm: () => { DB.deleteItem(DB.K.tickets, id); render(); }});
@@ -131,6 +134,7 @@ document.addEventListener('submit', async e => {
     for (let i = 0; i < n; i++) { const m = new Date(s.getFullYear(), s.getMonth() + i, 1); DB.addItem(DB.K.rents, {ownerId: u.id, leaseId: l.id, month: `${m.getFullYear()}-${String(m.getMonth() + 1).padStart(2, '0')}`, amount: rent, paidAt: null}); }
     DB.updateItem(DB.K.units, x.id, {status: 'occupée', leaseId: l.id}); audit('Bail unité ' + x.ref, d.tenant); closeModal();
     toast(`${x.ref} louée : ${n} loyers planifiés.${listable(gProp(x.propertyId)) ? '' : ' Toutes les unités sont prises : le bien quitte la recherche.'}`); render(); }
+  if (a === 'g8-assign' && d.providerId === 'moi') { const t = DB.findItem(DB.K.tickets, y => y.id === f.dataset.id && y.ownerId === u.id); if (!t) return; DB.updateItem(DB.K.tickets, t.id, {enRegie: true}); closeModal(); tkAdvance(u, {...t, enRegie: true}, null); return; }
   if (a === 'g8-assign') { const t = DB.findItem(DB.K.tickets, y => y.id === f.dataset.id && y.ownerId === u.id); if (!t || !DB.findItem(DB.K.providers, y => y.id === d.providerId && y.ownerId === u.id)) return; DB.updateItem(DB.K.tickets, t.id, {providerId: d.providerId}); closeModal(); tkAdvance(u, {...t, providerId: d.providerId}, null); }
   if (a === 'g8-ticket') { let photo = ''; const file = f.querySelector('[type=file]').files[0]; if (file) { try { photo = await readImageAsDataUrl(file); } catch { toast('Photo illisible.', 'bad'); return; } }
     const pid = DB.findItem(DB.K.providers, y => y.id === d.providerId && y.ownerId === u.id) ? d.providerId : '', t = DB.addItem(DB.K.tickets, {ownerId: u.id, propertyId: d.propertyId, title: d.title.trim(), category: MCAT.includes(d.category) ? d.category : 'Autre', priority: d.priority, providerId: pid, cost: +d.cost || 0, photo, status: pid ? 'en cours' : 'nouvelle', ref: nref('MNT', 'tickets')});
@@ -162,7 +166,10 @@ function enhanceTable(t) {
   const tb = t.tBodies[0]; if (!tb || !t.tHead || !t.tHead.rows[0] || t.dataset.enh) return; t.dataset.enh = '1'; let page = 0, dir = 1, col = -1; const per = 10, wrap = t.closest('.table-wrap') || t.parentElement, bar = document.createElement('div'); bar.className = 'small muted'; bar.style.cssText = 'display:flex;gap:10px;align-items:center;justify-content:flex-end;padding:8px 2px'; wrap.after(bar);
   const rows = () => [...tb.rows], refresh = () => {
     const vis = rows().filter(r => r.dataset.f !== '1'), pages = Math.max(1, Math.ceil(vis.length / per)); page = Math.min(page, pages - 1); rows().forEach(r => r.style.display = 'none'); vis.slice(page * per, page * per + per).forEach(r => r.style.display = '');
-    bar.innerHTML = vis.length > per ? `<span>${vis.length} lignes · page ${page + 1}/${pages}</span><button class="btn ghost sm" ${page ? '' : 'disabled'} data-pg="-1">Précédent</button><button class="btn ghost sm" ${page < pages - 1 ? '' : 'disabled'} data-pg="1">Suivant</button>` : '';
+    /* n'écrire que si le contenu change : sinon les observateurs de la page
+       relancent la pagination, qui réécrit la barre, qui les relance… */
+    const html = vis.length > per ? `<span>${vis.length} lignes · page ${page + 1}/${pages}</span><button class="btn ghost sm" ${page ? '' : 'disabled'} data-pg="-1">Précédent</button><button class="btn ghost sm" ${page < pages - 1 ? '' : 'disabled'} data-pg="1">Suivant</button>` : '';
+    if (bar.dataset.k !== html) { bar.dataset.k = html; bar.innerHTML = html; }
   };
   bar.addEventListener('click', e => { const b = e.target.closest('[data-pg]'); if (b) { page += +b.dataset.pg; refresh(); } });
   [...t.tHead.rows[0].cells].forEach((th, i) => { if (!th.textContent.trim()) return; th.style.cursor = 'pointer'; th.title = 'Trier'; th.addEventListener('click', () => { dir = col === i ? -dir : 1; col = i;

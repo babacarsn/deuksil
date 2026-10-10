@@ -242,7 +242,7 @@ function adapterCoffre() {
     const n = +((a.querySelector('.dn') || {}).textContent || 0);
     if (!n) { a.remove(); return; }
     const d = a.querySelector('.desk');
-    if (d && MOTS_RECUS[cat]) d.textContent = MOTS_RECUS[cat];
+    if (d && MOTS_RECUS[cat] && d.textContent !== MOTS_RECUS[cat]) d.textContent = MOTS_RECUS[cat];
   });
 }
 

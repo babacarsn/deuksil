@@ -338,6 +338,7 @@ document.addEventListener('change', e => {
   if (el.dataset.action === 'region-change') {
     const form = el.closest('form'), city = form.querySelector('[name="city"]');
     city.innerHTML = Object.keys(LOCATIONS[el.value] || {}).map(c => `<option>${c}</option>`).join('');
+    lieuSuitVille(form);
   }
   if (el.dataset.action === 'search-region-change') { searchState.region = el.value; searchState.city = ''; searchState.quartier = ''; searchState.page = 1; render(); }
   if (el.dataset.action === 'search-city-change') { searchState.city = el.value; searchState.quartier = ''; searchState.page = 1; render(); }
@@ -480,4 +481,45 @@ document.addEventListener('submit', e => {
     DB.updateItem(DB.K.users, u.id, {notifPrefs: {email: !!d.email, sms: !!d.sms, newRequest: !!d.newRequest, newMessage: !!d.newMessage}});
     toast('Préférences de notification enregistrées.'); render();
   }
+});
+
+/* Formulaire d'annonce : la commune et le quartier suivent la ville.
+   En changeant de région, la commune restait « Dakar » et le quartier
+   « Almadies » : une villa de Saly s'enregistrait « Saly, Dakar, Mbour ».
+   La commune reprend la ville tant que le propriétaire ne l'a pas saisie
+   lui-même ; le quartier est vidé s'il n'appartient pas à la nouvelle ville,
+   et la liste des quartiers connus est proposée pendant la saisie. */
+function lieuSuitVille(form) {
+  if (!form) return;
+  const region = form.querySelector('[name="region"]'), city = form.querySelector('[name="city"]');
+  const com = form.querySelector('[name="commune"]'), q = form.querySelector('[name="quartier"]');
+  if (!region || !city) return;
+  const quartiers = (LOCATIONS[region.value] || {})[city.value] || [];
+  if (com && com.dataset.saisie !== '1') com.value = city.value;
+  if (q && q.tagName === 'INPUT') {
+    let dl = document.getElementById('dl-quartiers');
+    if (!dl) { dl = document.createElement('datalist'); dl.id = 'dl-quartiers'; document.body.appendChild(dl); }
+    dl.innerHTML = quartiers.map(x => `<option value="${esc(x)}">`).join('');
+    q.setAttribute('list', 'dl-quartiers');
+    if (q.value && quartiers.length && !quartiers.includes(q.value) && q.dataset.saisie !== '1') q.value = '';
+  }
+}
+document.addEventListener('change', e => {
+  const f = e.target.closest && e.target.closest('form[data-action="save-property"]');
+  if (f && e.target.name === 'city') lieuSuitVille(f);
+});
+document.addEventListener('input', e => {
+  const f = e.target.closest && e.target.closest('form[data-action="save-property"]');
+  if (f && ['commune', 'quartier'].includes(e.target.name)) e.target.dataset.saisie = '1';
+});
+/* suggestions de quartiers dès qu'on entre dans le champ, sans rien effacer */
+document.addEventListener('focusin', e => {
+  const f = e.target.closest && e.target.closest('form[data-action="save-property"]');
+  if (!f || e.target.name !== 'quartier') return;
+  const region = f.querySelector('[name="region"]'), city = f.querySelector('[name="city"]');
+  const quartiers = region && city ? ((LOCATIONS[region.value] || {})[city.value] || []) : [];
+  let dl = document.getElementById('dl-quartiers');
+  if (!dl) { dl = document.createElement('datalist'); dl.id = 'dl-quartiers'; document.body.appendChild(dl); }
+  dl.innerHTML = quartiers.map(x => `<option value="${esc(x)}">`).join('');
+  e.target.setAttribute('list', 'dl-quartiers');
 });

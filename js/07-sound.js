@@ -94,7 +94,10 @@ function closeModal() {
   if (modalLastFocus && document.contains(modalLastFocus)) modalLastFocus.focus();
   modalLastFocus = null;
 }
-function go(route) { if (location.hash !== route) { location.hash = route; render(); } else render(); }
+/* Un seul affichage par navigation : changer l'adresse suffit, l'écouteur
+   « hashchange » affiche l'écran. L'ancien double affichage effaçait ce que
+   les modules venaient de pré-remplir (bail depuis une visite, etc.). */
+function go(route) { if (location.hash !== route) location.hash = route; else render(); }
 
 /* Boîtes de dialogue maison (remplacent confirm()/prompt() du navigateur) */
 /* Erreurs de formulaire stylées, cohérentes avec l'inscription */

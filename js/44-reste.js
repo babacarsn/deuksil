@@ -20,7 +20,11 @@ const dueDayOf = l => Math.min(28, Math.max(1, +(l && l.dueDay) || 5));
 rentState = function (r) {
   if (r.paidAt) return ['Payé', 'ok'];
   const l = DB.findItem(DB.K.leases, r.leaseId), d = String(dueDayOf(l)).padStart(2, '0');
-  return `${r.month}-${d}` < ymd() ? ['En retard', 'bad'] : ['À venir', 'info'];
+  /* un bail commencé le 10 n'a pas de loyer dû le 5 du même mois : l'échéance
+     du premier loyer ne peut pas précéder le début du bail */
+  let echeance = `${r.month}-${d}`;
+  if (l && l.start && String(l.start).slice(0, 10) > echeance) echeance = String(l.start).slice(0, 10);
+  return echeance < ymd() ? ['En retard', 'bad'] : ['À venir', 'info'];
 };
 
 /* ---------- §7 : unité archivée ---------- */

@@ -66,7 +66,7 @@ document.addEventListener('click', e => {
     notify(loc.id, `Rappel : le loyer de ${monthLabel(r.month)} (${money(r.amount)}) reste à régler.`, '#/tenant/rents');
     if (bail) DB.addItem(DB.K.tmsgs, {leaseId: bail.id, from: 'owner', read: false,
       text: `Rappel : le loyer de ${monthLabel(r.month)} (${money(r.amount)}) n'a pas encore été réglé.`});
-    toast(`${loc.firstName} a été relancé dans son espace.`);
+    toast(`Relance envoyée à ${loc.firstName} dans son espace.`);
   } else {
     toast('Relance enregistrée. Ce locataire n\'a pas encore de compte.', 'warn');
   }

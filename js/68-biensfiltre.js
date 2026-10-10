@@ -38,7 +38,8 @@ function bfAppliquer() {
   });
   try { if (typeof t.__pg === 'function') t.__pg(); } catch (e) {}
   const c = document.querySelector('.bf-n');
-  if (c) c.textContent = `${n} bien${n > 1 ? 's' : ''}`;
+  const txt = `${n} bien${n > 1 ? 's' : ''}`;
+  if (c && c.textContent !== txt) c.textContent = txt;   // sinon : boucle sans fin avec l'observateur
 }
 
 function bfBarre() {

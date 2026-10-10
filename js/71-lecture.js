@@ -92,7 +92,7 @@ function cochesFil() {
     const ex = d.querySelector('.lu-n');
     if (!n) { if (ex) ex.remove(); d.classList.remove('nonlu'); return; }
     d.classList.add('nonlu');
-    if (ex) { ex.textContent = n; return; }
+    if (ex) { if (ex.textContent !== String(n)) ex.textContent = n; return; }
     const r = d.querySelector('.row');
     if (r) r.insertAdjacentHTML('beforeend', `<span class="lu-n">${n}</span>`);
   });

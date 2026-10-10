@@ -114,7 +114,7 @@ function valeursParDefautBail(f, force) {
   }
   const aide = f.querySelector('[data-rent-aide]');
   const note = `Repris de la fiche du bien (${money(prix)} par mois). Modifiable.`;
-  if (aide) aide.textContent = note;
+  if (aide) { if (aide.textContent !== note) aide.textContent = note; }
   else {
     const n = document.createElement('div');
     n.className = 'small muted';
