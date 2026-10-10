@@ -218,12 +218,8 @@ function startVoiceInput(inputEl, micBtn) {
   } catch (e) { toast('Impossible de démarrer la dictée vocale.', 'bad'); }
 }
 
-function isDarkTheme() {
-  const t = document.documentElement.dataset.theme;
-  if (t === 'dark') return true;
-  if (t === 'light') return false;
-  return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-}
+/* L'application n'a qu'un thème, clair. */
+function isDarkTheme() { return false; }
 function ownerSubscriptionActive(ownerId) {
   const owner = DB.findItem(DB.K.users, ownerId);
   if (!owner || !['owner', 'agency'].includes(owner.role)) return true;

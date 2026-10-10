@@ -61,7 +61,7 @@ function ownerBalance(u, o, month) {
   const ids = myProps(u).filter(p => p.clientOwnerId === o.id).map(p => p.id), lp = id => (DB.findItem(DB.K.leases, id) || {}).propertyId;
   const inM = d => !month || (d || '').slice(0, 7) === month;
   const loyers = gMine('rents', u).filter(r => r.paidAt && inM(r.paidAt) && ids.includes(lp(r.leaseId))).reduce((s, r) => s + r.amount, 0);
-  const autres = gMine('fpay', u).filter(x => inM(x.createdAt) && ids.includes(x.propertyId)).reduce((s, x) => s + x.amount, 0);
+  const autres = horsVentes(gMine('fpay', u)).filter(x => inM(x.createdAt) && ids.includes(x.propertyId)).reduce((s, x) => s + x.amount, 0);
   const dep = gMine('expenses', u).filter(x => inM(x.date) && ids.includes(x.propertyId)).reduce((s, x) => s + x.amount, 0);
   const encaisse = loyers + autres, rate = commissionRate(u, o), com = Math.round(encaisse * rate / 100);
   return {encaisse, dep, rate, com, net: encaisse - dep - com};
@@ -125,12 +125,8 @@ document.addEventListener('submit', e => {
 });
 
 /* ---------- Onglets ---------- */
-const _gt2 = gTab;
-gTab = function (u, tab) {
-  if (tab === 'mandates') return mandatesTab(u);
-  if (tab === 'transfers') return transfersTab(u);
-  return _gt2(u, tab);
-};
+vueGestion(['mandates'], u => mandatesTab(u));
+vueGestion(['transfers'], u => transfersTab(u));
 /* commission : le mandat fait foi */
 const _ownerStats = ownerStats;
 ownerStats = function (u, o, y) { const s = _ownerStats(u, o, y), r = commissionRate(u, o); s.com = Math.round(s.rev * r / 100); s.net = s.rev - s.dep - s.com; return s; };

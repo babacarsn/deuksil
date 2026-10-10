@@ -64,16 +64,13 @@ async function attachDoc(u, file, name, cat, propertyId, srcRef) {
   const rec = DB.addItem(DB.K.documents, {ownerId: u.id, name: n, mime, dataUrl, cat, propertyId: propertyId || '', expiry: '', srcRef: srcRef || ''});
   return DB.lastWriteOk ? rec : null;
 }
-const _gtM = gTab;
-gTab = function (u, tab) {
-  const h = _gtM(u, tab);
+retoucheGestion(['expenses', 'leases'], function (h, u, tab) {
   if (tab === 'expenses') return h.replace('<button class="btn">Enregistrer la dépense</button>',
     '<div class="field"><label>Justificatif (facultatif)</label><input class="input" type="file" name="proof" accept=".pdf,image/*"></div><button class="btn">Enregistrer la dépense</button>');
-  if (tab !== 'leases') return h;
   /* bouton « Joindre » sur chaque bail */
   return h.replace(/<button class="btn ghost sm" data-action="g-end-lease" data-id="([\w]+)">Mettre fin<\/button>/g,
     (m, id) => `<button class="btn ghost sm" data-action="l-doc" data-id="${id}">Joindre</button>` + m);
-};
+});
 document.addEventListener('click', e => {
   const el = e.target.closest('[data-action="l-doc"]'), u = Auth.current(); if (!el || !u) return;
   const l = DB.findItem(DB.K.leases, x => x.id === el.dataset.id && x.ownerId === u.id); if (!l) return;

@@ -59,9 +59,7 @@ routes.forEach(r => {
 /* Gestion : onglet « Équipe & accès » (réservé au titulaire du compte) */
 GTABS.push(['team', 'Équipe & accès']);
 routes.find(r => /manage/.test(r.re.source)).re = /^\/manage\/(leases|rents|tickets|deals|docs|fpay|expenses|finance|audit|contracts|providers|team)$/;
-const _g4 = gTab;
-gTab = function (u, tab) {
-  if (tab !== 'team') return _g4(u, tab);
+vueGestion(['team'], function (u, tab) {
   if (u.member) return '';
   const team = DB.filterItems(DB.K.users, x => x.parentId === u.id), tenants = DB.filterItems(DB.K.users, x => x.ownerRef === u.id && x.role === 'tenant');
   const free = gMine('leases', u).filter(l => l.status === 'actif' && !tenants.some(t => t.leaseId === l.id));
@@ -81,7 +79,7 @@ gTab = function (u, tab) {
     <div class="field"><label>CNI du locataire (13 chiffres)</label><input class="input" name="cni" required pattern="\\d{13}"></div>
     <div class="field"><label>Mot de passe</label><input class="input" type="password" name="password" minlength="6" required></div></div><button class="btn">Créer l'accès locataire</button></form>` +
     gTable(['Locataire', 'CNI', 'Bail', ''], tenants.map(t => `<tr><td class="small"><b>${esc(t.firstName)} ${esc(t.lastName)}</b></td><td class="small">${t.cni}</td><td class="small">${esc((gProp((DB.findItem(DB.K.leases, t.leaseId) || {}).propertyId) || {}).title || '—')}</td><td><button class="btn ghost sm" data-action="g4-del" data-id="${t.id}" aria-label="Supprimer">${icon('trash', 14)}</button></td></tr>`), ['Aucun accès locataire', 'Le locataire pourra suivre ses loyers et signaler un problème.']);
-};
+});
 function g4User(u, d, extra) {
   const err = m => { $('#g4-err') && ($('#g4-err').textContent = m); toast(m, 'bad'); return null; };
   if (!/^\d{13}$/.test(d.cni)) return err('La CNI doit comporter 13 chiffres.');
@@ -150,6 +148,5 @@ function seedV4() {
   DB.addItem(DB.K.users, {...base, cni: '1900000000013', firstName: 'Fatou', lastName: 'Ndiaye', phone: '770000013', role: 'tenant', leaseId: l.id, ownerRef: owner.id});
   DB.updateItem(DB.K.properties, pr.id, {status: 'loue'});
 }
-const _seed = seedIfNeeded;
-seedIfNeeded = function (f) { _seed(f); seedV4(); };
+etapeAmorcage('équipes et locataire de démonstration', seedV4);
 window.__menuRdy = true;

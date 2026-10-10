@@ -4,9 +4,16 @@
    ========================================================================== */
 const PDF_URL = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
 let _pdfLoad = null;
-const loadPdf = () => window.jspdf ? Promise.resolve() : (_pdfLoad = _pdfLoad || new Promise((ok, ko) => {
+const loadJsPdf = () => window.jspdf ? Promise.resolve() : (_pdfLoad = _pdfLoad || new Promise((ok, ko) => {
   const s = document.createElement('script'); s.src = PDF_URL; s.onload = ok; s.onerror = () => { _pdfLoad = null; ko(new Error('pdf')); }; document.head.appendChild(s);
 }));
+/* jsPDF veut le logo en data URL : on lit le fichier une fois, au premier PDF. */
+let LOGO_PDF = null;
+const loadLogoPdf = () => LOGO_PDF ? Promise.resolve() : fetch(LOGO_DARK).then(r => r.blob())
+  .then(b => new Promise(ok => { const f = new FileReader(); f.onload = () => { LOGO_PDF = f.result; ok(); }; f.onerror = () => ok(); f.readAsDataURL(b); }))
+  .catch(() => {});
+const loadPdf = () => Promise.all([loadJsPdf(), loadLogoPdf()]).then(() => {});
+const logoPdf = (doc, x, y, w, h) => { if (LOGO_PDF) try { doc.addImage(LOGO_PDF, 'PNG', x, y, w, h); } catch (e) {} };
 const NAVY = [15, 48, 87], GOLD = [180, 134, 63], INK = [16, 27, 38], MUT = [116, 132, 150], SOFT = [231, 237, 244];
 const T = s => String(s ?? '').replace(/[\u202f\u00a0]/g, ' ').replace(/[\u2018\u2019]/g, "'").replace(/[\u201c\u201d]/g, '"').replace(/→/g, '->').replace(/²/g, '2').replace(/[^\x00-\xff\u2013\u2014]/g, '?');
 const fc = n => String(Math.round(n || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' FCFA';
@@ -27,7 +34,7 @@ const issuerLines = I => [I.name, I.address, I.phone && 'Tél : ' + I.phone, I.e
 
 function pdfBegin(kind, ref, date, title) {
   const doc = new window.jspdf.jsPDF({unit: 'mm', format: 'a4', compress: true}); doc.setProperties({title: title || ref, creator: 'DEUKSIL', author: 'DEUKSIL'});
-  doc.addImage(LOGO_DARK, 'PNG', 15, 10, 13, 13.6);
+  logoPdf(doc, 15, 10, 13, 13.6);
   doc.setFont('helvetica', 'bold').setFontSize(17).setTextColor(...NAVY).text('DEUKSIL', 31, 17.5);
   doc.setFont('helvetica', 'normal').setFontSize(7.5).setTextColor(...MUT).text('Plateforme immobilière du Sénégal', 31, 22);
   doc.setFont('helvetica', 'bold').setFontSize(19).setTextColor(...NAVY).text(T(kind), 195, 18, {align: 'right'});
@@ -175,16 +182,14 @@ function showCreated(kind, key) {
 /* Onglet « Mes informations » : émetteur des documents */
 GTABS.push(['identity', 'Mes informations']);
 routes.find(r => /manage/.test(r.re.source)).re = /^\/manage\/(leases|rents|tickets|deals|docs|fpay|expenses|finance|audit|contracts|providers|team|identity)$/;
-const _g6 = gTab;
-gTab = function (u, tab) {
-  if (tab !== 'identity') return _g6(u, tab);
+vueGestion(['identity'], function (u, tab) {
   if (u.member) return ''; const I = {...issuer(u), seuil: (u.docInfo || {}).seuil}, f = (k, l, ph) => `<div class="field"><label>${l}</label><input class="input" name="${k}" value="${esc(I[k] || '')}" placeholder="${ph || ''}"></div>`;
   return `<form class="card" data-action="g4-identity"><h4 style="margin-top:0">Informations de l'émetteur</h4><p class="small muted">Elles figurent sur tous vos PDF (factures, devis, reçus, quittances, contrats).</p><div class="form-grid">
     ${f('name', 'Nom ou raison sociale')}${f('address', 'Adresse', 'Quartier, ville')}${f('phone', 'Téléphone')}${f('email', 'E-mail')}${f('ninea', 'NINEA')}${f('rccm', 'RCCM')}
     ${u.role === 'agency' ? `<div class="field"><label>Seuil de validation d'un devis (FCFA)</label><input class="input" type="number" min="0" name="seuil" value="${esc(I.seuil == null ? 100000 : I.seuil)}"><div class="small muted" style="margin-top:4px">Au-delà, un devis sur un bien géré attend l'accord du propriétaire.</div></div>` : ''}</div>
     <div class="field"><label>Coordonnées de paiement (RIB, Wave, Orange Money…)</label><textarea name="bank">${esc(I.bank)}</textarea></div>
     <div class="field"><label>Conditions de paiement (facultatif)</label><textarea name="terms">${esc(I.terms)}</textarea></div><button class="btn">Enregistrer</button></form>`;
-};
+});
 document.addEventListener('submit', e => {
   const f = e.target.closest('[data-action="g4-identity"]'), u = Auth.current(); if (!f || !u || u.member) return;
   e.preventDefault(); const d = formData(f), info = {}; ['name', 'address', 'phone', 'email', 'ninea', 'rccm', 'bank', 'terms'].forEach(k => info[k] = String(d[k] || '').trim().slice(0, 400));

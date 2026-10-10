@@ -79,12 +79,10 @@ function brandCard(u) {
 }
 
 /* On ajoute le bloc à la suite du formulaire d'identité existant. */
-const _gBrand = gTab;
-gTab = function (u, tab) {
-  const h = _gBrand(u, tab);
-  if (tab !== 'identity' || typeof h !== 'string' || !h || (u && u.member)) return h;
+retoucheGestion(['identity'], function (h, u) {
+  if (typeof h !== 'string' || !h || (u && u.member)) return h;
   return h + brandCard(u);
-};
+});
 
 /* --- Dépôt, enregistrement, retrait ------------------------------------- */
 let _brandKey = null;
@@ -137,7 +135,7 @@ pdfBegin = function (kind, ref, date, title) {
   const k = Math.min(maxW / rw, maxH / rh);
   const lw = Math.max(4, rw * k), lh = Math.max(4, rh * k);
   try { doc.addImage(b.logo, 'PNG', 15, 10 + (maxH - lh) / 2, lw, lh); }
-  catch (e) { try { doc.addImage(LOGO_DARK, 'PNG', 15, 10, 13, 13.6); } catch (e2) {} }
+  catch (e) { logoPdf(doc, 15, 10, 13, 13.6); }
 
   /* Le titre du document est posé en premier : on en déduit la place
      restante pour le nom de l'émetteur, qui sinon chevauchait le titre. */

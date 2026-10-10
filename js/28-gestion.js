@@ -14,6 +14,24 @@ const backBar = (href, label, current) => `<div class="gback">
 const sBar = (ph = 'Rechercher…') => `<form class="card sbar" data-action="sb-noop"><div class="row" style="gap:10px">
   <input class="input" data-gsearch placeholder="${esc(ph)}" autocomplete="off">
   <button class="btn" type="submit" aria-label="Rechercher">${icon('search', 16)}</button></div></form>`;
+/* ---------- Aiguillage des onglets de Gestion ----------
+   Les modules ne remplacent plus gTab en l'enveloppant : ils déclarent ce
+   qu'ils apportent, et l'ordre devient lisible ici.
+   - vueGestion(onglets, fn)        fn(u, tab) produit l'écran complet de ces
+     onglets. Pour un même onglet, la dernière déclaration l'emporte.
+   - retoucheGestion(onglets, fn)   fn(html, u, tab) complète le HTML produit
+     (bouton, bloc ajouté). Les retouches s'appliquent dans l'ordre de
+     déclaration, après la vue.
+   Un onglet sans vue déclarée est produit par gTabBase (plus bas). */
+const VUES_GESTION = {}, RETOUCHES_GESTION = [];
+function vueGestion(onglets, fn) { onglets.forEach(t => { VUES_GESTION[t] = fn; }); }
+function retoucheGestion(onglets, fn) { RETOUCHES_GESTION.push({onglets, fn}); }
+function gTab(u, tab) {
+  const vue = VUES_GESTION[tab];
+  let h = vue ? vue(u, tab) : gTabBase(u, tab);
+  for (const r of RETOUCHES_GESTION) if (r.onglets.includes(tab)) h = r.fn(h, u, tab);
+  return h;
+}
 const GTABS = [['leases','Locataires & baux'], ['rents','Loyers'], ['tickets','Maintenance'], ['deals','Ventes'], ['finance','Finances']];
 const STAGES = [['prospect','Prospect'], ['visite','Visite'], ['offre','Offre'], ['promesse','Promesse'], ['signe','Vendu']];
 const TICKET_NEXT = {ouvert:'en cours', 'en cours':'resolu', resolu:'ouvert'};
@@ -32,7 +50,7 @@ let gTable = (head, rows, empty) => rows.length
   ? `<div class="table-wrap"><table><thead><tr>${head.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table></div>`
   : `<div class="empty"><b>${empty[0]}</b><p class="small">${empty[1]}</p></div>`;
 
-function gTab(u, tab) {
+function gTabBase(u, tab) {
   const props = myProps(u), locs = props.filter(p => p.transaction === 'location'), sales = props.filter(p => p.transaction !== 'location');
   const leases = gMine('leases', u), rents = gMine('rents', u), tickets = gMine('tickets', u), deals = gMine('deals', u);
   const lease = id => leases.find(l => l.id === id);

@@ -87,16 +87,16 @@ function saveProperty(form, id, intent) {
   try {
     if (id) {
       const before = DB.findItem(DB.K.properties, id);
-      DB.updateItem(DB.K.properties, id, {...payload, listingStatus: intent === 'publish' ? (before.listingStatus === 'publiee' ? 'publiee' : 'attente') : before.listingStatus});
+      DB.updateItem(DB.K.properties, id, {...payload, listingStatus: intent === 'publish' ? 'publiee' : before.listingStatus});
       if (!DB.lastWriteOk) return;
-      toast(intent === 'publish' ? 'Modifications envoyées à la validation.' : 'Brouillon mis à jour.');
+      toast(intent === 'publish' ? 'Annonce mise à jour et en ligne.' : 'Brouillon mis à jour.');
     } else {
       const p = DB.addItem(DB.K.properties, {...payload, ownerId: u.id, status: 'disponible', views: 0, contacts: 0,
-        listingStatus: intent === 'publish' ? 'attente' : 'brouillon'});
+        listingStatus: intent === 'publish' ? 'publiee' : 'brouillon'});
       if (!DB.lastWriteOk) return;
-      if (intent === 'publish') notify('user_admin', `Nouvelle annonce à valider : ${p.title}`, '#/admin/listings');
+      if (intent === 'publish') notify('user_admin', `Nouvelle annonce en ligne : ${p.title}`, '#/admin/listings');
       logActivity(`${displayName(u)} a ${intent === 'publish' ? 'soumis' : 'enregistré'} l'annonce « ${p.title} »`);
-      toast(intent === 'publish' ? 'Annonce soumise : en attente de validation.' : 'Brouillon enregistré.');
+      toast(intent === 'publish' ? 'Annonce publiée.' : 'Brouillon enregistré.');
     }
   } catch (e) {
     toast("Stockage local saturé : réduisez le nombre ou le poids des photos.", 'bad'); return;
@@ -132,12 +132,6 @@ document.addEventListener('click', e => {
   switch (a) {
     case 'close-modal': stop(); closeModal(); break;
     case 'logout': stop(); Auth.logout(); break;
-    case 'theme': {
-      const dark = isDarkTheme();
-      document.documentElement.dataset.theme = dark ? 'light' : 'dark';
-      localStorage.setItem('deuksil_theme_pref', dark ? 'light' : 'dark');
-      render(); break;
-    }
     case 'notifications': stop(); openNotifications(u); break;
     case 'open-ai-chat': stop(); openAiChat(); break;
     case 'ai-voice': stop(); startVoiceInput($('#ai-chat-text'), el); break;
@@ -258,9 +252,9 @@ document.addEventListener('click', e => {
     case 'publish': {
       stop();
       if (!ownsProperty(id, u)) break;
-      DB.updateItem(DB.K.properties, id, {listingStatus: 'attente'});
-      notify('user_admin', `Annonce à valider : ${DB.findItem(DB.K.properties, id).title}`, '#/admin/listings');
-      toast('Annonce soumise à la validation.'); render(); break;
+      DB.updateItem(DB.K.properties, id, {listingStatus: 'publiee'});
+      notify('user_admin', `Nouvelle annonce en ligne : ${DB.findItem(DB.K.properties, id).title}`, '#/admin/listings');
+      toast('Annonce publiée : elle est visible dans la recherche.'); render(); break;
     }
     case 'pause': stop(); if (!ownsProperty(id, u)) break; DB.updateItem(DB.K.properties, id, {listingStatus: 'pause'}); toast('Annonce mise en pause.'); render(); break;
     case 'archive': stop(); if (!ownsProperty(id, u)) break; DB.updateItem(DB.K.properties, id, {listingStatus: 'archivee', status: 'archive'}); toast('Annonce archivée.'); render(); break;

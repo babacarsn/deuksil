@@ -20,32 +20,6 @@
   --display:"Source Serif 4","Iowan Old Style",Georgia,serif;
   --sidebar:250px;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --ink:#E7ECF1; --ink-2:#BFCAD6; --muted:#8996A6;
-  --bg:#070D14; --surface:#0E1620; --surface-2:#131D29; --surface-3:#1A2632;
-  --line:#1E2A37; --line-strong:#2C3B4A;
-  --brand:#4E7FB8; --brand-2:#3E6796; --brand-soft:#132234; --brand-ink:#06111C;
-  --gold:#D8B569; --gold-soft:#26200E;
-  --ok:#5CBE8A; --ok-soft:#122A1C;
-  --warn:#DCAF52; --warn-soft:#28210F;
-  --bad:#E2887A; --bad-soft:#2C1712;
-  --info:#7EA9DD; --info-soft:#121F30;
-  --sh-2:0 1px 3px rgba(0,0,0,.5), 0 14px 32px -20px rgba(0,0,0,.9);
-  --sh-3:0 26px 64px -34px rgba(0,0,0,.95);
-}}
-:root[data-theme="dark"]{
-  --ink:#E7ECF1; --ink-2:#BFCAD6; --muted:#8996A6;
-  --bg:#070D14; --surface:#0E1620; --surface-2:#131D29; --surface-3:#1A2632;
-  --line:#1E2A37; --line-strong:#2C3B4A;
-  --brand:#4E7FB8; --brand-2:#3E6796; --brand-soft:#132234; --brand-ink:#06111C;
-  --gold:#D8B569; --gold-soft:#26200E;
-  --ok:#5CBE8A; --ok-soft:#122A1C;
-  --warn:#DCAF52; --warn-soft:#28210F;
-  --bad:#E2887A; --bad-soft:#2C1712;
-  --info:#7EA9DD; --info-soft:#121F30;
-  --sh-2:0 1px 3px rgba(0,0,0,.5), 0 14px 32px -20px rgba(0,0,0,.9);
-  --sh-3:0 26px 64px -34px rgba(0,0,0,.95);
-}
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
 body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
@@ -208,7 +182,6 @@ footer.site a:hover{opacity:1}
 
 .props{display:grid;grid-template-columns:repeat(auto-fill,minmax(286px,1fr));gap:22px}
 .prop{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--sh-1);transition:box-shadow .18s,transform .18s}
-.prop:hover{box-shadow:var(--sh-2)}
 .prop .body{padding:16px 17px 17px;display:flex;flex-direction:column;gap:9px;flex:1}
 .prop .price{font-family:var(--display);font-size:1.32rem;font-weight:600;letter-spacing:-.008em}
 .prop .feat{display:flex;gap:8px;font-size:.78rem;color:var(--ink-2);flex-wrap:wrap}
@@ -402,18 +375,6 @@ footer.site a:hover{opacity:1}
   --sh-1:none; --sh-2:0 8px 26px -12px rgba(0,25,47,.22); --sh-3:0 26px 60px -28px rgba(0,25,47,.5);
   --sidebar:264px;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --ink:#EAF0F7; --ink-2:#C3CEDB; --muted:#8C9AAC; --bg:#040C16; --surface:#0B1726; --surface-2:#101E30; --surface-3:#172940;
-  --line:#182B42; --line-strong:#27405E; --brand:#6C9CF2; --brand-2:#5588E6; --brand-soft:#11233B; --brand-ink:#04101E;
-  --yellow-soft:#2C2506; --gold:#E6B73C; --gold-soft:#2A2208; --ok:#53C98E; --ok-soft:#0F2A1D; --warn:#E0B055; --warn-soft:#2A210C;
-  --bad:#EE8A93; --bad-soft:#2D1519; --info:#7DB0FF; --info-soft:#0F2038; --nav:#00101F; --nav-2:#0E2238; --nav-line:#16304B;
-}}
-:root[data-theme="dark"]{
-  --ink:#EAF0F7; --ink-2:#C3CEDB; --muted:#8C9AAC; --bg:#040C16; --surface:#0B1726; --surface-2:#101E30; --surface-3:#172940;
-  --line:#182B42; --line-strong:#27405E; --brand:#6C9CF2; --brand-2:#5588E6; --brand-soft:#11233B; --brand-ink:#04101E;
-  --yellow-soft:#2C2506; --gold:#E6B73C; --gold-soft:#2A2208; --ok:#53C98E; --ok-soft:#0F2A1D; --warn:#E0B055; --warn-soft:#2A210C;
-  --bad:#EE8A93; --bad-soft:#2D1519; --info:#7DB0FF; --info-soft:#0F2038; --nav:#00101F; --nav-2:#0E2238; --nav-line:#16304B;
-}
 body{font-family:var(--font);font-size:15px;line-height:1.5;background:var(--surface)}
 h1,h2,h3,h4{font-family:var(--font);letter-spacing:-.012em}
 h1{font-size:clamp(2rem,6.2vw,3.3rem);font-weight:800;line-height:1.08}
@@ -474,7 +435,6 @@ tbody tr:hover{background:var(--surface-2)}
 
 /* ---------- Biens : cartes ---------- */
 .prop{border-radius:18px;box-shadow:none;border:1px solid var(--line)}
-.prop:hover{box-shadow:var(--sh-2)}
 .prop .price{font-weight:700;color:var(--brand);font-size:1.28rem}
 .prop .feat span{background:var(--surface-2);border-radius:8px}
 .photo .tag{border-radius:8px;font-weight:600;background:#fff}
@@ -772,28 +732,6 @@ footer.site{background:var(--nav)}
   --sh-pill:0 12px 30px -10px rgba(0,25,47,.45);
   --sidebar:252px;
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --ink:#E8EDF3; --ink-2:#C2CEDA; --muted:#8696A8;
-  --bg:#060E16; --surface:#0D1821; --surface-2:#121F2A; --surface-3:#182734;
-  --line:#1C2B38; --line-strong:#2A3B4B;
-  --brand:#5E93CC; --brand-2:#4B7CB2; --brand-soft:#11263A; --brand-ink:#04121E;
-  --gold:#F0B429; --gold-ink:#2A1E00; --gold-soft:#2A2108;
-  --ok:#5FC68E; --ok-soft:#10291C; --warn:#E0B259; --warn-soft:#2A2210;
-  --bad:#E98A90; --bad-soft:#2E1518; --info:#7FAEE6; --info-soft:#112235;
-  --tint-blue:#15304B; --tint-green:#113221; --tint-orange:#33210F; --tint-violet:#211F3C;
-  --nav:#040B13; --nav-2:#122536; --nav-line:#1C3144;
-}}
-:root[data-theme="dark"]{
-  --ink:#E8EDF3; --ink-2:#C2CEDA; --muted:#8696A8;
-  --bg:#060E16; --surface:#0D1821; --surface-2:#121F2A; --surface-3:#182734;
-  --line:#1C2B38; --line-strong:#2A3B4B;
-  --brand:#5E93CC; --brand-2:#4B7CB2; --brand-soft:#11263A; --brand-ink:#04121E;
-  --gold:#F0B429; --gold-ink:#2A1E00; --gold-soft:#2A2108;
-  --ok:#5FC68E; --ok-soft:#10291C; --warn:#E0B259; --warn-soft:#2A2210;
-  --bad:#E98A90; --bad-soft:#2E1518; --info:#7FAEE6; --info-soft:#112235;
-  --tint-blue:#15304B; --tint-green:#113221; --tint-orange:#33210F; --tint-violet:#211F3C;
-  --nav:#040B13; --nav-2:#122536; --nav-line:#1C3144;
-}
 
 /* ---- Typographie : une seule famille, hiérarchie par le poids ---- */
 body{background:var(--bg);color:var(--ink);font-family:var(--font);-webkit-font-smoothing:antialiased}
@@ -1079,8 +1017,8 @@ th,td{padding:13px 15px}
 .kpis > *:nth-child(4){animation-delay:.12s} .kpis > *:nth-child(n+5){animation-delay:.16s}
 
 /* Réactions au survol et au doigt */
-.card,.pc,.quick-card{transition:transform .2s cubic-bezier(.2,.8,.3,1),border-color .2s,box-shadow .2s}
-.pc:hover,.quick-card:hover{transform:translateY(-3px)}
+.card,.quick-card{transition:transform .2s cubic-bezier(.2,.8,.3,1),border-color .2s,box-shadow .2s}
+.quick-card:hover{transform:translateY(-3px)}
 .btn{transition:background .18s,border-color .18s,color .18s,transform .12s}
 .btn:active,.bcard:active,.drawer:active{transform:scale(.985)}
 tbody tr{transition:background .16s}
@@ -1092,12 +1030,6 @@ tbody tr{transition:background .16s}
 .modal-backdrop,.dialog-backdrop{animation:dcIn .2s both}
 .toast{animation:dcUp .26s cubic-bezier(.2,.8,.3,1) both}
 
-/* Carrousel : les biens défilent tout seuls, de la droite vers la gauche */
-.runner{overflow:hidden;position:relative;padding:2px 0 12px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent);mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent)}
-.runner .track{display:flex;gap:16px;width:max-content;animation:dcRun var(--run,42s) linear infinite}
-.runner:hover .track,.runner:focus-within .track{animation-play-state:paused}
-.runner .pc{flex:0 0 288px}
-@media (max-width:760px){.runner .pc{flex:0 0 252px}.runner .track{animation-duration:var(--run-m,34s)}}
 
 /* Tableau de bord : indicateur principal, graphique, anneau, premiers pas */
 .dash-top{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr) minmax(0,1fr);gap:14px;margin-bottom:14px}
@@ -1167,13 +1099,9 @@ tbody tr{transition:background .16s}
 @media (prefers-reduced-motion:reduce){.kpi-rich::before,.kpi-rich::after,.quick-card::before{transition:none}
   .kpi-rich:hover::before,.kpi-rich:hover::after,.quick-card:hover::before{transform:none}}
 /* Cartes de la recherche (.prop) : même traitement que les autres */
-.main > .content .prop,.prop{animation:dcUp .32s cubic-bezier(.2,.8,.3,1) both;transition:transform .2s cubic-bezier(.2,.8,.3,1),border-color .2s,box-shadow .2s}
-.props > .prop:nth-child(2){animation-delay:.04s} .props > .prop:nth-child(3){animation-delay:.08s}
-.props > .prop:nth-child(4){animation-delay:.12s} .props > .prop:nth-child(5){animation-delay:.16s}
-.props > .prop:nth-child(n+6){animation-delay:.2s}
-.prop:hover{transform:translateY(-4px)}
-.prop .photo img,.pc .photo img{transition:transform .5s cubic-bezier(.2,.8,.3,1)}
-.prop:hover .photo img,.pc:hover .photo img{transform:scale(1.05)}
+/* Cartes de biens : aucune apparition en fondu ni effet de survol.
+   Sur téléphone, le fondu repartait de zéro à chaque affichage et le survol
+   restait bloqué après un appui : les biens paraissaient blanchis. */
 /* Favori : petit battement quand on l'active */
 @keyframes dcBeat{0%{transform:scale(1)}35%{transform:scale(1.28)}60%{transform:scale(.92)}100%{transform:scale(1)}}
 .fav.on,.fav[aria-pressed="true"]{animation:dcBeat .42s cubic-bezier(.2,.8,.3,1)}

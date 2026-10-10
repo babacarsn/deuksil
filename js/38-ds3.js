@@ -106,13 +106,11 @@ const pcard = (p, favIds = []) => `<article class="pc"><div class="ph">${photoHt
   <div class="pr">${money(p.price)}${p.transaction === 'location' ? ' <small>/ mois</small>' : ''}</div>
   <div class="sp">${p.transaction === 'terrain' ? `<span>${icon('area', 14)} ${p.surface} m²</span>` : `<span>${icon('bed', 14)} ${p.rooms}</span><span>${icon('bath', 14)} ${p.baths}</span><span>${icon('area', 14)} ${p.surface} m²</span>`}</div>
   <a class="go" href="#/property/${p.id}">Voir le détail ${icon('arrowRight', 15)}</a></div></article>`;
-const mixed = (pubs, n = 8) => { const by = {location: [], vente: [], terrain: []}; [...pubs].sort((a, b) => (b.views || 0) - (a.views || 0)).forEach(p => (by[p.transaction] || by.vente).push(p)); const out = []; for (let i = 0; out.length < n && i < 6; i++) ['location', 'vente', 'terrain'].forEach(k => by[k][i] && out.length < n && out.push(by[k][i])); return out; };
+let mixed = (pubs, n = 8) => { const by = {location: [], vente: [], terrain: []}; [...pubs].sort((a, b) => (b.views || 0) - (a.views || 0)).forEach(p => (by[p.transaction] || by.vente).push(p)); const out = []; for (let i = 0; out.length < n && i < 6; i++) ['location', 'vente', 'terrain'].forEach(k => by[k][i] && out.length < n && out.push(by[k][i])); return out; };
 const recoHtml = (list, favIds) => {
   const cards = list.map(p => pcard(p, favIds)).join('');
-  /* Au-delà de trois biens, la bande défile toute seule ; elle s'arrête au survol et au doigt.
-     Les cartes sont écrites deux fois pour que la boucle soit continue. */
+  /* La bande ne défile plus toute seule : on la fait glisser au doigt. */
   const body = !cards ? '<p class="muted small">Aucune annonce disponible pour le moment.</p>'
-    : list.length > 3 ? `<div class="runner" style="--run:${Math.max(28, list.length * 7)}s;--run-m:${Math.max(22, list.length * 5.5)}s"><div class="track">${cards}${cards}</div></div>`
     : `<div class="hscroll">${cards}</div>`;
   return `<div class="sect-h"><h3>${icon('star', 22)} Recommandés pour vous</h3><a href="#/search">Voir tout →</a></div>${body}`;
 };
@@ -183,7 +181,7 @@ propRoute.fn = pid => {
       <div class="field"><label>Équipements</label><div class="row" style="flex-wrap:wrap;gap:10px">${AMENITIES.map(a => `<label class="check"><input type="checkbox" name="amenities" value="${a}" ${(v.amenities || []).includes(a) ? 'checked' : ''}>${a}</label>`).join('')}</div></div>
       <div class="field" style="max-width:260px"><label>Disponible à partir du</label><input class="input" name="availableFrom" type="date" value="${(v.availableFrom || now()).slice(0, 10)}"></div></div></div>
     <div class="wstep" data-step="3"><div class="wiz-card"><h3>3. Photos et publication</h3>${photoUploadHtml()}
-      <p class="small muted" style="margin:14px 0 0">Les annonces sont vérifiées par DEUKSIL avant publication.</p></div></div>
+      <p class="small muted" style="margin:14px 0 0">Vous verrez un récapitulatif avant la mise en ligne. La publication est immédiate.</p></div></div>
     <div class="wiz-foot"><button type="button" class="btn ghost" data-action="wiz-prev" id="wiz-prev" disabled>${icon('chevLeft', 16)} Précédent</button><span class="grow"></span>
       <button type="button" class="btn" data-action="wiz-next" id="wiz-next">Suivant ${icon('arrowRight', 16)}</button>
       <span id="wiz-end" class="hidden" style="display:none;gap:10px"><button class="btn ghost" name="intent" value="draft">Enregistrer le brouillon</button><button class="btn" name="intent" value="publish">Enregistrer et publier</button></span></div></form>`);

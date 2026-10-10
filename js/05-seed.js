@@ -4,7 +4,22 @@
    ========================================================================== */
 const SEED_VERSION = '1.0.0';
 
+/* ---------- Amorçage ----------
+   Le jeu de base est posé une fois (ou à la réinitialisation). Les modules
+   suivants y ajoutent leurs données en déclarant une étape, au lieu
+   d'envelopper seedIfNeeded : la liste ETAPES_AMORCAGE dit dans quel ordre
+   tout s'exécute. Chaque étape vérifie elle-même si elle a déjà été jouée.
+   Une étape « tolérante » n'interrompt pas les suivantes si elle échoue. */
+const ETAPES_AMORCAGE = [];
+function etapeAmorcage(nom, fn, tolerante = false) { ETAPES_AMORCAGE.push({nom, fn, tolerante}); }
 function seedIfNeeded(force) {
+  seedBase(force);
+  for (const e of ETAPES_AMORCAGE) {
+    if (!e.tolerante) { e.fn(); continue; }
+    try { e.fn(); } catch (err) { console.warn(`Amorçage « ${e.nom} » ignoré :`, err); }
+  }
+}
+function seedBase(force) {
   if (!force && localStorage.getItem(DB.K.seed) === SEED_VERSION) return;
   DB.reset();
 

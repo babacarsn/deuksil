@@ -124,5 +124,4 @@ function seedV7() {
   DB.addItem(DB.K.docs, {ownerId: owner.id, type: 'DEV', ref: nref('DEV', 'docs'), client: l.tenant, propertyId: l.propertyId, items, discount: 0, tax: 0, status: 'accepté', due: addDays(now(), 30).slice(0, 10)});
   DB.addItem(DB.K.docs, {ownerId: owner.id, type: 'FAC', ref: nref('FAC', 'docs'), client: l.tenant, propertyId: l.propertyId, items, discount: 0, tax: 0, status: 'émise', due: addDays(now(), 30).slice(0, 10)});
 }
-const _seed7 = seedIfNeeded;
-seedIfNeeded = function (f) { _seed7(f); seedV7(); };
+etapeAmorcage('coffre de documents', seedV7);

@@ -63,8 +63,8 @@ let bulkSelected = [];
 route(/^\/admin\/listings$/, () => {
   const u = Auth.guard('admin'); if (!u) return false;
   const props = DB.getData(DB.K.properties);
-  const groups = [['attente', 'En attente de validation'], ['publiee', 'Publiées'], ['refusee', 'Refusées'], ['pause', 'En pause'], ['brouillon', 'Brouillons'], ['archivee', 'Archivées']];
-  return shellApp(u, page('Validation des annonces', 'Une annonce validée devient visible dans la recherche.') +
+  const groups = [['attente', 'Reçues avant la publication immédiate'], ['publiee', 'Publiées'], ['refusee', 'Refusées'], ['pause', 'En pause'], ['brouillon', 'Brouillons'], ['archivee', 'Archivées']];
+  return shellApp(u, page('Modération des annonces', 'Les annonces sont en ligne dès leur publication. Retirez ici celles qui posent problème.') +
     groups.map(([k, label]) => {
       const list = props.filter(p => p.listingStatus === k);
       if (!list.length) return '';

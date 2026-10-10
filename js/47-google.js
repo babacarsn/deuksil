@@ -8,7 +8,7 @@ const gmailOf = u => u.email || `${(u.firstName || 'user').toLowerCase().normali
 function seedEmails() {
   DB.getData(DB.K.users).filter(u => !u.email).forEach(u => DB.updateItem(DB.K.users, u.id, {email: gmailOf(u)}));
 }
-const _seedG = seedIfNeeded; seedIfNeeded = function (f) { _seedG(f); seedEmails(); };
+etapeAmorcage('adresses Gmail', seedEmails);
 setTimeout(seedEmails, 900);
 
 /* le « compte du téléphone » : le dernier utilisé, sinon le client de démonstration */

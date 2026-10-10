@@ -14,13 +14,14 @@ function dashStats(u) {
   const duMois = rents.filter(r => r.month === m);
   const attendus = duMois.reduce((s, r) => s + r.amount, 0);
   const encaisses = rents.filter(r => r.paidAt && r.paidAt.slice(0, 7) === m).reduce((s, r) => s + r.amount, 0)
-    + gMine('fpay', u).filter(p => p.createdAt.slice(0, 7) === m).reduce((s, p) => s + p.amount, 0);
+    + horsVentes(gMine('fpay', u)).filter(p => p.createdAt.slice(0, 7) === m).reduce((s, p) => s + p.amount, 0);
+  const ventes = queVentes(gMine('fpay', u)).filter(p => p.createdAt.slice(0, 7) === m).reduce((s, p) => s + p.amount, 0);
   const retards = rents.filter(r => !r.paidAt && rentState(r)[1] === 'bad');
   const impayes = retards.reduce((s, r) => s + r.amount, 0)
     + gMine('docs', u).filter(d => d.type === 'FAC' && dRest(d) > 0 && d.due < ymd()).reduce((s, d) => s + dRest(d), 0);
   const depenses = gMine('expenses', u).filter(x => x.date.slice(0, 7) === m).reduce((s, x) => s + x.amount, 0)
     + gMine('tickets', u).filter(t => !t.expenseId && (t.createdAt || '').slice(0, 7) === m).reduce((s, t) => s + t.cost, 0);
-  return {props, nUnits, occUnits, vacantes: nUnits - occUnits, attendus, encaisses, impayes, depenses, net: encaisses - depenses, retards, actifs};
+  return {props, nUnits, occUnits, vacantes: nUnits - occUnits, attendus, encaisses, ventes, impayes, depenses, net: encaisses - depenses, retards, actifs};
 }
 /* « À traiter » : uniquement ce qui demande une action aujourd'hui */
 function todoList(u, s) {
@@ -48,7 +49,7 @@ function todoList(u, s) {
 const dashKpi = (n, l, ic, tone) => kpiRich(n, l, ic, tone || 'brand', null);
 function monthIncome(u, m) {
   return gMine('rents', u).filter(r => r.paidAt && r.paidAt.slice(0, 7) === m).reduce((x, r) => x + r.amount, 0)
-    + gMine('fpay', u).filter(p => p.createdAt.slice(0, 7) === m).reduce((x, p) => x + p.amount, 0);
+    + horsVentes(gMine('fpay', u)).filter(p => p.createdAt.slice(0, 7) === m).reduce((x, p) => x + p.amount, 0);
 }
 function monthSpend(u, m) {
   return gMine('expenses', u).filter(x => x.date.slice(0, 7) === m).reduce((t, x) => t + x.amount, 0)
@@ -57,7 +58,7 @@ function monthSpend(u, m) {
 const prevMonth = m => { const d = new Date(m + '-01'); d.setMonth(d.getMonth() - 1); return d.toISOString().slice(0, 7); };
 /* variation par rapport au mois précédent, affichée seulement si elle a du sens */
 function variation(now_, before, goodWhenUp = true) {
-  if (!before) return now_ ? {label: 'Premier mois enregistré', tone: ''} : null;
+  if (!before) return now_ ? {label: 'Rien d\'enregistré le mois dernier', tone: ''} : null;
   const pc = Math.round((now_ - before) / before * 100);
   if (!pc) return {label: 'Stable par rapport au mois dernier', tone: ''};
   const up = pc > 0, good = up === goodWhenUp;
@@ -88,7 +89,7 @@ function dashHtml(u) {
   const vals = months.map(x => monthIncome(u, x)), max = Math.max(1, ...vals);
   const actions = u.role === 'agency'
     ? [['#/manage/owners', 'Ajouter un propriétaire', 'user'], ['#/owner/property/new', 'Ajouter un bien', 'plus'], ['#/manage/rents', 'Encaisser un loyer', 'money'], ['#/manage/docs', 'Créer une facture', 'layers']]
-    : [['#/owner/property/new', 'Ajouter un bien', 'plus'], ['#/manage/leases', 'Ajouter un locataire', 'users'], ['#/manage/rents', 'Encaisser un loyer', 'money'], ['#/manage/expenses', 'Ajouter une dépense', 'repeat']];
+    : [['#/owner/property/new', 'Ajouter un bien', 'plus'], ['#/manage/leases', 'Ajouter un locataire', 'users'], ['#/manage/deals', 'Ajouter un acheteur', 'briefcase'], ['#/coffre', 'Ajouter un document', 'file', 'g7-add']];
   return `
     <h3 style="margin:22px 0 12px">Ce que vous gagnez <span class="small muted" style="font-weight:500">· ${monthLabel(m)}</span></h3>
     <div class="dash-top">
@@ -97,13 +98,14 @@ function dashHtml(u) {
           <span class="hk-ic">${icon('trendUp', 18)}</span><span class="small" style="opacity:.86">Revenu net du mois</span></div>
         <div class="hk-n">${money(netNow)}</div>
         ${vHtml(variation(netNow, netBefore))}
+        ${s.ventes ? `<div class="small" style="opacity:.8;margin-top:8px">Hors ventes : ${money(s.ventes)} encaissés sur cessions ce mois-ci (<a href="#/manage/deals" style="color:inherit;text-decoration:underline">voir les ventes</a>)</div>` : ''}
       </div>
-      ${kpiRich(money(s.encaisses), 'Encaissé', 'money', 'ok', variation(s.encaisses, monthIncome(u, pm)))}
+      ${kpiRich(money(s.encaisses), 'Encaissé (hors ventes)', 'money', 'ok', variation(s.encaisses, monthIncome(u, pm)))}
       ${kpiRich(money(s.impayes), 'Impayés', 'alert', s.impayes ? 'bad' : 'ok', s.retards.length ? {label: `${s.retards.length} loyer${s.retards.length > 1 ? 's' : ''} en retard`, tone: 'bad'} : null)}
     </div>
 
     <div class="dash-mid">
-      <div class="card"><div class="row-between" style="margin-bottom:14px"><b>Revenus des 6 derniers mois</b><span class="small muted">encaissé</span></div>
+      <div class="card"><div class="row-between" style="margin-bottom:14px"><b>Revenus des 6 derniers mois</b><span class="small muted">loyers et factures, hors ventes</span></div>
         <div class="bars">${months.map((x, i) => `<div class="bar"><div class="col"><i style="height:${Math.round(vals[i] / max * 100)}%${i === 5 ? ';background:var(--brand)' : ''}" title="${money(vals[i])}"></i></div>
           <span class="small ${i === 5 ? '' : 'muted'}">${x.slice(5)}</span></div>`).join('')}</div></div>
       <div class="card ring-card">
@@ -123,7 +125,7 @@ function dashHtml(u) {
           <div class="txt" style="min-width:0"><b>${esc(t)}</b><div class="sub">${esc(d)}</div></div>${icon('arrowRight', 16)}</a>`).join('')
           : `<div class="empty" style="padding:28px 16px;border:0;background:transparent"><b>Rien à traiter</b><p class="small">Aucun retard, aucune demande en attente.</p></div>`}</div>
       <div><h3 style="margin:0 0 10px">Actions rapides</h3><div class="qa-grid">
-        ${actions.map(([h, l, ic]) => `<a class="quick-card" href="${h}"><div class="ic-bubble" style="background:var(--brand-soft);color:var(--brand)">${icon(ic, 17)}</div><b>${l}</b></a>`).join('')}
+        ${actions.map(([h, l, ic, ouvrir]) => `<a class="quick-card" href="${h}"${ouvrir ? ` data-ouvrir="${ouvrir}"` : ''}><div class="ic-bubble" style="background:var(--brand-soft);color:var(--brand)">${icon(ic, 17)}</div><b>${l}</b></a>`).join('')}
       </div></div>
     </div>`;
 }
@@ -145,4 +147,12 @@ function dashHero(u) {
 ['owner', 'agency'].forEach(role => {
   const r = routes.find(x => x.re.source === `^\\/${role}\\/dashboard$`); if (!r) return;
   r.fn = () => { const u = Auth.guard(role); if (!u) return false; return shellApp(u, dashHero(u) + dashHtml(u)); };
+});
+
+/* Action rapide qui ouvre directement un formulaire de l'écran visé :
+   « Ajouter un document » mène au coffre et ouvre sa fenêtre d'ajout. */
+document.addEventListener('click', e => {
+  const a = e.target.closest('a[data-ouvrir]'); if (!a) return;
+  const action = a.dataset.ouvrir;
+  setTimeout(() => { const b = document.querySelector(`[data-action="${action}"]`); if (b) b.click(); }, 60);
 });

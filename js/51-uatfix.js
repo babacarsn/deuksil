@@ -26,8 +26,7 @@ function dedupeEmails() {
     seen.set(neuf.toLowerCase(), u.id);
   });
 }
-const _seedU = seedIfNeeded;
-seedIfNeeded = function (f) { _seedU(f); dedupeEmails(); };
+etapeAmorcage('adresses en double', dedupeEmails);
 setTimeout(dedupeEmails, 1200);
 
 /* Les neuf espaces accessibles depuis l'écran de connexion. */

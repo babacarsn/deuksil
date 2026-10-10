@@ -14,6 +14,13 @@ const audit = (action, detail) => { const u = Auth.current(); if (u) DB.addItem(
 const dTot = d => Math.round(d.items.reduce((t, i) => t + i.qty * i.price, 0) * (1 - (d.discount || 0) / 100) * (1 + (d.tax || 0) / 100));
 const dCred = d => DB.getData(DB.K.docs).filter(x => x.type === 'AV' && x.parentId === d.id).reduce((s, x) => s + dTot(x), 0);
 const dPaid = d => DB.getData(DB.K.fpay).filter(p => p.docId === d.id).reduce((s, p) => s + p.amount, 0);
+/* Un encaissement rattaché à une facture de vente (dossier de vente) est un
+   produit de cession, pas un revenu locatif : il a son propre rapport
+   (« Ventes de biens ») et ne doit gonfler ni le revenu du mois, ni la
+   rentabilité d'un bien, ni la commission de gestion d'un mandant. */
+const idsFacturesVente = () => new Set(DB.getData(DB.K.docs).filter(d => d.dealId).map(d => d.id));
+const horsVentes = list => { const v = idsFacturesVente(); return list.filter(p => !v.has(p.docId)); };
+const queVentes = list => { const v = idsFacturesVente(); return list.filter(p => v.has(p.docId)); };
 const dRest = d => Math.max(0, dTot(d) - dCred(d) - dPaid(d));
 const hasChild = d => DB.getData(DB.K.docs).some(x => x.parentId === d.id && x.type !== 'AV');
 function dState(d) {
@@ -46,9 +53,7 @@ function docForm(type, d) {
     <div class="field"><label>Remise (%)</label><input class="input" type="number" min="0" max="100" name="discount" value="0"></div>
     <div class="field"><label>Échéance (jours)</label><input class="input" type="number" min="1" name="days" value="30"></div></div>${lines}<button class="btn block">Créer</button></form>`);
 }
-const _gTab = gTab;
-gTab = function (u, tab) {
-  if (!['docs', 'fpay', 'expenses', 'finance', 'audit'].includes(tab)) return _gTab(u, tab);
+vueGestion(['docs', 'fpay', 'expenses', 'finance', 'audit'], function (u, tab) {
   const props = myProps(u), docs = gMine('docs', u), pays = gMine('fpay', u), exps = gMine('expenses', u), fac = docs.filter(x => x.type === 'FAC');
   const search = sBar();
   if (tab === 'docs') return `<div class="row-between" style="margin-bottom:14px">${search}<div class="row" style="gap:8px">${['DEV', 'PF', 'FAC'].map(t => `<button class="btn sm" data-action="g2-new" data-id="${t}">+ ${DT[t]}</button>`).join('')}</div></div>` +
@@ -71,7 +76,7 @@ gTab = function (u, tab) {
   /* finance : rentabilité */
   const rents = gMine('rents', u).filter(r => r.paidAt), tk = gMine('tickets', u), leaseProp = id => (DB.findItem(DB.K.leases, id) || {}).propertyId;
   const inc = {}, out = {}, add = (o, k, v) => o[k] = (o[k] || 0) + v;
-  rents.forEach(r => add(inc, r.paidAt.slice(0, 7), r.amount)); pays.forEach(p => add(inc, p.createdAt.slice(0, 7), p.amount));
+  rents.forEach(r => add(inc, r.paidAt.slice(0, 7), r.amount)); horsVentes(pays).forEach(p => add(inc, p.createdAt.slice(0, 7), p.amount));
   exps.forEach(x => add(out, x.date.slice(0, 7), x.amount)); tk.filter(t => !t.expenseId).forEach(t => add(out, (t.createdAt || now()).slice(0, 7), t.cost));
   const I = Object.values(inc).reduce((a, b) => a + b, 0), O = Object.values(out).reduce((a, b) => a + b, 0);
   const unpaid = fac.reduce((s, d) => s + dRest(d), 0) + gMine('rents', u).filter(r => !r.paidAt && rentState(r)[1] === 'bad').reduce((s, r) => s + r.amount, 0);
@@ -79,11 +84,11 @@ gTab = function (u, tab) {
   return `<div class="kpis">${kpi(money(fac.reduce((s, d) => s + dTot(d) - dCred(d), 0)), 'Facturé')}${kpi(money(I), 'Encaissé (loyers + factures)', 'ok')}${kpi(money(unpaid), 'Impayés', 'bad')}${kpi(money(O), 'Dépenses')}${kpi(money(I - O), 'Résultat net', 'brand')}</div>
   <div class="card" style="margin:18px 0"><b class="small">Revenus (bleu) et dépenses (doré), 6 derniers mois</b><div style="display:flex;gap:14px;align-items:flex-end;height:120px;margin-top:10px">${ms.map(m => `<div style="flex:1;text-align:center"><div style="display:flex;gap:3px;align-items:flex-end;height:96px"><i style="flex:1;background:var(--brand);height:${(inc[m] || 0) / mx * 100}%"></i><i style="flex:1;background:var(--gold);height:${(out[m] || 0) / mx * 100}%"></i></div><span class="small muted">${m.slice(5)}/${m.slice(2, 4)}</span></div>`).join('')}</div></div>` +
     gTable(['Bien', 'Revenus', 'Dépenses', 'Net', 'Rentabilité'], props.map(p => {
-      const r = rents.filter(x => leaseProp(x.leaseId) === p.id).reduce((s, x) => s + x.amount, 0) + pays.filter(x => x.propertyId === p.id).reduce((s, x) => s + x.amount, 0);
+      const r = rents.filter(x => leaseProp(x.leaseId) === p.id).reduce((s, x) => s + x.amount, 0) + horsVentes(pays).filter(x => x.propertyId === p.id).reduce((s, x) => s + x.amount, 0);
       const c = exps.filter(x => x.propertyId === p.id).reduce((s, x) => s + x.amount, 0) + tk.filter(x => x.propertyId === p.id && !x.expenseId).reduce((s, x) => s + x.cost, 0);
       return `<tr><td class="small"><b>${esc(p.title)}</b></td><td>${money(r)}</td><td>${money(c)}</td><td><b style="color:var(--${r - c < 0 ? 'bad' : 'ok'})">${money(r - c)}</b></td><td>${p.price && p.transaction !== 'location' ? ((r - c) / p.price * 100).toFixed(1) + ' %' : '—'}</td></tr>`;
     }), ['Aucun bien', 'Ajoutez des biens pour suivre leur rentabilité.']);
-};
+});
 document.addEventListener('input', e => {
   const q = e.target.closest('[data-gsearch]'); if (!q) return;
   $$('tbody tr').forEach(tr => { tr.dataset.f = tr.textContent.toLowerCase().includes(q.value.toLowerCase()) ? '' : '1'; tr.style.display = tr.dataset.f ? 'none' : ''; }); $$('table').forEach(t => t.__pg && t.__pg());

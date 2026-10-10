@@ -52,12 +52,10 @@ mkDoc = function (u, type, o) {
 };
 const _dState = dState;
 dState = d => d.status === 'à valider' ? ['Accord du propriétaire attendu', 'warn'] : _dState(d);
-const _gtR = gTab;
-gTab = function (u, tab) {
-  if (tab === 'units') return _gtR(u, tab) + `<div style="margin-top:12px"><button class="btn ghost sm" data-action="g8-arch-toggle">${GSHOW_ARCH ? 'Masquer' : 'Afficher'} les unités archivées</button></div>`;
-  if (tab !== 'docs') return _gtR(u, tab);
-  return _gtR(u, tab).replace(/<button class="btn sm" data-action="g2-ok" data-id="([\w]+)">Accepter<\/button><button class="btn ghost sm" data-action="g2-no" data-id="\1">Refuser<\/button>/g,
+retoucheGestion(['units', 'docs'], function (h, u, tab) {
+  if (tab === 'units') return h + `<div style="margin-top:12px"><button class="btn ghost sm" data-action="g8-arch-toggle">${GSHOW_ARCH ? 'Masquer' : 'Afficher'} les unités archivées</button></div>`;
+  return h.replace(/<button class="btn sm" data-action="g2-ok" data-id="([\w]+)">Accepter<\/button><button class="btn ghost sm" data-action="g2-no" data-id="\1">Refuser<\/button>/g,
     (m, id) => { const d = DB.findItem(DB.K.docs, id);
       return d && d.status === 'à valider'
         ? `<button class="btn sm" data-action="q-ok" data-id="${id}">Accord reçu</button><button class="btn ghost sm" data-action="q-no" data-id="${id}">Refusé</button>` : m; });
-};
+});

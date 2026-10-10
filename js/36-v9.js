@@ -10,7 +10,7 @@ const TKS = ['ouvert', 'assigné', 'en cours', 'résolu', 'fermé'], PRIO = {bas
 Object.assign(TICKET_LABEL, {'assigné':'Assigné', 'résolu':'Résolu', 'fermé':'Fermé'}); Object.assign(TICKET_TONE, {'assigné':'info', 'résolu':'ok', 'fermé':''});
 let tkSt = t => t.status === 'resolu' ? 'résolu' : t.status;
 const csvBtn = k => `<div class="row" style="justify-content:flex-end;margin-bottom:10px"><button class="btn ghost sm" data-action="g3-csv" data-id="${k}">Exporter en CSV</button></div>`;
-const tenantOf = l => DB.findItem(DB.K.users, x => x.leaseId === l.id);
+let tenantOf = l => DB.findItem(DB.K.users, x => x.leaseId === l.id);
 const provName = id => (DB.findItem(DB.K.providers, id) || {}).name || '';
 EXP.units = u => [['Bien', 'Unité', 'Étage', 'Surface', 'Loyer', 'Statut'], gMine('units', u).map(x => [(gProp(x.propertyId) || {}).title, x.ref, x.floor, x.surface, x.rent, x.status])];
 
@@ -18,7 +18,7 @@ EXP.units = u => [['Bien', 'Unité', 'Étage', 'Surface', 'Loyer', 'Statut'], gM
 const REP = {type:'revenus', year:new Date().getFullYear()};
 const REPT = {revenus:'Revenus par mois', revenus_bien:'Revenus par bien', depenses:'Dépenses par catégorie', impayes:'Impayés', occupation:'Occupation', rentabilite:'Rentabilité par bien'};
 function repData(u, type, y) {
-  const Y = String(y), props = myProps(u), paid = gMine('rents', u).filter(r => r.paidAt && r.paidAt.startsWith(Y)), pays = gMine('fpay', u).filter(p => p.createdAt.startsWith(Y));
+  const Y = String(y), props = myProps(u), paid = gMine('rents', u).filter(r => r.paidAt && r.paidAt.startsWith(Y)), pays = horsVentes(gMine('fpay', u)).filter(p => p.createdAt.startsWith(Y));
   const exps = gMine('expenses', u).filter(x => x.date.startsWith(Y)), tk = gMine('tickets', u).filter(t => !t.expenseId && (t.createdAt || '').startsWith(Y));
   const lp = id => (DB.findItem(DB.K.leases, id) || {}).propertyId, sum = a => a.reduce((s, x) => s + (x.amount ?? x.cost ?? 0), 0);
   if (type === 'revenus') { const rows = [...Array(12)].map((_, i) => { const k = `${Y}-${String(i + 1).padStart(2, '0')}`, a = sum(paid.filter(r => r.paidAt.startsWith(k))), b = sum(pays.filter(p => p.createdAt.startsWith(k))); return [monthLabel(k), a, b, a + b]; });
@@ -40,8 +40,7 @@ const repFmt = (d, v, j) => typeof v === 'number' && (d.money ? d.money.includes
 const repRows = d => [...d.rows, ...(d.total ? [d.total] : [])].map(r => r.map((v, j) => repFmt(d, v, j)));
 
 /* ---------- Onglets ---------- */
-const _g8 = gTab;
-gTab = function (u, tab) {
+vueGestion(['units', 'tenants', 'reports', 'tickets'], function (u, tab) {
   const props = myProps(u);
   if (tab === 'units') {
     const us = gMine('units', u).filter(x => x.status !== 'archivee' || GSHOW_ARCH).sort((a, b) => ((gProp(a.propertyId) || {}).title || '') + a.ref < ((gProp(b.propertyId) || {}).title || '') + b.ref ? -1 : 1), occ = us.filter(x => x.status === 'occupée').length;
@@ -64,7 +63,6 @@ gTab = function (u, tab) {
       <div class="field"><label>Année</label><select class="input" data-action="g8-rep" name="year">${[0, 1, 2].map(i => new Date().getFullYear() - i).map(y => `<option ${y === REP.year ? 'selected' : ''}>${y}</option>`).join('')}</select></div></div>
       <div class="row" style="gap:8px"><button class="btn" data-action="g8-rpdf">Télécharger en PDF</button><button class="btn ghost" data-action="g8-rcsv">Exporter en CSV</button></div></div>` +
       gTable(d.head, rows.map((r, i) => `<tr${d.total && i === rows.length - 1 ? ' style="font-weight:700"' : ''}>${r.map(c => `<td class="small">${esc(c)}</td>`).join('')}</tr>`), ['Aucune donnée', 'Aucun élément pour cette période.']); }
-  if (tab !== 'tickets') return _g8(u, tab);
   const tks = gMine('tickets', u).filter(t => { if (!t.ref) { t.ref = nref('MNT', 'tickets'); DB.updateItem(DB.K.tickets, t.id, {ref: t.ref}); } return true; }).reverse(), provs = gMine('providers', u);
   return csvBtn('tickets') + `<form class="card" data-action="g8-ticket" style="margin-bottom:18px"><h4 style="margin-top:0">Nouvelle intervention</h4><div class="form-grid"><div class="field"><label>Bien</label><select class="input" name="propertyId" required>${gOpts(props)}</select></div>
     <div class="field"><label>Problème</label><input class="input" name="title" required></div>
@@ -76,13 +74,10 @@ gTab = function (u, tab) {
       return `<tr><td class="small"><b>${t.ref}</b></td><td class="small">${esc((gProp(t.propertyId) || {}).title || '')}</td><td class="small"><b>${esc(t.title)}</b><br><span class="muted">${esc(t.category || 'Autre')}</span> ${badge(...(PRIO[t.priority] || PRIO.normale))}</td><td class="small">${esc(provName(t.providerId) || '—')}</td><td>${money(t.cost)}</td>
       <td>${next ? `<button class="btn ghost sm" data-action="g8-tnext" data-id="${t.id}" title="Passer à : ${TICKET_LABEL[next]}">${badge(TICKET_LABEL[s], TICKET_TONE[s])} →</button>` : badge('Fermé', '')}</td>
       <td><div class="row" style="gap:6px">${t.photo ? `<button class="btn ghost sm" data-action="g8-tphoto" data-id="${t.id}">Photo</button>` : ''}${t.expenseId ? badge('Dépense liée', 'ok') : ''}<button class="btn ghost sm" data-action="g8-tdel" data-id="${t.id}" aria-label="Supprimer">${icon('trash', 14)}</button></div></td></tr>`; }), ['Aucune intervention', 'Suivez chaque panne : assignation, travaux, résolution, dépense.']);
-};
+});
 
-const _g9 = gTab;
-gTab = function (u, tab) {
-  const h = _g9(u, tab);
-  return ['expenses', 'leases', 'rents', 'contracts', 'deals', 'audit', 'providers', 'tenants', 'units'].includes(tab) ? sBar() + h : h;
-};
+/* barre de recherche en tête des listes (le journal et les ventes ont la leur) */
+retoucheGestion(['expenses', 'leases', 'rents', 'contracts', 'providers', 'tenants', 'units'], h => sBar() + h);
 
 /* ---------- Actions ---------- */
 function tkAdvance(u, t, cost) {

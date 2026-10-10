@@ -92,7 +92,6 @@ function shellApp(u, content) {
         <div class="row">
           <button class="bell" data-action="sound-toggle" aria-label="${soundEnabled() ? 'Couper le son des notifications' : 'Activer le son des notifications'}" title="${soundEnabled() ? 'Son activé' : 'Son coupé'}">${icon(soundEnabled() ? 'volumeOn' : 'volumeOff', 16)}</button>
           <button class="bell" data-action="notifications" aria-label="Notifications">${icon('bell', 17)}${unread ? `<b>${unread}</b>` : ''}</button>
-          <button class="btn ghost sm" data-action="theme" aria-label="${isDarkTheme() ? 'Passer au thème clair' : 'Passer au thème sombre'}" title="${isDarkTheme() ? 'Thème clair' : 'Thème sombre'}">${icon(isDarkTheme() ? 'sun' : 'moon', 16)}</button>
         </div>
       </div>
       <div class="content">${content}</div>

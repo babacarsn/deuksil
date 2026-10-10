@@ -27,21 +27,19 @@ DB.updateItem = function (k, id, patch) {
     if (ch.length) DB.addItem(DB.K.audit, {ownerId: after.ownerId || u.id, who: u.firstName, action: 'Modification', detail: `${AUD_COLL[coll]} ${after.ref || after.title || after.name || ''}`.trim(), changes: ch}); }
   return after;
 };
-const _g10 = gTab;
-gTab = function (u, tab) {
+vueGestion(['audit', 'owners', 'tmsgs'], function (u, tab) {
   const search = sBar();
   if (tab === 'audit') return csvBtn('audit') + search + gTable(['Date', 'Utilisateur', 'Action', 'Détail', 'Changements'], gMine('audit', u).slice().reverse().slice(0, 300).map(a => `<tr><td class="small muted">${dateTimeFr(a.createdAt)}</td><td class="small">${esc(a.who)}</td><td class="small"><b>${esc(a.action)}</b></td><td class="small">${esc(a.detail)}</td>
     <td class="small">${(a.changes || []).map(c => `<div><span class="muted">${esc(c.f)} :</span> <s>${esc(c.o)}</s> → <b>${esc(c.n)}</b></div>`).join('') || '—'}</td></tr>`), ['Journal vide', 'Les actions et modifications (ancienne et nouvelle valeur) sont tracées ici.']);
   if (tab === 'owners') return ownersTab(u, search);
   if (tab === 'tmsgs') return gTable(['Locataire', 'Bien', 'Dernier message', 'Non lus', ''], gMine('leases', u).map(l => { const m = DB.filterItems(DB.K.tmsgs, x => x.leaseId === l.id), last = m[m.length - 1], un = m.filter(x => x.from === 'tenant' && !x.read).length;
     return `<tr><td class="small"><b>${esc(l.tenant)}</b></td><td class="small">${esc((gProp(l.propertyId) || {}).title || '')}${l.unitRef ? ' · ' + esc(l.unitRef) : ''}</td><td class="small muted">${last ? esc(last.text.slice(0, 60)) : '—'}</td><td>${un ? badge(un, 'bad') : '—'}</td><td><button class="btn ghost sm" data-action="g9-thread" data-id="${l.id}">Ouvrir</button></td></tr>`; }), ['Aucun locataire', 'La messagerie s\'ouvre dès qu\'un bail existe.']);
-  return _g10(u, tab);
-};
+});
 
 /* ---------- Fiches propriétaires (mandats de gestion) ---------- */
 function ownerStats(u, o, y) {
   const P = myProps(u).filter(p => p.clientOwnerId === o.id), ids = P.map(p => p.id), lp = id => (DB.findItem(DB.K.leases, id) || {}).propertyId, Y = String(y);
-  const rev = sumA(gMine('rents', u).filter(r => r.paidAt && r.paidAt.startsWith(Y) && ids.includes(lp(r.leaseId))), r => r.amount) + sumA(gMine('fpay', u).filter(p => p.createdAt.startsWith(Y) && ids.includes(p.propertyId)), p => p.amount);
+  const rev = sumA(gMine('rents', u).filter(r => r.paidAt && r.paidAt.startsWith(Y) && ids.includes(lp(r.leaseId))), r => r.amount) + sumA(horsVentes(gMine('fpay', u)).filter(p => p.createdAt.startsWith(Y) && ids.includes(p.propertyId)), p => p.amount);
   const dep = sumA(gMine('expenses', u).filter(x => x.date.startsWith(Y) && ids.includes(x.propertyId)), x => x.amount) + sumA(gMine('tickets', u).filter(t => !t.expenseId && ids.includes(t.propertyId)), t => t.cost), com = Math.round(rev * (o.rate || 0) / 100);
   return {P, rev, dep, com, net: rev - dep - com};
 }
@@ -120,7 +118,7 @@ document.addEventListener('click', async e => {
   if (a === 'g9-odetach') { const p = myProps(u).find(x => x.id === id), ow = mine2(el.dataset.o); if (p && ow) { DB.updateItem(DB.K.properties, id, {clientOwnerId: ''}); ownerFiche(u, ow); } }
   if (a === 'g9-opdf' && o) { if (u.member && !u.perms.includes('finances')) { toast('Action non autorisée pour votre profil.', 'bad'); return; }
     try { const y = yr(), s = ownerStats(u, o, y), lp = pid => (DB.findItem(DB.K.leases, pid) || {}).propertyId;
-      const rows = s.P.map(p => { const r = sumA(gMine('rents', u).filter(x => x.paidAt && x.paidAt.startsWith(String(y)) && lp(x.leaseId) === p.id), x => x.amount) + sumA(gMine('fpay', u).filter(x => x.createdAt.startsWith(String(y)) && x.propertyId === p.id), x => x.amount), d = sumA(gMine('expenses', u).filter(x => x.date.startsWith(String(y)) && x.propertyId === p.id), x => x.amount) + sumA(gMine('tickets', u).filter(t => !t.expenseId && t.propertyId === p.id), t => t.cost), c = Math.round(r * o.rate / 100); return [p.title, fc(r), fc(d), fc(c), fc(r - d - c)]; });
+      const rows = s.P.map(p => { const r = sumA(gMine('rents', u).filter(x => x.paidAt && x.paidAt.startsWith(String(y)) && lp(x.leaseId) === p.id), x => x.amount) + sumA(horsVentes(gMine('fpay', u)).filter(x => x.createdAt.startsWith(String(y)) && x.propertyId === p.id), x => x.amount), d = sumA(gMine('expenses', u).filter(x => x.date.startsWith(String(y)) && x.propertyId === p.id), x => x.amount) + sumA(gMine('tickets', u).filter(t => !t.expenseId && t.propertyId === p.id), t => t.cost), c = Math.round(r * o.rate / 100); return [p.title, fc(r), fc(d), fc(c), fc(r - d - c)]; });
       rows.push(['TOTAL', fc(s.rev), fc(s.dep), fc(s.com), fc(s.net)]);
       await relevePdf('RELEVÉ DE GESTION', 'Relevé ' + o.name, `REL-${y}-${o.id.slice(-4).toUpperCase()}`, [o.name, o.phone && 'Tél : ' + o.phone, o.address].filter(Boolean), ['Bien', 'Revenus', 'Dépenses', `Commission (${o.rate} %)`, 'Net'], rows, `Montant à reverser au propriétaire pour ${y} : ${fc(s.net)} (${enLettres(Math.max(0, s.net))} francs CFA).`, u, `releve-${o.name.replace(/\W+/g, '-')}-${y}`); audit('Relevé généré', o.name);
     } catch { toast('PDF indisponible : connexion Internet nécessaire.', 'bad'); } }
@@ -166,4 +164,4 @@ function seedV10() {
   P.slice(0, 2).forEach(p => DB.updateItem(DB.K.properties, p.id, {clientOwnerId: o1.id})); P.slice(2, 4).forEach(p => DB.updateItem(DB.K.properties, p.id, {clientOwnerId: o2.id}));
   if (ten && ten.leaseId) DB.addItem(DB.K.tmsgs, {leaseId: ten.leaseId, from: 'owner', text: 'Bonjour, n\'hésitez pas à me signaler tout problème dans le logement.', read: false});
 }
-const _seed10 = seedIfNeeded; seedIfNeeded = function (f) { _seed10(f); seedV10(); };
+etapeAmorcage('mandants, investisseur, promoteur', seedV10);

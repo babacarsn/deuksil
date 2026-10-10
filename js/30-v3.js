@@ -39,9 +39,12 @@ const EXP = {
   expenses: u => [['Réf.', 'Bien', 'Fournisseur', 'Catégorie', 'Montant', 'Date'], gMine('expenses', u).map(x => [x.ref, (gProp(x.propertyId) || {}).title, x.supplier, x.cat, x.amount, x.date])],
   tickets: u => [['Bien', 'Problème', 'Coût', 'Statut'], gMine('tickets', u).map(t => [(gProp(t.propertyId) || {}).title, t.title, t.cost, t.status])]
 };
-const _g3 = gTab;
-gTab = function (u, tab) {
-  const csv = EXP[tab] ? `<div class="row" style="justify-content:flex-end;margin-bottom:10px"><button class="btn ghost sm" data-action="g3-csv" data-id="${tab}">Exporter en CSV</button></div>` : '';
+/* bouton d'export CSV en tête des onglets de base et de finance qui en ont un
+   (contrats, maintenance, unités… le posent eux-mêmes) */
+const csvBtnHaut = tab => EXP[tab] ? `<div class="row" style="justify-content:flex-end;margin-bottom:10px"><button class="btn ghost sm" data-action="g3-csv" data-id="${tab}">Exporter en CSV</button></div>` : '';
+retoucheGestion(['leases', 'rents', 'docs', 'fpay', 'expenses'], (h, u, tab) => csvBtnHaut(tab) + h);
+vueGestion(['providers', 'contracts'], function (u, tab) {
+  const csv = csvBtnHaut(tab);
   if (tab === 'providers') {
     const list = gMine('providers', u);
     return `<form class="card" data-action="g3-provider" style="margin-bottom:18px"><h4 style="margin-top:0">Nouveau prestataire</h4><div class="form-grid">
@@ -49,7 +52,6 @@ gTab = function (u, tab) {
       <div class="field"><label>Téléphone</label><input class="input" name="phone" required></div></div><button class="btn">Ajouter</button></form>` +
       gTable(['Nom', 'Métier', 'Téléphone', ''], list.slice().reverse().map(p => `<tr><td class="small"><b>${esc(p.name)}</b></td><td class="small">${esc(p.job)}</td><td><a href="${telHref(p.phone)}">${esc(p.phone)}</a></td><td><button class="btn ghost sm" data-action="g3-delprov" data-id="${p.id}" aria-label="Supprimer">${icon('trash', 14)}</button></td></tr>`), ['Aucun prestataire', 'Gardez ici vos plombiers, électriciens et artisans de confiance.']);
   }
-  if (tab !== 'contracts') return csv + _g3(u, tab);
   syncContracts(u);
   const list = gMine('contracts', u), props = myProps(u), soon = c => c.status === 'actif' && daysBetween(now(), c.end) <= 30;
   return csv + `<form class="card" data-action="g3-contract" style="margin-bottom:18px"><h4 style="margin-top:0">Nouveau contrat</h4><div class="form-grid">
@@ -68,7 +70,7 @@ gTab = function (u, tab) {
       ${c.status === 'brouillon' ? `<button class="btn sm" data-action="g3-activate" data-id="${c.id}">Activer</button>` : ''}
       ${['actif', 'expiré'].includes(c.status) ? `<button class="btn sm" data-action="g3-renew" data-id="${c.id}">Renouveler</button>` : ''}
       ${c.status === 'actif' ? `<button class="btn ghost sm" data-action="g3-cancel" data-id="${c.id}">Résilier</button>` : ''}</div></td></tr>`), ['Aucun contrat', 'Créez un contrat de location, un mandat de gestion, de vente ou de prestation.']);
-};
+});
 document.addEventListener('click', e => {
   const el = e.target.closest('[data-action^="g3-"]'), u = Auth.current(); if (!el || el.tagName === 'FORM') return;
   const a = el.dataset.action, id = el.dataset.id;

@@ -100,5 +100,4 @@ function seedV5() {
   DB.updateItem(DB.K.properties, props[0].id, {verifLevel: 'annonce'});
   [['1900000000003', 'identite'], ['1900000000004', 'pro']].forEach(([c, l]) => { const x = DB.findItem(DB.K.users, y => y.cni === c); if (x) DB.updateItem(DB.K.users, x.id, {verifLevel: l}); });
 }
-const _seed5 = seedIfNeeded;
-seedIfNeeded = function (f) { _seed5(f); seedV5(); };
+etapeAmorcage('signalements', seedV5);
