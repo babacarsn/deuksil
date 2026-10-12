@@ -885,3 +885,28 @@ une attaque. En production :
 Fichiers : `js/78-coherence.js` (nouveau), `js/28-gestion.js` (versements, fin de bail), `js/44-reste.js`
 (état d'un loyer), `js/05-seed.js`, `js/29-finance.js`, `js/36-v9.js`, `js/37-v10.js`, `js/41-gestion2.js`,
 `js/42-dashboard.js`, `js/43-fiche.js`, `js/45-menus.js`, `js/62-assistance.js`, `index.html`.
+
+## 81. Recherche en temps réel, tiroirs de Gestion, mise en page mobile
+
+**Toutes les barres de recherche filtrent pendant la frappe** (`js/79-recherche.js`), sans bouton ni Entrée.
+La comparaison ignore accents et majuscules, et plusieurs mots doivent tous apparaître (« aout » trouve
+« août », « loyer fatou » croise les deux).
+- **Accueil de la Gestion** : seuls les tiroirs concernés par les lettres tapées restent affichés (« loy » →
+  Loyers, « artisan » → Prestataires, « facture » → Devis & Factures). Chaque tiroir a une liste de mots
+  associés (`MOTS_TIROIR`) : « quittance », « impayé », « panne », « NINEA »… mènent au bon endroit. Les biens,
+  locataires, factures, paiements et contrats correspondants s'affichent dessous (« Dans vos données »).
+  Entrée ouvre le premier tiroir trouvé.
+- **Listes de Gestion** (barre « Rechercher… ») : lignes et cartes filtrées en direct, avec le nombre de
+  résultats ; le filtre d'état des loyers (En retard / À venir / Encaissés) se combine avec le texte. Les dossiers
+  de vente reçoivent une barre dès trois dossiers.
+- **Mes biens** et les listes filtrées automatiquement : même règle d'accents.
+- **Recherche de biens** : le champ libre et les filtres détaillés (prix, chambres, surface, quartier, type,
+  meublé, parking) s'appliquent pendant la saisie, le curseur reste dans le champ. Sur l'accueil public, les
+  biens correspondants sont proposés sous la barre au fil des lettres.
+
+**Mise en page.**
+- Les filtres « Tous / Location / Vente » ne touchent plus la barre de recherche (marges des `.rfiltre`).
+- **Champs de date sur mobile** : Safari iOS donne aux champs date une largeur propre qui ignore `width:100%`,
+  et le champ dépassait de sa carte. Les champs date/heure sont ramenés à la largeur de la colonne, texte aligné
+  à gauche, et les colonnes de formulaire acceptent de rétrécir (`min-width:0`). Vérifié sans débordement à
+  375 px de large (émulation Chromium ; un contrôle sur un iPhone réel reste conseillé).

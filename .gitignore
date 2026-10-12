@@ -1,3 +1,4 @@
 tests/resultats.json
 tests/regression.json
 node_modules/
+tests/*.png

@@ -412,3 +412,28 @@ input[type="checkbox"]:focus-visible{outline:2px solid var(--brand);outline-offs
 @media (max-width:900px){
   input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea,.input{font-size:16px!important}
 }
+
+/* ---- Espacements des barres de filtre (chips) et de recherche ---- */
+.rfiltre{margin:14px 0 16px;row-gap:10px}
+.rfiltre.bf{margin:14px 0 16px}
+.rfiltre + .tfilter, .rfiltre + .sbar{margin-top:4px}
+.tfilter{margin:0 0 16px}
+@media (max-width:760px){
+  .rfiltre,.rfiltre.bf{margin:12px 0 14px}
+  .rfiltre-n,.bf-n{margin-top:2px}
+}
+
+/* ---- Champs de date sur mobile (Safari iOS) ----
+   Safari donne aux champs date/heure une largeur propre qui ignore
+   width:100% et un texte centré : le champ dépassait de sa carte. */
+.form-grid > *, .field, .filters > *{min-width:0}
+input[type=date], input[type=time], input[type=datetime-local], input[type=month]{
+  -webkit-appearance:none; appearance:none;
+  display:block; box-sizing:border-box; width:100%; max-width:100%; min-width:0;
+  min-height:46px; text-align:left; background-clip:padding-box;
+}
+input[type=date]::-webkit-date-and-time-value,
+input[type=time]::-webkit-date-and-time-value,
+input[type=datetime-local]::-webkit-date-and-time-value,
+input[type=month]::-webkit-date-and-time-value{text-align:left; margin:0}
+input[type=date]::-webkit-calendar-picker-indicator{margin-left:auto}

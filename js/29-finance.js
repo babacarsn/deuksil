@@ -89,10 +89,7 @@ vueGestion(['docs', 'fpay', 'expenses', 'finance', 'audit'], function (u, tab) {
       return `<tr><td class="small"><b>${esc(p.title)}</b></td><td>${money(r)}</td><td>${money(c)}</td><td><b style="color:var(--${r - c < 0 ? 'bad' : 'ok'})">${money(r - c)}</b></td><td>${p.price && p.transaction !== 'location' ? ((r - c) / p.price * 100).toFixed(1) + ' %' : '—'}</td></tr>`;
     }), ['Aucun bien', 'Ajoutez des biens pour suivre leur rentabilité.']);
 });
-document.addEventListener('input', e => {
-  const q = e.target.closest('[data-gsearch]'); if (!q) return;
-  $$('tbody tr').forEach(tr => { tr.dataset.f = tr.textContent.toLowerCase().includes(q.value.toLowerCase()) ? '' : '1'; tr.style.display = tr.dataset.f ? 'none' : ''; }); $$('table').forEach(t => t.__pg && t.__pg());
-});
+/* Le filtrage des listes pendant la frappe est dans 79-recherche.js. */
 document.addEventListener('click', e => {
   const el = e.target.closest('[data-action^="g2-"]'), u = Auth.current(); if (!el || !u || el.tagName === 'FORM') return;
   const a = el.dataset.action, id = el.dataset.id, own = k => DB.findItem(DB.K[k], x => x.id === id && x.ownerId === u.id), d = own('docs');
