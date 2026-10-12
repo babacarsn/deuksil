@@ -39,7 +39,7 @@ vueGestion(['audit', 'owners', 'tmsgs'], function (u, tab) {
 /* ---------- Fiches propriétaires (mandats de gestion) ---------- */
 function ownerStats(u, o, y) {
   const P = myProps(u).filter(p => p.clientOwnerId === o.id), ids = P.map(p => p.id), lp = id => (DB.findItem(DB.K.leases, id) || {}).propertyId, Y = String(y);
-  const rev = sumA(gMine('rents', u).filter(r => r.paidAt && r.paidAt.startsWith(Y) && ids.includes(lp(r.leaseId))), r => r.amount) + sumA(horsVentes(gMine('fpay', u)).filter(p => p.createdAt.startsWith(Y) && ids.includes(p.propertyId)), p => p.amount);
+  const rev = encLoyers(gMine('rents', u), Y, r => ids.includes(lp(r.leaseId))) + sumA(horsVentes(gMine('fpay', u)).filter(p => p.createdAt.startsWith(Y) && ids.includes(p.propertyId)), p => p.amount);
   const dep = sumA(gMine('expenses', u).filter(x => x.date.startsWith(Y) && ids.includes(x.propertyId)), x => x.amount) + sumA(gMine('tickets', u).filter(t => !t.expenseId && ids.includes(t.propertyId)), t => t.cost), com = Math.round(rev * (o.rate || 0) / 100);
   return {P, rev, dep, com, net: rev - dep - com};
 }
@@ -118,7 +118,7 @@ document.addEventListener('click', async e => {
   if (a === 'g9-odetach') { const p = myProps(u).find(x => x.id === id), ow = mine2(el.dataset.o); if (p && ow) { DB.updateItem(DB.K.properties, id, {clientOwnerId: ''}); ownerFiche(u, ow); } }
   if (a === 'g9-opdf' && o) { if (u.member && !u.perms.includes('finances')) { toast('Action non autorisée pour votre profil.', 'bad'); return; }
     try { const y = yr(), s = ownerStats(u, o, y), lp = pid => (DB.findItem(DB.K.leases, pid) || {}).propertyId;
-      const rows = s.P.map(p => { const r = sumA(gMine('rents', u).filter(x => x.paidAt && x.paidAt.startsWith(String(y)) && lp(x.leaseId) === p.id), x => x.amount) + sumA(horsVentes(gMine('fpay', u)).filter(x => x.createdAt.startsWith(String(y)) && x.propertyId === p.id), x => x.amount), d = sumA(gMine('expenses', u).filter(x => x.date.startsWith(String(y)) && x.propertyId === p.id), x => x.amount) + sumA(gMine('tickets', u).filter(t => !t.expenseId && t.propertyId === p.id), t => t.cost), c = Math.round(r * o.rate / 100); return [p.title, fc(r), fc(d), fc(c), fc(r - d - c)]; });
+      const rows = s.P.map(p => { const r = encLoyers(gMine('rents', u), String(y), x => lp(x.leaseId) === p.id) + sumA(horsVentes(gMine('fpay', u)).filter(x => x.createdAt.startsWith(String(y)) && x.propertyId === p.id), x => x.amount), d = sumA(gMine('expenses', u).filter(x => x.date.startsWith(String(y)) && x.propertyId === p.id), x => x.amount) + sumA(gMine('tickets', u).filter(t => !t.expenseId && t.propertyId === p.id), t => t.cost), c = Math.round(r * o.rate / 100); return [p.title, fc(r), fc(d), fc(c), fc(r - d - c)]; });
       rows.push(['TOTAL', fc(s.rev), fc(s.dep), fc(s.com), fc(s.net)]);
       await relevePdf('RELEVÉ DE GESTION', 'Relevé ' + o.name, `REL-${y}-${o.id.slice(-4).toUpperCase()}`, [o.name, o.phone && 'Tél : ' + o.phone, o.address].filter(Boolean), ['Bien', 'Revenus', 'Dépenses', `Commission (${o.rate} %)`, 'Net'], rows, `Montant à reverser au propriétaire pour ${y} : ${fc(s.net)} (${enLettres(Math.max(0, s.net))} francs CFA).`, u, `releve-${o.name.replace(/\W+/g, '-')}-${y}`); audit('Relevé généré', o.name);
     } catch { toast('PDF indisponible : connexion Internet nécessaire.', 'bad'); } }

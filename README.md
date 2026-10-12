@@ -827,3 +827,61 @@ secondaires : biens, unités, locataires, dépenses du mois.
 numérotées, seule la première étant active.
 Mobile : le revenu net garde sa largeur, les autres cartes passent à deux colonnes, le graphique et l'anneau prennent
 toute la largeur.
+
+## 80. Audit logique de l'espace propriétaire (biens, paiements, baux, accès)
+
+Chaque point de la liste d'audit a été **testé dans l'application en marche** (navigateur automatisé, démo
+neuve à chaque test, actions déclenchées comme par l'interface, y compris depuis un écran resté ouvert ou avec
+un identifiant forgé). Les tests sont rejouables : `tests/audit-proprietaire.js` (25 cas) et
+`tests/regression.js` (parcours normaux + tour des pages par rôle). Résultat : **17 échecs sur 25 cas ; 16 corrigés**.
+Le n° S4 (contrôle serveur) ne peut pas l'être sans backend.
+
+| # | Règle | Avant | Correction |
+|---|---|---|---|
+| V1 | Pas deux dossiers de vente ouverts sur un bien | déjà respecté | — |
+| V2 | Un bien n'est pas vendu deux fois | deux dossiers pouvaient être signés | la promesse et la signature revérifient la règle au moment d'écrire (`motifEtapeVente`) : le premier signé l'emporte |
+| V3 | Un bien occupé n'est pas vendu | un dossier ouvert avant le bail se signait quand même | idem : bail actif ou unité occupée → refus |
+| V4 | Statut manuel cohérent (bien loué) | « Disponible » accepté avec un bail en cours, l'annonce revenait dans la recherche | le statut découle des baux et des ventes (`motifStatut`) |
+| V5 | Statut manuel cohérent (bien vendu) | un bien vendu repassait « Disponible » | un bien vendu ne change plus de statut ; « Vendu » / « Loué » s'obtiennent par une vente ou un bail |
+| V6 | Suppression d'un bien engagé | supprimer un bien loué terminait le bail et **effaçait les loyers impayés** | refus si bail actif, vente en cours ou signée, loyers impayés, factures non soldées → archivage proposé |
+| V7 | Pas de baux chevauchants | un bail antidaté pouvait commencer avant le départ du précédent | contrôle des périodes par logement (`bailEnConflit`), sur les baux de bien et d'unité |
+| V8 | Deux onglets ouverts | l'autre onglet gardait un écran périmé | écoute de l'évènement `storage` : l'écran se redessine (ou prévient si une saisie est en cours) |
+| P1 | Paiement partiel ≠ paiement intégral | un acompte marquait le loyer « Payé » et **remplaçait le montant dû** : la dette disparaissait | modèle de versements (ci-dessous) |
+| P2 | Reste dû = dû − paiements | non calculable | `rRest(r)` ; le solde rend le loyer payé |
+| P3 | Pas de trop-perçu | 3× le loyer accepté, le loyer devenait ce montant | refus au-delà du reste dû ; date future refusée |
+| P4–P5 | Facture créée ≠ encaissée ; reste dû exact | déjà respecté (`dState`, `dRest`) | — |
+| P6–P7 | Un paiement compté une fois | respecté tant qu'un loyer ne se payait qu'en une fois | avec les acomptes : formulaire verrouillé après envoi, et une référence de transaction ne se saisit qu'une fois (`refDejaUtilisee`) |
+| P8 | Impayés et encaissé justes | impayés = montant entier, acomptes absents des revenus | tableaux de bord, finances, fiche d'un bien, relevés mandants, rapports et espace locataire passent par `encLoyers` / `rRest` |
+| C1 | Un bail échu ne libère pas le bien | déjà respecté | — |
+| C2 | Renouvellement sans chevauchement | aucun moyen de prolonger un bail : après l'échéance, plus aucun loyer n'était dû | bouton **Prolonger** : avenant sur le même bail, échéances ajoutées à la suite, sans doublon, loyer révisable, historique `renewals` |
+| C3 | Renouvellement de contrat | le nouveau contrat commençait le jour de fin du précédent (un jour en double) | il commence le lendemain, dure autant, et refuse un contrat actif concurrent sur le même bien |
+| C4 | Fin de bail et impayés | « Mettre fin » **supprimait tous les loyers non encaissés**, dettes comprises | date de départ demandée ; seuls les loyers des mois suivant le départ sont annulés (`terminerBail`) |
+| C5 | Retard selon le jour d'échéance du bail | déjà respecté (§ 9) | les acomptes s'affichent « Partiel · reste … » |
+| S1 | Identifiant forgé à l'écriture | un `data-id` modifié dans l'inspecteur réécrivait le bien d'un autre compte | `saveProperty` vérifie le propriétaire à l'écriture |
+| S2 | Actions sur les données d'autrui | un dossier de vente s'ouvrait sur le bien d'un autre compte | `v-new` / `g-deal` exigent un de ses biens ; membres d'équipe : ventes → droit « gestion », liste des biens → droit « biens » |
+| S3 | URL forgée | déjà refusée (fiche, édition, dossier de vente) | `/vente/` et `/bien/` ajoutés au contrôle des droits des membres |
+| S4 | Contrôles côté serveur | **impossible ici** | voir ci-dessous |
+
+**Modèle des loyers.** `amount` est le montant **dû** et n'est jamais remplacé. Chaque versement est ajouté à
+`payments` (`amount`, `date`, `method`, `ref`) ; `paidAt` n'est posé qu'au solde, et la quittance n'est émise
+qu'à ce moment (un acompte produit une notification au locataire avec le reste à régler). Les loyers saisis
+avant cette version (sans `payments`) comptent comme un versement unique : aucune migration n'est nécessaire.
+
+**Règles retenues pour les baux.** Même locataire, même logement → **prolongation** du bail existant (avenant).
+Nouveau locataire → **nouveau bail**, qui ne peut commencer qu'après le départ du précédent. Un bail échu
+n'est jamais libéré automatiquement : le logement reste occupé tant qu'on n'a pas cliqué « Mettre fin ».
+
+**S4 — ce que le serveur devra garantir.** Dans cette démo, toutes les données de tous les comptes sont dans
+le `localStorage` du navigateur : n'importe qui peut les lire ou les modifier depuis la console, et les mots de
+passe sont en clair. Les contrôles ajoutés ici empêchent les erreurs et les manipulations par l'interface, pas
+une attaque. En production :
+- authentification réelle (mots de passe hachés, session côté serveur) ; l'identité vient de la session, jamais d'un champ envoyé par le client ;
+- chaque requête filtrée par `owner_id` côté serveur (ou politique RLS PostgreSQL) : un identifiant inconnu ou d'un autre compte répond 404 ;
+- règles d'exclusivité en contraintes de base : index unique partiel « une vente signée par bien », contrainte d'exclusion PostgreSQL sur la période des baux d'un même logement (`EXCLUDE USING gist (logement WITH =, daterange(debut, fin) WITH &&)`) ;
+- signature d'une vente, création d'un bail et encaissement dans une transaction avec verrou de ligne (`SELECT … FOR UPDATE`) : deux utilisateurs ne peuvent pas valider en même temps deux opérations incompatibles ;
+- table `paiements` à part, avec clé d'idempotence par envoi de formulaire et unicité de la référence de transaction ;
+- les règles de ce module (`78-coherence.js`) réécrites côté serveur à l'identique ; celles du navigateur ne servent plus qu'à afficher l'erreur plus tôt.
+
+Fichiers : `js/78-coherence.js` (nouveau), `js/28-gestion.js` (versements, fin de bail), `js/44-reste.js`
+(état d'un loyer), `js/05-seed.js`, `js/29-finance.js`, `js/36-v9.js`, `js/37-v10.js`, `js/41-gestion2.js`,
+`js/42-dashboard.js`, `js/43-fiche.js`, `js/45-menus.js`, `js/62-assistance.js`, `index.html`.

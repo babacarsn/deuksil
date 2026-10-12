@@ -36,11 +36,11 @@ const bRents = (u, p) => { const ids = bLeases(u, p).map(l => l.id); return gMin
 const bExp = (u, p) => gMine('expenses', u).filter(x => x.propertyId === p.id);
 const bTick = (u, p) => gMine('tickets', u).filter(t => t.propertyId === p.id);
 function bFin(u, p, year) {
-  const Y = String(year), rents = bRents(u, p).filter(r => r.paidAt && r.paidAt.startsWith(Y)).reduce((s, r) => s + r.amount, 0);
+  const Y = String(year), rents = encLoyers(bRents(u, p), Y);
   const fact = horsVentes(gMine('fpay', u)).filter(x => x.propertyId === p.id && x.createdAt.startsWith(Y)).reduce((s, x) => s + x.amount, 0);
   const dep = bExp(u, p).filter(x => x.date.startsWith(Y)).reduce((s, x) => s + x.amount, 0)
     + bTick(u, p).filter(t => !t.expenseId && (t.createdAt || '').startsWith(Y)).reduce((s, t) => s + t.cost, 0);
-  const impayes = bRents(u, p).filter(r => !r.paidAt && rentState(r)[1] === 'bad').reduce((s, r) => s + r.amount, 0);
+  const impayes = bRents(u, p).filter(r => !r.paidAt && rentState(r)[1] === 'bad').reduce((s, r) => s + rRest(r), 0);
   return {rev: rents + fact, dep, impayes, net: rents + fact - dep};
 }
 /* une unité implicite pour un bien sans unité déclarée */

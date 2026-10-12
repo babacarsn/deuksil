@@ -24,7 +24,9 @@ rentState = function (r) {
      du premier loyer ne peut pas précéder le début du bail */
   let echeance = `${r.month}-${d}`;
   if (l && l.start && String(l.start).slice(0, 10) > echeance) echeance = String(l.start).slice(0, 10);
-  return echeance < ymd() ? ['En retard', 'bad'] : ['À venir', 'info'];
+  /* Un acompte ne solde pas le loyer : il reste en retard ou à venir, avec le reste dû affiché. */
+  const part = rPaid(r) > 0, reste = part ? ' · reste ' + money(rRest(r)) : '';
+  return echeance < ymd() ? [(part ? 'Partiel, en retard' : 'En retard') + reste, 'bad'] : [part ? 'Partiel' + reste : 'À venir', part ? 'warn' : 'info'];
 };
 
 /* ---------- §7 : unité archivée ---------- */

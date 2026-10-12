@@ -46,6 +46,26 @@ function rentState(r) {
   if (r.paidAt) return ['Payé', 'ok'];
   return r.month + '-05' < now().slice(0, 10) ? ['En retard', 'bad'] : ['À venir', 'info'];
 }
+/* Encaissements d'un loyer. Un loyer peut être réglé en plusieurs fois :
+   `amount` reste le montant DÛ (il n'est jamais remplacé par ce qui a été
+   reçu), `payments` liste les versements, et `paidAt` n'est posé qu'au
+   solde. Un loyer enregistré avant cette règle (sans `payments`) compte
+   comme un seul versement égal à son montant, à la date `paidAt`. */
+const rPays = r => Array.isArray(r.payments) && r.payments.length ? r.payments
+  : r.paidAt ? [{amount: r.amount, date: r.paidAt, method: r.method || '', ref: r.payRef || ''}] : [];
+const rPaid = r => rPays(r).reduce((s, p) => s + (+p.amount || 0), 0);
+const rRest = r => r.paidAt ? 0 : Math.max(0, (+r.amount || 0) - rPaid(r));
+/* Total des versements de loyer dont la date commence par `periode`
+   ('2026', '2026-10' ; vide = toutes dates), sur les loyers retenus par `garder`. */
+const encLoyers = (rents, periode, garder) => rents.reduce((s, r) => (!garder || garder(r))
+  ? s + rPays(r).filter(p => !periode || String(p.date).startsWith(periode)).reduce((a, p) => a + (+p.amount || 0), 0) : s, 0);
+/* Une référence de transaction (Wave, virement…) ne se saisit qu'une fois. */
+function refDejaUtilisee(u, ref) {
+  const k = String(ref).trim().toLowerCase(); if (!k) return '';
+  for (const r of gMine('rents', u)) for (const p of rPays(r)) if (String(p.ref || '').trim().toLowerCase() === k) {
+    const l = DB.findItem(DB.K.leases, r.leaseId) || {}; return `loyer de ${monthLabel(r.month)}${l.tenant ? ' · ' + l.tenant : ''}`; }
+  return '';
+}
 let gTable = (head, rows, empty) => rows.length
   ? `<div class="table-wrap"><table><thead><tr>${head.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table></div>`
   : `<div class="empty"><b>${empty[0]}</b><p class="small">${empty[1]}</p></div>`;
@@ -76,7 +96,7 @@ function gTabBase(u, tab) {
 
   if (tab === 'rents') {
     const late = rents.filter(r => !r.paidAt && rentState(r)[1] === 'bad');
-    return `<div class="kpis">${kpi(rents.filter(r => r.paidAt).length, 'Loyers encaissés', 'ok')}${kpi(late.length, 'En retard', 'bad')}${kpi(money(late.reduce((s, r) => s + r.amount, 0)), 'Montant impayé')}</div>
+    return `<div class="kpis">${kpi(rents.filter(r => r.paidAt).length, 'Loyers encaissés', 'ok')}${kpi(late.length, 'En retard', 'bad')}${kpi(money(late.reduce((s, r) => s + rRest(r), 0)), 'Montant impayé')}</div>
     <div style="margin-top:18px">` + gTable(['Mois', 'Locataire', 'Bien', 'Montant', 'État', ''], rents.slice().sort((a, b) => a.month < b.month ? -1 : 1).map(r => {
       const l = lease(r.leaseId); if (!l) return ''; const p = gProp(l.propertyId), [lab, tone] = rentState(r);
       const wa = String(l.phone).replace(/\D/g, ''), msg = encodeURIComponent(`Bonjour ${l.tenant}, rappel : le loyer de ${monthLabel(r.month)} (${money(r.amount)}) est en attente. Merci.`);
@@ -128,6 +148,18 @@ route(/^\/manage\/(leases|rents|tickets|deals|finance)$/, tab => {
   return shellApp(u, page(gLabel(tab), meta[1]) + nav + gTab(u, tab));
 });
 
+/* Fin d'un bail à une date donnée. On n'efface que les loyers des mois
+   POSTÉRIEURS au départ : un loyer échu et impayé est une dette du
+   locataire, pas une ligne à faire disparaître. */
+function terminerBail(l, fin) {
+  fin = String(fin || ymd()).slice(0, 10);
+  const moisFin = fin.slice(0, 7);
+  DB.updateItem(DB.K.leases, l.id, {status: 'termine', endedAt: fin});
+  DB.filterItems(DB.K.rents, r => r.leaseId === l.id && !r.paidAt && r.month > moisFin && !rPaid(r)).forEach(r => DB.deleteItem(DB.K.rents, r.id));
+  if (l.unitId) DB.updateItem(DB.K.units, l.unitId, {status: 'libre', leaseId: ''});
+  else if (!DB.findItem(DB.K.leases, x => x.id !== l.id && x.propertyId === l.propertyId && x.status === 'actif')) DB.updateItem(DB.K.properties, l.propertyId, {status: 'disponible'});
+  audit('Fin de bail', `${l.tenant} · départ le ${dateFr(fin)}`);
+}
 function gReceipt(r) {
   const l = DB.findItem(DB.K.leases, r.leaseId), p = l && gProp(l.propertyId), u = Auth.current();
   const bailleur = ownerLabel(u);
@@ -141,18 +173,23 @@ document.addEventListener('click', e => {
   const a = el.dataset.action, id = el.dataset.id, u = Auth.current(); if (!u) return;
   const own = (k) => DB.findItem(DB.K[k], x => x.id === id && x.ownerId === u.id);
   if (a === 'g-pay' && own('rents')) { const r = own('rents'), l = DB.findItem(DB.K.leases, r.leaseId) || {};
-    modal('Enregistrer le paiement', `<p class="small muted">${esc(l.tenant || '')} · loyer de <b>${monthLabel(r.month)}</b></p>
+    const deja = rPaid(r), reste = rRest(r);
+    modal('Enregistrer le paiement', `<p class="small muted">${esc(l.tenant || '')} · loyer de <b>${monthLabel(r.month)}</b> : ${money(r.amount)}${deja ? ` · déjà reçu <b>${money(deja)}</b> · reste <b>${money(reste)}</b>` : ''}</p>
       <form data-action="g-pay-save" data-id="${id}"><div class="form-grid">
-        <div class="field"><label>Montant reçu (FCFA)</label><input class="input" type="number" min="1" name="amount" value="${r.amount}" required></div>
-        <div class="field"><label>Date du paiement</label><input class="input" type="date" name="date" value="${ymd()}" required></div>
+        <div class="field"><label>Montant reçu (FCFA)</label><input class="input" type="number" min="1" max="${reste}" name="amount" value="${reste}" required></div>
+        <div class="field"><label>Date du paiement</label><input class="input" type="date" name="date" value="${ymd()}" max="${ymd()}" required></div>
         <div class="field"><label>Mode de paiement</label><select class="input" name="method">${PAYM.map(x => `<option>${x}</option>`).join('')}</select></div>
         <div class="field"><label>Référence (facultatif)</label><input class="input" name="ref" placeholder="N° de transaction, reçu…"></div></div>
-      <button class="btn block">Enregistrer et générer la quittance</button></form>`); }
+      <p class="small muted" style="margin:0 0 10px">Un montant inférieur au reste dû est enregistré comme acompte : la quittance n'est émise qu'au solde.</p>
+      <button class="btn block">Enregistrer le paiement</button></form>`); }
   if (a === 'g-receipt' && own('rents')) gReceipt(own('rents'));
-  if (a === 'g-end-lease' && own('leases')) confirmDialog({title: 'Mettre fin au bail', message: 'Les loyers non encaissés seront supprimés et le bien redeviendra disponible.', confirmLabel: 'Mettre fin', danger: true, onConfirm: () => {
-    const l = own('leases'); DB.updateItem(DB.K.leases, id, {status: 'termine'});
-    DB.filterItems(DB.K.rents, r => r.leaseId === id && !r.paidAt).forEach(r => DB.deleteItem(DB.K.rents, r.id));
-    if (l.unitId) DB.updateItem(DB.K.units, l.unitId, {status: 'libre', leaseId: ''}); else DB.updateItem(DB.K.properties, l.propertyId, {status: 'disponible'}); toast('Bail terminé.'); render(); }});
+  if (a === 'g-end-lease' && own('leases')) { const l = own('leases');
+    modal('Mettre fin au bail', `<form data-action="g-end-lease-ok" data-id="${id}">
+      <p class="small">Bail de <b>${esc(l.tenant)}</b>, du ${dateFr(l.start)} au ${dateFr(leaseEnd(l))}.</p>
+      <div class="field"><label>Date de départ du locataire</label><input class="input" type="date" name="end" value="${ymd()}" min="${String(l.start).slice(0, 10)}" required></div>
+      <p class="small muted">Les loyers des mois suivant le départ sont annulés. Les loyers échus et non réglés <b>restent dus</b> et continuent d'apparaître dans les impayés.</p>
+      <div class="row" style="justify-content:flex-end;gap:10px;margin-top:14px"><button type="button" class="btn ghost" data-action="close-modal">Annuler</button>
+      <button class="btn danger">Mettre fin au bail</button></div></form>`); }
   if (a === 'g-ticket-next' && own('tickets')) { DB.updateItem(DB.K.tickets, id, {status: TICKET_NEXT[own('tickets').status]}); render(); }
   if (a === 'g-del' && ['tickets', 'deals'].includes(el.dataset.coll) && own(el.dataset.coll)) { DB.deleteItem(DB.K[el.dataset.coll], id); render(); }
 });
@@ -165,16 +202,40 @@ document.addEventListener('change', e => {
 document.addEventListener('submit', e => {
   const pf = e.target.closest('[data-action="g-pay-save"]'), uu = Auth.current();
   if (pf && uu) {
-    e.preventDefault(); const r = DB.findItem(DB.K.rents, x => x.id === pf.dataset.id && x.ownerId === uu.id);
+    e.preventDefault();
+    if (pf.dataset.sent) return;                       // double clic : une seule écriture
+    const r = DB.findItem(DB.K.rents, x => x.id === pf.dataset.id && x.ownerId === uu.id);
     if (!r || r.paidAt) { closeModal(); return; }
-    const d = formData(pf);
-    DB.updateItem(DB.K.rents, r.id, {paidAt: (d.date || ymd()) + 'T12:00:00.000Z', amount: +d.amount || r.amount,
-      method: PAYM.includes(d.method) ? d.method : 'Espèces', payRef: (d.ref || '').trim()});
-    audit('Loyer encaissé', `${monthLabel(r.month)} · ${money(+d.amount || r.amount)} · ${d.method}`);
+    const d = formData(pf), m = Math.round(+d.amount), reste = rRest(r), ref = (d.ref || '').trim(), date = d.date || ymd();
+    if (!(m > 0)) return formError(pf, 'Indiquez le montant reçu.');
+    if (m > reste) return formError(pf, `Le montant dépasse le reste dû (${money(reste)}). Un trop-perçu ne s'enregistre pas comme loyer.`);
+    if (date > ymd()) return formError(pf, 'La date du paiement ne peut pas être dans le futur.');
+    const dbl = refDejaUtilisee(uu, ref);
+    if (dbl) return formError(pf, `La référence « ${ref} » est déjà enregistrée (${dbl}). Un même versement ne se saisit qu'une fois.`);
+    pf.dataset.sent = '1';
+    const method = PAYM.includes(d.method) ? d.method : 'Espèces', at = date + 'T12:00:00.000Z', solde = m >= reste;
+    const payments = [...rPays(r), {id: uid('rpay'), amount: m, date: at, method, ref, savedAt: now()}];
+    DB.updateItem(DB.K.rents, r.id, solde ? {payments, paidAt: at, method, payRef: ref} : {payments});
+    audit(solde ? 'Loyer encaissé' : 'Acompte sur loyer', `${monthLabel(r.month)} · ${money(m)} · ${method}${solde ? '' : ' · reste ' + money(reste - m)}`);
     const t = DB.findItem(DB.K.users, x => x.leaseId === r.leaseId);
-    if (t) notify(t.id, `Votre loyer de ${monthLabel(r.month)} a été enregistré comme payé.`, '#/tenant/quittances');
-    closeModal(); render(); showCreated('quit', r.id); autoFileThen('quittance', DB.findItem(DB.K.rents, r.id), 'Paiement enregistré');
+    if (t) notify(t.id, solde ? `Votre loyer de ${monthLabel(r.month)} a été enregistré comme payé.`
+      : `Acompte de ${money(m)} reçu pour le loyer de ${monthLabel(r.month)}. Reste à régler : ${money(reste - m)}.`, '#/tenant/rents');
+    closeModal(); render();
+    if (solde) { showCreated('quit', r.id); autoFileThen('quittance', DB.findItem(DB.K.rents, r.id), 'Paiement enregistré'); }
+    else toast(`Acompte de ${money(m)} enregistré. Reste dû : ${money(reste - m)}. La quittance sera émise au solde.`);
     return;
+  }
+  const ef = e.target.closest('[data-action="g-end-lease-ok"]');
+  if (ef && uu) {
+    e.preventDefault();
+    const l = DB.findItem(DB.K.leases, x => x.id === ef.dataset.id && x.ownerId === uu.id && x.status === 'actif');
+    if (!l) { closeModal(); return; }
+    const fin = formData(ef).end || ymd();
+    if (fin < String(l.start).slice(0, 10)) return formError(ef, 'Le départ ne peut pas précéder le début du bail.');
+    terminerBail(l, fin); closeModal();
+    const dus = DB.filterItems(DB.K.rents, r => r.leaseId === l.id && !r.paidAt);
+    toast(dus.length ? `Bail terminé. ${dus.length} loyer${dus.length > 1 ? 's' : ''} impayé${dus.length > 1 ? 's restent dus' : ' reste dû'} : ${money(dus.reduce((s, r) => s + rRest(r), 0))}.` : 'Bail terminé.');
+    render(); return;
   }
   const form = e.target.closest('[data-action^="g-"]'), u = Auth.current(); if (!form || !u) return;
   e.preventDefault(); const a = form.dataset.action, d = formData(form);

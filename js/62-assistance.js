@@ -13,7 +13,7 @@
 const RFILTRES = [
   ['tous',    'Tous',        () => true],
   ['retard',  'En retard',   t => t === 'bad'],
-  ['attente', 'À venir',     t => t === 'info'],
+  ['attente', 'À venir',     t => t === 'info' || t === 'warn'],   // « warn » : acompte reçu, pas encore en retard
   ['paye',    'Encaissés',   t => t === 'ok'],
 ];
 let rFiltre = 'tous';
@@ -26,6 +26,7 @@ function tonLigne(tr) {
   if (b.classList.contains('bad')) return 'bad';
   if (b.classList.contains('ok')) return 'ok';
   if (b.classList.contains('info')) return 'info';
+  if (b.classList.contains('warn')) return 'warn';
   return '';
 }
 

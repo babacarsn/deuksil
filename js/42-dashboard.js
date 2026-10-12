@@ -13,11 +13,11 @@ function dashStats(u) {
   const m = curMonth(), rents = gMine('rents', u);
   const duMois = rents.filter(r => r.month === m);
   const attendus = duMois.reduce((s, r) => s + r.amount, 0);
-  const encaisses = rents.filter(r => r.paidAt && r.paidAt.slice(0, 7) === m).reduce((s, r) => s + r.amount, 0)
+  const encaisses = encLoyers(rents, m)
     + horsVentes(gMine('fpay', u)).filter(p => p.createdAt.slice(0, 7) === m).reduce((s, p) => s + p.amount, 0);
   const ventes = queVentes(gMine('fpay', u)).filter(p => p.createdAt.slice(0, 7) === m).reduce((s, p) => s + p.amount, 0);
   const retards = rents.filter(r => !r.paidAt && rentState(r)[1] === 'bad');
-  const impayes = retards.reduce((s, r) => s + r.amount, 0)
+  const impayes = retards.reduce((s, r) => s + rRest(r), 0)
     + gMine('docs', u).filter(d => d.type === 'FAC' && dRest(d) > 0 && d.due < ymd()).reduce((s, d) => s + dRest(d), 0);
   const depenses = gMine('expenses', u).filter(x => x.date.slice(0, 7) === m).reduce((s, x) => s + x.amount, 0)
     + gMine('tickets', u).filter(t => !t.expenseId && (t.createdAt || '').slice(0, 7) === m).reduce((s, t) => s + t.cost, 0);
@@ -26,7 +26,7 @@ function dashStats(u) {
 /* « À traiter » : uniquement ce qui demande une action aujourd'hui */
 function todoList(u, s) {
   const t = [];
-  if (s.retards.length) t.push([`${s.retards.length} loyer${s.retards.length > 1 ? 's' : ''} en retard`, money(s.retards.reduce((x, r) => x + r.amount, 0)), '#/manage/rents', 'money', 'bad']);
+  if (s.retards.length) t.push([`${s.retards.length} loyer${s.retards.length > 1 ? 's' : ''} en retard`, money(s.retards.reduce((x, r) => x + rRest(r), 0)), '#/manage/rents', 'money', 'bad']);
   const finBail = s.actifs.filter(l => { const d = daysBetween(ymd(), leaseEnd(l)); return d >= 0 && d <= 45; });
   if (finBail.length) t.push([`${finBail.length} bail${finBail.length > 1 ? 's' : ''} bientôt échu${finBail.length > 1 ? 's' : ''}`, finBail.map(l => l.tenant).join(', '), '#/manage/leases', 'briefcase', 'warn']);
   const mnt = gMine('tickets', u).filter(x => tkSt(x) !== 'terminée');
@@ -48,7 +48,7 @@ function todoList(u, s) {
 }
 const dashKpi = (n, l, ic, tone) => kpiRich(n, l, ic, tone || 'brand', null);
 function monthIncome(u, m) {
-  return gMine('rents', u).filter(r => r.paidAt && r.paidAt.slice(0, 7) === m).reduce((x, r) => x + r.amount, 0)
+  return encLoyers(gMine('rents', u), m)
     + horsVentes(gMine('fpay', u)).filter(p => p.createdAt.slice(0, 7) === m).reduce((x, p) => x + p.amount, 0);
 }
 function monthSpend(u, m) {

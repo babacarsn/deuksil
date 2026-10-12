@@ -44,11 +44,14 @@ route(/^\/tenant\/(payments|quittances)$/, which => {
   if (!u || u.role !== 'tenant') { toast('Espace réservé aux locataires.', 'bad'); go('#/login'); return false; }
   const l = tLease(u), rents = DB.filterItems(DB.K.rents, r => r.leaseId === u.leaseId && r.paidAt).sort((a, b) => a.paidAt < b.paidAt ? 1 : -1);
   if (which === 'payments') {
-    const total = rents.reduce((s, r) => s + r.amount, 0);
+    /* Chaque versement, acomptes compris : un loyer réglé en deux fois donne deux lignes. */
+    const vers = DB.filterItems(DB.K.rents, r => r.leaseId === u.leaseId).flatMap(r => rPays(r).map(p => ({r, p})))
+      .sort((a, b) => String(a.p.date) < String(b.p.date) ? 1 : -1);
+    const total = vers.reduce((s, x) => s + (+x.p.amount || 0), 0);
     return shellApp(u, page('Mes paiements', 'Tout ce que vous avez déjà réglé.') +
-      `<div class="kpis" style="margin-bottom:16px">${kpi(rents.length, 'Paiements')}${kpi(money(total), 'Total versé', 'ok')}${kpi(l ? money(l.deposit) : '—', 'Caution versée')}</div>` +
-      (rents.length ? rents.map(r => `<div class="bcard" style="cursor:default"><div class="top"><b>${monthLabel(r.month)}</b>${badge(esc(r.method || 'Encaissé par le bailleur'), 'info')}<span class="amt">${money(r.amount)}</span></div>
-        <div class="sub">Payé le ${dateFr(r.paidAt)}${r.payRef ? ' · réf. ' + esc(r.payRef) : ''}</div></div>`).join('')
+      `<div class="kpis" style="margin-bottom:16px">${kpi(vers.length, 'Paiements')}${kpi(money(total), 'Total versé', 'ok')}${kpi(l ? money(l.deposit) : '—', 'Caution versée')}</div>` +
+      (vers.length ? vers.map(({r, p}) => `<div class="bcard" style="cursor:default"><div class="top"><b>${monthLabel(r.month)}</b>${badge(esc(p.method || 'Encaissé par le bailleur'), 'info')}${r.paidAt ? '' : badge('Acompte · reste ' + money(rRest(r)), 'warn')}<span class="amt">${money(p.amount)}</span></div>
+        <div class="sub">Payé le ${dateFr(p.date)}${p.ref ? ' · réf. ' + esc(p.ref) : ''}</div></div>`).join('')
         : '<div class="empty"><b>Aucun paiement</b><p class="small">Vos règlements apparaîtront ici.</p></div>'));
   }
   return shellApp(u, page('Mes quittances', 'Une quittance par loyer payé, téléchargeable en PDF.') +

@@ -27,7 +27,7 @@ function repData(u, type, y) {
   if (type === 'depenses') { const g = {}; exps.forEach(x => { g[x.cat] = g[x.cat] || [x.cat, 0, 0]; g[x.cat][1]++; g[x.cat][2] += x.amount; }); if (tk.length) g.tk = ['maintenance (tickets)', tk.length, sum(tk)];
     const rows = Object.values(g); return {head: ['Catégorie', 'Nombre', 'Montant'], rows, total: ['TOTAL', rows.reduce((s, r) => s + r[1], 0), rows.reduce((s, r) => s + r[2], 0)]}; }
   if (type === 'impayes') { const rows = [];
-    gMine('rents', u).filter(r => !r.paidAt && rentState(r)[1] === 'bad').forEach(r => { const l = DB.findItem(DB.K.leases, r.leaseId) || {}; rows.push(['Loyer', monthLabel(r.month), l.tenant, (gProp(l.propertyId) || {}).title || '', d8(r.month + '-05'), r.amount]); });
+    gMine('rents', u).filter(r => !r.paidAt && rentState(r)[1] === 'bad').forEach(r => { const l = DB.findItem(DB.K.leases, r.leaseId) || {}; rows.push(['Loyer', monthLabel(r.month), l.tenant, (gProp(l.propertyId) || {}).title || '', d8(r.month + '-' + String(dueDayOf(l)).padStart(2, '0')), rRest(r)]); });
     gMine('docs', u).filter(d => d.type === 'FAC' && dRest(d) > 0 && d.due < now().slice(0, 10)).forEach(d => rows.push(['Facture', d.ref, d.client, (gProp(d.propertyId) || {}).title || '', d8(d.due), dRest(d)]));
     return {head: ['Type', 'Référence', 'Débiteur', 'Bien', 'Échéance', 'Montant'], rows, total: ['TOTAL', '', '', '', '', rows.reduce((s, r) => s + r[5], 0)], money: [5]}; }
   if (type === 'occupation') { const us = gMine('units', u), ls = gMine('leases', u).filter(l => l.status === 'actif');

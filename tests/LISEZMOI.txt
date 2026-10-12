@@ -1,0 +1,6 @@
+Tests automatisés (Node + Playwright, Chromium) :
+  npm install playwright
+  node tests/audit-proprietaire.js        24 règles métier (biens, paiements, baux, accès)
+  node tests/audit-proprietaire.js P1,V7  seulement certains cas
+  node tests/regression.js                parcours normaux par l'interface + tour des pages par rôle
+Le cas S4 échoue par construction : il rappelle qu'aucun serveur ne contrôle les accès.

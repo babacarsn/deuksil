@@ -142,7 +142,8 @@ function logActivity(text) { DB.addItem(DB.K.activity, {text}); }
 function cascadeDeleteProperty(propertyId) {
   DB.getData(DB.K.units).filter(x => x.propertyId === propertyId).forEach(x => DB.deleteItem(DB.K.units, x.id));
   DB.getData(DB.K.tickets).filter(x => x.propertyId === propertyId).forEach(x => DB.deleteItem(DB.K.tickets, x.id));
-  DB.getData(DB.K.leases).filter(l => l.propertyId === propertyId && l.status === 'actif').forEach(l => { DB.getData(DB.K.rents).filter(r => r.leaseId === l.id && !r.paidAt).forEach(r => DB.deleteItem(DB.K.rents, r.id)); DB.updateItem(DB.K.leases, l.id, {status: 'termine'}); });
+  /* Un bail en cours est clôturé à la date du jour : les loyers échus impayés restent dus. */
+  DB.getData(DB.K.leases).filter(l => l.propertyId === propertyId && l.status === 'actif').forEach(l => terminerBail(l, ymd()));
   DB.getData(DB.K.favorites).filter(f => f.propertyId === propertyId).forEach(f => DB.deleteItem(DB.K.favorites, f.id));
   DB.getData(DB.K.visits).filter(v => v.propertyId === propertyId).forEach(v => DB.deleteItem(DB.K.visits, v.id));
   DB.deleteItem(DB.K.properties, propertyId);
