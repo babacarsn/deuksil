@@ -1037,3 +1037,65 @@ et la liste devient un menu déroulant posé sur la page (ombre, hauteur limité
 un nouveau toutes les 4 secondes ; flèches sur ordinateur, glissement au doigt sur téléphone, flèches du clavier quand
 la bande a le focus. Le défilement s'arrête quand on survole, touche ou parcourt la bande, quand l'onglet est caché, et
 ne démarre pas si le système demande de réduire les animations.
+
+## 90. Accueil : bas de page d'après la maquette
+
+- **Mon activité récente** (compte connecté) : bandeau voilé de marine, lignes blanches avec pastille ronde selon le
+  type (retard en rouge, document, visite ou message en marine), date à droite, « Voir tout ».
+- **Comment ça marche** : « Trois étapes pour trouver le bon bien », cartes numérotées 01 / 02 / 03 en doré du logo,
+  séparées du texte par un filet (empilées sur téléphone, trois colonnes sur ordinateur).
+- **Vous êtes propriétaire** (carte marine, « propriétaire » en doré, coches dorées, bouton doré « Publier un bien »,
+  logo en filigrane) et **Vous êtes une agence** (carte blanche, « agence » en doré, bouton marine « Créer un compte
+  agence »), côte à côte sur ordinateur.
+- **Chiffres** : biens référencés, comptes actifs, villes couvertes, visites organisées, avec pictogramme (2 × 2 sur
+  téléphone, une ligne sur ordinateur).
+Les témoignages, la FAQ et le pied de page restent inchangés.
+
+## 91. Témoignages qui défilent et questions fréquentes illustrées
+
+- **Témoignages** : cartes d'après la maquette (guillemets, citation, pastille aux initiales, nom et rôle), qui
+  **défilent** comme les biens en vedette (trois à l'écran sur ordinateur, un sur téléphone, un nouveau toutes les
+  4 secondes, flèches, glissement au doigt). Cinq témoignages. **Ce sont des exemples** : la section l'indique
+  (« Exemples de démonstration ») ; il faudra les remplacer par de vrais avis, avec l'accord de leurs auteurs, avant
+  la mise en ligne.
+- **Questions fréquentes** : chaque question a son icône — publier (flèche vers le haut), gratuité (FCFA), annonces
+  à jour (coche), visite (calendrier), commission (pourcentage), version de démonstration (fiole). Réponses dépliables,
+  chevron qui pivote. Nouvelle question « Comment publier un bien sur DEUKSIL ? » ; la réponse sur la version finale ne
+  parle plus de paiements simulés (il n'y a plus de paiement dans l'application).
+
+## 92. Pied de page prêt pour la mise en ligne
+
+- Plus aucune mention « démonstration », « simulation », « comptes de test » ni « réinitialiser les données » dans le pied de page.
+- Nouveau pied de page (js/84-accueil.js, `piedDePage()`) : marque + coordonnées, colonnes Explorer, Professionnels, Aide, Légal ; barre basse « © année DEUKSIL. Tous droits réservés. · Conçu au Sénégal · Haut de page ».
+- Coordonnées et réseaux sociaux à renseigner dans `DEUKSIL_CONTACT` (en haut de la section pied de page de js/84-accueil.js) : un champ vide n'est pas affiché, rien n'est inventé.
+- La réinitialisation des données de test reste accessible depuis les paramètres administrateur.
+
+## 93. Animations
+
+Module js/85-animations.js + section « Animations » de css/02-refonte.css.
+- Transition douce à chaque changement de page ; rien ne se rejoue quand la même page se redessine (recherche, filtres).
+- Accueil : photo de couverture qui avance lentement, titre / texte / recherche qui arrivent en cascade, reflet doré sur « Sénégal ».
+- Blocs qui apparaissent au défilement, en cascade (catégories, biens, étapes, profils, chiffres, avis, FAQ, cartes des tableaux de bord, pied de page).
+- Compteurs qui défilent jusqu'à leur valeur (chiffres de l'accueil, montants des tableaux de bord) ; barres du graphique qui se remplissent.
+- Survol : cartes qui se soulèvent, photos qui zooment, icônes qui basculent, flèches qui avancent ; onde au clic sur les boutons.
+- Bulles des tableaux de bord qui respirent, alerte des impayés qui pulse, ombre de l'en-tête au défilement, fenêtres et notifications qui glissent.
+- Réglage « réduire les animations » de l'appareil respecté : tout s'affiche sans mouvement.
+
+## 94. Bouton flottant « Remonter en haut »
+
+- Bouton rond bleu nuit du logo, flèche blanche, anneau doré qui se remplit au fil de la lecture de la page.
+- Apparaît en glissant après environ un écran de défilement, disparaît en haut de page.
+- Au clic, la page glisse jusqu'en haut (accélère puis ralentit) ; molette, doigt ou clavier interrompent le glissement. Le lien « Haut de page » du pied de page utilise le même glissement.
+- Se place automatiquement au-dessus de l'assistant et de la barre d'onglets du mobile.
+- Test : tests/bouton-haut.js.
+
+## 95. Bouton « Remonter en haut » limité à l'accueil, portraits de profil
+
+- Le bouton flottant n'apparaît plus que sur la page d'accueil publique.
+- js/86-portraits.js : chaque compte sans photo affiche un portrait illustré d'une personne noire (homme ou femme selon le prénom ; teint, coiffure — afro, tresses, foulard, voile, chignon, calotte —, barbe, lunettes, tenue et fond variés, toujours les mêmes pour un compte). Dessinés en SVG dans le projet : aucun visage réel, aucun droit à payer. La photo ajoutée par l'utilisateur reste prioritaire. Les témoignages de l'accueil utilisent aussi ces portraits.
+- Pour forcer le genre d'un compte : champ `sexe` ('F' ou 'M') sur l'utilisateur.
+
+## 96. Barre de recherche de l'accueil
+
+- La barre est à cheval : le bord bas de la photo passe exactement au milieu de la barre (moitié sur la photo, moitié sur le blanc), accueil public comme accueil client. Le décalage est porté par l'animation d'entrée (`pillIn`), qui l'annulait auparavant.
+- Sur téléphone, texte d'aide raccourci : « Ville, quartier, type de bien… ».
