@@ -7,6 +7,7 @@
      3. Évolution des revenus : six mois en barres horizontales.
      4. Mon patrimoine : biens, locataires, ventes, documents, avec photo.
      5. À traiter : ce qui demande une action aujourd'hui.
+     6. Actions rapides : ajouter un bien, un locataire, un acheteur, un document.
    Tous les chiffres sont calculés sur les versements réels (acomptes
    compris, voir § 80 du README) : aucun graphique illustratif.
    L'agence garde son tableau de bord actuel.
@@ -123,6 +124,18 @@ function pdATraiter(u, d) {
   </section>`;
 }
 
+/* Les quatre actions rapides de l'ancien tableau de bord, chacune dans sa couleur. */
+const PD_ACTIONS = [
+  ['#/owner/property/new', 'Ajouter un bien', 'plus', 'brand', ''],
+  ['#/manage/leases', 'Ajouter un locataire', 'users', 'ok', ''],
+  ['#/manage/deals', 'Ajouter un acheteur', 'briefcase', 'gold', ''],
+  ['#/coffre', 'Ajouter un document', 'file', 'info', 'g7-add']
+];
+function pdActions() {
+  return `<section class="pd-actions" aria-labelledby="pd-act-t"><h3 id="pd-act-t" class="pd-h" style="margin-bottom:12px">Actions rapides</h3>
+    <div class="qa-grid">${PD_ACTIONS.map(([h, l, ic, tone, ouvrir]) => `<a class="quick-card pd-qa" data-tone="${tone}" href="${h}"${ouvrir ? ` data-ouvrir="${ouvrir}"` : ''}>
+      <div class="ic-bubble">${icon(ic, 17)}</div><b>${l}</b></a>`).join('')}</div></section>`;
+}
 function tableauProprietaire(u) {
   if (!myProps(u).length) return dashOnboarding(u);
   const d = pdStats(u);
@@ -131,7 +144,7 @@ function tableauProprietaire(u) {
       <div class="pd-left">${pdRevenus(d)}${pdDuo(d)}</div>
       ${pdEvolution(d)}
     </div>
-    <div class="pd-bottom">${pdPatrimoine(d)}${pdATraiter(u, d)}</div>
+    <div class="pd-bottom">${pdPatrimoine(d)}<div class="pd-left">${pdATraiter(u, d)}${pdActions()}</div></div>
   </div>`;
 }
 

@@ -923,6 +923,7 @@ La comparaison ignore accents et majuscules, et plusieurs mots doivent tous appa
 4. **Mon patrimoine** : biens, locataires et baux, ventes, documents, chacun avec sa photo et ses chiffres.
    L'occupation ne compte que les logements à louer (un terrain en vente n'est pas « vacant »).
 5. **À traiter** : retards, maintenance, contrats à renouveler, visites.
+6. **Actions rapides** : ajouter un bien, un locataire, un acheteur, un document ; chaque carte dans sa couleur.
 Le bandeau photo d'accueil et l'écran « Premiers pas » (compte sans bien) sont conservés. L'agence garde son
 tableau de bord.
 

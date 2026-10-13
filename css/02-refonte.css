@@ -557,3 +557,11 @@ input[type=date]::-webkit-calendar-picker-indicator{margin-left:auto}
 .pd-month{background:var(--surface)}
 .pd-more{position:relative;background:color-mix(in srgb,var(--surface) 70%,transparent)}
 @media (prefers-reduced-motion:reduce){.pd-card::before,.pd-card::after{transition:none}.pd-card:hover::before,.pd-card:hover::after{transform:none}}
+
+/* Actions rapides du tableau de bord : bulle et pastille de la couleur de l'action. */
+.pd-qa{--qc:var(--info);--qs:var(--info-soft)}
+.pd-qa[data-tone="ok"]{--qc:var(--ok);--qs:var(--ok-soft)}
+.pd-qa[data-tone="gold"]{--qc:var(--gold);--qs:var(--gold-soft)}
+.pd-qa[data-tone="info"]{--qc:#6B5BD2;--qs:color-mix(in srgb,#6B5BD2 14%,var(--surface))}
+.pd-qa .ic-bubble{background:var(--qs);color:var(--qc)}
+.pd-qa::before{background:radial-gradient(circle at 34% 34%,color-mix(in srgb,var(--qc) 20%,transparent) 0%,transparent 72%)!important;opacity:1!important}
