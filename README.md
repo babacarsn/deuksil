@@ -1099,3 +1099,20 @@ Module js/85-animations.js + section « Animations » de css/02-refonte.css.
 
 - La barre est à cheval : le bord bas de la photo passe exactement au milieu de la barre (moitié sur la photo, moitié sur le blanc), accueil public comme accueil client. Le décalage est porté par l'animation d'entrée (`pillIn`), qui l'annulait auparavant.
 - Sur téléphone, texte d'aide raccourci : « Ville, quartier, type de bien… ».
+
+## 97. Bugs causés par les animations — analyse et corrections
+
+Cause principale : l'animation de changement de page posait un `transform` sur `#app` (gardé à la fin par `animation-fill-mode: both`). Un transform, même neutre, fait de l'élément le repère des descendants `position: fixed` : la barre d'onglets, le panneau du compte et le bouton de l'assistant se plaçaient alors par rapport à la page entière, plus par rapport à l'écran.
+- Barre d'onglets du bas : collée en bas du document et entraînée par le défilement (les « vibrations »). → Corrigé : la transition de page ne joue plus que sur l'opacité, sans remplissage.
+- Déconnexion : le panneau du compte s'ouvrait en haut du document (hors de l'écran dès qu'on avait défilé). → Corrigé par la même cause ; il s'ouvre sous l'en-tête, là où l'on est.
+- Apparition des blocs : la transition de survol des cartes écrasait celle de l'apparition (cartes qui « sautaient » sans fondu). → Apparition jouée par une animation `rvIn` (remplissage `backwards` seulement), qui ne laisse aucun transform derrière elle.
+- Onde au clic : elle forçait `position: relative; overflow: hidden` sur le bouton (pouvait déplacer un bouton absolu/fixe et couper pastilles ou menus). → L'onde vit dans son propre cadre ; un bouton déjà positionné garde son positionnement.
+- Impression : les blocs pas encore apparus restaient invisibles. → Tout est visible à l'impression.
+Tests : tests/anim-diag.js (barre et panneau à l'écran), tests/anim-logout.js (déconnexion des 5 rôles), tests/anim-fixes.js (aucun élément fixe « décroché » sur toutes les pages de chaque rôle, mobile et ordinateur).
+
+## 98. Noms des comptes féminins
+
+Awa Diallo → Alimatou Gueye (administratrice) · Fatou Ndiaye → Tacko Samb (cliente / locataire) · Aminata Ba → Soda Niang (cliente) · Seynabou Diop → Ndèye Sophie (propriétaire).
+- Jeu de départ mis à jour (05-seed, 31-rbac, 55/56-vie, 51-uatfix, 66-ventes).
+- js/87-noms.js : met à jour une seule fois les données déjà enregistrées dans un navigateur (comptes, baux, messages, notifications, journal).
+- Portraits : Alimatou, Tacko (et d'autres prénoms) reconnus comme féminins.

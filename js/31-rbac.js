@@ -142,10 +142,10 @@ function seedV4() {
   DB.addItem(DB.K.users, {...base, cni: '1900000000011', firstName: 'Moussa', lastName: 'Gestionnaire', phone: '770000011', role: 'manager', parentId: owner.id, perms: MEMBER_DEFAULT.manager});
   DB.addItem(DB.K.users, {...base, cni: '1900000000012', firstName: 'Aïssatou', lastName: 'Agent', phone: '770000012', role: 'agent', parentId: agency.id, perms: MEMBER_DEFAULT.agent});
   const pr = myProps(owner).find(p => p.transaction === 'location'); if (!pr) return;
-  const l = DB.addItem(DB.K.leases, {ownerId: owner.id, propertyId: pr.id, tenant: 'Fatou Ndiaye', phone: '770000013', rent: pr.price || 250000, deposit: 500000, start: addDays(now(), -90).slice(0, 10), months: 12, status: 'actif'});
+  const l = DB.addItem(DB.K.leases, {ownerId: owner.id, propertyId: pr.id, tenant: 'Tacko Samb', phone: '770000013', rent: pr.price || 250000, deposit: 500000, start: addDays(now(), -90).slice(0, 10), months: 12, status: 'actif'});
   const s = new Date(l.start);
   for (let i = 0; i < 12; i++) { const m = new Date(s.getFullYear(), s.getMonth() + i, 1); DB.addItem(DB.K.rents, {ownerId: owner.id, leaseId: l.id, month: `${m.getFullYear()}-${String(m.getMonth() + 1).padStart(2, '0')}`, amount: l.rent, paidAt: i < 2 ? addDays(l.start, i * 30) : null}); }
-  DB.addItem(DB.K.users, {...base, cni: '1900000000013', firstName: 'Fatou', lastName: 'Ndiaye', phone: '770000013', role: 'tenant', leaseId: l.id, ownerRef: owner.id});
+  DB.addItem(DB.K.users, {...base, cni: '1900000000013', firstName: 'Tacko', lastName: 'Samb', phone: '770000013', role: 'tenant', leaseId: l.id, ownerRef: owner.id});
   DB.updateItem(DB.K.properties, pr.id, {status: 'loue'});
 }
 etapeAmorcage('équipes et locataire de démonstration', seedV4);

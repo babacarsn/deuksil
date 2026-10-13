@@ -691,7 +691,7 @@ function seedVentes() {
     promiseRef: cp.ref,
     plan: dPro2.plan.map(l => l.n === 1 ? {...l, docId: fa.id, due: pAt} : l)});
 
-  /* 3. Une vente conclue et soldée, au nom d'Aminata Ba.
+  /* 3. Une vente conclue et soldée, au nom d'Soda Niang.
         La signature est récente et reste dans le mois en cours : le solde
         encaissé doit apparaître sur le tableau de bord du propriétaire,
         sinon la vente ne se voit nulle part. */

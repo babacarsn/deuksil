@@ -11,9 +11,9 @@ const res = [], ok = (id, c, m) => { res.push(c); console.log(`${c ? 'OK  ' : '�
   await p.fill('#gs-q', ''); await p.type('#gs-q', 'facture', {delay: 30}); await p.waitForTimeout(300);
   vis = await p.$$eval('.gsection:not([hidden]) .drawer:not([hidden])', a => a.map(x => x.querySelector('b').textContent));
   ok('H2', vis.some(v => /Factur/.test(v)), `« facture » → ${vis.join(', ')}`);
-  await p.fill('#gs-q', ''); await p.type('#gs-q', 'fatou', {delay: 30}); await p.waitForTimeout(300);
+  await p.fill('#gs-q', ''); await p.type('#gs-q', 'tacko', {delay: 30}); await p.waitForTimeout(300);
   const data = await p.$$eval('#gs-res a.trow', a => a.length); const foc = await p.evaluate(() => document.activeElement && document.activeElement.id);
-  ok('H3', data > 0 && foc === 'gs-q', `« fatou » → ${data} résultat(s) dans les données, focus conservé : ${foc}`);
+  ok('H3', data > 0 && foc === 'gs-q', `« tacko » → ${data} résultat(s) dans les données, focus conservé : ${foc}`);
   await p.fill('#gs-q', ''); await p.type('#gs-q', 'artisan'); await p.keyboard.press('Enter'); await p.waitForTimeout(400);
   ok('H4', /providers/.test(await p.evaluate(() => location.hash)), 'Entrée ouvre ' + await p.evaluate(() => location.hash));
   await goto(p, '#/manage'); await p.fill('#gs-q', ''); await p.type('#gs-q', 'securite zzz'); await p.waitForTimeout(300);

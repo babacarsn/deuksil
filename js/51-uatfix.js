@@ -2,7 +2,7 @@
    MODULE : uatfix.js — accès aux neuf espaces pour la recette (UAT).
    Deux obstacles empêchaient de tester l'application en entier :
    1. le compte locataire recevait la même adresse Gmail que le compte
-      client (Fatou Ndiaye dans les deux cas). La connexion retrouvait le
+      client (Tacko Samb dans les deux cas). La connexion retrouvait le
       client en premier : l'espace locataire était inatteignable.
    2. la liste des comptes de démonstration n'en proposait que cinq ;
       investisseur, promoteur, gestionnaire et agent devaient être saisis

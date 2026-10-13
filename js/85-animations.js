@@ -114,11 +114,15 @@ document.addEventListener('pointerdown', e => {
   const b = e.target.closest('.btn, .quick-card, .hx-cat, .hx-arrow, .pd-more');
   if (!b || b.disabled) return;
   const r = b.getBoundingClientRect(), d = Math.max(r.width, r.height) * 2;
-  const o = document.createElement('span');
+  /* On ne change le positionnement que d'un bouton « statique » : un bouton
+     déjà fixe, absolu ou collant garde le sien. */
+  if (getComputedStyle(b).position === 'static') b.classList.add('onde-hote');
+  const cadre = document.createElement('span'), o = document.createElement('span');
+  cadre.className = 'onde-cadre'; cadre.setAttribute('aria-hidden', 'true');
   o.className = 'onde';
   o.style.cssText = `width:${d}px;height:${d}px;left:${e.clientX - r.left - d / 2}px;top:${e.clientY - r.top - d / 2}px`;
-  b.classList.add('onde-hote'); b.appendChild(o);
-  setTimeout(() => o.remove(), 650);
+  cadre.appendChild(o); b.appendChild(cadre);
+  setTimeout(() => cadre.remove(), 650);
 }, true);
 
 /* --------------------------------------------------------------------------

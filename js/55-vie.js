@@ -96,7 +96,7 @@ function seedVie() {
 
   /* --- 6. Un journal d'activité qui ne part pas de zéro --------------- */
   ['Mamadou Fall a publié une annonce aux Almadies',
-   'Fatou Ndiaye a demandé une visite',
+   'Tacko Samb a demandé une visite',
    'Une intervention de serrurerie a été clôturée',
    'L\'agence Teranga a enregistré un nouveau mandat',
    'Un loyer de 450 000 FCFA a été encaissé'

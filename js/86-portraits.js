@@ -10,7 +10,7 @@
 
 const PRENOMS_FEMININS = new Set(('awa fatou aminata seynabou nafissatou aissatou mariama khadija astou ndeye coumba rokhaya aida aicha ' +
   'khady adja bineta dieynaba mareme ramatoulaye yacine nafi oumy fatoumata penda maimouna anta dior codou sophie marie kine ngone fama aby ' +
-  'mame sokhna fanta binta diarra hawa kadiatou salimata ndella rama sira soda absa arame daba mbene ndiaye_f nogaye selly thioro yaye').split(/\s+/));
+  'mame sokhna fanta binta diarra hawa kadiatou salimata ndella rama sira soda absa arame daba mbene nogaye selly thioro yaye alimatou alimata tacko sophie diatou khoudia mbayang ndeye-sophie').split(/\s+/));
 const sansAccents = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
 function estFemme(u) {
   if (u && (u.sexe || u.genre)) return /^f/i.test(u.sexe || u.genre);

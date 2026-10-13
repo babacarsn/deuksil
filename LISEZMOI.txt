@@ -14,7 +14,7 @@ fichiers partagé, ou ouvrez la version publiée en ligne.
 -----------------------------------------------------------------
 COMPTES DE TEST  (mot de passe : demo123, sauf l'administrateur)
 -----------------------------------------------------------------
-  Administrateur   awa.diallo@gmail.com      (admin123)
+  Administrateur   1900000000001   (admin123) — Alimatou Gueye
   Client           1900000000005
   Propriétaire     1900000000003
   Agence           1900000000004

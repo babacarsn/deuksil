@@ -24,12 +24,12 @@ function seedBase(force) {
   DB.reset();
 
   const U = [
-    {id:'user_admin',   cni:'1900000000001', firstName:'Awa',     lastName:'Diallo',  phone:'+221 77 000 00 01', password:'admin123',  role:'admin',  status:'actif'},
-    {id:'user_client1', cni:'1900000000002', firstName:'Fatou',   lastName:'Ndiaye',  phone:'+221 77 000 00 02', password:'demo123',   role:'client', status:'actif'},
+    {id:'user_admin',   cni:'1900000000001', firstName:'Alimatou', lastName:'Gueye',  phone:'+221 77 000 00 01', password:'admin123',  role:'admin',  status:'actif'},
+    {id:'user_client1', cni:'1900000000002', firstName:'Tacko',   lastName:'Samb',    phone:'+221 77 000 00 02', password:'demo123',   role:'client', status:'actif'},
     {id:'user_client2', cni:'1900000000005', firstName:'Ibrahima',lastName:'Sarr',    phone:'+221 76 000 00 05', password:'demo123',   role:'client', status:'actif'},
-    {id:'user_client3', cni:'1900000000006', firstName:'Aminata', lastName:'Ba',      phone:'+221 70 000 00 06', password:'demo123',   role:'client', status:'actif'},
+    {id:'user_client3', cni:'1900000000006', firstName:'Soda',    lastName:'Niang',   phone:'+221 70 000 00 06', password:'demo123',   role:'client', status:'actif'},
     {id:'user_owner1',  cni:'1900000000003', firstName:'Mamadou', lastName:'Fall',    phone:'+221 78 000 00 03', password:'demo123',   role:'owner',  status:'actif'},
-    {id:'user_owner2',  cni:'1900000000007', firstName:'Seynabou',lastName:'Diop',    phone:'+221 77 000 00 07', password:'demo123',   role:'owner',  status:'actif'},
+    {id:'user_owner2',  cni:'1900000000007', firstName:'Ndèye',   lastName:'Sophie',  phone:'+221 77 000 00 07', password:'demo123',   role:'owner',  status:'actif'},
     {id:'user_agency1', cni:'1900000000004', firstName:'Cheikh',  lastName:'Gueye',   phone:'+221 33 000 00 04', password:'demo123',   role:'agency', status:'actif',
       agencyName:'Teranga Immobilier', agencyDesc:"Agence généraliste implantée à Dakar depuis 2016 : location, vente et gestion locative.", address:'Rue 10 x Corniche, Almadies, Dakar', plan:'BUSINESS'},
     {id:'user_agency2', cni:'1900000000008', firstName:'Nafissatou', lastName:'Sow',  phone:'+221 33 000 00 08', password:'demo123',   role:'agency', status:'suspendu',
@@ -102,7 +102,7 @@ function seedBase(force) {
     participants:['user_client1','user_owner1'], propertyId:'property_001',
     items:[
       {senderId:'user_client1', text:'Bonjour, le bien des Almadies est-il toujours disponible ?', at: addDays(now(), -2)},
-      {senderId:'user_owner1',  text:'Bonjour Fatou, oui il est disponible. Souhaitez-vous une visite ?', at: addDays(now(), -2)},
+      {senderId:'user_owner1',  text:'Bonjour Tacko, oui il est disponible. Souhaitez-vous une visite ?', at: addDays(now(), -2)},
       {senderId:'user_client1', text:'Avec plaisir, plutôt le week-end.', at: addDays(now(), -1)}
     ]
   });
@@ -123,7 +123,7 @@ function seedBase(force) {
   notify('user_client1', 'Votre demande de visite a été acceptée.', '#/client/visits');
   notify('user_admin',  '2 annonces attendent votre validation.', '#/admin/listings');
 
-  ['Fatou Ndiaye a créé un compte client','Mamadou Fall a publié une annonce','Teranga Immobilier a publié deux annonces','Une visite a été confirmée à Sacré-Cœur']
+  ['Tacko Samb a créé un compte client','Mamadou Fall a publié une annonce','Teranga Immobilier a publié deux annonces','Une visite a été confirmée à Sacré-Cœur']
     .forEach((text, i) => DB.addItem(DB.K.activity, {text, createdAt: addDays(now(), -i)}));
 
   localStorage.setItem(DB.K.seed, SEED_VERSION);

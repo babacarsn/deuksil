@@ -987,18 +987,25 @@ footer.site.ft .ft-top{display:flex;align-items:center;gap:6px;color:#C9D3DF;opa
 :root{--ease-out:cubic-bezier(.22,1,.36,1);--ease-spring:cubic-bezier(.34,1.56,.64,1)}
 
 /* 1. Changement de page */
-#app.anim-page{animation:pageIn .45s var(--ease-out) both}
-@keyframes pageIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+/* Opacité seulement, sans « transform » ni remplissage final : un transform
+   sur #app, même neutre, ferait de la page le repère des éléments fixes
+   (barre d'onglets, panneau du compte, assistant), qui suivraient alors la
+   page au lieu de rester sur l'écran. */
+#app.anim-page{animation:pageIn .4s var(--ease-out)}
+@keyframes pageIn{from{opacity:0}to{opacity:1}}
 
 /* 2. Apparition au défilement, en cascade */
 html,body{overflow-x:clip}
-.rv{opacity:0;transform:translateY(26px) scale(.985);transition:opacity .7s var(--ease-out),transform .7s var(--ease-out);transition-delay:calc(var(--rv-i,0) * 70ms)}
-.rv.rv-on{opacity:1;transform:none}
-.hx-cat.rv{transform:translateY(18px) scale(.9)}
-.hx-cat.rv.rv-on{transform:none;transition-timing-function:var(--ease-out),var(--ease-spring)}
-.hx-stat.rv,.hx-prof.rv:nth-child(odd){transform:translateX(-24px)}
-.hx-prof.rv:nth-child(even){transform:translateX(24px)}
-.hx-stat.rv.rv-on,.hx-prof.rv.rv-on{transform:none}
+/* Apparition jouée par une animation (et non une transition) : elle ne
+   remplace pas les transitions de survol des cartes, et elle ne laisse
+   aucun transform derrière elle une fois finie (remplissage « backwards »
+   seulement, pour le temps d'attente de la cascade). */
+.rv{opacity:0}
+.rv.rv-on{opacity:1;animation:rvIn .7s var(--ease-out) backwards;animation-delay:calc(var(--rv-i,0) * 70ms)}
+@keyframes rvIn{from{opacity:0;transform:var(--rv-de,translateY(26px) scale(.985))}to{opacity:1;transform:none}}
+.hx-cat.rv{--rv-de:translateY(18px) scale(.9)}
+.hx-stat.rv,.hx-prof.rv:nth-child(odd){--rv-de:translateX(-24px)}
+.hx-prof.rv:nth-child(even){--rv-de:translateX(24px)}
 
 /* 3. Accueil : la photo avance doucement, le texte arrive ligne par ligne */
 .hx-bgw{position:absolute;inset:0;z-index:-2;overflow:hidden;border-radius:inherit}
@@ -1053,7 +1060,10 @@ html,body{overflow-x:clip}
 html.defile .nav,html.defile .mhead{box-shadow:0 8px 24px -14px rgba(12,39,69,.45)}
 
 /* 9. Onde au clic */
-.onde-hote{position:relative;overflow:hidden}
+/* L'onde vit dans son propre cadre : le bouton garde son positionnement et
+   ce qui en dépasse (pastilles, menus) n'est jamais coupé. */
+.onde-hote{position:relative}
+.onde-cadre{position:absolute;inset:0;border-radius:inherit;overflow:hidden;pointer-events:none}
 .onde{position:absolute;border-radius:50%;background:currentColor;opacity:.18;transform:scale(0);animation:onde .6s var(--ease-out) forwards;pointer-events:none}
 @keyframes onde{to{transform:scale(1);opacity:0}}
 
@@ -1062,11 +1072,13 @@ html.defile .nav,html.defile .mhead{box-shadow:0 8px 24px -14px rgba(12,39,69,.4
 .hx-q-chev{transition:transform .3s var(--ease-out)}
 
 /* 11. Fenêtres et notifications */
-.modal,.modal-card,.sheet{animation:modalIn .32s var(--ease-out)}
+.modal{animation:modalIn .32s var(--ease-out)}
 @keyframes modalIn{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:none}}
 .toast{animation:toastIn .4s var(--ease-spring)}
 @keyframes toastIn{from{opacity:0;transform:translateY(14px) scale(.95)}to{opacity:1;transform:none}}
 
+/* À l'impression, tout est visible, même ce qui n'a pas encore défilé. */
+@media print{.rv{opacity:1!important;animation:none!important}#app.anim-page{animation:none}}
 /* Moins d'animations demandé par l'appareil : tout s'affiche directement. */
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
@@ -1117,3 +1129,8 @@ footer.site.ft .ft-bottom{padding-right:84px}
 .hx-main{padding-top:66px}.hx-main-app{padding-top:58px}
 @media (max-width:760px){.hx-main{padding-top:50px}.hx-main-app{padding-top:46px}}
 @media (prefers-reduced-motion:reduce){.hx-search,.hx.hx-in-app .hx-search{transform:translateY(50%)!important;opacity:1!important}}
+
+/* En-tête de l'accueil public : fixe lui aussi. Transparent sur la photo,
+   il devient bleu nuit dès qu'on fait défiler la page. */
+body:has(.hx:not(.hx-in-app)) header.nav{position:fixed;transition:background .3s,box-shadow .3s}
+html.defile body:has(.hx:not(.hx-in-app)) header.nav{background:#0C2745;box-shadow:0 10px 26px -14px rgba(8,27,49,.7)}
