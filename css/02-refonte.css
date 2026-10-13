@@ -569,3 +569,8 @@ input[type=date]::-webkit-calendar-picker-indicator{margin-left:auto}
 .pd-qa[data-tone="info"]{--qc:#6B5BD2;--qs:color-mix(in srgb,#6B5BD2 14%,var(--surface))}
 .pd-qa .ic-bubble{background:var(--qs);color:var(--qc)}
 .pd-qa::before{background:radial-gradient(circle at 34% 34%,color-mix(in srgb,var(--qc) 20%,transparent) 0%,transparent 72%)!important;opacity:1!important}
+
+/* ---- Tableau de bord de l'agence (js/82-tableau-agence.js) : mêmes cartes que le propriétaire ---- */
+.pd-ic.info{background:color-mix(in srgb,#6B5BD2 14%,var(--surface));color:#6B5BD2}
+.pa-quad .pd-mini[data-tone="gold"] .pd-ic{background:var(--gold-soft);color:var(--gold)}
+.pa-quad .pd-mini[data-tone="info"] .pd-ic{background:color-mix(in srgb,#6B5BD2 14%,var(--surface));color:#6B5BD2}

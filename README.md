@@ -967,3 +967,16 @@ de bord suit le solde.
 
 **Fichiers non chargés** : `54-comptes.js`, `55-vie.js`, `56-roles.js`, `57-bail-client.js`, `58-interactions.js`,
 `59-mandant.js` et `60-demarrage.js` sont d'anciennes versions absentes de `index.html` : les modifier n'a aucun effet.
+
+## 85. Tableau de bord de l'agence
+
+Même structure, même style et mêmes bulles de couleur que le tableau de bord du propriétaire (§ 82), avec ce dont
+l'agence a besoin (`js/82-tableau-agence.js`) :
+1. **Commissions de l'agence** du mois (gestion locative, au taux des mandats), variation, lien vers le détail.
+2. **Quatre indicateurs** : encaissé ce mois, loyers impayés, solde à reverser aux propriétaires, mandats actifs.
+3. **Évolution des encaissements** sur six mois, avec la part des commissions.
+4. **Mon portefeuille** : propriétaires mandants, biens gérés, locataires et baux, ventes, avec photos.
+5. **À traiter** : retards, reversements dus, propriétaires dont les biens sont gérés **sans mandat actif**, mandats
+   à renouveler dans les 30 jours, maintenance, visites.
+6. **Actions rapides** : ajouter un propriétaire, ajouter un bien, encaisser un loyer, créer une facture.
+Un agent sans droit « finances » ne voit pas les montants (cartes 1 à 3) et seulement les actions de son ressort.
