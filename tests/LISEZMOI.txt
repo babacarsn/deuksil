@@ -4,4 +4,5 @@ Tests automatisés (Node + Playwright, Chromium) :
   node tests/audit-proprietaire.js P1,V7  seulement certains cas
   node tests/regression.js                parcours normaux par l'interface + tour des pages par rôle
   node tests/recherche.js                 recherche en temps réel (Gestion, listes, biens) + débordements mobile
+  node tests/tableaux.js                  tableau de bord de chaque rôle : affichage et débordement mobile
 Le cas S4 échoue par construction : il rappelle qu'aucun serveur ne contrôle les accès.

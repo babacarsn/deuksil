@@ -574,3 +574,5 @@ input[type=date]::-webkit-calendar-picker-indicator{margin-left:auto}
 .pd-ic.info{background:color-mix(in srgb,#6B5BD2 14%,var(--surface));color:#6B5BD2}
 .pa-quad .pd-mini[data-tone="gold"] .pd-ic{background:var(--gold-soft);color:var(--gold)}
 .pa-quad .pd-mini[data-tone="info"] .pd-ic{background:color-mix(in srgb,#6B5BD2 14%,var(--surface));color:#6B5BD2}
+/* Petite carte « rouge » (favoris, retards) : pastille rouge, comme sa bulle. */
+.pd-mini[data-tone="bad"] .pd-ic{background:var(--bad-soft);color:var(--bad)}

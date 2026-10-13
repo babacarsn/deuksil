@@ -980,3 +980,21 @@ l'agence a besoin (`js/82-tableau-agence.js`) :
    à renouveler dans les 30 jours, maintenance, visites.
 6. **Actions rapides** : ajouter un propriétaire, ajouter un bien, encaisser un loyer, créer une facture.
 Un agent sans droit « finances » ne voit pas les montants (cartes 1 à 3) et seulement les actions de son ressort.
+
+## 86. Tous les tableaux de bord sur le même modèle
+
+`js/83-tableaux.js` fournit un gabarit unique (`tbPage`) qui reprend la structure et les bulles colorées des tableaux
+de bord propriétaire et agence : grande carte (bleu), quatre petites cartes (vert, rouge, doré, violet), évolution en
+barres horizontales (violet), liste avec photos (doré), « À traiter » (rouge ou vert), actions rapides.
+- **Client** : biens disponibles (ou correspondant à ses alertes), favoris, visites à venir, messages non lus, alertes,
+  nouvelles annonces sur 6 mois, « Mon espace », « À suivre » (visites, réponses, favoris devenus indisponibles), puis
+  les biens recommandés. Le bandeau photo avec la barre de recherche est conservé.
+- **Locataire** : mon loyer (retards et prochaine échéance), loyers en retard, payé dans l'année, loyer mensuel, fin du
+  bail, paiements sur 6 mois, « Mon logement » (bail, quittances, interventions, propriétaire).
+- **Administrateur** : activité de la plateforme, utilisateurs, annonces publiées, signalements, annonces à valider,
+  nouveaux comptes sur 6 mois, accès aux écrans d'administration, activité récente.
+- **Propriétaire mandant** (biens gérés par une agence) : revenus de ses biens, net, reste à percevoir, déjà reversé,
+  taux de commission, net sur 6 mois, biens confiés. Les chiffres viennent du compte de gestion de l'agence (§ 84) ;
+  avant, ce tableau de bord affichait des zéros, les loyers étant enregistrés côté agence.
+Les espaces investisseur et promoteur ont été retirés dans une version antérieure (`57-roles.js`) ; le LISEZMOI
+n'annonce plus leurs comptes de test.
