@@ -998,3 +998,18 @@ barres horizontales (violet), liste avec photos (doré), « À traiter » (rouge
   avant, ce tableau de bord affichait des zéros, les loyers étant enregistrés côté agence.
 Les espaces investisseur et promoteur ont été retirés dans une version antérieure (`57-roles.js`) ; le LISEZMOI
 n'annonce plus leurs comptes de test.
+
+## 87. Accueil d'après la maquette (public et client)
+
+`js/84-accueil.js`, styles en fin de `css/02-refonte.css`, photo `img/photos/couverture.jpg`.
+- **Couverture** plein cadre sous l'entête (logo blanc + « EUKSIL », menu), « Dakar, Sénégal », titre « Trouvez votre
+  prochain bien immobilier au Sénégal », barre de recherche à cheval sur la photo. La photo est très claire à gauche
+  (soleil) : un voile marine dégradé et une ombre douce sur le texte gardent le titre lisible, la maison reste visible.
+- **Cinq catégories** : Maisons, Appartements, Terrains, Locaux commerciaux, Biens à découvrir (libellés courts sur
+  téléphone). La catégorie active est en marine, soulignée de bleu.
+- **Biens immobiliers en vedette** : trois cartes (une maison, un appartement, un terrain parmi les plus consultés),
+  pastille de type sur la photo, favori, chambres, surface, prix, « Voir plus ». Trois colonnes sur ordinateur,
+  défilement au doigt sur téléphone.
+- **À la une — Bureaux & commerces** : « Découvrir » ouvre la recherche filtrée sur les bureaux et locaux commerciaux
+  (filtre `pro`, retirable comme les autres).
+- **Accueil du client** : même page, avec « Mon espace » (favoris, visites, messages, alertes) dans les cartes à bulles.
