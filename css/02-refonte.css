@@ -533,3 +533,27 @@ input[type=date]::-webkit-calendar-picker-indicator{margin-left:auto}
 .vstep.on{background:none;color:var(--brand);font-weight:700}
 .vstep.on i{background:var(--brand);color:#fff;box-shadow:0 0 0 4px var(--brand-soft)}
 @media (max-width:420px){.vstep{font-size:.72rem}.vstep i{width:28px;height:28px}.vstep::before{top:15px}}
+
+/* Bulles dégradées du § 78 reprises sur les cartes du tableau de bord :
+   une grande en haut à droite, une discrète en bas à gauche, chacune de la
+   couleur de sa carte (bleu revenus, vert encaissé, rouge impayés, bleu clair
+   évolution, doré patrimoine). */
+.pd-card{position:relative;overflow:hidden;isolation:isolate}
+.pd-card::before,.pd-card::after{content:"";position:absolute;border-radius:50%;z-index:-1;pointer-events:none;
+  transition:transform .45s cubic-bezier(.2,.8,.3,1)}
+.pd-card::before{width:190px;height:190px;right:-70px;top:-80px;opacity:.9;
+  background:radial-gradient(circle at 32% 32%,var(--kc,var(--brand-soft)) 0%,transparent 72%)}
+.pd-card::after{width:120px;height:120px;left:-48px;bottom:-56px;opacity:.55;
+  background:radial-gradient(circle at 60% 40%,var(--kc,var(--brand-soft)) 0%,transparent 70%)}
+.pd-mini::before{width:140px;height:140px;right:-52px;top:-60px}
+.pd-mini::after{width:96px;height:96px;left:-40px;bottom:-48px}
+.pd-card:hover::before{transform:scale(1.15) translate(-6px,6px)}
+.pd-card:hover::after{transform:scale(1.1)}
+.pd-card[data-tone="brand"]{--kc:color-mix(in srgb,var(--info) 22%,transparent)}
+.pd-card[data-tone="ok"]{--kc:color-mix(in srgb,var(--ok) 20%,transparent)}
+.pd-card[data-tone="bad"]{--kc:color-mix(in srgb,var(--bad) 18%,transparent)}
+.pd-card[data-tone="gold"]{--kc:color-mix(in srgb,var(--gold) 24%,transparent)}
+.pd-card[data-tone="info"]{--kc:color-mix(in srgb,#6B5BD2 18%,transparent)}
+.pd-month{background:var(--surface)}
+.pd-more{position:relative;background:color-mix(in srgb,var(--surface) 70%,transparent)}
+@media (prefers-reduced-motion:reduce){.pd-card::before,.pd-card::after{transition:none}.pd-card:hover::before,.pd-card:hover::after{transform:none}}

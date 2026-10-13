@@ -39,7 +39,7 @@ function pdStats(u) {
 
 function pdRevenus(d) {
   const v = variation(d.loyersMois, d.loyersAvant);
-  return `<section class="pd-card pd-rev" aria-labelledby="pd-rev-t">
+  return `<section class="pd-card pd-rev" data-tone="brand" aria-labelledby="pd-rev-t">
     <div class="pd-rev-head">
       <div style="min-width:0"><h3 id="pd-rev-t" class="pd-h">Revenus locatifs</h3><p class="pd-sub">Loyers encaissés</p></div>
       <div class="pd-month">${icon('calendar', 18)}<b>${moisCourt(d.m)} ${d.m.slice(0, 4)}</b></div>
@@ -54,12 +54,12 @@ function pdRevenus(d) {
 function pdDuo(d) {
   const n = d.retards.length;
   return `<div class="pd-duo">
-    <a class="pd-card pd-mini" href="#/manage/fpay">
+    <a class="pd-card pd-mini" data-tone="ok" href="#/manage/fpay">
       <span class="pd-ic ok">${icon('wallet', 22)}</span>
       <span class="pd-lab">Total encaissé ce mois</span>
       <b class="pd-val">${money(d.s.encaisses)}</b>
       <span class="pd-foot">Loyers et factures, hors ventes</span></a>
-    <a class="pd-card pd-mini" href="#/manage/rents">
+    <a class="pd-card pd-mini" data-tone="${n ? 'bad' : 'ok'}" href="#/manage/rents">
       <span class="pd-ic ${n ? 'warn' : 'ok'}">${icon(n ? 'alert' : 'checkCircle', 22)}</span>
       <span class="pd-lab">Loyers impayés</span>
       <b class="pd-val${n ? ' bad' : ''}">${money(d.impayes)}</b>
@@ -69,7 +69,7 @@ function pdDuo(d) {
 
 function pdEvolution(d) {
   const max = Math.max(1, ...d.revenus), total = d.revenus.reduce((a, b) => a + b, 0);
-  return `<section class="pd-card pd-evo" aria-labelledby="pd-evo-t">
+  return `<section class="pd-card pd-evo" data-tone="info" aria-labelledby="pd-evo-t">
     <div class="pd-evo-head">
       <div><h3 id="pd-evo-t" class="pd-h">Évolution des revenus</h3><p class="pd-sub">Les 6 derniers mois</p></div>
       <span class="pd-evo-ic" aria-hidden="true">${icon('barres', 24)}</span>
@@ -103,7 +103,7 @@ function pdPatrimoine(d) {
       d.ventes.length ? `${pluriel(ouverts, 'dossier')} en cours · ${pluriel(conclus, 'vente conclue', 'ventes conclues')}` : 'Aucun dossier de vente'],
     ['#/coffre', PHOTOS.bureau, 'Documents', d.docs ? `${pluriel(d.docs, 'document')} rangés dans le coffre` : 'Contrats, factures et quittances']
   ];
-  return `<section class="pd-card pd-pat" aria-labelledby="pd-pat-t">
+  return `<section class="pd-card pd-pat" data-tone="gold" aria-labelledby="pd-pat-t">
     <div class="pd-pat-head"><h3 id="pd-pat-t" class="pd-h">Mon patrimoine</h3>
       <a class="pd-all" href="#/owner/properties">Voir tout ${icon('arrowRight', 16)}</a></div>
     <div class="pd-pat-list">${items.map(([h, img, t, sub]) => `<a class="pd-item" href="${h}">
@@ -115,7 +115,7 @@ function pdPatrimoine(d) {
 
 function pdATraiter(u, d) {
   const todo = todoList(u, d.s);
-  return `<section class="pd-card pd-todo" aria-labelledby="pd-todo-t">
+  return `<section class="pd-card pd-todo" data-tone="${todo.length ? 'bad' : 'ok'}" aria-labelledby="pd-todo-t">
     <div class="pd-pat-head"><h3 id="pd-todo-t" class="pd-h">À traiter</h3>${todo.length ? `<span class="badge bad">${todo.length}</span>` : ''}</div>
     ${todo.length ? todo.map(([t, sub, h, ic, tone]) => `<a class="trow" href="${h}"><span class="itile sm ${tone === 'bad' ? 'orange' : tone === 'warn' ? 'gold' : ''}">${icon(ic, 17)}</span>
       <div class="txt" style="min-width:0"><b>${esc(t)}</b><div class="sub">${esc(sub)}</div></div>${icon('arrowRight', 16)}</a>`).join('')
