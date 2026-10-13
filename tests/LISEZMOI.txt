@@ -5,4 +5,6 @@ Tests automatisés (Node + Playwright, Chromium) :
   node tests/regression.js                parcours normaux par l'interface + tour des pages par rôle
   node tests/recherche.js                 recherche en temps réel (Gestion, listes, biens) + débordements mobile
   node tests/tableaux.js                  tableau de bord de chaque rôle : affichage et débordement mobile
+  node tests/suggestions.js               la liste de suggestions de l'accueil passe au-dessus des blocs
+  node tests/defilement.js                défilement des biens en vedette (automatique et flèches)
 Le cas S4 échoue par construction : il rappelle qu'aucun serveur ne contrôle les accès.

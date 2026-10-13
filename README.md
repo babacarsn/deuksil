@@ -1024,3 +1024,14 @@ teinte, plus claire : liens, étiquettes, barres), `--brand-soft` / `--info-soft
 couverture, « Sénégal » passe au doré du logo. Couleur du navigateur (`theme-color`, manifeste) : #0C2745.
 Restent volontairement : le violet des bulles « évolution » et « mandats », et le bleu Google du bouton de connexion
 Google (charte de Google).
+
+## 89. Recherche de l'accueil et défilement des biens
+
+**Bug corrigé** : en tapant dans la barre de recherche de l'accueil, la liste des biens proposés passait **sous** les
+catégories et les cartes (le bandeau isolait son contenu sans priorité d'affichage). Le bandeau passe au premier plan
+et la liste devient un menu déroulant posé sur la page (ombre, hauteur limitée, défilement interne).
+
+**Défilement des biens en vedette** : neuf biens (tour à tour maison, appartement, terrain, local), trois à l'écran,
+un nouveau toutes les 4 secondes ; flèches sur ordinateur, glissement au doigt sur téléphone, flèches du clavier quand
+la bande a le focus. Le défilement s'arrête quand on survole, touche ou parcourt la bande, quand l'onglet est caché, et
+ne démarre pas si le système demande de réduire les animations.

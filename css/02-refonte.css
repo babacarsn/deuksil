@@ -789,3 +789,29 @@ body:has(.hx:not(.hx-in-app)) header.nav{position:absolute;left:0;right:0;top:0;
   --nav:#0C2745; --nav-2:#1A3A60; --nav-line:#1F4673;
   --tint-blue:#DCE4EE;
 }
+
+/* ---- Recherche de l'accueil : les suggestions passent AU-DESSUS des blocs ----
+   Le bandeau isolait son contenu sans priorité d'affichage : la liste des
+   suggestions passait sous les catégories et les cartes. */
+.hx{z-index:6}
+.hx-search .sugg{position:absolute;left:0;right:0;top:calc(100% + 6px);max-width:860px;max-height:min(60vh,420px);overflow-y:auto;z-index:30;margin:0;
+  background:var(--surface);box-shadow:0 22px 50px -18px rgba(12,39,69,.45);border:1px solid var(--line);border-radius:18px}
+
+/* ---- Défilement des biens en vedette ---- */
+.hx-head-r{display:flex;align-items:center;gap:14px}
+.hx-nav{display:flex;gap:6px}
+.hx-arrow{width:34px;height:34px;border-radius:50%;border:1px solid var(--line-strong);background:var(--surface);color:var(--brand);display:grid;place-items:center;cursor:pointer;transition:background .2s,color .2s}
+.hx-arrow:hover{background:var(--brand);color:#fff;border-color:var(--brand)}
+.hx-car{display:grid;grid-auto-flow:column;grid-template-columns:none;grid-auto-columns:calc((100% - 2 * 14px) / 3);overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;
+  overscroll-behavior-x:contain;padding:2px 2px 12px;margin:0 -2px;scroll-behavior:smooth}
+.hx-car::-webkit-scrollbar{display:none}
+.hx-car .hx-card{scroll-snap-align:start}
+.hx-car:focus-visible{outline:2px solid var(--brand);outline-offset:4px;border-radius:12px}
+@media (max-width:760px){
+  .hx-car{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:calc((100% - 2 * 8px) / 3);overflow-x:auto}
+  .hx-arrow{width:28px;height:28px}
+  .hx-arrow .ic{width:14px;height:14px}
+  .hx-head-r{gap:8px}
+}
+@media (max-width:350px){.hx-car{grid-auto-columns:46%}}
+@media (max-width:760px){.hx-nav{display:none}}   /* sur téléphone, on fait glisser au doigt : le titre garde sa ligne */

@@ -36,13 +36,18 @@ function hxCats() {
     `<a class="hx-cat${actif === t && (t || !searchState.pro) ? ' on' : ''}" href="#/search" data-action="home-cat" data-t="${t}">
       <span class="hx-ci">${icon(ic, 26)}</span><span class="hx-cl"><span class="lg">${l}</span><span class="sm">${court}</span></span></a>`).join('')}</nav>`;
 }
-/* Trois biens en vedette, de trois natures différentes quand c'est possible. */
-function biensEnVedette(pubs) {
-  const tri = [...pubs].sort((a, b) => (b.views || 0) - (a.views || 0)), out = [];
-  [p => ['villa', 'maison'].includes(p.type), p => ['appartement', 'studio'].includes(p.type), p => p.transaction === 'terrain' || p.type === 'terrain']
-    .forEach(f => { const p = tri.find(x => f(x) && !out.includes(x)); if (p) out.push(p); });
-  tri.forEach(p => { if (out.length < 3 && !out.includes(p)) out.push(p); });
-  return out.slice(0, 3);
+/* Les biens en vedette : les trois premiers de natures différentes quand c'est
+   possible (maison, appartement, terrain), puis les plus consultés. */
+function biensEnVedette(pubs, n = 9) {
+  /* Tour à tour une maison, un appartement, un terrain, un local… : la bande
+     qui défile ne montre jamais trois terrains d'affilée. */
+  const tri = [...pubs].sort((a, b) => (b.views || 0) - (a.views || 0));
+  const familles = [p => ['villa', 'maison'].includes(p.type), p => ['appartement', 'studio', 'chambre'].includes(p.type),
+    p => p.transaction === 'terrain' || p.type === 'terrain', p => ['bureau', 'local commercial'].includes(p.type)];
+  const files = familles.map(f => tri.filter(f)), out = [];
+  for (let i = 0; out.length < n && files.some(f => f.length); i = (i + 1) % files.length) if (files[i].length) out.push(files[i].shift());
+  tri.forEach(p => { if (out.length < n && !out.includes(p)) out.push(p); });
+  return out;
 }
 function hxCarte(p, favIds) {
   const fav = favIds.includes(p.id), terrain = p.transaction === 'terrain' || p.type === 'terrain';
@@ -58,11 +63,45 @@ function hxCarte(p, favIds) {
       <a class="hx-more" href="#/property/${p.id}">Voir plus ${icon('arrowRight', 16)}</a>
     </div></article>`;
 }
+/* Les biens défilent : trois à l'écran, un nouveau toutes les 4 secondes,
+   flèches pour avancer ou reculer, glissement au doigt. Le défilement
+   s'arrête quand on survole, touche ou parcourt la bande au clavier. */
 function hxVedette(pubs, favIds) {
   const l = biensEnVedette(pubs);
-  return `<section class="hx-sec"><div class="hx-head"><h2>Biens immobiliers en vedette</h2><a href="#/search">Voir tous ${icon('arrowRight', 18)}</a></div>
-    ${l.length ? `<div class="hx-grid">${l.map(p => hxCarte(p, favIds)).join('')}</div>` : '<p class="muted">Aucune annonce en ligne pour le moment.</p>'}</section>`;
+  const fleches = l.length > 3 ? `<span class="hx-nav"><button type="button" class="hx-arrow" data-car="prev" aria-label="Biens précédents">${icon('arrowLeft', 17)}</button><button type="button" class="hx-arrow" data-car="next" aria-label="Biens suivants">${icon('arrowRight', 17)}</button></span>` : '';
+  return `<section class="hx-sec"><div class="hx-head"><h2>Biens immobiliers en vedette</h2><span class="hx-head-r">${fleches}<a href="#/search">Voir tous ${icon('arrowRight', 18)}</a></span></div>
+    ${l.length ? `<div class="hx-grid hx-car" role="region" aria-label="Biens en vedette, défilement automatique" tabindex="0">${l.map(p => hxCarte(p, favIds)).join('')}</div>` : '<p class="muted">Aucune annonce en ligne pour le moment.</p>'}</section>`;
 }
+const CAR_DELAI = 4000;
+function carPas(car) { const c = car.querySelector('.hx-card'); if (!c) return 0; return c.getBoundingClientRect().width + parseFloat(getComputedStyle(car).columnGap || getComputedStyle(car).gap || 0); }
+function carAller(car, sens) {
+  const pas = carPas(car); if (!pas) return;
+  const fin = car.scrollWidth - car.clientWidth - 2;
+  if (sens > 0 && car.scrollLeft >= fin) car.scrollTo({left: 0, behavior: 'smooth'});
+  else if (sens < 0 && car.scrollLeft <= 2) car.scrollTo({left: car.scrollWidth, behavior: 'smooth'});
+  else car.scrollBy({left: sens * pas, behavior: 'smooth'});
+}
+function carDemarrer(car) {
+  if (car.dataset.car) return; car.dataset.car = '1';
+  const calme = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let pauseJusqua = 0;
+  const pause = ms => { pauseJusqua = Date.now() + ms; };
+  ['pointerenter', 'touchstart', 'focusin', 'wheel'].forEach(ev => car.addEventListener(ev, () => pause(8000), {passive: true}));
+  car.addEventListener('pointerleave', () => pause(1500));
+  const t = setInterval(() => {
+    if (!document.body.contains(car)) { clearInterval(t); return; }
+    if (calme || document.hidden || Date.now() < pauseJusqua || car.scrollWidth <= car.clientWidth + 2) return;
+    carAller(car, 1);
+  }, CAR_DELAI);
+  car.addEventListener('keydown', e => { if (e.key === 'ArrowRight') { e.preventDefault(); pause(8000); carAller(car, 1); } if (e.key === 'ArrowLeft') { e.preventDefault(); pause(8000); carAller(car, -1); } });
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-car]'); if (!b || b.classList.contains('hx-car')) return;
+  const car = b.closest('.hx-sec') && b.closest('.hx-sec').querySelector('.hx-car'); if (!car) return;
+  e.preventDefault(); car.dispatchEvent(new Event('pointerenter')); carAller(car, b.dataset.car === 'next' ? 1 : -1);
+});
+new MutationObserver(() => document.querySelectorAll('.hx-car:not([data-car])').forEach(carDemarrer))
+  .observe(document.body, {childList: true, subtree: true});
 function hxUne(pubs) {
   const n = pubs.filter(p => ['bureau', 'local commercial'].includes(p.type)).length;
   return `<section class="hx-une">
