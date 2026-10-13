@@ -9,7 +9,7 @@ const loadJsPdf = () => window.jspdf ? Promise.resolve() : (_pdfLoad = _pdfLoad 
 }));
 /* jsPDF veut le logo en data URL : on lit le fichier une fois, au premier PDF. */
 let LOGO_PDF = null;
-const loadLogoPdf = () => LOGO_PDF ? Promise.resolve() : fetch(LOGO_DARK).then(r => r.blob())
+const loadLogoPdf = () => LOGO_PDF ? Promise.resolve() : fetch('img/logo-d-bleu.png').then(r => r.blob())
   .then(b => new Promise(ok => { const f = new FileReader(); f.onload = () => { LOGO_PDF = f.result; ok(); }; f.onerror = () => ok(); f.readAsDataURL(b); }))
   .catch(() => {});
 const loadPdf = () => Promise.all([loadJsPdf(), loadLogoPdf()]).then(() => {});

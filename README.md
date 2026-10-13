@@ -1116,3 +1116,25 @@ Awa Diallo → Alimatou Gueye (administratrice) · Fatou Ndiaye → Tacko Samb (
 - Jeu de départ mis à jour (05-seed, 31-rbac, 55/56-vie, 51-uatfix, 66-ventes).
 - js/87-noms.js : met à jour une seule fois les données déjà enregistrées dans un navigateur (comptes, baux, messages, notifications, journal).
 - Portraits : Alimatou, Tacko (et d'autres prénoms) reconnus comme féminins.
+
+## 99. Nouveau logo : le D sans encadrement, suivi de « EUKSIL »
+
+- img/logo-d-blanc.svg (fonds bleu nuit) et img/logo-d-bleu.svg (fonds clairs) : le D redessiné en vectoriel (net à toutes les tailles), pilier doré #C89858, sans les coins de l'ancien carré.
+- img/logo-clair.png (qui gardait les « encadrements ») est supprimé ; LOGO_LIGHT / LOGO_DARK pointent vers les SVG.
+- Versions PNG (logo-d-blanc.png, logo-d-bleu.png) pour les PDF ; icônes de l'application (icone-2/3/192/512) refaites : D blanc sur fond bleu nuit.
+- Pied de page : le logo n'est plus voilé (opacité 1).
+
+## 100. Logo aligné sur les lettres, icônes à fond blanc
+
+- Le D fait office de première lettre : `.logo .mark` mesure `1cap` (hauteur des capitales de la police) et repose sur la ligne de base — le bas du D est au niveau du bas de « EUKSIL », le haut au niveau du haut des lettres. SVG recadré au plus juste (viewBox 5 2 278.5 291). Même règle dans le tiroir mobile et sur la page de connexion.
+- Logo agrandi d'environ 30 % (taille de police du .logo selon l'endroit : 1,6 à 1,9 rem), le D suit grâce à 1cap.
+- Icônes de l'application (PWA, apple-touch, onglet) : D bleu nuit sur fond blanc ; manifest background_color #FFFFFF. Sur un téléphone où l'application est déjà installée, la désinstaller puis la réinstaller pour voir la nouvelle icône.
+
+## 101. Revenir à son espace depuis l'accueil
+
+- Connecté, sur l'accueil : bouton « Mon espace » (avec la photo de profil) dans l'en-tête, visible aussi sur téléphone (avant, il était masqué sur mobile).
+- Menu hamburger de l'accueil : connecté → « Mon espace » en tête et « Se déconnecter » en bas ; visiteur → « Se connecter » / « Créer un compte » comme avant.
+- js/88-espace.js : #/login et #/register renvoient un utilisateur déjà connecté vers son espace.
+- Tests : tests/espace-menu.js, tests/espace-parcours.js.
+- « EUKSIL » réduit à 64 % du D (`.logo > span{font-size:.64em}`), le bas des lettres sur le même trait que le bas du D ; bloc recentré verticalement dans les en-têtes.
+- « EUKSIL » légèrement remonté (`top:-.14em`) par rapport au bas du D, à la demande.

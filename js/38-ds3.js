@@ -42,21 +42,27 @@ shellPublic = function (content) {
   const u = Auth.current(), hero = content.includes('class="hero2"');
   return `<header class="nav"><div class="wrap nav-in"><a class="logo" href="#/"><img src="${LOGO_LIGHT}" alt="DEUKSIL" class="mark"><span>EUKSIL</span></a>
     <nav class="nav-links"><a href="#/search">Rechercher</a><a href="#/#comment">Comment ça marche</a><a href="#/#proprietaires">Propriétaires</a><a href="#/#agences">Agences</a><a href="#/#faq">Questions</a></nav>
-    <div class="row">${u ? `<a class="btn sm" href="${Auth.home(u)}">Mon espace</a>` : `<a class="btn ghost sm nav-login" href="#/login">Se connecter</a><a class="btn sm" href="#/register">Créer un compte</a>`}<button class="nav-burger" data-action="open-pub-menu" aria-label="Menu">${icon('menu', 28)}</button></div></div></header>
+    <div class="row">${u ? `<a class="nav-espace" href="${Auth.home(u)}" aria-label="Mon espace">${avatarHtml(u, 28)}<span>Mon espace</span></a>` : `<a class="btn ghost sm nav-login" href="#/login">Se connecter</a><a class="btn sm" href="#/register">Créer un compte</a>`}<button class="nav-burger" data-action="open-pub-menu" aria-label="Menu">${icon('menu', 28)}</button></div></div></header>
     ${hero ? content : `<div class="pub-sheet">${content}</div>`}`;
 };
 document.head.insertAdjacentHTML('beforeend', '<style>.pub-sheet{background:var(--surface);position:relative}.pub-sheet{border-radius:0;min-height:70vh}@media(max-width:760px){.nav-in{padding:6px 0}.nav .nav-login,.nav .row .btn{display:none}}</style>');
 
 function openDrawer(links, foot) {
   const path = location.hash.replace('#', '');
-  document.body.insertAdjacentHTML('beforeend', `<div class="sdrawer-back" data-action="close-drawer"></div><aside class="sdrawer"><a class="logo" href="#/" data-action="close-drawer" style="color:#fff;font-weight:700;font-size:1.4rem;gap:10px;margin-bottom:14px"><img src="${LOGO_LIGHT}" alt="" style="width:34px;height:34px"><span>EUKSIL</span></a>
+  document.body.insertAdjacentHTML('beforeend', `<div class="sdrawer-back" data-action="close-drawer"></div><aside class="sdrawer"><a class="logo" href="#/" data-action="close-drawer" style="color:#fff;font-weight:700;font-size:1.75rem;margin-bottom:14px"><img src="${LOGO_LIGHT}" alt="" class="mark"><span>EUKSIL</span></a>
     ${links.map(([h, l, i]) => `<a href="${h}" data-action="close-drawer" class="${path === h.slice(1) ? 'active' : ''}">${icon(i, 20)}<span>${esc(l)}</span></a>`).join('')}${foot || ''}</aside>`);
 }
 const closeDrawer = () => document.querySelectorAll('.sdrawer-back,.sdrawer').forEach(e => e.remove());
 document.addEventListener('click', e => {
   const el = e.target.closest('[data-action]'); if (!el) return; const a = el.dataset.action, u = Auth.current();
   if (a === 'open-drawer' && u) openDrawer(MENUS[u.role], `<a href="#/" data-action="close-drawer">${icon('home', 20)}<span>Site public</span></a><a href="#" data-action="logout" style="color:#FFB3B8">${icon('logout', 20)}<span>Se déconnecter</span></a>`);
-  if (a === 'open-pub-menu') openDrawer([['#/', 'Accueil', 'home'], ['#/search', 'Rechercher', 'search'], ['#/#comment', 'Comment ça marche', 'compass'], ['#/#proprietaires', 'Propriétaires', 'building'], ['#/#agences', 'Agences', 'briefcase'], ['#/login', 'Se connecter', 'user'], ['#/register', 'Créer un compte', 'plus']]);
+  if (a === 'open-pub-menu') {
+    /* Connecté : « Mon espace » en tête du menu et « Se déconnecter » en bas,
+       au lieu de « Se connecter » / « Créer un compte ». */
+    const pub = [['#/', 'Accueil', 'home'], ['#/search', 'Rechercher', 'search'], ['#/#comment', 'Comment ça marche', 'compass'], ['#/#proprietaires', 'Propriétaires', 'building'], ['#/#agences', 'Agences', 'briefcase']];
+    if (u) openDrawer([[Auth.home(u), 'Mon espace', 'grid'], ...pub], `<a href="#" data-action="logout" style="color:#FFB3B8">${icon('logout', 20)}<span>Se déconnecter</span></a>`);
+    else openDrawer([...pub, ['#/login', 'Se connecter', 'user'], ['#/register', 'Créer un compte', 'plus']]);
+  }
   if (a === 'close-drawer') closeDrawer();
   if (a === 'toggle-upanel' || a === 'close-upanel') {
     const p = document.getElementById('upanel'); if (!p) return;

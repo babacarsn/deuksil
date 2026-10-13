@@ -1134,3 +1134,33 @@ footer.site.ft .ft-bottom{padding-right:84px}
    il devient bleu nuit dès qu'on fait défiler la page. */
 body:has(.hx:not(.hx-in-app)) header.nav{position:fixed;transition:background .3s,box-shadow .3s}
 html.defile body:has(.hx:not(.hx-in-app)) header.nav{background:#0C2745;box-shadow:0 10px 26px -14px rgba(8,27,49,.7)}
+
+/* Logo : le D (sans encadrement) suivi de « EUKSIL », toujours net et opaque. */
+footer.site.ft .logo{opacity:1}
+.side .logo{gap:3px}
+/* Le D fait office de première lettre : même hauteur que les capitales de
+   « EUKSIL », posé sur la même ligne de base (bas du D = bas des lettres). */
+.logo,.mhead .logo,.side .logo,.sdrawer .logo,.auth-side .logo,.auth-main .logo{align-items:baseline;gap:.07em}
+.logo .mark,.mhead .logo .mark,.side .logo .mark,.sdrawer .logo .mark,.auth-side .logo .mark,.auth-main .logo .mark{height:.7em;height:1cap;width:auto;object-fit:contain;align-self:baseline}
+/* Logo agrandi (le D suit, puisqu'il mesure 1cap). */
+.logo{font-size:1.7rem}
+.nav .logo,header.nav .logo{font-size:1.75rem}
+.mhead .logo{font-size:1.8rem}
+.side .logo{font-size:1.65rem}
+.ft-brand .logo{font-size:1.6rem}
+.auth-side .logo,.auth-main .logo{font-size:1.9rem}
+
+/* « Mon espace » dans l'en-tête public, visible aussi sur téléphone. */
+.nav-espace{display:inline-flex;align-items:center;gap:8px;padding:4px 14px 4px 4px;border-radius:999px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);color:#fff;font-weight:600;font-size:.88rem;text-decoration:none;white-space:nowrap;transition:background .2s}
+.nav-espace:hover{background:rgba(255,255,255,.18)}
+.nav-espace .avatar-img,.nav-espace img{border-radius:50%!important}
+@media (max-width:760px){.nav .row .nav-espace{display:inline-flex}}
+@media (max-width:370px){.nav-espace span{display:none}.nav-espace{padding:3px}}
+/* « EUKSIL » un peu plus petit que le D, posé sur la même ligne de base. */
+.logo > span{font-size:.64em;letter-spacing:.01em}
+/* Le bloc D + EUKSIL est centré visuellement (sans l'espace réservé sous les lettres). */
+.logo > span{line-height:1}
+.logo{padding-top:.14em}
+.side .logo{padding-top:calc(.14em + 2px)}
+/* « EUKSIL » légèrement remonté par rapport au bas du D. */
+.logo > span{position:relative;top:-.14em}

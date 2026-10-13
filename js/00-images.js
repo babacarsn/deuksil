@@ -4,8 +4,8 @@
    navigateur ne les télécharge qu'au moment de les afficher, au lieu de
    charger 1,8 Mo de base64 avant le premier écran.
    ========================================================================== */
-const LOGO_LIGHT = 'img/logo-clair.png';
-const LOGO_DARK = 'img/logo-sombre.png';
+const LOGO_LIGHT = 'img/logo-d-blanc.svg';   /* D blanc, pour les fonds bleu nuit */
+const LOGO_DARK = 'img/logo-d-bleu.svg';     /* D bleu nuit, pour les fonds clairs */
 
 const $  = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
