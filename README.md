@@ -937,3 +937,33 @@ L'application n'a qu'un thème, clair. Les restes de l'ancien mode sombre sont r
 `color-scheme: only light` en CSS et en balise meta (mode sombre automatique de Chrome Android, de certains
 téléphones, ou thème sombre de l'application qui affiche la page), et un `data-theme="dark"` posé par l'hôte est
 remis à `light`.
+
+## 84. Audit logique de l'espace agence
+
+Testé dans l'application en marche, comme l'espace propriétaire : `tests/audit-agence.js` (12 cas). **Avant : 9
+échecs sur les 11 premiers cas ; tous corrigés** (`js/81-agence.js`). Le 12e cas, ajouté avec la correction des relevés,
+passe aussi.
+
+| # | Règle | Avant | Correction |
+|---|---|---|---|
+| A1 | Un reversement qui règle plusieurs mois d'un coup n'est pas redemandé | le reversement était rattaché à un seul mois ; les autres restaient « à reverser » (risque de payer deux fois) | **compte par propriétaire** : dû cumulé − déjà reversé = solde ; un reversement est un montant libre jusqu'au solde |
+| A2 | Pas de reversement supérieur au solde | accepté | refusé, avec le solde affiché |
+| A3 | Pas de reversement nul | 0 FCFA enregistré, mois marqué « reversé » | refusé |
+| A4 | Une dépense saisie après un reversement est imputée | perdue (mois déjà clos) | le solde devient négatif : « à retenir » sur le prochain reversement |
+| A5 | Un bien, un mandant | un bien passait d'un mandant à l'autre sans prévenir | refusé : bien déjà confié ou rattaché à un autre propriétaire |
+| A6 | Un mandant, un mandat à la fois | deux mandats actifs (8 % et 12 %) sur la même période | refusé si les périodes se chevauchent |
+| A7 | Commission au taux du mandat du mois | taux du mandat actif aujourd'hui, appliqué à tout l'historique | taux du mandat en vigueur chaque mois ; hors mandat (avant, après résiliation), pas de commission |
+| A8 | Droits des agents | un agent sans droit « finances » pouvait reverser et créer des mandats | reversements → « finances », mandats → « gestion » |
+| A9 | Supprimer un mandant | possible avec un mandat actif ou un solde dû | refusé tant qu'il reste un mandat actif ou un solde |
+| A10 | Page Commissions | « simulation » : un mois de loyer par bien loué, 3 % par bien vendu | commissions de gestion réelles (12 mois, par mois et par propriétaire) + honoraires estimés, signalés comme tels |
+| A11 | Identifiants forgés | déjà refusé | — |
+| A12 | Relevé du mandant = compte de l'agence | recalcul à part : sans les dépenses ni les acomptes, au taux de la fiche | le relevé lit le compte de gestion de l'agence |
+
+**Écran Reversements** : comptes des propriétaires (encaissé, dépenses, commission, dû, déjà reversé, solde),
+détail des 6 derniers mois, historique des reversements avec reçu (solde avant / après). « À traiter » du tableau
+de bord suit le solde.
+
+**Résiliation d'un mandat** : la date de résiliation est enregistrée (`endedAt`) et borne la commission.
+
+**Fichiers non chargés** : `54-comptes.js`, `55-vie.js`, `56-roles.js`, `57-bail-client.js`, `58-interactions.js`,
+`59-mandant.js` et `60-demarrage.js` sont d'anciennes versions absentes de `index.html` : les modifier n'a aucun effet.
