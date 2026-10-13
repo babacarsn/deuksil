@@ -1031,6 +1031,8 @@ Google (charte de Google).
 catégories et les cartes (le bandeau isolait son contenu sans priorité d'affichage). Le bandeau passe au premier plan
 et la liste devient un menu déroulant posé sur la page (ombre, hauteur limitée, défilement interne).
 
+**Photo de couverture** : filtre sombre uniforme (`brightness(.7)`) en plus du voile marine.
+
 **Défilement des biens en vedette** : neuf biens (tour à tour maison, appartement, terrain, local), trois à l'écran,
 un nouveau toutes les 4 secondes ; flèches sur ordinateur, glissement au doigt sur téléphone, flèches du clavier quand
 la bande a le focus. Le défilement s'arrête quand on survole, touche ou parcourt la bande, quand l'onglet est caché, et

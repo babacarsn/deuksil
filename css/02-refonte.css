@@ -815,3 +815,7 @@ body:has(.hx:not(.hx-in-app)) header.nav{position:absolute;left:0;right:0;top:0;
 }
 @media (max-width:350px){.hx-car{grid-auto-columns:46%}}
 @media (max-width:760px){.hx-nav{display:none}}   /* sur téléphone, on fait glisser au doigt : le titre garde sa ligne */
+
+/* Photo de couverture : un filtre sombre uniforme, en plus du voile marine,
+   pour calmer le ciel très lumineux et donner du relief au texte. */
+.hx-bg{filter:brightness(.7) saturate(.92)}
