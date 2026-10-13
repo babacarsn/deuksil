@@ -910,3 +910,21 @@ La comparaison ignore accents et majuscules, et plusieurs mots doivent tous appa
   et le champ dépassait de sa carte. Les champs date/heure sont ramenés à la largeur de la colonne, texte aligné
   à gauche, et les colonnes de formulaire acceptent de rétrécir (`min-width:0`). Vérifié sans débordement à
   375 px de large (émulation Chromium ; un contrôle sur un iPhone réel reste conseillé).
+
+## 82. Tableau de bord du propriétaire (refonte) et étapes de vente
+
+**Tableau de bord** (`js/80-tableau-proprietaire.js`, styles en fin de `css/02-refonte.css`), sur la structure validée :
+1. **Revenus locatifs** : loyers encaissés du mois, badge du mois, variation par rapport au mois précédent,
+   lien « Voir le détail des revenus ».
+2. **Total encaissé ce mois** (loyers et factures, hors ventes) et **Loyers impayés** (reste dû des loyers en
+   retard), côte à côte.
+3. **Évolution des revenus** : six mois en barres horizontales, mois en cours en bleu foncé, montant au bout de
+   chaque barre. Données réelles, acomptes compris : plus de graphique illustratif.
+4. **Mon patrimoine** : biens, locataires et baux, ventes, documents, chacun avec sa photo et ses chiffres.
+   L'occupation ne compte que les logements à louer (un terrain en vente n'est pas « vacant »).
+5. **À traiter** : retards, maintenance, contrats à renouveler, visites.
+Le bandeau photo d'accueil et l'écran « Premiers pas » (compte sans bien) sont conservés. L'agence garde son
+tableau de bord.
+
+**Étapes d'une vente** : la rangée de pastilles défilait et coupait « Vendu » sur mobile. Les cinq étapes
+tiennent maintenant sur une ligne de cinq colonnes égales, pastille reliée par un trait et libellé dessous.
