@@ -15,7 +15,7 @@ PHOTOS.couverture = 'img/photos/couverture.jpg';
 /* --- 1. Les blocs ---------------------------------------------------------- */
 /* [type, libellé, icône, libellé court pour téléphone] */
 const HX_CATS = [['maison', 'Maisons', 'home', 'Maisons'], ['appartement', 'Appartements', 'building', 'Apparts'], ['terrain', 'Terrains', 'pin', 'Terrains'],
-  ['local commercial', 'Locaux commerciaux', 'store', 'Locaux'], ['', 'Biens à découvrir', 'grid', 'Découvrir']];
+  ['local commercial', 'Locaux commerciaux', 'store', 'Locaux commerciaux'], ['', 'Biens à découvrir', 'grid', 'Biens à découvrir']];
 const TYPE_FR = {appartement: 'Appartement', villa: 'Villa', maison: 'Maison', studio: 'Studio', chambre: 'Chambre', terrain: 'Terrain', bureau: 'Bureau', 'local commercial': 'Local commercial'};
 
 function hxHero(u, interne) {

@@ -666,3 +666,113 @@ body:has(.hx:not(.hx-in-app)) header.nav{position:absolute;left:0;right:0;top:0;
 }
 /* Le texte passe sur la façade claire sur téléphone : une ombre douce le détache. */
 .hx h1,.hx-lede,.hx-loc,.hx-hello{text-shadow:0 2px 18px rgba(0,25,47,.55)}
+
+/* ---- Accueil : proportions de la maquette ----
+   Première version trop grande d'environ moitié : titre, catégories, cartes et
+   encart prenaient l'écran. On revient aux tailles de la maquette. */
+.hx{min-height:470px;padding-top:96px}
+.hx-body{padding-bottom:26px}
+.hx h1{font-size:clamp(1.75rem,4.2vw,2.9rem);max-width:15ch;margin-bottom:12px}
+.hx-loc{font-size:.92rem;margin-bottom:10px}
+.hx-lede{font-size:.98rem;max-width:44ch}
+.hx-search .searchpill{max-width:760px}
+.hx-main{padding-top:52px}
+.hx-cats{padding:12px;gap:10px;border-radius:20px;margin-bottom:26px}
+.hx-ci{max-width:92px;aspect-ratio:1.3;border-radius:14px}
+.hx-ci .ic{width:22px;height:22px}
+.hx-cl{font-size:.86rem}
+.hx-cat{gap:7px;padding-bottom:8px}
+.hx-cat.on::after{height:2.5px}
+.hx-sec{margin-bottom:26px}
+.hx-head{margin-bottom:14px}
+.hx-head h2{font-size:clamp(1.15rem,2.6vw,1.6rem)}
+.hx-head a{font-size:.92rem}
+.hx-grid{gap:14px}
+.hx-card{border-radius:16px}
+.hx-ph{aspect-ratio:16/10.5}
+.hx-fav{width:32px;height:32px;top:8px;right:8px}
+.hx-fav .ic{width:17px;height:17px}
+.hx-chip{font-size:.72rem;padding:3px 10px;left:10px;bottom:-10px}
+.hx-cb{padding:18px 14px 14px;gap:6px}
+.hx-cb h3{font-size:.98rem}
+.hx-where,.hx-specs{font-size:.8rem}
+.hx-specs{gap:12px}
+.hx-specs .ic,.hx-where .ic{width:14px;height:14px}
+.hx-price{font-size:1.02rem}
+.hx-more{font-size:.86rem;padding-top:4px}
+.hx-une{border-radius:22px;margin-bottom:32px}
+.hx-une-ph{min-height:200px}
+.hx-une-ph img{border-radius:0 22px 22px 0}
+.hx-une-txt{padding:22px 26px;gap:9px}
+.hx-une h2{font-size:clamp(1.05rem,2.6vw,1.6rem)}
+.hx-une p{font-size:.92rem}
+.hx-tag{font-size:.74rem;padding:3px 10px}
+.hx-go{padding:9px 18px;font-size:.9rem}
+.hx.hx-in-app{min-height:400px}
+.hx-main .pd-mini{padding:13px 13px 12px;gap:4px}
+.hx-main .pd-mini .pd-ic{width:34px;height:34px;border-radius:10px;margin-bottom:2px}
+.hx-main .pd-mini .pd-ic .ic{width:18px;height:18px}
+.hx-main .pd-mini .pd-val{font-size:1.1rem}
+
+/* Téléphone : trois cartes côte à côte et l'encart en deux colonnes, comme la maquette. */
+@media (max-width:760px){
+  .hx{min-height:420px;padding-top:84px}
+  .hx-body{padding-bottom:22px}
+  .hx h1{font-size:clamp(1.55rem,7.4vw,1.95rem);margin-bottom:10px}
+  .hx-loc{font-size:.82rem;margin-bottom:8px}
+  .hx-lede{font-size:.86rem;max-width:32ch}
+  .hx-search .searchpill{min-height:0}
+  .hx-main{padding-top:44px}
+  .hx-cats{gap:6px;padding:10px 8px;border-radius:18px;margin-bottom:22px}
+  .hx-ci{aspect-ratio:1.2;border-radius:12px}
+  .hx-ci .ic{width:20px;height:20px}
+  .hx-cl{font-size:.68rem;line-height:1.15}
+  .hx-cl .lg{display:none}.hx-cl .sm{display:inline}
+  .hx-head h2{font-size:1.12rem}
+  .hx-head a{font-size:.8rem}
+  .hx-grid{grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-flow:row;grid-auto-columns:auto;overflow:visible;gap:8px;padding:0;margin:0}
+  .hx-card{border-radius:12px}
+  .hx-ph{aspect-ratio:1/0.82}
+  .hx-fav{width:26px;height:26px;top:5px;right:5px}
+  .hx-fav .ic{width:14px;height:14px}
+  .hx-chip{font-size:.6rem;padding:2px 7px;left:6px;bottom:-8px}
+  .hx-cb{padding:13px 8px 9px;gap:4px}
+  .hx-cb h3{font-size:.74rem;line-height:1.2}
+  .hx-where,.hx-specs{font-size:.62rem;gap:3px}
+  .hx-specs{gap:7px;flex-wrap:wrap}
+  .hx-specs span{gap:3px}
+  .hx-specs .ic,.hx-where .ic{width:11px;height:11px;flex:none}
+  .hx-price{font-size:.74rem;margin-top:2px}
+  .hx-price small{font-size:.58rem}
+  .hx-more{font-size:.68rem;gap:3px}
+  .hx-more .ic{width:12px;height:12px}
+  .hx-une{grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);border-radius:18px;margin-bottom:26px}
+  .hx-une-ph{min-height:150px}
+  .hx-une-ph img{border-radius:0 18px 18px 0}
+  .hx-une-txt{padding:14px 14px 16px;gap:6px}
+  .hx-tag{font-size:.62rem;padding:2px 8px}
+  .hx-une h2{font-size:1rem}
+  .hx-une p{font-size:.72rem;line-height:1.4}
+  .hx-go{padding:7px 13px;font-size:.74rem;gap:5px}
+  .hx-go .ic{width:13px;height:13px}
+  .hx.hx-in-app{min-height:380px;padding:22px 18px 0}
+  .hx-main .pd-mini .pd-val{font-size:1rem}
+  .hx-main .pd-mini .pd-lab{font-size:.8rem}
+}
+@media (max-width:350px){
+  .hx-grid{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:46%;overflow-x:auto}
+}
+/* Ajustements après comparaison avec la maquette */
+.hx h1{max-width:21ch}
+/* (le contenu garde la largeur de la page, aligné sur le titre et la recherche) */
+.hx-ph{aspect-ratio:16/9.4}
+.hx-une-ph{position:relative;min-height:220px}
+.hx-une-ph img{position:absolute;inset:0;height:100%}
+.hx-cl{overflow-wrap:normal;word-break:keep-all;hyphens:none}
+.hx-price{display:flex;flex-wrap:wrap;align-items:baseline;column-gap:4px}
+.hx-price small{white-space:nowrap}
+@media (max-width:760px){
+  .hx-cl{font-size:.64rem;letter-spacing:-.01em}
+  .hx-ph{aspect-ratio:1/0.82}
+  .hx-une-ph{min-height:0}
+}

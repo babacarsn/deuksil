@@ -1013,3 +1013,4 @@ n'annonce plus leurs comptes de test.
 - **À la une — Bureaux & commerces** : « Découvrir » ouvre la recherche filtrée sur les bureaux et locaux commerciaux
   (filtre `pro`, retirable comme les autres).
 - **Accueil du client** : même page, avec « Mon espace » (favoris, visites, messages, alertes) dans les cartes à bulles.
+- **Proportions** : resserrées sur la maquette (titre, catégories, cartes, encart). Sur téléphone, les trois biens en vedette tiennent côte à côte et l'encart « À la une » reste en deux colonnes.
