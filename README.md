@@ -1014,3 +1014,13 @@ n'annonce plus leurs comptes de test.
   (filtre `pro`, retirable comme les autres).
 - **Accueil du client** : même page, avec « Mon espace » (favoris, visites, messages, alertes) dans les cartes à bulles.
 - **Proportions** : resserrées sur la maquette (titre, catégories, cartes, encart). Sur téléphone, les trois biens en vedette tiennent côte à côte et l'encart « À la une » reste en deux colonnes.
+
+## 88. Un seul bleu : celui du logo
+
+Le logo est marine **#0C2745** et doré **#D0A361**. L'application utilisait une quinzaine d'autres bleus (bleus vifs
+#3D8BFF, #1F7BFF, #1D6FE8, marines voisins #00192F, #0F3057…). Ils sont tous remplacés par la famille du logo :
+`--brand` / `--nav` #0C2745 (marine du logo), `--brand-2` #081B31 (même teinte, plus foncée), `--info` #1F4673 (même
+teinte, plus claire : liens, étiquettes, barres), `--brand-soft` / `--info-soft` #E7ECF3 (voile clair). Sur la photo de
+couverture, « Sénégal » passe au doré du logo. Couleur du navigateur (`theme-color`, manifeste) : #0C2745.
+Restent volontairement : le violet des bulles « évolution » et « mandats », et le bleu Google du bouton de connexion
+Google (charte de Google).

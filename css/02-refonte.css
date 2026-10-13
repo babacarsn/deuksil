@@ -47,7 +47,7 @@
   /* case à cocher : hors flux, en haut à droite, lisible au-dessus d'une photo */
   .table-wrap td:has(> input[type="checkbox"]){position:absolute;top:21px;right:23px;z-index:3;
     width:30px;height:30px;padding:0;margin:0;border:0;display:grid;place-items:center;
-    background:var(--surface);border-radius:9px;box-shadow:0 2px 8px rgba(0,25,47,.22)}
+    background:var(--surface);border-radius:9px;box-shadow:0 2px 8px rgba(12,39,69,.22)}
   .table-wrap td:has(> input[type="checkbox"])::before{display:none}
   .table-wrap tbody tr:has(td > .photo) td:has(> input[type="checkbox"]){top:21px;right:23px}
 
@@ -158,12 +158,12 @@ input[type="checkbox"]:focus-visible{outline:2px solid var(--brand);outline-offs
     width:26px;height:26px;border-radius:9px;border-width:2px;
     border-color:rgba(255,255,255,.9);background:rgba(255,255,255,.9);
     -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
-    box-shadow:0 2px 10px rgba(0,25,47,.32)}
+    box-shadow:0 2px 10px rgba(12,39,69,.32)}
   .table-wrap td > input[type="checkbox"]::after{width:15px;height:15px;
     -webkit-mask-size:15px;mask-size:15px}
   .table-wrap td > input[type="checkbox"]:hover{transform:scale(1.07);border-color:#fff}
   .table-wrap td > input[type="checkbox"]:checked{
-    background:var(--brand);border-color:#fff;box-shadow:0 3px 14px rgba(0,25,47,.42)}
+    background:var(--brand);border-color:#fff;box-shadow:0 3px 14px rgba(12,39,69,.42)}
 
   /* --- 9. Respiration : entre les cartes et dans les cartes --- */
   .table-wrap{margin:4px 0 8px}
@@ -268,7 +268,7 @@ input[type="checkbox"]:focus-visible{outline:2px solid var(--brand);outline-offs
 .recap-ph{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:16px;position:relative}
 .recap-ph img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;display:block;border:1px solid var(--line)}
 .recap-ph img:first-child{grid-column:span 2;grid-row:span 2;aspect-ratio:1}
-.recap-plus{position:absolute;right:8px;bottom:8px;background:rgba(0,25,47,.82);color:#fff;
+.recap-plus{position:absolute;right:8px;bottom:8px;background:rgba(12,39,69,.82);color:#fff;
   font-size:.74rem;font-weight:650;padding:4px 9px;border-radius:999px}
 .recap-vide{display:flex;flex-direction:column;gap:3px;align-items:flex-start;
   padding:16px;border:1px dashed var(--line);border-radius:12px;margin-bottom:16px;
@@ -580,22 +580,22 @@ input[type=date]::-webkit-calendar-picker-indicator{margin-left:auto}
 /* ---- Accueil d'après la maquette (js/84-accueil.js) ---- */
 /* L'entête public se pose sur la photo de couverture. */
 body:has(.hx:not(.hx-in-app)) header.nav::before,body:has(.hx:not(.hx-in-app)) header.nav::after{display:none}
-body:has(.hx:not(.hx-in-app)) header.nav{position:absolute;left:0;right:0;top:0;background:linear-gradient(180deg,rgba(0,25,47,.55),rgba(0,25,47,0));border:0;z-index:30}
-.hx{position:relative;isolation:isolate;color:#fff;background:#0B2B46;padding:118px 0 0;min-height:560px;display:flex;flex-direction:column;justify-content:flex-end}
+body:has(.hx:not(.hx-in-app)) header.nav{position:absolute;left:0;right:0;top:0;background:linear-gradient(180deg,rgba(12,39,69,.55),rgba(12,39,69,0));border:0;z-index:30}
+.hx{position:relative;isolation:isolate;color:#fff;background:#0C2745;padding:118px 0 0;min-height:560px;display:flex;flex-direction:column;justify-content:flex-end}
 .hx-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:72% 55%;z-index:-2}
 /* Le ciel est très clair à gauche : un voile marine garde le texte lisible. */
 .hx::before{content:"";position:absolute;inset:0;z-index:-1;
-  background:linear-gradient(90deg,rgba(0,25,47,.74) 0%,rgba(0,25,47,.48) 36%,rgba(0,25,47,.08) 64%,rgba(0,25,47,0) 100%),
-             linear-gradient(0deg,rgba(0,25,47,.22) 0%,rgba(0,25,47,0) 26%)}
+  background:linear-gradient(90deg,rgba(12,39,69,.74) 0%,rgba(12,39,69,.48) 36%,rgba(12,39,69,.08) 64%,rgba(12,39,69,0) 100%),
+             linear-gradient(0deg,rgba(12,39,69,.22) 0%,rgba(12,39,69,0) 26%)}
 .hx-cl .sm{display:none}
 .hx-body{padding-bottom:34px;max-width:1180px}
 .hx-hello{margin:0 0 6px;opacity:.9}
 .hx-loc{display:flex;align-items:center;gap:7px;margin:0 0 14px;font-weight:500;font-size:1rem}
 .hx h1{color:#fff;font-size:clamp(2.1rem,5.6vw,3.6rem);font-weight:800;letter-spacing:-.03em;line-height:1.04;max-width:14ch;margin:0 0 16px;text-wrap:balance}
-.hx h1 span{color:#3D8BFF}
+.hx h1 span{color:#D0A361}
 .hx-lede{max-width:46ch;font-size:1.06rem;line-height:1.55;color:#E3EBF5;margin:0}
 .hx-search{position:relative;transform:translateY(50%);margin-top:-6px;z-index:2;max-width:1180px}
-.hx-search .searchpill{max-width:860px;margin:0;background:#fff;box-shadow:0 18px 40px -14px rgba(0,25,47,.35);border:1px solid rgba(0,25,47,.06)}
+.hx-search .searchpill{max-width:860px;margin:0;background:#fff;box-shadow:0 18px 40px -14px rgba(12,39,69,.35);border:1px solid rgba(12,39,69,.06)}
 .hx-main{padding-top:64px}
 .hx-main-app{padding-top:58px}
 
@@ -606,19 +606,19 @@ body:has(.hx:not(.hx-in-app)) header.nav{position:absolute;left:0;right:0;top:0;
 .hx-cl{font-size:.95rem;line-height:1.2;overflow-wrap:anywhere}
 .hx-cat.on .hx-ci{background:var(--brand-2);border-color:var(--brand-2);color:#fff}
 .hx-cat.on .hx-cl{font-weight:700}
-.hx-cat.on::after{content:"";position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:56%;height:3px;border-radius:3px;background:#3D8BFF}
+.hx-cat.on::after{content:"";position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:56%;height:3px;border-radius:3px;background:#D0A361}
 
 .hx-sec{margin-bottom:34px}
 .hx-head{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:18px}
 .hx-head h2{margin:0;font-size:clamp(1.45rem,3.6vw,2.05rem);font-weight:800;letter-spacing:-.02em;color:var(--brand-2)}
 .hx-head a{display:flex;align-items:center;gap:6px;color:var(--info);font-weight:600;text-decoration:none;white-space:nowrap}
 .hx-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
-.hx-card{background:var(--surface);border-radius:20px;box-shadow:0 10px 30px -16px rgba(0,25,47,.28);border:1px solid var(--line);overflow:hidden;display:flex;flex-direction:column;min-width:0}
+.hx-card{background:var(--surface);border-radius:20px;box-shadow:0 10px 30px -16px rgba(12,39,69,.28);border:1px solid var(--line);overflow:hidden;display:flex;flex-direction:column;min-width:0}
 .hx-ph{position:relative;aspect-ratio:16/11;background:var(--surface-3)}
 .hx-ph img{width:100%;height:100%;object-fit:cover;display:block}
-.hx-fav{position:absolute;top:10px;right:10px;width:40px;height:40px;border:0;background:rgba(0,25,47,.18);border-radius:50%;color:#fff;display:grid;place-items:center;cursor:pointer;backdrop-filter:blur(2px)}
+.hx-fav{position:absolute;top:10px;right:10px;width:40px;height:40px;border:0;background:rgba(12,39,69,.18);border-radius:50%;color:#fff;display:grid;place-items:center;cursor:pointer;backdrop-filter:blur(2px)}
 .hx-fav.on{color:#FF5A6A;background:#fff}
-.hx-chip{position:absolute;left:14px;bottom:-12px;background:var(--info);color:#fff;font-size:.8rem;font-weight:600;padding:5px 12px;border-radius:999px;box-shadow:0 6px 14px -6px rgba(29,111,232,.6)}
+.hx-chip{position:absolute;left:14px;bottom:-12px;background:var(--info);color:#fff;font-size:.8rem;font-weight:600;padding:5px 12px;border-radius:999px;box-shadow:0 6px 14px -6px rgba(12,39,69,.6)}
 .hx-cb{padding:24px 18px 18px;display:flex;flex-direction:column;gap:8px;flex:1}
 .hx-cb h3{margin:0;font-size:1.08rem;font-weight:700;line-height:1.25;color:var(--ink)}
 .hx-where,.hx-specs{display:flex;align-items:center;gap:6px;margin:0;color:var(--muted);font-size:.86rem}
@@ -650,7 +650,7 @@ body:has(.hx:not(.hx-in-app)) header.nav{position:absolute;left:0;right:0;top:0;
 @media (max-width:760px){
   .hx{min-height:520px;padding-top:96px}
   .hx-bg{object-position:74% 50%}
-  .hx::before{background:linear-gradient(180deg,rgba(0,25,47,.62) 0%,rgba(0,25,47,.5) 48%,rgba(0,25,47,.12) 76%,rgba(0,25,47,.3) 100%)}
+  .hx::before{background:linear-gradient(180deg,rgba(12,39,69,.62) 0%,rgba(12,39,69,.5) 48%,rgba(12,39,69,.12) 76%,rgba(12,39,69,.3) 100%)}
   .hx-cl .lg{display:none}.hx-cl .sm{display:inline}
   .hx h1{font-size:clamp(2rem,9vw,2.6rem)}
   .hx-lede{font-size:1rem;max-width:30ch}
@@ -665,7 +665,7 @@ body:has(.hx:not(.hx-in-app)) header.nav{position:absolute;left:0;right:0;top:0;
   .hx.hx-in-app{min-height:420px;padding:28px 20px 0;border-radius:22px}
 }
 /* Le texte passe sur la façade claire sur téléphone : une ombre douce le détache. */
-.hx h1,.hx-lede,.hx-loc,.hx-hello{text-shadow:0 2px 18px rgba(0,25,47,.55)}
+.hx h1,.hx-lede,.hx-loc,.hx-hello{text-shadow:0 2px 18px rgba(12,39,69,.55)}
 
 /* ---- Accueil : proportions de la maquette ----
    Première version trop grande d'environ moitié : titre, catégories, cartes et
@@ -775,4 +775,17 @@ body:has(.hx:not(.hx-in-app)) header.nav{position:absolute;left:0;right:0;top:0;
   .hx-cl{font-size:.64rem;letter-spacing:-.01em}
   .hx-ph{aspect-ratio:1/0.82}
   .hx-une-ph{min-height:0}
+}
+
+/* ---- Un seul bleu : celui du logo ----
+   Le logo DEUKSIL est marine #0C2745 et doré #D0A361. Tous les bleus de
+   l'application en découlent : le marine lui-même, une nuance plus claire de
+   la même teinte (#1F4673) pour les liens et étiquettes, une nuance plus
+   foncée (#081B31) et un voile très clair (#E7ECF3). Aucun autre bleu. */
+:root{
+  --logo-navy:#0C2745; --logo-gold:#D0A361;
+  --brand:#0C2745; --brand-2:#081B31; --brand-soft:#E7ECF3; --brand-ink:#FFFFFF;
+  --info:#1F4673; --info-soft:#E7ECF3;
+  --nav:#0C2745; --nav-2:#1A3A60; --nav-line:#1F4673;
+  --tint-blue:#DCE4EE;
 }

@@ -24,7 +24,7 @@ function syncContracts(u) {
 }
 function contractHtml(c, u) {
   const p = gProp(c.propertyId), me = ownerLabel(u);
-  return `<div style="font-family:sans-serif;color:#0F3057"><h2>${CTYPE[c.type].toUpperCase()}</h2><p><b>N° ${c.ref}</b> — ${c.status}</p>
+  return `<div style="font-family:sans-serif;color:#0C2745"><h2>${CTYPE[c.type].toUpperCase()}</h2><p><b>N° ${c.ref}</b> — ${c.status}</p>
     <p><b>Entre :</b> ${esc(me)} <b>et :</b> ${esc(c.party)}.</p>${p ? `<p><b>Bien concerné :</b> ${esc(p.title)}, ${esc(p.quartier)}, ${esc(p.city)}.</p>` : ''}
     <p><b>Durée :</b> du ${dateFr(c.start)} au ${dateFr(c.end)}.<br><b>Montant :</b> ${money(c.amount)}${c.deposit ? ` · <b>Caution :</b> ${money(c.deposit)}` : ''}${c.charges ? ` · <b>Charges :</b> ${money(c.charges)}` : ''}</p>
     <p><b>Conditions :</b> ${esc(c.conditions || 'Selon les dispositions légales en vigueur au Sénégal.')}</p>

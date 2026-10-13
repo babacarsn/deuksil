@@ -37,7 +37,7 @@ function mkDoc(u, type, o) {
 }
 function docHtml(d, u) {
   const co = ownerLabel(u), p = gProp(d.propertyId), cr = dCred(d), pd = dPaid(d);
-  return `<div style="font-family:sans-serif;color:#0F3057"><div style="display:flex;justify-content:space-between"><div><b style="font-size:1.3em">${esc(co)}</b><br><small>${esc(u.phone || '')} · Sénégal</small></div>
+  return `<div style="font-family:sans-serif;color:#0C2745"><div style="display:flex;justify-content:space-between"><div><b style="font-size:1.3em">${esc(co)}</b><br><small>${esc(u.phone || '')} · Sénégal</small></div>
     <div style="text-align:right"><b style="font-size:1.2em">${DT[d.type].toUpperCase()}</b><br>${d.ref}<br><small>${dateFr(d.createdAt)}${d.type === 'FAC' ? ' · échéance ' + dateFr(d.due) : ''}</small></div></div>
     <p><b>Client :</b> ${esc(d.client)}${p ? '<br><b>Bien :</b> ' + esc(p.title) : ''}</p>
     <table style="width:100%;border-collapse:collapse"><tr style="background:#eee"><th align=left>Désignation</th><th>Qté</th><th align=right>P.U.</th><th align=right>Total</th></tr>
@@ -108,7 +108,7 @@ document.addEventListener('click', e => {
     const m = +v; if (!(m > 0) || m > dRest(d)) { toast('Montant invalide : un avoir ne peut pas dépasser le reste à payer (les remboursements ne sont pas gérés).', 'bad'); return; }
     const av = mkDoc(u, 'AV', {client: d.client, propertyId: d.propertyId, items: [{label: 'Avoir sur ' + d.ref, qty: 1, price: m}], parentId: d.id}); render(); autoFileThen('doc', av, 'Avoir créé'); }});
   const p = own('fpay');
-  if (a === 'g2-rec' && p) { const html = `<div style="font-family:sans-serif;color:#0F3057"><h2>REÇU ${p.rec}</h2><p>Reçu de <b>${esc(p.client)}</b> la somme de <b>${money(p.amount)}</b> (${p.method}) pour la facture ${esc(p.docRef)}, le ${dateFr(p.createdAt)}.</p><p>Référence paiement : ${p.ref}</p></div>`;
+  if (a === 'g2-rec' && p) { const html = `<div style="font-family:sans-serif;color:#0C2745"><h2>REÇU ${p.rec}</h2><p>Reçu de <b>${esc(p.client)}</b> la somme de <b>${money(p.amount)}</b> (${p.method}) pour la facture ${esc(p.docRef)}, le ${dateFr(p.createdAt)}.</p><p>Référence paiement : ${p.ref}</p></div>`;
     modal('Reçu ' + p.rec, `<div class="card pad-s">${html}</div><div style="margin-top:12px">${dlLink(html, p.rec)}</div>`); }
   const x = own('expenses');
   if (a === 'g2-delx' && x) confirmDialog({title: 'Supprimer la dépense', message: x.ref + ' sera définitivement supprimée.', confirmLabel: 'Supprimer', danger: true, onConfirm: () => { DB.deleteItem(DB.K.expenses, id); DB.filterItems(DB.K.tickets, t => t.expenseId === id).forEach(t => DB.updateItem(DB.K.tickets, t.id, {expenseId: ''})); audit('Suppression dépense', x.ref); render(); }});

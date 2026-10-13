@@ -91,7 +91,7 @@ activeChips = function () { const c = _activeChips(); if ((searchState.q || '').
 const _photoHtml = photoHtml;
 photoHtml = function (p, o = {}) { const h = _photoHtml(p, o), t = {location:'À louer', vente:'À vendre', terrain:'Terrain'}[p.transaction];
   return t ? h.replace(/<em class="tag"([^>]*)>[^<]*<\/em>/, `<em class="tag tag-${p.transaction}"$1>${t}</em>`) : h; };
-document.head.insertAdjacentHTML('beforeend', '<style>.photo .tag.tag-location{background:#1F7BFF;color:#fff}.photo .tag.tag-vente,.photo .tag.tag-terrain{background:#1C8A57;color:#fff}</style>');
+document.head.insertAdjacentHTML('beforeend', '<style>.photo .tag.tag-location{background:#1F4673;color:#fff}.photo .tag.tag-vente,.photo .tag.tag-terrain{background:#1C8A57;color:#fff}</style>');
 
 /* ---------- Accueil : composants communs ---------- */
 const CATS = [['', 'Tous les biens', 'home', 'Tous'], ['maison', 'Maisons', 'home', 'Maisons'], ['appartement', 'Appartements', 'building', 'Apparts'], ['terrain', 'Terrains', 'land', 'Terrains'], ['local commercial', 'Locaux commerciaux', 'store', 'Locaux']];
@@ -142,7 +142,7 @@ clientRoute.fn = () => {
   const row = (h, i, c, t, s) => `<a class="row-card" href="${h}"><span class="tile" style="border-color:${c};color:${c}">${icon(i, 24)}</span><span class="body"><span>${t}</span><b>${s}</b></span><span class="chev">${icon('chevRight', 20)}</span></a>`;
   return shellApp(u, `<div class="hero-card hero-photo" style="border-radius:26px;padding:26px 24px 24px;color:#fff;position:relative;overflow:hidden">
       <img class="hp-bg" src="${PHOTOS.bnClient}" alt="" loading="eager">
-      <p style="margin:0 0 8px;opacity:.9;position:relative">Bonjour, <b>${esc(u.firstName)}</b></p><h1 style="font-size:clamp(1.7rem,4.6vw,2.6rem);max-width:14ch;color:#fff">Trouvez le bien qui vous correspond au <span style="color:#6FB6FF">Sénégal</span></h1>
+      <p style="margin:0 0 8px;opacity:.9;position:relative">Bonjour, <b>${esc(u.firstName)}</b></p><h1 style="font-size:clamp(1.7rem,4.6vw,2.6rem);max-width:14ch;color:#fff">Trouvez le bien qui vous correspond au <span style="color:#D0A361">Sénégal</span></h1>
       <p style="color:#CCD8E6;max-width:44ch;margin:10px 0 0">Locations, ventes et terrains, tout est ici.</p>${searchPill()}</div>
     <div style="margin-top:22px">${catsHtml()}</div><div style="margin-top:14px">${marketHtml()}</div>${recoHtml(reco, fi)}${activityHtml(u)}
     <div class="sect-h"><h3>Mon espace</h3></div><div class="rows">

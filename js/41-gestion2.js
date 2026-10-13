@@ -47,7 +47,7 @@ function mandatesTab(u) {
 }
 function mandateHtml(m, u) {
   const o = DB.findItem(DB.K.owners, m.ownerId2) || {}, me = ownerLabel(u);
-  return `<div style="font-family:sans-serif;color:#0F3057"><h2>MANDAT DE GESTION IMMOBILIÈRE</h2><p><b>N° ${m.ref}</b> — ${m.status}</p>
+  return `<div style="font-family:sans-serif;color:#0C2745"><h2>MANDAT DE GESTION IMMOBILIÈRE</h2><p><b>N° ${m.ref}</b> — ${m.status}</p>
     <p><b>Le mandant :</b> ${esc(o.name)}${o.cni ? ', CNI ' + esc(o.cni) : ''}${o.address ? ', ' + esc(o.address) : ''}<br><b>Le mandataire :</b> ${esc(me)}</p>
     <p><b>Biens confiés :</b> ${m.properties.map(id => esc((gProp(id) || {}).title || '')).filter(Boolean).join(' · ') || 'à préciser'}</p>
     <p><b>Durée :</b> du ${dateFr(m.start)} au ${dateFr(m.end)}.<br><b>Commission :</b> ${m.rate} % des loyers encaissés.</p>
@@ -145,7 +145,7 @@ document.addEventListener('click', e => {
       <div class="field"><label>Mode</label><select class="input" name="method">${PAYM.map(x => `<option>${x}</option>`).join('')}</select></div>
       <div class="field"><label>Référence (facultatif)</label><input class="input" name="ref"></div><button class="btn block">Enregistrer le reversement</button></form>`); }
   if (a === 't-recu' && mine('transfers')) { const t = mine('transfers'), o = DB.findItem(DB.K.owners, t.ownerId2) || {};
-    const html = `<div style="font-family:sans-serif;color:#0F3057"><h2>REÇU DE REVERSEMENT ${t.ref}</h2>
+    const html = `<div style="font-family:sans-serif;color:#0C2745"><h2>REÇU DE REVERSEMENT ${t.ref}</h2>
       <p>Versé à <b>${esc(o.name)}</b> la somme de <b>${money(t.amount)}</b> (${esc(t.method)}) au titre de la gestion de ${monthLabel(t.month)}, le ${dateFr(t.createdAt)}.</p>
       <p class="small">Encaissé ${money(t.encaisse)} · dépenses ${money(t.dep)} · commission ${money(t.com)} (${t.rate} %).</p>${t.payRef ? `<p>Référence : ${esc(t.payRef)}</p>` : ''}</div>`;
     modal('Reçu ' + t.ref, `<div class="card pad-s">${html}</div>`); }

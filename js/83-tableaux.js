@@ -136,7 +136,7 @@ if (_clientRoute83) _clientRoute83.fn = () => {
   const u = Auth.guard('client'); if (!u) return false;
   return shellApp(u, `<div class="hero-card hero-photo" style="border-radius:26px;padding:26px 24px 24px;color:#fff;position:relative;overflow:hidden">
       <img class="hp-bg" src="${PHOTOS.bnClient}" alt="" loading="eager">
-      <p style="margin:0 0 8px;opacity:.9;position:relative">Bonjour, <b>${esc(u.firstName)}</b></p><h1 style="font-size:clamp(1.7rem,4.6vw,2.6rem);max-width:14ch;color:#fff">Trouvez le bien qui vous correspond au <span style="color:#6FB6FF">Sénégal</span></h1>
+      <p style="margin:0 0 8px;opacity:.9;position:relative">Bonjour, <b>${esc(u.firstName)}</b></p><h1 style="font-size:clamp(1.7rem,4.6vw,2.6rem);max-width:14ch;color:#fff">Trouvez le bien qui vous correspond au <span style="color:#D0A361">Sénégal</span></h1>
       <p style="color:#CCD8E6;max-width:44ch;margin:10px 0 0">Locations, ventes et terrains, tout est ici.</p>${searchPill()}</div>` + tableauClient(u));
 };
 

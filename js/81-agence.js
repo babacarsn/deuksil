@@ -168,7 +168,7 @@ window.addEventListener('click', e => {
   if (!t) return;
   e.preventDefault(); e.stopImmediatePropagation();
   const o = DB.findItem(DB.K.owners, t.ownerId2) || {};
-  const html = `<div style="font-family:sans-serif;color:#0F3057"><h2>REÇU DE REVERSEMENT ${esc(t.ref)}</h2>
+  const html = `<div style="font-family:sans-serif;color:#0C2745"><h2>REÇU DE REVERSEMENT ${esc(t.ref)}</h2>
     <p>Versé à <b>${esc(o.name || '')}</b> la somme de <b>${money(t.amount)}</b> (${esc(t.method || '')}), le ${dateFr(t.paidOn || t.createdAt)}.</p>
     ${t.soldeAvant !== undefined ? `<p class="small">Compte de gestion : encaissé ${money(t.encaisse)} · dépenses ${money(t.dep)} · commission ${money(t.com)} · déjà reversé avant ce versement ${money(t.du - t.soldeAvant)}.<br>
       Solde avant : ${money(t.soldeAvant)} · solde après : ${money(t.soldeApres)}.</p>`
