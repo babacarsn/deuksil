@@ -17,8 +17,7 @@ function bootSkeletonHtml() {
     </div>`;
 }
 $('#app').innerHTML = bootSkeletonHtml();
-const savedTheme = localStorage.getItem('deuksil_theme_pref');
-if (savedTheme === 'light' || savedTheme === 'dark') document.documentElement.dataset.theme = savedTheme;
+/* Plus de préférence de thème : l'application n'existe qu'en clair (voir 76-demarrage). */
 setTimeout(() => {
   seedIfNeeded();
   if (!location.hash) location.hash = '#/';

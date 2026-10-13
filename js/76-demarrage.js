@@ -20,6 +20,11 @@ $('#app').innerHTML = bootSkeletonHtml();
 /* Thème unique, clair : on efface une ancienne préférence « sombre ». */
 document.documentElement.dataset.theme = 'light';
 try { localStorage.removeItem('deuksil_theme_pref'); } catch (e) {}
+/* Si l'hôte (navigateur, application) pose data-theme="dark" sur la page, on
+   le remet en clair : l'application n'a qu'un thème. */
+new MutationObserver(() => {
+  if (document.documentElement.dataset.theme !== 'light') document.documentElement.dataset.theme = 'light';
+}).observe(document.documentElement, {attributes: true, attributeFilter: ['data-theme']});
 setTimeout(() => {
   seedIfNeeded();
   if (!location.hash) location.hash = '#/';

@@ -929,3 +929,11 @@ tableau de bord.
 
 **Étapes d'une vente** : la rangée de pastilles défilait et coupait « Vendu » sur mobile. Les cinq étapes
 tiennent maintenant sur une ligne de cinq colonnes égales, pastille reliée par un trait et libellé dessous.
+
+## 83. Mode clair uniquement
+
+L'application n'a qu'un thème, clair. Les restes de l'ancien mode sombre sont retirés (lecture de la préférence
+`deuksil_theme_pref` dans `60-demarrage.js`). La page interdit aussi au navigateur de l'assombrir de lui-même :
+`color-scheme: only light` en CSS et en balise meta (mode sombre automatique de Chrome Android, de certains
+téléphones, ou thème sombre de l'application qui affiche la page), et un `data-theme="dark"` posé par l'hôte est
+remis à `light`.
