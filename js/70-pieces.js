@@ -179,7 +179,8 @@ function envoyerAvecPJ(f, u, texte, pj, cle) {
 
   /* Messagerie du bail : le propriétaire répond depuis une fenêtre, le
      locataire depuis sa page. */
-  const bailId = a === 'g9-osend' ? f.dataset.id : u.leaseId;
+  const convBail = () => { try { const c = conversationsDe(u).find(x => x.cle === boiteOuverte); return c && c.baux[0] && c.baux[0].id; } catch (e) { return null; } };
+  const bailId = a === 'g9-osend' ? f.dataset.id : (convBail() || u.leaseId);
   const l = DB.findItem(DB.K.leases, bailId);
   if (!l) return;
   const depuis = a === 'g9-osend' ? 'owner' : 'tenant';

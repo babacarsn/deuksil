@@ -1215,3 +1215,14 @@ Un agent (membre d'une agence, rôle « agent ») réutilise les écrans de l'ag
 - **Validation des biens** : un bien publié par un agent passe en « À valider par l'agence » ; le responsable valide ou renvoie avec un motif, que l'agent voit dans « Mes biens ». Réglable dans Paramètres › Règles de l'agence.
 - **Commission partagée** : l'agent qui a rentré le bien (`apporteurId`) et celui qui conclut (visite du futur locataire, ou offre de vente) se partagent la part agent selon « Dont part de l'agent qui a rentré le bien » (50 % par défaut). Un seul agent touche tout.
 - Test : `tests/agent-pratiques.js` (24 contrôles).
+
+## 110. Messagerie : une boîte par personne, pour tous les acteurs (js/92-messagerie.js)
+
+- Constat (test `tests/messagerie-acteurs.js`) : les échanges locataire ↔ propriétaire / agence passaient par le canal du bail, que le bailleur ne lisait que dans Gestion › Messages locataires (absent du menu de l'agence). Ce qu'écrivait le locataire n'arrivait pas dans « Messages », et une réponse partie de « Messages » n'arrivait pas dans le bail. Un fil client ↔ agence existait en double.
+- Le propriétaire et l'agence ont désormais, comme le locataire, une seule boîte : une conversation par personne, qui réunit discussions et échanges du bail (pastille « Locataire »). La réponse à un locataire repart dans le bail ; le locataire répond dans le bail de la conversation ouverte.
+- L'agent (sans droit sur les baux) ne voit pas les échanges du bail ; le responsable et le gestionnaire les voient.
+- Notifications : elles mènent toujours à la boîte « Messages » du destinataire ; l'ancien lien `#/manage/tmsgs` y redirige.
+- Pastille « Messages » : compte aussi les messages de locataires non lus.
+- Fils en double entre deux mêmes personnes fusionnés au chargement.
+- La bulle de l'assistant est masquée sur l'écran Messages (elle couvrait « Envoyer » sur mobile).
+- Test : `tests/messagerie-acteurs.js` (29 contrôles : client, propriétaire, gestionnaire, agence, agent, locataire, mandant).
