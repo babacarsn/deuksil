@@ -103,6 +103,8 @@ let clientPourBail = null;
 function poserBlocBail() {
   const u = Auth.current();
   if (!u || !['owner', 'agency'].includes(u.role)) return;
+  /* Établir un bail relève de la gestion : pas pour un membre sans ce droit (agent). */
+  if (u.member && !(u.perms || []).includes('gestion')) return;
   if (!/^#\/(owner|agency)\/visits/.test(location.hash)) return;
   const c = document.querySelector('.main > .content');
   if (!c || c.querySelector('.suite-visite')) return;

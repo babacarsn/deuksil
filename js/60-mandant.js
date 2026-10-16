@@ -37,7 +37,7 @@ function assurerMandants() {
       if (!u) return;
       notify(moi.id, `Accès créé pour ${u.firstName} ${u.lastName} : ${u.email}`, '#/manage/owners');
       notify(u.id, 'Votre espace propriétaire est ouvert : suivez vos biens et vos relevés.', '#/owner/dashboard');
-      toast(`${u.firstName} peut suivre ses biens avec ${u.email} (mot de passe : demo123).`);
+      if (!moi.member) toast(`${u.firstName} peut suivre ses biens avec ${u.email} (mot de passe : demo123).`);
     });
   } catch (e) {}
 }

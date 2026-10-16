@@ -56,7 +56,7 @@ function assurerComptes() {
         return;
       }
       notify(moi.id, `Accès locataire créé pour ${u.firstName} ${u.lastName} : ${u.email}`, '#/manage/tenants');
-      toast(`${u.firstName} peut maintenant se connecter avec ${u.email} (mot de passe : demo123).`);
+      if (!moi.member) toast(`${u.firstName} peut maintenant se connecter avec ${u.email} (mot de passe : demo123).`);
     });
   } catch (e) { /* une donnée incomplète ne doit pas bloquer l'écran */ }
   _comptesEnCours = false;

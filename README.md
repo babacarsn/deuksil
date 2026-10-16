@@ -1138,3 +1138,80 @@ Awa Diallo → Alimatou Gueye (administratrice) · Fatou Ndiaye → Tacko Samb (
 - Tests : tests/espace-menu.js, tests/espace-parcours.js.
 - « EUKSIL » réduit à 64 % du D (`.logo > span{font-size:.64em}`), le bas des lettres sur le même trait que le bas du D ; bloc recentré verticalement dans les en-têtes.
 - « EUKSIL » légèrement remonté (`top:-.14em`) par rapport au bas du D, à la demande.
+
+## 102. Refonte d'après les maquettes « Ventes » et « Locataires & baux »
+
+js/89-design.js (habillage, aucune logique modifiée) + section « Refonte d'après maquettes » de css/02-refonte.css.
+- Titre de page souligné d'un trait doré ; fil d'Ariane en pastille bleue (retour rond, maison avant « Gestion ») ; menu de section sorti en carte avec chevron.
+- Tuiles d'indicateurs : pastille ronde, flèche « voir le détail » (fait défiler jusqu'à la liste), fond teinté selon la couleur ; petites tuiles alignées sur le même style.
+- Recherche : champ haut et bouton bleu nuit carré ; « Exporter » avec icône.
+- Formulaires : en-tête avec pastille d'icône, titre et sous-titre, trait de séparation ; champs hauts et arrondis avec icône à gauche selon la donnée (bien, immeuble, personne, téléphone, montant, date, lieu…) et chevron dessiné pour les listes ; aides précédées d'un « i ».
+- Montants affichés avec espaces (85 000 000) ; l'application lit toujours le nombre brut (formData et .value). Test : tests/design-montants.js.
+- Bouton de l'assistant : bulle de discussion bleu nuit avec pastille dorée.
+
+## 103. Maquette « Mes biens » appliquée à toutes les listes
+
+js/89-design.js (suite) + css/02-refonte.css (§ « Maquette Mes biens »).
+- Boutons d'action avec icône selon le libellé : Ouvrir/Voir (œil), Modifier (crayon), Mettre en pause, Réactiver, Archiver, Supprimer, Quittance, Encaisser, Relancer, Télécharger, Envoyer, Accepter, Refuser, Renouveler… ; plus hauts et arrondis sur mobile, bouton principal bleu nuit, secondaires blancs bordés.
+- Puces de filtre avec icône (Tous, Location, Vente, Terrain, En retard, À venir, Encaissés…) et compteur en pastille, sur une seule ligne sur téléphone ; « 12 biens » en gras.
+- Barre « Filtrer cette liste » dans une carte, loupe à gauche, réglages à droite.
+- Fiches (tableaux en cartes sur mobile) : carte blanche arrondie, grande photo, titre en gras, lignes libellé / valeur, liste d'état avec chevron, pastille « Publiée » agrandie.
+- Appliqué partout : propriétaire, agence, gestion (loyers, baux…), administration.
+- Tuiles simples (Finances, Loyers…) converties au même format : pastille ronde avec icône choisie d'après le libellé (Facturé, Encaissé, Impayés, Dépenses, Résultat net…), couleur de la tuile, flèche. Test : tests/design-tuiles.js (aucune tuile sans icône).
+
+## 104. Tous les tableaux de bord au style des maquettes
+
+Propriétaire, agence, client, locataire, administration (et mandant) : cartes blanches arrondies ; bulles décoratives remplacées par un fond teinté (chaque bloc garde sa couleur) ; tuiles et actions rapides avec pastille ronde colorée et flèche dans un rond ; « À traiter » en lignes-cartes avec pastille ronde et flèche ; listes (patrimoine, portefeuille, logement) avec vignettes arrondies et flèche ronde ; « Voir tout » en pastille ; barres du graphique arrondies.
+- Listes des tableaux de bord (Mon patrimoine, Mon portefeuille, Mon logement, Plateforme) : icône dans une pastille ronde colorée à la place de la photo.
+
+## 105. Espace agence — premier passage
+
+- Tour des 16 pages de l'agence sur téléphone : aucune erreur, nouveau style appliqué partout.
+- Pages courtes (Devis & Factures, Messages…) : la feuille blanche descend jusqu'en bas de l'écran (plus de pan bleu nuit sous le contenu).
+- Tuiles : icônes adaptées pour Unités (immeuble), Occupées (clé), Libres (porte), Taux (pourcentage), Tiroirs, Expirent bientôt.
+
+## 106. Logique métier de l'agence (js/90-agence-metier.js)
+
+Tout passe par les écrans existants, sans écran ni notion en double.
+- **Règles de l'agence** (Paramètres) : frais de location (mois de loyer, défaut 1), honoraires de vente (% , défaut 3, payés par le vendeur ou l'acquéreur), TVA (défaut 18 %), qui garde la caution (défaut l'agence), part de l'agent (défaut 20 %), pénalité de retard (défaut 0 = aucune), révision annuelle proposée.
+- **Mandat de vente** : même formulaire que le mandat de gestion, choix « Gestion / Vente » ; prix, honoraires, payeur, exclusivité, durée ; un bien loué ou déjà sous mandat de vente n'est pas proposé ; passe à « vendu » à la signature.
+- **Honoraires réels** : frais de location créés à la signature d'un bail saisi dans l'application, honoraires de vente à la signature d'une vente (taux du mandat de vente, sinon la règle) ; HT, TVA, TTC ; un seul par bail ou par vente ; aucun inventé pour les baux déjà présents (« Facturer » depuis le suivi du bail).
+- **Honoraires & cautions** (remplace « Commissions ») : honoraires à encaisser / encaissés, commission de gestion et sa part de TVA, cautions détenues ; encaisser, payer l'agent.
+- **Suivi du bail** (un bouton par bail, propriétaire et agence) : état des lieux d'entrée et de sortie (5 pièces, compteurs, clés ; la sortie rappelle l'état d'entrée), préavis de départ, révision du loyer (échéances à venir non payées mises à jour), caution (retenues pour impayés — qui soldent les loyers en retard — et pour réparations, avec motif ; jamais plus que la caution), frais d'agence.
+- **Pénalité de retard** : bouton sur un loyer en retard au-delà du délai, une seule fois par loyer.
+- **Équipe unique** : les anciens « agents » (liste sans connexion) deviennent des membres de l'équipe ; page Équipe : biens, visites, honoraires générés, commission due ; « Attribuer des biens » (un agent par bien) ; droits dans Gestion › Équipe & accès.
+- **Clients** : demandes (louer/acheter, type, budget, lieu, chambres, agent) avec les biens qui correspondent et envoi de la sélection par WhatsApp ; pas de demande en double.
+- **À traiter** : départs annoncés, cautions à restituer, honoraires à encaisser.
+- **Menu** : Clients, Visites, Ventes, Honoraires, Équipe ajoutés (sans doublon).
+- Test : tests/agence-metier.js (26 vérifications).
+- Menu de l'agence allégé : Messages, Maintenance, Dépenses et Rapports retirés du menu latéral (toujours accessibles par la barre du bas, la cloche et les tiroirs de Gestion).
+- Menu de l'agence : Visites, Équipe et Gestion retirés aussi ; accès par la page Clients (bouton Visites), les Paramètres (carte Équipe) et la barre du bas (Gestion).
+- Textes d'exemple (placeholders) ajoutés automatiquement dans tous les champs qui n'en avaient pas, selon la donnée (nom, téléphone, e-mail, CNI, montant, adresse, taux…).
+
+## 107. Densité : blocs plus compacts
+
+Section « Densité » de css/02-refonte.css : tuiles, pastilles (52 → 38 px), chiffres, cartes de tableau de bord, actions rapides, « À traiter », formulaires (champs 54 → 44 px, en-têtes), fil d'Ariane, recherche, puces de filtre, fiches mobiles et boutons réduits d'environ un quart ; même style.
+
+## 108. Espace de l'agent (js/91-agent.js)
+
+Un agent (membre d'une agence, rôle « agent ») réutilise les écrans de l'agence avec le filtre « les miens » : aucun écran en double.
+- **Menu** : Tableau de bord, Mes biens, Mes visites, Mes clients, Messages, Mes commissions, Mon profil. **Barre du bas** : Accueil, Mes biens, Publier, Visites, Messages (Messages et Visites étaient devenus inaccessibles).
+- **Tableau de bord de l'agent** : visites du jour (titre), sa commission à recevoir, visites aujourd'hui / à confirmer, ses biens, ses clients, prochaines visites, à traiter (visites à confirmer, comptes rendus à faire, clients sans bien correspondant), actions rapides. Plus aucun lien vers une page qui lui est interdite.
+- **Mes biens** par défaut, « Toute l'agence » en un clic ; un bien qu'il publie lui est attribué.
+- **Mes visites** et **compte rendu** (intéressé, a fait une offre + montant, à revoir, pas intéressé, note) ; une offre sur un bien à vendre ouvre un dossier de vente (stade « offre ») et prévient l'agence. Le responsable voit les comptes rendus et l'agent de chaque visite.
+- **Mes clients** : ses demandes seulement (créées à son nom).
+- **Mes commissions** : les siennes seulement (à recevoir, versé, en attente d'encaissement).
+- **Mon profil** : téléphone, mot de passe (ancien vérifié, 6 caractères, confirmation) ; nom et CNI réservés au responsable.
+- Démonstration : biens de Teranga répartis une fois entre les agents actifs (ceux qui ont des visites d'abord).
+- Sécurité : la page « Honoraires & cautions » et la vue Visites, remplacées, ont retrouvé leur contrôle d'accès ; messages « mot de passe : demo123 » réservés au responsable ; « Établir le bail » masqué sans droit gestion.
+- Tests : tests/agent.js (24), tests/membres-acces.js (28 adresses × chaque membre : aucun accès anormal).
+
+## 109. Pratiques d'agence côté agent (js/91-agent.js, js/90-agence-metier.js)
+
+- **Planifier une visite** : bouton sur « Mes visites », le tableau de bord et chaque demande client. Bien, client (avec ou sans compte), date, heure, note. Visite confirmée d'office, au nom de l'agent ; créneau déjà pris refusé ; le client qui a un compte est prévenu.
+- **Visites sans agent** : signalées dans « À traiter » du responsable ; bouton « Confier » sur la visite (option : confier aussi le bien).
+- **Messages** : l'agent voit les fils de ses biens et de ses clients, plus ceux que personne ne suit ; le premier qui répond devient l'agent du fil. Il ne peut pas écrire dans le fil d'un collègue. Le responsable voit tout.
+- **Rappels** : notification la veille et le jour de chaque visite, à l'agent concerné (ou au responsable si aucun agent), une seule fois par visite. Les notifications personnelles d'un membre s'ajoutent à celles de l'agence.
+- **Validation des biens** : un bien publié par un agent passe en « À valider par l'agence » ; le responsable valide ou renvoie avec un motif, que l'agent voit dans « Mes biens ». Réglable dans Paramètres › Règles de l'agence.
+- **Commission partagée** : l'agent qui a rentré le bien (`apporteurId`) et celui qui conclut (visite du futur locataire, ou offre de vente) se partagent la part agent selon « Dont part de l'agent qui a rentré le bien » (50 % par défaut). Un seul agent touche tout.
+- Test : `tests/agent-pratiques.js` (24 contrôles).
