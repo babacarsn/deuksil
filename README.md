@@ -1226,3 +1226,20 @@ Un agent (membre d'une agence, rôle « agent ») réutilise les écrans de l'ag
 - Fils en double entre deux mêmes personnes fusionnés au chargement.
 - La bulle de l'assistant est masquée sur l'écran Messages (elle couvrait « Envoyer » sur mobile).
 - Test : `tests/messagerie-acteurs.js` (29 contrôles : client, propriétaire, gestionnaire, agence, agent, locataire, mandant).
+
+## 111. Chaque raccourci mène à la bonne section (js/93-liens.js, js/11-router.js)
+
+- Audit `tests/audit-liens.js` (463 liens, 8 profils) : aucune page inexistante ni erreur, mais les raccourcis ouvraient la page générale (« 2 loyers en retard » → tous les loyers, « Ajouter un locataire » → la liste des baux, etc.) et deux tuiles menaient le gestionnaire à « Accès non autorisé ».
+- Le routeur comprend des précisions dans l'adresse : `?f=` filtre (retard, nonpaye, paye, confirmer, aujourdhui, avenir, encours, renouveler, impayee, suspendu, sansagent, crafaire, aencaisser), `?q=` recherche, `?s=` section, `?form=` formulaire, `?ouvrir=` action. Elles sont retirées de l'adresse et appliquées à l'arrivée : lignes filtrées avec un bandeau « Filtré : … · Tout afficher », section mise en vue sous l'en-tête, formulaire ouvert avec le premier champ prêt, fenêtre ouverte.
+- Règles générales (`REGLES`) : selon la page visée et le texte du raccourci, le lien reçoit sa précision — pour tous les tableaux de bord et listes. Le menu et les rubriques de Gestion ouvrent la rubrique entière.
+- Écran Loyers : nouveau bouton « À encaisser » (retards + à venir).
+- Un raccourci vers une page interdite au profil (membre) est remplacé par l'équivalent autorisé ou désactivé ; anciennes adresses (`#/manage/tmsgs`, `#/tenant/messages`) remplacées directement.
+- « Fin du bail » (locataire) mène à ses contrats au lieu de recharger l'accueil.
+- Audit des boutons `tests/audit-boutons.js` : seule erreur réelle, le logo des PDF ne se chargeait pas quand l'application est ouverte depuis un fichier → logo intégré (`js/00-logo-pdf.js`).
+- Mobile : une cellule de tableau à plusieurs lignes (titre, catégorie, badge) passe sous son libellé au lieu de déborder.
+- Test : `tests/liens-precis.js` (25 clics réels vérifiés).
+
+## 112. Simplification et finalisation (js/94-finalisation.js, AUDIT.md)
+
+Audit complet, problèmes classés et corrigés un par un avec un test pour chacun (`tests/finalisation.js`, 44 contrôles). L'empreinte des tableaux de bord et des actions rapides (`tests/empreinte.js`) reste identique. Détail, résultats des tests, risques restants et prérequis de production : **AUDIT.md**. Version de départ : étiquette Git `avant-finalisation`.
+Partie 2 (navigation, formulaires, parcours) : erreurs affichées sous le champ concerné, modification d'annonce en 3 clics, visites planifiées par le propriétaire indépendant, un nom par écran, barre du bas complète pour le mandant — voir AUDIT.md §8 à §10.

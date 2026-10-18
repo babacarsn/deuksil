@@ -256,7 +256,7 @@ window.addEventListener('submit', e => {
     if (String(d.phone).replace(/\D/g, '').length < 9) return toast('Indiquez un téléphone valide (9 chiffres).', 'bad');
     DB.updateItem(DB.K.users, m.id, {phone: d.phone.trim()}); toast('Téléphone enregistré.');
   } else {
-    if (d.ancien !== m.password) return toast('Le mot de passe actuel est incorrect.', 'bad');
+    if (!(typeof verifierMotDePasse === 'function' ? verifierMotDePasse(m, d.ancien) : d.ancien === m.password)) return toast('Le mot de passe actuel est incorrect.', 'bad');
     if ((d.nouveau || '').length < 6) return toast('Le nouveau mot de passe doit faire 6 caractères minimum.', 'bad');
     if (d.nouveau !== d.confirme) return toast('Les deux mots de passe ne correspondent pas.', 'bad');
     if (d.nouveau === d.ancien) return toast('Choisissez un mot de passe différent de l\'actuel.', 'bad');
@@ -308,7 +308,8 @@ const agentDeVisite = v => v.agentId || (gProp(v.propertyId) || {}).agentId || '
 document.addEventListener('click', e => {
   const b = e.target.closest('[data-action="agent-planif"]'); if (!b) return;
   e.preventDefault(); e.stopPropagation();
-  const u = Auth.current(); if (!u || u.role !== 'agency') return;
+  /* L'agence, ses agents, et le propriétaire indépendant (pas le mandant, dont l'agence s'occupe). */
+  const u = Auth.current(); if (!u || !['agency', 'owner'].includes(u.role) || (typeof estMandant === 'function' && estMandant(u))) return;
   if (u.member && !memberCan(u, 'visites')) return toast('Action non autorisée pour votre profil.', 'bad');
   const dm = b.dataset.dm && DB.findItem(DB.K.demandes, x => x.id === b.dataset.dm && x.ownerId === u.id);
   const agent = estAgent(u);
@@ -332,10 +333,10 @@ document.addEventListener('click', e => {
 window.addEventListener('submit', e => {
   const f = e.target.closest && e.target.closest('form[data-action="agent-planif-ok"]'); if (!f) return;
   e.preventDefault(); e.stopImmediatePropagation();
-  const u = Auth.current(); if (!u || u.role !== 'agency') return;
+  const u = Auth.current(); if (!u || !['agency', 'owner'].includes(u.role) || (typeof estMandant === 'function' && estMandant(u))) return;
   if (u.member && !memberCan(u, 'visites')) return toast('Action non autorisée pour votre profil.', 'bad');
   const d = formData(f), p = DB.findItem(DB.K.properties, x => x.id === d.propertyId && x.ownerId === u.id);
-  if (!p) return toast('Choisissez un bien de l\'agence.', 'bad');
+  if (!p) return toast(u.role === 'agency' ? 'Choisissez un bien de l\'agence.' : 'Choisissez un de vos biens.', 'bad');
   if (!String(d.name || '').trim()) return toast('Indiquez le nom du client.', 'bad');
   if (chiffres9(d.phone).length < 9) return toast('Indiquez un téléphone valide (9 chiffres).', 'bad');
   if (!d.date || d.date < ymd()) return toast('La date ne peut pas être passée.', 'bad');
@@ -348,13 +349,13 @@ window.addEventListener('submit', e => {
   if (compte && DB.findItem(DB.K.visits, v => v.propertyId === p.id && v.clientId === compte.id && ['acceptee', 'attente'].includes(v.status) && v.date >= ymd())) return toast('Ce client a déjà une visite prévue pour ce bien.', 'bad');
   const agentId = estAgent(u) ? moi(u).id : (d.agentId || p.agentId || '');
   DB.addItem(DB.K.visits, {ownerId: u.id, propertyId: p.id, clientId: compte ? compte.id : '', clientName: d.name.trim(), clientPhone: d.phone.trim(),
-    date: d.date, time: d.time, status: 'acceptee', agentId, note: (d.note || '').trim(), source: 'agence', planifieePar: u.member ? u.member.id : u.id, createdAt: now()});
+    date: d.date, time: d.time, status: 'acceptee', agentId, note: (d.note || '').trim(), source: u.role === 'owner' ? 'proprietaire' : 'agence', planifieePar: u.member ? u.member.id : u.id, createdAt: now()});
   if (p.status === 'disponible') DB.updateItem(DB.K.properties, p.id, {status: 'discussion'});
   if (compte) notify(compte.id, `Visite confirmée : « ${p.title} » le ${dateFr(d.date)} à ${d.time}.`, '#/client/visits');
   if (agentId && agentId !== (u.member || {}).id) notify(agentId, `Nouvelle visite pour vous : « ${p.title} » le ${dateFr(d.date)} à ${d.time} avec ${d.name.trim()}.`, '#/agency/visits');
   audit('Visite planifiée', `${p.title} · ${dateFr(d.date)} ${d.time}`);
   closeModal(); toast(`Visite planifiée le ${dateFr(d.date)} à ${d.time}.`);
-  if (location.hash !== '#/agency/visits') go('#/agency/visits'); else render();
+  const ecran = `#/${u.role}/visits`; if (location.hash !== ecran) go(ecran); else render();
 }, true);
 
 /* --- 9. Confier une visite sans agent ---------------------------------------- */

@@ -502,7 +502,7 @@ function biensPour(u, dm) {
   r.fn = (...a) => {
     const h = ancienne(...a); if (h === false) return h;
     const u = Auth.current(), dms = DB.filterItems(DB.K.demandes, x => x.ownerId === u.id && x.status !== 'close').slice().reverse(), equipe = membresDe(u);
-    const lien = id => location.href.split('#')[0] + '#/bien/' + id;
+    const lien = id => location.href.split('#')[0] + (typeof annonceHref === 'function' ? annonceHref(gProp(id)) : '#/property/' + id);
     const bloc = `<form class="card" data-action="ag-demande" style="margin:0 0 18px" data-sub="Ce que cherche le client"><h4 style="margin-top:0">Nouvelle demande client</h4>
       <div class="form-grid">
         <div class="field"><label>Client</label><input class="input" name="name" required placeholder="Nom complet"></div>

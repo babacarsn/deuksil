@@ -46,7 +46,7 @@ route(/^\/owner\/dashboard$/, () => {
       </div>
       <div class="card">
         <div class="row-between"><h3>Demandes récentes</h3>${visits.length ? `<a class="linkbtn small" href="#/owner/visits">Tout voir</a>` : ''}</div>
-        ${visits.slice(0, 5).map(v => { const p = DB.findItem(DB.K.properties, v.propertyId) || {}; const c = DB.findItem(DB.K.users, v.clientId) || {};
+        ${visits.slice(0, 5).map(v => { const p = DB.findItem(DB.K.properties, v.propertyId) || {}; const c = typeof clientVisite === 'function' ? clientVisite(v) : (DB.findItem(DB.K.users, v.clientId) || {});
           return `<a class="list-item" href="#/owner/visits">
             ${avatarHtml(c, 34)}
             <div class="body"><b class="small">${esc(displayName(c))}</b><div class="small muted">${esc(p.title || '')} · ${dateFr(v.date)}</div></div>
@@ -206,7 +206,7 @@ route(/^\/(owner|agency)\/visits$/, role => {
   const visits = DB.filterItems(DB.K.visits, v => v.ownerId === u.id);
   return shellApp(u, page('Demandes de visite', 'Acceptez, reportez ou clôturez les demandes reçues.') +
     (visits.length ? `<div class="table-wrap"><table><thead><tr><th>Client</th><th>Bien</th><th>Créneau</th><th>Message</th><th>Statut</th><th>Actions</th></tr></thead><tbody>
-      ${visits.map(v => { const c = DB.findItem(DB.K.users, v.clientId) || {}; const p = DB.findItem(DB.K.properties, v.propertyId) || {};
+      ${visits.map(v => { const c = typeof clientVisite === 'function' ? clientVisite(v) : (DB.findItem(DB.K.users, v.clientId) || {}); const p = DB.findItem(DB.K.properties, v.propertyId) || {};
         return `<tr><td><div class="row">${avatarHtml(c, 36)}
             <div><b class="small">${esc(displayName(c))}</b><div class="small muted"><a href="${telHref(c.phone)}" style="color:inherit;text-decoration:none">${icon('phone', 11)} ${esc(c.phone || '')}</a></div></div></div></td>
           <td class="small">${esc(p.title || '—')}</td><td>${dateFr(v.date)}<div class="small muted">${esc(v.time)}</div></td>

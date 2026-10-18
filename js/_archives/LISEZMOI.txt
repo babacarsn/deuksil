@@ -1,0 +1,5 @@
+Anciennes versions de modules, remplacées par les fichiers de même rôle
+chargés par index.html (ex. 55-comptes.js, 56-vie.js, 57-roles.js,
+58-bail-client.js, 59-interactions.js, 60-mandant.js, 76-demarrage.js).
+Elles ne sont plus chargées par l'application et sont gardées pour
+l'historique (voir aussi Git). Ne pas les ajouter à index.html.

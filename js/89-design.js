@@ -124,7 +124,8 @@ function dsHabiller(root) {
   root.querySelectorAll('.input:not([data-ds])').forEach(el => {
     el.dataset.ds = '1';
     if (el.tagName === 'TEXTAREA' || ['checkbox', 'radio', 'file', 'hidden', 'color', 'range'].includes(el.type)) return;
-    if (el.closest('.sbar, .searchrow, .searchpill, .hx-search, .rfiltre, .gsel')) return;
+    if (el.closest('.sbar, .searchrow, .searchpill, .hx-search, .rfiltre, .gsel, .ai-v2')) return;
+    if (el.parentElement && el.parentElement.querySelector(':scope > .ifx')) return;   /* le champ a déjà son icône (connexion) */
     if (el.type === 'number' && DS_MONTANTS.test(el.name || '')) dsMontant(el);
     const ic = dsIconeChamp(el); if (ic && ICONS[ic]) el.dataset.ic = ic;
   });

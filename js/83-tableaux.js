@@ -201,7 +201,7 @@ function tableauAdmin(u) {
   const pending = props.filter(p => p.listingStatus === 'attente'), suspendus = users.filter(x => x.status === 'suspendu');
   const nvx = mois => users.filter(x => String(x.createdAt || '').startsWith(mois)).length;
   const annMois = mois => props.filter(p => String(p.createdAt || '').startsWith(mois)).length;
-  const pubs = props.filter(p => p.listingStatus === 'publiee');
+  const pubs = props.filter(p => p.listingStatus === 'publiee' && listable(p));   // « en ligne » = visible dans la recherche (bien ni loué ni vendu)
   const role = r => users.filter(x => x.role === r).length;
   return tbPage({
     grand: {title: 'Activité de la plateforme', sub: 'Annonces créées ce mois', badge: badgeMois(m), big: pluriel(annMois(m), 'annonce'),

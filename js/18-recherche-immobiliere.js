@@ -8,7 +8,7 @@ const SORT_LABEL = {recent:'Plus récents', priceAsc:'Prix croissant', priceDesc
 function applySearch() {
   const s = searchState;
   const list = published().filter(p =>
-    (!s.transaction || p.transaction === s.transaction) &&
+    (!s.transaction || p.transaction === s.transaction || (s.transaction === 'vente' && p.transaction === 'terrain')) &&
     (!s.region || p.region === s.region) && (!s.city || p.city === s.city) && (!s.quartier || p.quartier === s.quartier) &&
     (!s.type || p.type === s.type) &&
     (!s.min || p.price >= +s.min) && (!s.max || p.price <= +s.max) &&

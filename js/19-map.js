@@ -14,7 +14,7 @@ function searchFormHtml() {
   const opt = (v, label, cur) => `<option value="${esc(v)}" ${cur === v ? 'selected' : ''}>${esc(label)}</option>`;
   return `<form class="card" data-action="search" style="margin-bottom:22px">
     <div class="seg" style="margin-bottom:14px">
-      ${[['','Tout'],['location','Location'],['vente','Vente'],['terrain','Terrain']].map(([v, l]) =>
+      ${[['','Tout'],['location','Location'],['vente','Vente']].map(([v, l]) =>
         `<button type="button" data-action="set-transaction" data-v="${v}" aria-pressed="${s.transaction === v}">${l}</button>`).join('')}
     </div>
     <div class="filters">
@@ -70,19 +70,15 @@ function resultsHtml(u) {
 }
 route(/^\/search/, () => {
   const u = Auth.current();
-  const aiBox = `<form class="card ai-search" data-action="ai-search" style="margin-bottom:16px">
-      <div class="row" style="gap:12px;align-items:flex-start">
-        <div class="ic-bubble" style="background:var(--brand-soft);color:var(--brand);flex:none">${icon('sparkle', 16)}</div>
-        <div style="flex:1;min-width:0">
-          <b class="small">Assistant de recherche</b>
-          <p class="small muted" style="margin:2px 0 8px">Décrivez ce que vous cherchez en une phrase, l'assistant règle les filtres pour vous.</p>
-          <div class="row" style="gap:8px">
-            <input class="input" name="q" placeholder="Ex. F3 meublé pas cher à Almadies" autocomplete="off">
-            <button class="btn sm" type="submit">${icon('sparkle', 14)} Chercher</button>
-          </div>
-          <div id="ai-search-state" style="margin-top:10px"></div>
-        </div>
+  const aiBox = `<form class="card ai-search ai-v2" data-action="ai-search" style="margin-bottom:16px">
+      <div class="ai-head"><span class="ai-ic">${icon(ICONS.etincelle ? 'etincelle' : 'sparkle', 26)}</span>
+        <div style="min-width:0"><b class="ai-t">Assistant de recherche</b>
+          <p class="ai-d">Décrivez ce que vous cherchez en une phrase, l'assistant règle les filtres pour vous.</p></div></div>
+      <div class="ai-row">
+        <input class="input" name="q" placeholder="Ex. F3 meublé pas cher à Almadies" autocomplete="off" aria-label="Décrivez votre recherche">
+        <button class="btn ai-go" type="submit">${icon(ICONS.etincelle ? 'etincelle' : 'sparkle', 18)} Chercher ${icon('arrowRight', 18)}</button>
       </div>
+      <div id="ai-search-state" style="margin-top:10px"></div>
     </form>`;
   const toggle = `<div class="row-between" style="margin-bottom:14px"></div>`;
   const body = page('Rechercher un bien', 'Seules les annonces validées par DEUKSIL apparaissent ici.') + aiBox + searchFormHtml() + toggle +

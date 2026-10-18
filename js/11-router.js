@@ -3,8 +3,18 @@
    ========================================================================== */
 const routes = [];
 const route = (re, fn) => routes.push({re, fn});
+/* Un lien peut préciser ce qu'il faut montrer à l'arrivée :
+   #/manage/rents?f=retard (filtre), ?q=texte (recherche), ?s=section,
+   ?form=titre du formulaire, ?ouvrir=action. Les paramètres sont retirés
+   de l'adresse et gardés dans LIEN, le temps que la page les applique. */
+let LIEN = null;
 function render() {
-  const path = (location.hash || '#/').replace(/^#/, '');
+  const h0 = location.hash || '#/', iq = h0.indexOf('?');
+  if (iq >= 0) {
+    LIEN = {path: h0.slice(0, iq), p: new URLSearchParams(h0.slice(iq + 1)), at: Date.now()};
+    try { history.replaceState(history.state, '', location.href.split('#')[0] + h0.slice(0, iq)); } catch (e) {}
+  }
+  const path = (location.hash || '#/').replace(/^#/, '').split('?')[0];
   for (const r of routes) {
     const m = path.match(r.re);
     if (m) { const html = r.fn(...m.slice(1)); if (html !== false) { $('#app').innerHTML = html; window.scrollTo(0, 0); afterRender(); } return; }

@@ -77,9 +77,9 @@ const {open, loginAs, goto} = require('./harnais.js');
   // 7. Profil : téléphone, mot de passe
   await goto(p, '#/agent/profil'); await p.waitForTimeout(600);
   await p.evaluate(() => { const f = document.querySelector('form[data-action="agent-mdp"]'); f.ancien.value = 'faux'; f.nouveau.value = 'nouveau1'; f.confirme.value = 'nouveau1'; f.requestSubmit(); }); await p.waitForTimeout(300);
-  T('P1', await p.evaluate(a => DB.findItem(DB.K.users, a).password, ids.agent) === 'demo123', 'mauvais mot de passe actuel refusé');
+  T('P1', await p.evaluate(a => verifierMotDePasse(DB.findItem(DB.K.users, a), 'demo123'), ids.agent), 'mauvais mot de passe actuel refusé');
   await p.evaluate(() => { const f = document.querySelector('form[data-action="agent-mdp"]'); f.ancien.value = 'demo123'; f.nouveau.value = 'nouveau1'; f.confirme.value = 'nouveau1'; f.requestSubmit(); }); await p.waitForTimeout(300);
-  T('P2', await p.evaluate(a => DB.findItem(DB.K.users, a).password, ids.agent) === 'nouveau1', 'mot de passe changé');
+  T('P2', await p.evaluate(a => verifierMotDePasse(DB.findItem(DB.K.users, a), 'nouveau1'), ids.agent), 'mot de passe changé');
   await p.evaluate(a => DB.updateItem(DB.K.users, a, {password: 'demo123'}), ids.agent);
   T('P3', await p.evaluate(() => document.querySelector('form[data-action="agent-profil"] input[disabled]') !== null), 'nom et CNI non modifiables par l\'agent');
 

@@ -194,8 +194,9 @@ propRoute.fn = pid => {
 };
 /* Inscription par étapes */
 const regRoute = routes.find(r => r.re.source.includes('register'));
-const ROLE_OPT = [['client', 'user', 'Client', () => 'Recherche, favoris et visites'], ['owner', 'home', 'Propriétaire', () => 'Publication de biens et gestion locative'],
-  ['agency', 'building', 'Agence', () => 'Portefeuille, agents et mandats'], ['investor', 'chart', 'Investisseur', () => 'Suivi de patrimoine et rentabilité'], ['promoter', 'briefcase', 'Promoteur', () => 'Programmes immobiliers et lots']];
+/* Inscription publique : Client, Propriétaire ou Agence. Un client qui reçoit un bail devient locataire. */
+const ROLE_OPT = [['client', 'user', 'Client', () => 'Recherche, favoris, contact et visites'], ['owner', 'home', 'Propriétaire', () => 'Publication de biens et gestion locative'],
+  ['agency', 'building', 'Agence', () => 'Portefeuille, agents et mandats']];
 regRoute.fn = () => {
   const preset = (location.hash.split('role=')[1] || 'client').replace(/[^a-z]/g, ''), r = ROLE_OPT.some(o => o[0] === preset) ? preset : 'client';
   const pw = n => `<div class="pw-wrap"><input class="input" type="password" name="${n}" required><button type="button" class="pw-toggle" data-action="toggle-pw" aria-label="Afficher le mot de passe">${icon('eye', 17)}</button></div>`;
@@ -246,9 +247,9 @@ new MutationObserver(() => requestAnimationFrame(() => { const t = document.quer
 const searchRoute = routes.find(r => r.re.source.includes('search')), _search = searchRoute.fn;
 searchRoute.fn = () => {
   let h = _search(); if (typeof h !== 'string') return h;
-  const s = searchState, bar = `<form class="searchrow" data-action="page-search"><input class="input" type="search" name="q" value="${esc(s.q || '')}" placeholder="Rechercher une ville, un quartier, un bien…" autocomplete="off" aria-label="Rechercher"><button type="button" class="sq" data-action="toggle-filters" aria-label="Filtres">${icon('sliders', 20)}</button></form>
-    <div class="tabs">${[['', 'Tout'], ['location', 'À louer'], ['vente', 'À vendre'], ['terrain', 'Terrains']].map(([v, l]) => `<button type="button" data-action="set-transaction" data-v="${v}" aria-pressed="${s.transaction === v}">${l}</button>`).join('')}</div>`;
-  const a = h.indexOf('<form class="card ai-search"'); if (a > -1) h = h.slice(0, a) + bar + h.slice(a);
+  const s = searchState, bar = `<form class="searchrow" data-action="page-search"><span class="sr-ic" aria-hidden="true">${icon('search', 21)}</span><input class="input" type="search" name="q" value="${esc(s.q || '')}" placeholder="Rechercher une ville, un quartier, un bien…" autocomplete="off" aria-label="Rechercher"><button type="button" class="sq" data-action="toggle-filters" aria-label="Filtres">${icon('sliders', 20)}</button></form>
+    <div class="tabs tabs-op">${[['', 'Tout', 'home'], ['location', 'À louer', 'building'], ['vente', 'À vendre', 'tag']].map(([v, l, ic]) => `<button type="button" data-action="set-transaction" data-v="${v}" aria-pressed="${s.transaction === v}">${icon(ICONS[ic] ? ic : 'home', 19)}<span>${l}</span></button>`).join('')}</div>`;
+  const a = h.indexOf('<form class="card ai-search'); if (a > -1) h = h.slice(0, a) + bar + h.slice(a);
   const i = h.indexOf('<form class="card" data-action="search"'), k = h.indexOf('</form>', i) + 7;
   if (i > -1) h = h.slice(0, i) + '<div class="sfold" id="sfold">' + h.slice(i, k) + '</div>' + h.slice(k);
   return h;

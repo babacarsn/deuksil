@@ -102,7 +102,7 @@ function shellApp(u, content) {
 }
 
 function page(title, subtitle, actions = '') {
-  return `<div class="page-head"><div><h2>${esc(title)}</h2>${subtitle ? `<p class="muted" style="margin:4px 0 0">${esc(subtitle)}</p>` : ''}</div><div class="row">${actions}</div></div>`;
+  return `<div class="page-head"><div><h1>${esc(title)}</h1>${subtitle ? `<p class="muted" style="margin:4px 0 0">${esc(subtitle)}</p>` : ''}</div><div class="row">${actions}</div></div>`;
 }
 function kpi(n, l, tone) { return `<div class="kpi"><div class="n" ${tone ? `style="color:var(--${tone})"` : ''}>${n}</div><div class="l">${esc(l)}</div></div>`; }
 function dailyBuckets(records, days = 7) {

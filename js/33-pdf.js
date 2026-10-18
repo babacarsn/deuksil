@@ -8,7 +8,7 @@ const loadJsPdf = () => window.jspdf ? Promise.resolve() : (_pdfLoad = _pdfLoad 
   const s = document.createElement('script'); s.src = PDF_URL; s.onload = ok; s.onerror = () => { _pdfLoad = null; ko(new Error('pdf')); }; document.head.appendChild(s);
 }));
 /* jsPDF veut le logo en data URL : on lit le fichier une fois, au premier PDF. */
-let LOGO_PDF = null;
+let LOGO_PDF = typeof LOGO_PDF_DATA !== 'undefined' ? LOGO_PDF_DATA : null;
 const loadLogoPdf = () => LOGO_PDF ? Promise.resolve() : fetch('img/logo-d-bleu.png').then(r => r.blob())
   .then(b => new Promise(ok => { const f = new FileReader(); f.onload = () => { LOGO_PDF = f.result; ok(); }; f.onerror = () => ok(); f.readAsDataURL(b); }))
   .catch(() => {});

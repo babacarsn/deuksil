@@ -35,7 +35,7 @@ route(/^\/agency\/dashboard$/, () => {
       </div>
       <div class="card">
         <div class="row-between"><h3>Visites à traiter</h3>${pending.length ? `<a class="linkbtn small" href="#/agency/visits">Tout voir</a>` : ''}</div>
-        ${pending.length ? pending.slice(0, 6).map(v => { const c = DB.findItem(DB.K.users, v.clientId) || {};
+        ${pending.length ? pending.slice(0, 6).map(v => { const c = typeof clientVisite === 'function' ? clientVisite(v) : (DB.findItem(DB.K.users, v.clientId) || {});
           return `<div class="list-item">${avatarHtml(c, 34)}
             <div class="body"><b class="small">${esc(displayName(c))}</b><div class="small muted">${dateFr(v.date)} à ${esc(v.time)}</div></div>
             <button class="btn sm" data-action="visit-status" data-id="${v.id}" data-s="acceptee">Accepter</button></div>`; }).join('')
