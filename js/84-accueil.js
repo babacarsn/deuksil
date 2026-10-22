@@ -253,7 +253,7 @@ function piedDePage() {
       </div>
       <nav class="ft-col" aria-label="Explorer"><b>Explorer</b>${lien('#/search', 'Rechercher un bien')}${cat('maison', 'Maisons')}${cat('appartement', 'Appartements')}${cat('terrain', 'Terrains')}${cat('local commercial', 'Locaux commerciaux')}</nav>
       <nav class="ft-col" aria-label="Professionnels"><b>Professionnels</b>${lien('#/register?role=owner', 'Publier un bien')}${lien('#/register?role=agency', 'Créer un compte agence')}${lien('#/#proprietaires', 'Espace propriétaires')}${lien('#/#agences', 'Espace agences')}${lien('#/login', 'Se connecter')}</nav>
-      <nav class="ft-col" aria-label="Aide"><b>Aide</b>${lien('#/#comment', 'Comment ça marche')}${lien('#/#faq', 'Questions fréquentes')}${C.email ? lien('mailto:' + esc(C.email), 'Nous écrire') : ''}${C.whatsapp ? lien('https://wa.me/' + esc(C.whatsapp), 'WhatsApp', ' target="_blank" rel="noopener"') : ''}</nav>
+      <nav class="ft-col" aria-label="Aide"><b>Aide</b>${lien('#/#comment', 'Comment ça marche')}${lien('#/#faq', 'Questions fréquentes')}${lien('#/contact', 'Nous écrire')}${lien('#/mot-de-passe-oublie', 'Mot de passe oublié')}${C.whatsapp ? lien('https://wa.me/' + esc(C.whatsapp), 'WhatsApp', ' target="_blank" rel="noopener"') : ''}</nav>
       <nav class="ft-col" aria-label="Informations légales"><b>Légal</b>${lien('#/legal/mentions', 'Mentions légales')}${lien('#/legal/cgu', 'Conditions d\'utilisation')}${lien('#/legal/confidentialite', 'Politique de confidentialité')}</nav>
     </div>
     <div class="wrap ft-bottom">

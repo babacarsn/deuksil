@@ -1,0 +1,14 @@
+[
+ {
+  "page": "#/agency/properties",
+  "bouton": "Disponible En discussion Loué Vendu Archivé En mai",
+  "action": "set-status",
+  "souci": "aucun effet visible"
+ },
+ {
+  "page": "#/owner/property/new",
+  "bouton": "Précédent",
+  "action": "wiz-prev",
+  "souci": "aucun effet visible"
+ }
+]

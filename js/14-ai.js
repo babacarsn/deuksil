@@ -156,7 +156,7 @@ function localAssistantReply(text) {
   if (/visite/.test(t))
     return {reply: "Depuis la fiche d'un bien, cliquez sur « Demander une visite », choisissez une date et une heure. Le propriétaire accepte, refuse ou reporte, et vous êtes notifié."};
   if (/(paiement|payer|wave|orange|free money|paydunya|carte)/.test(t))
-    return {reply: "Les paiements se font via PayDunya : Orange Money, Wave, Free Money ou carte bancaire. Dans cette démonstration, le paiement est simulé."};
+    return {reply: "DEUKSIL est gratuit : aucun paiement n'est demandé pour créer un compte ou publier une annonce. Les loyers et les ventes se règlent directement entre vous et le propriétaire ou l'agence."};
   if (/(bonjour|salut|bonsoir|hello|coucou)/.test(t) && t.length < 25)
     return {reply: "Bonjour ! Dites-moi ce que vous cherchez (type de bien, ville, budget) ou posez une question sur les tarifs, la publication d'un bien ou les visites."};
   const filters = sanitizeAiFilters(parseSearchLocal(text));

@@ -50,7 +50,7 @@ route(/^\/admin\/users$/, () => {
       ${users.map(x => `<tr><td><div class="row">${avatarHtml(x, 36)}
           <div><b class="small">${esc(displayName(x))}</b>${x.role === 'agency' ? `<div class="small muted">${esc(x.address || '')}</div>` : ''}</div></div></td>
         <td class="small">${esc(x.cni)}</td><td class="small">${esc(x.phone)}</td>
-        <td>${badge({client:'Client', owner:'Propriétaire', agency:'Agence'}[x.role], x.role === 'agency' ? 'gold' : 'info')}</td>
+        <td>${badge({client:'Client', tenant:'Locataire', owner:'Propriétaire', agency:'Agence', manager:'Gestionnaire', agent:'Agent'}[x.role] || x.role, x.role === 'agency' ? 'gold' : 'info')}</td>
         <td>${badge(x.status, x.status === 'actif' ? 'ok' : x.status === 'suspendu' ? 'bad' : 'warn')}</td>
         <td class="small">${dateFr(x.createdAt)}</td>
         <td><div class="row" style="gap:6px">

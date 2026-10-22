@@ -26,7 +26,7 @@ let ok = 0, ko = 0; const t = (c, m) => { c ? ok++ : ko++; console.log((c ? '✓
   // Créer un compte client → retour sur l'annonce
   await p.evaluate(() => { location.hash = '#/register'; }); await p.waitForTimeout(700);
   await p.evaluate(() => { const f = document.querySelector('form[data-action="register"]');
-    Object.entries({cni: '1999999999555', firstName: 'Awa', lastName: 'Nouvelle', phone: '775554433', password: 'Secret-555', password2: 'Secret-555'}).forEach(([k, v]) => { const i = f.querySelector(`[name="${k}"]`); if (i) i.value = v; }); f.requestSubmit(); });
+    Object.entries({cni: '1999999999555', firstName: 'Awa', lastName: 'Nouvelle', phone: '775554433', password: 'Secret-555', password2: 'Secret-555', email: 'awa.nouvelle555@exemple.sn', cgu: true}).forEach(([k, v]) => { const i = f.querySelector(`[name="${k}"]`); if (i) { if (i.type === 'checkbox') i.checked = !!v; else i.value = v; } }); f.requestSubmit(); });
   await p.waitForTimeout(1200);
   const u = await p.evaluate(() => Auth.current() && {role: Auth.current().role, id: Auth.current().id});
   t(u && u.role === 'client', 'Compte client créé et connecté');

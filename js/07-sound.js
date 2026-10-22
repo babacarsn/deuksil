@@ -37,24 +37,6 @@ function checkNotifySound(u) {
   lastUnreadCount[u.id] = count;
 }
 
-function openReceipt(id) {
-  const p = DB.findItem(DB.K.payments, id);
-  if (!p || !p.paydunya) return;
-  const pd = p.paydunya;
-  modal('Reçu PayDunya', `
-    <div class="pd-topbar"><b>PayDunya</b><span class="badge ok">Bac à sable — simulation</span></div>
-    <div class="pd-merchant">
-      <div class="row-between"><span class="small muted">Marchand</span><b class="small">DEUKSIL</b></div>
-      <div class="row-between"><span class="small muted">Référence facture</span><code class="small">${pd.token}</code></div>
-      <div class="row-between"><span class="small muted">Statut</span>${badge(pd.status, 'ok')}</div>
-      <div class="row-between"><span class="small muted">Client</span><span class="small">${esc(pd.customer.name)} · ${esc(pd.customer.phone)}</span></div>
-      <div class="row-between"><span class="small muted">Empreinte (hash)</span><code class="small">${pd.hash.slice(0, 20)}…</code></div>
-      <div class="row-between" style="margin-top:6px"><span>Montant réglé</span><b style="font-family:var(--display);font-weight:600;font-size:1.3rem">${money(p.amount)}</b></div>
-    </div>
-    <p class="small muted" style="margin-top:12px">${esc(p.type)} · ${esc(p.method)} · ${dateTimeFr(p.createdAt)} · Réf. interne ${esc(p.ref)}</p>
-    <p class="small muted">Ce reçu est une simulation : aucune transaction bancaire réelle n'a eu lieu.</p>`);
-}
-
 function toast(msg, tone = 'ok') {
   const el = document.createElement('div');
   el.className = 'toast ' + (tone === 'ok' ? '' : tone);

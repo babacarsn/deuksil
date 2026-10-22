@@ -281,14 +281,14 @@ const DS_EXEMPLES = [
   [/cni/i, 'Ex. 1234567890123 (13 chiffres)'], [/mail/i, 'exemple@mail.sn'], [/phone|tél|telephone|whatsapp/i, '77 000 00 00'],
   [/password|mot de passe/i, '6 caractères minimum'], [/iban|rib|compte bancaire/i, 'SN08 …'],
   [/firstname|prénom|prenom/i, 'Ex. Awa'], [/lastname|^nom$|\bnom\b(?! complet)/i, 'Ex. Diop'],
-  [/tenant|locataire|buyer|acqu|client|name|nom complet|société|societe|propriétaire|proprietaire|vendeur|fournisseur|prestataire/i, 'Ex. Mamadou Diallo'],
-  [/address|adresse/i, 'Ex. Rue 10 x Corniche, Almadies, Dakar'], [/quartier|lieu/i, 'Ex. Almadies, Mermoz…'], [/city|ville/i, 'Ex. Dakar'],
+  [/address|adresse/i, 'Ex. Rue 10 x Corniche, Almadies, Dakar'],
+  [/tenant|locataire|buyer|acqu|client|name|nom complet|société|societe|propriétaire|proprietaire|vendeur|fournisseur|prestataire/i, 'Ex. Mamadou Diallo'], [/quartier|lieu/i, 'Ex. Almadies, Mermoz…'], [/city|ville/i, 'Ex. Dakar'],
   [/rate|taux|commission|%/i, 'Ex. 8'], [/surface|m²/i, 'Ex. 120'], [/rooms|chambres/i, 'Ex. 3'], [/baths|salle/i, 'Ex. 2'],
   [/months|durée|duree/i, 'Ex. 12'], [/days|jours/i, 'Ex. 30'], [/dueday|jour d'échéance|echeance/i, 'Ex. 5'],
   [/deposit|caution/i, 'Ex. 500 000'], [/cost|coût|cout|dépense|depense/i, 'Ex. 25 000'], [/price|prix de vente/i, 'Ex. 85 000 000'],
   [/rent|loyer|price|prix|amount|montant|deposit|caution|charges|cost|coût|offer|offre|budget|acompte|value|valeur|retenue|fcfa/i, 'Ex. 250 000'],
   [/ref|référence|reference|numéro|numero|transaction/i, 'Ex. N° de transaction'], [/title|titre|problème|probleme|objet/i, 'Ex. Fuite d\'eau dans la cuisine'],
-  [/motif|raison/i, 'Ex. Peinture de la chambre'], [/hours|heures/i, 'Ex. Lun–Sam, 9h–18h'], [/compteur|elec|eau/i, 'Ex. 004512'],
+  [/motif|raison/i, 'Ex. Peinture de la chambre'], [/hours|heures/i, 'Ex. Lun–Sam, 9h–18h'], [/compteur|elec|\beau\b/i, 'Ex. 004512'],
   [/note|remarque|comment|description|message|desc/i, 'Écrivez ici…'], [/cles|clés/i, 'Ex. 2']
 ];
 function dsExemples(root) {
@@ -297,6 +297,11 @@ function dsExemples(root) {
     if (['date', 'month', 'time', 'checkbox', 'radio', 'file', 'hidden', 'color', 'range'].includes(el.type)) return;
     const lab = ((el.closest('.field') || {}).querySelector ? ((el.closest('.field').querySelector('label') || {}).textContent || '') : '').replace(/\*/g, '').trim();
     const cle = (el.name || '') + ' ' + lab;
+    if (el.type === 'password') {
+      el.placeholder = /ancien|actuel|current/i.test(el.name + ' ' + lab + ' ' + (el.autocomplete || '')) ? 'Votre mot de passe actuel'
+        : /confirm|password2/i.test(el.name + ' ' + lab) ? 'Retapez le nouveau mot de passe' : '6 caractères minimum';
+      return;
+    }
     const m = DS_EXEMPLES.find(([re]) => re.test(el.name || '')) || DS_EXEMPLES.find(([re]) => re.test(lab));
     if (m) el.placeholder = m[1];
     else if (lab) el.placeholder = lab.length < 40 ? lab + '…' : '';

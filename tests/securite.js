@@ -10,7 +10,7 @@ const {open, loginAs, goto} = require('./harnais.js');
   T('S1a', !/"password"/.test(s) && !/demo123|admin123/.test(s), 'aucun mot de passe en clair dans le stockage (jeu de démonstration converti)');
   await p.evaluate(() => { localStorage.removeItem(DB.K.session); location.hash = '#/register'; }); await p.waitForTimeout(700);
   await p.evaluate(() => { const f = document.querySelector('form[data-action="register"]'); f.querySelector('input[name="role"][value="owner"]').checked = true;
-    Object.entries({cni: '1999999999801', firstName: 'Nouveau', lastName: 'Client', phone: '770009801', password: 'Secret-801', password2: 'Secret-801'}).forEach(([k, v]) => { const i = f.querySelector(`[name="${k}"]`); if (i) i.value = v; }); f.requestSubmit(); }); await p.waitForTimeout(900);
+    Object.entries({cni: '1999999999801', firstName: 'Nouveau', lastName: 'Client', phone: '770009801', password: 'Secret-801', password2: 'Secret-801', email: 'nouveau801@exemple.sn', cgu: true}).forEach(([k, v]) => { const i = f.querySelector(`[name="${k}"]`); if (i) { if (i.type === 'checkbox') i.checked = !!v; else i.value = v; } }); f.requestSubmit(); }); await p.waitForTimeout(900);
   s = await brut();
   T('S1b', /1999999999801/.test(s) && !/Secret-801/.test(s), 'inscription : le mot de passe choisi n\'est pas stocké en clair');
   T('S1c', await p.evaluate(() => Auth.login('1999999999801', 'Secret-801').user ? true : false), 'le nouveau compte se connecte avec son mot de passe');
@@ -24,7 +24,7 @@ const {open, loginAs, goto} = require('./harnais.js');
   // membre créé par le propriétaire
   await loginAs(p, '1900000000003'); await goto(p, '#/manage/team'); await p.waitForTimeout(600);
   const membre = await p.evaluate(() => { const f = document.querySelector('form[data-action="g4-member"]'); if (!f) return false;
-    Object.entries({cni: '1999999999802', firstName: 'Gest', lastName: 'Ion', phone: '770009802', password: 'Membre-802'}).forEach(([k, v]) => { const i = f.querySelector(`[name="${k}"]`); if (i) i.value = v; });
+    Object.entries({cni: '1999999999802', firstName: 'Gest', lastName: 'Ion', phone: '770009802', password: 'Membre-802'}).forEach(([k, v]) => { const i = f.querySelector(`[name="${k}"]`); if (i) { if (i.type === 'checkbox') i.checked = !!v; else i.value = v; } });
     const r = f.querySelector('[name="role"]'); if (r) r.value = 'manager'; f.requestSubmit(); return true; }); await p.waitForTimeout(600);
   s = await brut();
   T('S1g', membre && /1999999999802/.test(s) && !/Membre-802/.test(s), 'membre d\'équipe créé : mot de passe stocké en empreinte');
@@ -38,7 +38,7 @@ const {open, loginAs, goto} = require('./harnais.js');
   await p.evaluate(() => localStorage.removeItem('deuksil_essais'));
   T('S2d', await p.evaluate(() => !!Auth.login('1900000000005', 'demo123').user), 'après la pause, la connexion fonctionne');
   await p.evaluate(() => { localStorage.removeItem(DB.K.session); location.hash = '#/login'; }); await p.waitForTimeout(700);
-  await p.evaluate(() => { const f = document.querySelector('form[data-action="login"]'); const set = (n, v) => { const i = f.querySelector(`[name="${n}"]`); if (i) i.value = v; }; set('cni', 'mamadou.fall@gmail.com'); set('password', 'demo123'); f.requestSubmit(); }); await p.waitForTimeout(900);
+  await p.evaluate(() => { const f = document.querySelector('form[data-action="login"]'); const set = (n, v) => { const i = f.querySelector(`[name="${n}"]`); if (i) { if (i.type === 'checkbox') i.checked = !!v; else i.value = v; } }; set('cni', 'mamadou.fall@gmail.com'); set('password', 'demo123'); f.requestSubmit(); }); await p.waitForTimeout(900);
   T('S2e', await p.evaluate(() => (Auth.current() || {}).cni === '1900000000003'), 'connexion par le formulaire (adresse Gmail de démonstration + demo123)');
 
   // S3 — doublons

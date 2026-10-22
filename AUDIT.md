@@ -272,3 +272,68 @@ Les sections 4 et 7 restent valables : authentification sécurisée, contrôles 
 - Application à routage par ancre (`#/…`) : les moteurs n'indexent pas chaque annonce séparément. Un vrai référencement demandera un rendu serveur ou un pré-rendu des pages publiques, un `sitemap.xml` et des URL sans `#` — à faire avec l'hébergement.
 - Référence opaque dans l'adresse ≠ sécurité : les contrôles d'accès devront être faits par le serveur.
 - Paiements, SMS, e-mails : simulés, présentés comme tels.
+
+## 20. Retours de recette — Partie 3 (Agence et agent)
+- 13 OK, 1 KO.
+- **AG4 « Confier un client » (KO : bouton introuvable)** : la fonction n'existait que pour les visites (responsable), pas pour les demandes clients. Ajout d'un bouton « Confier » sur chaque demande que l'agent suit (le responsable : toutes) → choix d'un collègue actif + note → la demande passe chez le collègue, qui est prévenu ; elle disparaît des demandes de l'agent. Trois demandes de démonstration (deux suivies par Aïssatou, une par Ousmane) pour pouvoir tester tout de suite.
+- Régression trouvée et corrigée au passage : depuis le passage des titres en H1, les titres « Mes biens » et « Mes clients » de l'agent ne remplaçaient plus « Portefeuille de biens » / « Clients ».
+- Test : `tests/confier-client.js` 7/7.
+
+## 21. Retours de recette — Partie 2 (Propriétaire)
+- 12 OK, 2 KO.
+- **P6 (KO : « je peux marquer terminée une visite pas encore arrivée »)** : le bouton « Marquer terminée » n'apparaît plus avant la date de la visite, et l'action est refusée si elle est déclenchée quand même (message avec la date prévue).
+- **P10 (KO : « pas trouvé comment me lier à une agence »)** : seule l'agence pouvait proposer le rattachement. Le propriétaire peut maintenant le demander : Mon profil › « Confier la gestion à une agence » (raccourci « Confier à une agence » dans Mes biens) → choix de l'agence + message → l'agence voit la demande en tête de Gestion › Propriétaires, fixe sa commission et accepte (fiche mandant reliée au compte existant, sans second compte) ou refuse ; le propriétaire est prévenu et peut annuler une demande en attente.
+- Test : `tests/recette-p2.js` 10/10.
+
+## 22. Tableaux de bord sur ordinateur (21/10/2026)
+
+- **Problème :** sur grand écran, les blocs des tableaux de bord étaient alignés par rangées, ce qui laissait de grands vides sous le graphique et sous « Mon portefeuille ». Les compteurs et les actions rapides étaient aussi très hauts.
+- **Correction :** `js/99c-bureau.js` et `css/03-bureau.css`, actifs uniquement au-delà de 900 px de large.
+  - Les blocs sont répartis en deux colonnes indépendantes, et le dernier bloc de chaque colonne s'étire pour que les deux colonnes finissent à la même hauteur.
+  - Dans « À traiter », la flèche est alignée au bord droit.
+  - Le tableau de l'agent passe sur deux colonnes.
+  - « Mon espace » (client) affiche ses quatre compteurs sur une ligne.
+  - « Activité récente » (administration) passe sur deux colonnes.
+  - À partir de 1400 px, les compteurs et les actions rapides deviennent compacts (icône à gauche).
+- **Mobile inchangé :** j'ai comparé la position de chaque élément avec et sans la correction, à 360, 390, 600, 768 et 900 px. Les seules différences relevées sont des données de démo qui varient d'une exécution à l'autre.
+- **Tests :**
+  - la référence de `empreinte` a été refaite, car l'ordre des sections change sur ordinateur (colonne de gauche, puis colonne de droite) ;
+  - le cas R5 de `regression` a été mis à jour : depuis la section 20, une fin de bail donne « libération à confirmer ».
+
+## 23. Œil sur tous les champs de mot de passe (21/10/2026)
+
+- **Avant :** seuls la connexion, l'inscription et l'assistant d'inscription avaient le bouton « œil ». Les autres formulaires ne l'avaient pas :
+  - accès d'un membre d'équipe ou d'un locataire ;
+  - changement de mot de passe (client, propriétaire, agence, administration, agent) ;
+  - premier mot de passe d'un compte ouvert par un tiers.
+- **Correction :** `js/99d-mdp.js` ajoute le même bouton à tout champ de mot de passe qui n'en a pas, y compris aux formulaires futurs.
+- **Test :** `tests/mdp-oeil.js` vérifie 22 champs sur 9 écrans (bouton présent, placé dans le champ, affiche puis masque la saisie), 22 sur 22.
+
+## 24. Finitions professionnelles sur ordinateur (21/10/2026)
+
+**Méthode.** J'ai parcouru l'application à 1440 px de large, pour 7 profils : 234 pages, chacune photographiée et passée au détecteur (boutons bruts, blocs collés, débordements). J'ai ensuite vérifié les fenêtres de dialogue principales.
+
+Les corrections sont dans `js/99e-pro.js` et `css/03-bureau.css`. Elles ne s'appliquent qu'au-delà de 900 px de large.
+
+- **Tableaux :**
+  - montants, dates, périodes et téléphones ne se coupent plus sur 2 ou 3 lignes ;
+  - les boutons d'action tiennent sur une ligne : à partir de 4 actions, les actions secondaires passent en icône, avec le libellé en info-bulle ;
+  - en-têtes en petites capitales, marges réduites quand il y a beaucoup de colonnes ;
+  - sur une fenêtre étroite, un tableau trop large revient au retour à la ligne plutôt que de déborder.
+  - Exemples : « Portefeuille de biens » débordait de la page à 1440 px, et les boutons de « Locataires & baux » et des signalements tenaient sur 2 ou 3 lignes. C'est corrigé.
+- **Champs « fichier » :** l'ancien bouton du navigateur « Choose File » est remplacé par un bouton dans le style de l'application (dépenses, travaux, pièces du bail).
+- **Cases à cocher en série :** biens confiés, services du mandat et permissions d'équipe s'affichent en grille de pastilles ; la case cochée est surlignée.
+- **Pages de Gestion :** le fil d'Ariane, le choix de section et l'export tiennent sur une seule barre, au lieu de 3 lignes.
+- **Visites :** « Suite à une visite » passe sous le titre de la page.
+- **Profil et paramètres :** les cartes « mot de passe », « règles » et « confier à une agence » rejoignent la colonne de gauche ; elles n'ont plus des largeurs différentes.
+- **Ajouter un bien :** l'assistant est centré et élargi à 920 px.
+- **Devis et factures :** la fenêtre est plus large, et chaque ligne (désignation, quantité, prix) tient sur une ligne. Le titre dit « Nouvelle facture » au lieu de « Nouveau facture ».
+- **Statistiques (administration, `js/99f-stats.js`, toutes largeurs) :**
+  - avant : les noms de régions se chevauchaient, les rôles restaient en anglais, « Revenus par type » était vide sans explication, et un graphique de biens était titré « Transactions » ;
+  - maintenant : des barres horizontales lisibles, en français, avec un total par carte.
+- **Textes d'exemple dans les champs (toutes largeurs) :**
+  - l'adresse du client affichait « Ex. Mamadou Diallo » ;
+  - « Nouveau mot de passe » affichait « Ex. 004512 », parce que « nouveau » contient « eau ».
+  - Les deux sont corrigés.
+
+**Mobile inchangé.** J'ai comparé la position de chaque élément avec et sans les modules de bureau, à 390, 768 et 900 px, sur 13 pages et sur les tableaux de bord. Les seules différences sont aussi présentes entre deux exécutions identiques : ce sont des données de démo variables.

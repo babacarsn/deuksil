@@ -8,7 +8,7 @@ const ETAPES = (process.env.ETAPES || 'P1,P3,P4,P2,P6,S1,N1,N2,N3,N4,I1,I2,I3').
   const inscrire = async (role, cni) => {
     await p.evaluate(() => { localStorage.removeItem(DB.K.session); location.hash = '#/register'; }); await p.waitForTimeout(700);
     await p.evaluate(([role, cni]) => { const f = document.querySelector('form[data-action="register"]'); const r = f.querySelector('input[name="role"]:checked'); r.value = role;
-      Object.entries({cni, firstName: 'Test', lastName: role, phone: '77' + cni.slice(-7), password: 'secret12', password2: 'secret12', agencyName: 'Agence ' + role}).forEach(([k, v]) => { const i = f.querySelector(`[name="${k}"]`); if (i) i.value = v; });
+      Object.entries({cni, firstName: 'Test', lastName: role, email: 'test' + cni + '@exemple.sn', phone: '77' + cni.slice(-7), password: 'secret12', password2: 'secret12', cgu: true, agencyName: 'Agence ' + role, address: 'Dakar'}).forEach(([k, v]) => { const i = f.querySelector(`[name="${k}"]`); if (i) { if (i.type === 'checkbox') i.checked = !!v; else i.value = v; } });
       f.requestSubmit(); }, [role, cni]); await p.waitForTimeout(800);
     return p.evaluate(c => (DB.findItem(DB.K.users, u => u.cni === c) || {}).role || null, cni);
   };
@@ -154,7 +154,7 @@ const ETAPES = (process.env.ETAPES || 'P1,P3,P4,P2,P6,S1,N1,N2,N3,N4,I1,I2,I3').
   }
   const erreurSous = (sel, nom) => p.evaluate(([sel, nom]) => { const f = document.querySelector(sel); const i = f && f.querySelector(`[name="${nom}"]`); if (!i) return null;
     const c = (i.closest('.field') || i.parentElement).querySelector('.champ-err'); return c ? {msg: c.textContent, ko: i.classList.contains('champ-ko'), focus: document.activeElement === i} : null; }, [sel, nom]);
-  const envoyer = (sel, vals) => p.evaluate(([sel, vals]) => { const f = document.querySelector(sel); Object.entries(vals).forEach(([k, v]) => { const i = f.querySelector(`[name="${k}"]`); if (i) i.value = v; }); f.requestSubmit(f.querySelector('button:not([type=button])') || undefined); }, [sel, vals]);
+  const envoyer = (sel, vals) => p.evaluate(([sel, vals]) => { const f = document.querySelector(sel); Object.entries(vals).forEach(([k, v]) => { const i = f.querySelector(`[name="${k}"]`); if (i) { if (i.type === 'checkbox') i.checked = !!v; else i.value = v; } }); f.requestSubmit(f.querySelector('button:not([type=button])') || undefined); }, [sel, vals]);
   if (ETAPES.includes('N1')) {
     await loginAs(p, '1900000000004'); await goto(p, '#/manage/owners'); await p.waitForTimeout(600);
     await envoyer('form[data-action="g9-owner"]', {name: 'Test Mandant', phone: '770005555', cni: '12345'}); await p.waitForTimeout(500);

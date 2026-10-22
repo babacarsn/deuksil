@@ -118,7 +118,7 @@ let agentPortee = 'miens';
     const seg = `<div class="seg" style="margin:0 0 14px" role="tablist">
       <button type="button" class="seg-b ${agentPortee === 'miens' ? 'on' : ''}" data-action="agent-portee" data-v="miens">${icon('user', 16)} Mes biens <span class="bf-c">${miens.length}</span></button>
       <button type="button" class="seg-b ${agentPortee === 'tous' ? 'on' : ''}" data-action="agent-portee" data-v="tous">${icon('building', 16)} Toute l'agence <span class="bf-c">${tous.length}</span></button></div>`;
-    h = h.replace(/<h2>Portefeuille de biens<\/h2>/, '<h2>Mes biens</h2>');
+    h = h.replace(/<(h[12])>Portefeuille de biens<\/\1>/, '<$1>Mes biens</$1>');
     return h.includes('<div class="rfiltre') ? h.replace('<div class="rfiltre', seg + '<div class="rfiltre')
       : h.replace(/(<div class="page-head">[\s\S]*?<div class="row">[\s\S]*?<\/div><\/div>)/, `$1${seg}`);
   };
@@ -202,7 +202,7 @@ window.addEventListener('submit', e => {
     DB.filterItems = function (k, pred) { const res = base.call(DB, k, pred); return k === DB.K.demandes ? res.filter(x => x.agentId === moi(u).id) : res; };
     let h; try { h = f(...a); } finally { DB.filterItems = base; }
     if (h === false) return h;
-    return h.replace('<h2>Clients</h2>', '<h2>Mes clients</h2>')
+    return h.replace(/<(h[12])>Clients<\/\1>/, '<$1>Mes clients</$1>')
       .replace(/<div class="field"><label>Agent qui suit<\/label>[\s\S]*?<\/select><\/div>/, '');
   };
 })();

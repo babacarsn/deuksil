@@ -11,6 +11,44 @@ Aucun backend, aucune base de données distante, aucune API de paiement réelle.
 
 ---
 
+## 0. Mise en ligne : formulaires et réglages
+
+Tous les réglages du déploiement sont dans **`js/00-config.js`** (seul fichier à modifier) :
+
+| Réglage | Rôle | Vide (par défaut) |
+|---|---|---|
+| `apiBase` | Adresse du serveur, ex. `https://api.deuksil.sn` | Comptes enregistrés dans le navigateur, aucun envoi de code |
+| `googleClientId` | ID client OAuth Google (type « Application Web ») | « Continuer avec Google » annonce que ce mode n'est pas encore activé |
+| `routes` | Chemins de l'API appelés par les formulaires | — |
+
+Formulaires réels (js/99g-formulaires.js, 38-ds3.js, 46-connexion.js, 47-google.js) :
+
+- **Inscription** `#/register` : profil (Client, Propriétaire, Agence), prénom, nom, **adresse e-mail** (sert à se
+  connecter), téléphone (9 chiffres, Sénégal), CNI (13 chiffres), mot de passe (8 caractères, lettre et chiffre),
+  confirmation, acceptation des conditions. Agence : nom, adresse, NINEA et RCCM (facultatifs). E-mail et CNI
+  uniques. Les liens de l'accueil cochent le bon profil : « Publier un bien » → Propriétaire, « Créer un compte
+  agence » → Agence.
+- **Mot de passe oublié** `#/mot-de-passe-oublie` → **Nouveau mot de passe** `#/reinitialiser-mot-de-passe`
+  (code à 6 chiffres reçu par e-mail ou SMS).
+- **Vérification de l'adresse e-mail** `#/verifier-email` (code à 6 chiffres, renvoi du code).
+- **Contact** `#/contact` (lien « Nous écrire » du pied de page). Sans serveur, le message est enregistré et
+  l'administration est notifiée.
+- **Google** : bouton officiel de Google ; le jeton reçu est envoyé à `POST {apiBase}/auth/google`, où le serveur
+  doit vérifier la signature et l'audience. Adresse connue → connexion ; adresse inconnue → inscription pré-remplie.
+
+Routes appelées quand `apiBase` est renseigné (POST, JSON ; erreur → `{message}` affiché tel quel) :
+`/auth/register`, `/auth/password/forgot`, `/auth/password/reset`, `/auth/email/verify`, `/auth/email/resend`,
+`/auth/google`, `/contact`. Sans serveur, ce qui exige un envoi (codes) le dit à l'utilisateur et propose
+l'assistance ; rien n'est simulé.
+
+Activer Google : console Google Cloud → API et services → Identifiants → Créer un ID client OAuth (Application Web) →
+« Origines JavaScript autorisées » : l'adresse du site (ex. `https://deuksil.sn`) → copier l'ID dans `googleClientId`.
+
+Les éléments de démonstration (bloc « Comptes de démonstration » de la page de connexion, comptes et annonces du jeu
+de test) restent en place : ils sont à retirer un par un avant l'ouverture au public.
+
+Tests : `node tests/formulaires.js` (34 vérifications).
+
 ## 1. Présentation
 
 DEUKSIL rassemble locations, ventes et terrains au Sénégal dans un seul produit, avec quatre espaces :
@@ -116,8 +154,8 @@ Routes (hash) : `#/`, `#/login`, `#/register`, `#/search`, `#/property/:id`, `#/
 ## 8. Ajouts récents
 
 - **Photos réelles** : le formulaire d'ajout/modification d'un bien permet d'importer de vraies images
-  (JPG/PNG, 8 photos maximum). Chaque image est redimensionnée et compressée dans le navigateur (canvas,
-  1280 px de large maximum, JPEG qualité 72 %) avant d'être stockée en base64 dans `localStorage`, avec
+  (JPG/PNG, 20 photos maximum pour un propriétaire comme pour une agence). Chaque image est redimensionnée et compressée dans le navigateur (canvas,
+  1080 px de côté maximum, JPEG qualité 70 %) avant d'être stockée en base64 dans `localStorage`, avec
   vignettes, réorganisation implicite (première photo = couverture) et suppression individuelle. Un bien
   sans photo continue d'afficher l'illustration générée automatiquement.
 - **Recherche enrichie** : tri (récents, prix croissant/décroissant, plus vus, plus grande surface),

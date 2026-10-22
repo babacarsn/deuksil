@@ -52,7 +52,9 @@ function startRegistration(data) {
   const exists = DB.findItem(DB.K.users, u => u.cni === data.cni);
   if (exists) { toast('Un compte existe déjà avec cette CNI.', 'bad'); return; }
   const user = DB.addItem(DB.K.users, {cni: data.cni, firstName: data.firstName, lastName: data.lastName, phone: data.phone,
-    password: data.password, role: data.role, agencyName: data.agencyName || '', address: data.address || '', agencyDesc: data.agencyDesc || '',
+    email: String(data.email || '').trim().toLowerCase(), password: data.password, role: data.role,
+    agencyName: data.agencyName || '', address: data.address || '', agencyDesc: data.agencyDesc || '',
+    ninea: data.ninea || '', rccm: data.rccm || '', cguAccepteesLe: data.cgu ? now() : '', emailVerifie: false,
     status: 'actif', registrationPaid: true});
   if (!DB.lastWriteOk) return;
   activate(user, 'Bienvenue sur DEUKSIL : votre compte est actif, gratuitement.');
@@ -143,7 +145,6 @@ document.addEventListener('click', e => {
       if (link) go(link); else render();
       break;
     }
-    case 'view-receipt': stop(); openReceipt(id); break;
     case 'open-more-menu': stop(); openMoreMenu(u); break;
     case 'nav-close-modal': closeModal(); break;
     case 'toggle-pw': {
@@ -372,9 +373,10 @@ document.addEventListener('change', e => {
     render();
   }
   if (el.dataset.action === 'photos-input') {
-    const files = [...el.files].slice(0, MAX_PHOTOS - formPhotos.length);
-    if (!files.length) return;
-    toast(`Ajout de ${files.length} photo${files.length > 1 ? 's' : ''}…`, 'warn');
+    const place = MAX_PHOTOS - formPhotos.length, files = [...el.files].slice(0, Math.max(0, place));
+    if (!files.length) { toast(`Vous avez déjà ${MAX_PHOTOS} photos, le maximum par annonce.`, 'warn'); return; }
+    if (el.files.length > files.length) toast(`${MAX_PHOTOS} photos maximum par annonce : seules les ${files.length} premières sont ajoutées.`, 'warn');
+    else toast(`Ajout de ${files.length} photo${files.length > 1 ? 's' : ''}…`, 'warn');
     Promise.all(files.map(f => readImageAsDataUrl(f).catch(() => null)))
       .then(results => {
         formPhotos.push(...results.filter(Boolean));

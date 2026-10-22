@@ -1,0 +1,659 @@
+[
+ {
+  "profil": "mandant",
+  "page": "#/owner/dashboard",
+  "label": "Ajouter un bien",
+  "href": "#/owner/property/new",
+  "final": "#/owner/property/new",
+  "titre": "",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/owner/dashboard",
+  "label": "Demandes de visite",
+  "href": "#/owner/visits?f=confirmer",
+  "final": "#/owner/visits",
+  "titre": "Demandes de visite",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/owner/dashboard",
+  "label": "Voir le détail des revenus",
+  "href": "#/manage/finance",
+  "final": "#/manage/finance",
+  "titre": "Finances",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/owner/dashboard",
+  "label": "Total encaissé ce mois 340 000 FCFA Loyers et factures, hors ventes",
+  "href": "#/manage/fpay",
+  "final": "#/manage/fpay",
+  "titre": "Paiements",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/owner/dashboard",
+  "label": "Loyers impayés 90 000 FCFA 2 loyers en retard",
+  "href": "#/manage/rents?f=retard",
+  "final": "#/manage/rents",
+  "titre": "Loyers",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/owner/dashboard",
+  "label": "Voir tout",
+  "href": "#/owner/properties",
+  "final": "#/owner/properties",
+  "titre": "Mes biens et annonces",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/owner/dashboard",
+  "label": "Mes biens immobiliers 7 biens · 3 loués · 4 disponibles · 3 en vente Accéder à la liste",
+  "href": "#/owner/properties",
+  "final": "#/owner/properties",
+  "titre": "Mes biens et annonces",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/owner/dashboard",
+  "label": "Locataires & baux 3 baux actifs · 3 logements occupés sur 4 (75 %) Accéder à la liste",
+  "href": "#/manage/leases",
+  "final": "#/manage/leases",
+  "titre": "Locataires & baux",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/owner/dashboard",
+  "label": "Ventes Aucun dossier de vente Accéder à la liste",
+  "href": "#/manage/deals",
+  "final": "#/manage/deals",
+  "titre": "Ventes",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/owner/dashboard",
+  "label": "Documents Contrats, factures et quittances Accéder à la liste",
+  "href": "#/coffre",
+  "final": "#/coffre",
+  "titre": "Mes documents",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/owner/dashboard",
+  "label": "2 loyers en retard 90 000 FCFA",
+  "href": "#/manage/rents?f=retard",
+  "final": "#/manage/rents",
+  "titre": "Loyers",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/owner/dashboard",
+  "label": "1 bail bientôt échu Ndèye Thiam",
+  "href": "#/manage/leases?q=Ndèye Thiam",
+  "final": "#/manage/leases",
+  "titre": "Locataires & baux",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/owner/dashboard",
+  "label": "Ajouter un locataire",
+  "href": "#/manage/leases?form=Nouveau bail",
+  "final": "#/manage/leases",
+  "titre": "Locataires & baux",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/owner/dashboard",
+  "label": "Ajouter un acheteur",
+  "href": "#/manage/deals?form=Vendre un bien",
+  "final": "#/manage/deals",
+  "titre": "Ventes",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/owner/dashboard",
+  "label": "Ajouter un document",
+  "href": "#/coffre?ouvrir=g7-add",
+  "final": "#/coffre",
+  "titre": "Mes documents",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/owner/properties",
+  "label": "Ajouter un bien",
+  "href": "#/owner/property/new",
+  "final": "#/owner/property/new",
+  "titre": "",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/owner/properties",
+  "label": "Ouvrir",
+  "href": "#/bien/propertie_xu1xhis7",
+  "final": "#/bien/propertie_xu1xhis7",
+  "titre": "Maison à Cité Lamy",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/owner/properties",
+  "label": "Modifier",
+  "href": "#/owner/property/propertie_xu1xhis7",
+  "final": "#/owner/property/propertie_xu1xhis7",
+  "titre": "",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/owner/properties",
+  "label": "Ouvrir",
+  "href": "#/bien/propertie_xu1ylz7u",
+  "final": "#/bien/propertie_xu1ylz7u",
+  "titre": "Appartement à Mboro",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/owner/properties",
+  "label": "Modifier",
+  "href": "#/owner/property/propertie_xu1ylz7u",
+  "final": "#/owner/property/propertie_xu1ylz7u",
+  "titre": "",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/owner/properties",
+  "label": "Ouvrir",
+  "href": "#/bien/propertie_xu1zmj39",
+  "final": "#/bien/propertie_xu1zmj39",
+  "titre": "Villa pieds dans l'eau à Somone",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/owner/properties",
+  "label": "Modifier",
+  "href": "#/owner/property/propertie_xu1zmj39",
+  "final": "#/owner/property/propertie_xu1zmj39",
+  "titre": "",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/owner/properties",
+  "label": "Ouvrir",
+  "href": "#/bien/propertie_xu1zs3rt",
+  "final": "#/bien/propertie_xu1zs3rt",
+  "titre": "Chambre meublée à Bambey",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/owner/properties",
+  "label": "Modifier",
+  "href": "#/owner/property/propertie_xu1zs3rt",
+  "final": "#/owner/property/propertie_xu1zs3rt",
+  "titre": "",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/owner/properties",
+  "label": "Ouvrir",
+  "href": "#/bien/propertie_xu20t7tq",
+  "final": "#/bien/propertie_xu20t7tq",
+  "titre": "Maison à Mbacké",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/owner/properties",
+  "label": "Modifier",
+  "href": "#/owner/property/propertie_xu20t7tq",
+  "final": "#/owner/property/propertie_xu20t7tq",
+  "titre": "",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/owner/properties",
+  "label": "Ouvrir",
+  "href": "#/bien/propertie_xu21apm1",
+  "final": "#/bien/propertie_xu21apm1",
+  "titre": "Terrain 400 m² à Fatick",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/owner/properties",
+  "label": "Modifier",
+  "href": "#/owner/property/propertie_xu21apm1",
+  "final": "#/owner/property/propertie_xu21apm1",
+  "titre": "",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/owner/properties",
+  "label": "Ouvrir",
+  "href": "#/bien/propertie_xu2249e3",
+  "final": "#/bien/propertie_xu2249e3",
+  "titre": "Maison avec cour à Sokone",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/owner/properties",
+  "label": "Modifier",
+  "href": "#/owner/property/propertie_xu2249e3",
+  "final": "#/owner/property/propertie_xu2249e3",
+  "titre": "",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/manage/leases",
+  "label": "Retour à la gestion",
+  "href": "#/manage",
+  "final": "#/manage",
+  "titre": "Gestion",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/manage/leases",
+  "label": "Gestion",
+  "href": "#/manage",
+  "final": "#/manage",
+  "titre": "Gestion",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/manage/rents",
+  "label": "Retour à la gestion",
+  "href": "#/manage",
+  "final": "#/manage",
+  "titre": "Gestion",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/manage/rents",
+  "label": "Gestion",
+  "href": "#/manage",
+  "final": "#/manage",
+  "titre": "Gestion",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/manage/deals",
+  "label": "Retour à la gestion",
+  "href": "#/manage",
+  "final": "#/manage",
+  "titre": "Gestion",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/manage/deals",
+  "label": "Gestion",
+  "href": "#/manage",
+  "final": "#/manage",
+  "titre": "Gestion",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/manage/tickets",
+  "label": "Retour à la gestion",
+  "href": "#/manage",
+  "final": "#/manage",
+  "titre": "Gestion",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/manage/tickets",
+  "label": "Gestion",
+  "href": "#/manage",
+  "final": "#/manage",
+  "titre": "Gestion",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/manage/finance",
+  "label": "Retour à la gestion",
+  "href": "#/manage",
+  "final": "#/manage",
+  "titre": "Gestion",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/manage/finance",
+  "label": "Gestion",
+  "href": "#/manage",
+  "final": "#/manage",
+  "titre": "Gestion",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/coffre",
+  "label": "Factures Factures émises et factures fournisseurs 0",
+  "href": "#/coffre/factures",
+  "final": "#/coffre/factures",
+  "titre": "Factures",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/coffre",
+  "label": "Devis & proformas Offres envoyées aux clients 0",
+  "href": "#/coffre/devis",
+  "final": "#/coffre/devis",
+  "titre": "Devis & proformas",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/coffre",
+  "label": "Avoirs Notes de crédit 0",
+  "href": "#/coffre/avoirs",
+  "final": "#/coffre/avoirs",
+  "titre": "Avoirs",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/coffre",
+  "label": "Reçus de paiement Preuves d'encaissement 0",
+  "href": "#/coffre/recus",
+  "final": "#/coffre/recus",
+  "titre": "Reçus de paiement",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/coffre",
+  "label": "Quittances de loyer Loyers payés 20",
+  "href": "#/coffre/quittances",
+  "final": "#/coffre/quittances",
+  "titre": "Quittances de loyer",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/coffre",
+  "label": "Contrats Baux, mandats, ventes 0",
+  "href": "#/coffre/contrats",
+  "final": "#/coffre/contrats",
+  "titre": "Contrats",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/coffre",
+  "label": "Pièces d'identité CNI, passeport 0",
+  "href": "#/coffre/identite",
+  "final": "#/coffre/identite",
+  "titre": "Pièces d'identité",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/coffre",
+  "label": "Titres & propriété Titre foncier, bail, plan 0",
+  "href": "#/coffre/propriete",
+  "final": "#/coffre/propriete",
+  "titre": "Titres & propriété",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/coffre",
+  "label": "Assurances Attestations et polices 0",
+  "href": "#/coffre/assurance",
+  "final": "#/coffre/assurance",
+  "titre": "Assurances",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/coffre",
+  "label": "Documents techniques Diagnostics, plans, devis travaux 0",
+  "href": "#/coffre/technique",
+  "final": "#/coffre/technique",
+  "titre": "Documents techniques",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/coffre",
+  "label": "Autres documents Tout le reste 0",
+  "href": "#/coffre/autres",
+  "final": "#/coffre/autres",
+  "titre": "Autres documents",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/owner/messages",
+  "label": "Voir le bien",
+  "href": "#/property/propertie_xu1xhis7",
+  "final": "#/property/propertie_xu1xhis7",
+  "titre": "Maison à Cité Lamy",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/manage",
+  "label": "Locataires & baux Baux en cours, caution et échéancier 3 bail(s) actif(s)",
+  "href": "#/manage/leases",
+  "final": "#/manage/leases",
+  "titre": "Locataires & baux",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/manage",
+  "label": "Fiches locataires Contact, bail et situation de chacun 3 locataire(s)",
+  "href": "#/manage/tenants",
+  "final": "#/manage/tenants",
+  "titre": "Fiches locataires",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/manage",
+  "label": "Unités Lots d'un immeuble loués séparément Aucune unité",
+  "href": "#/manage/units",
+  "final": "#/manage/units",
+  "titre": "Unités",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/manage",
+  "label": "Messages locataires Échanges avec vos locataires À jour",
+  "href": "#/owner/messages",
+  "final": "#/owner/messages",
+  "titre": "Messages",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/manage",
+  "label": "Loyers Encaissement, quittances et relances 2 en retard",
+  "href": "#/manage/rents",
+  "final": "#/manage/rents",
+  "titre": "Loyers",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/manage",
+  "label": "Ventes Du prospect à la signature 0 en cours",
+  "href": "#/manage/deals",
+  "final": "#/manage/deals",
+  "titre": "Ventes",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/manage",
+  "label": "Travaux Pannes, travaux et interventions Rien en cours",
+  "href": "#/manage/tickets",
+  "final": "#/manage/tickets",
+  "titre": "Travaux",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/manage",
+  "label": "Prestataires Plombiers, électriciens, artisans 0 prestataire(s)",
+  "href": "#/manage/providers",
+  "final": "#/manage/providers",
+  "titre": "Prestataires",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/manage",
+  "label": "Finances Encaissé, impayés et résultat net Vue d'ensemble",
+  "href": "#/manage/finance",
+  "final": "#/manage/finance",
+  "titre": "Finances",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/manage",
+  "label": "Devis & Factures Devis, proformas, factures, avoirs Tout est soldé",
+  "href": "#/manage/docs",
+  "final": "#/manage/docs",
+  "titre": "Devis & Factures",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/manage",
+  "label": "Paiements Encaissements et reçus 0 paiement(s)",
+  "href": "#/manage/fpay",
+  "final": "#/manage/fpay",
+  "titre": "Paiements",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/manage",
+  "label": "Dépenses Charges et factures fournisseurs 0 FCFA",
+  "href": "#/manage/expenses",
+  "final": "#/manage/expenses",
+  "titre": "Dépenses",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/manage",
+  "label": "Rapports Revenus, impayés, occupation, PDF 6 rapports",
+  "href": "#/manage/reports",
+  "final": "#/manage/reports",
+  "titre": "Rapports",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/manage",
+  "label": "Contrats Location, mandat, vente, prestation 0 actif(s)",
+  "href": "#/manage/contracts",
+  "final": "#/manage/contracts",
+  "titre": "Contrats",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/manage",
+  "label": "Mes informations Nom, NINEA, RCCM sur vos documents Émetteur des PDF",
+  "href": "#/manage/identity",
+  "final": "#/manage/identity",
+  "titre": "Mes informations",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/manage",
+  "label": "Équipe & accès Gestionnaires, agents et accès locataire 0 membre(s)",
+  "href": "#/manage/team",
+  "final": "#/manage/team",
+  "titre": "Équipe & accès",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/manage",
+  "label": "Journal Qui a fait quoi, et quand 0 entrée(s)",
+  "href": "#/manage/audit",
+  "final": "#/manage/audit",
+  "titre": "Journal",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/manage",
+  "label": "Ajouter un bien Publier une nouvelle annonce",
+  "href": "#/owner/property/new",
+  "final": "#/owner/property/new",
+  "titre": "",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/manage",
+  "label": "Demandes de visite Confirmer ou refuser une visite",
+  "href": "#/owner/visits",
+  "final": "#/owner/visits",
+  "titre": "Demandes de visite",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/manage",
+  "label": "Statistiques Vues et performance de vos annonces",
+  "href": "#/owner/statistics",
+  "final": "#/owner/statistics",
+  "titre": "Statistiques",
+  "souci": ""
+ },
+ {
+  "profil": "mandant",
+  "page": "#/manage",
+  "label": "Mon profil Vos informations de compte",
+  "href": "#/owner/profile",
+  "final": "#/owner/profile",
+  "titre": "Mon profil",
+  "souci": ""
+ }
+]

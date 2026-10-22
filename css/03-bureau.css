@@ -1,0 +1,157 @@
+/* =============================================================================
+   03-bureau.css — tableaux de bord sur ordinateur (≥ 901 px) uniquement.
+   Le mobile n'est pas concerné : tout est dans la requête média ci-dessous.
+   ============================================================================= */
+@media (min-width: 901px) {
+  /* Deux colonnes indépendantes (voir js/99c-bureau.js) */
+  .pd-cols{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:14px;align-items:stretch}
+  .pd-col{display:flex;flex-direction:column;gap:14px;min-width:0}
+  .pd-col > *{margin:0!important}
+  /* Le dernier bloc de chaque colonne s'étire : les deux colonnes finissent à la même hauteur */
+  .pd-col > :last-child{flex:1 1 auto}
+  .pd-col > .pd-pat:last-child,.pd-col > .pd-todo:last-child,.pd-col > .pd-evo:last-child,.pd-col > .pd-actions:last-child{display:flex;flex-direction:column}
+  .pd-col > .pd-pat:last-child .pd-pat-list{flex:1;align-content:space-evenly}
+  /* Dans une colonne, la liste reste sur une colonne : en deux colonnes elle laissait un grand vide */
+  .pd-col .pd-pat-list{grid-template-columns:1fr}
+  .pd-col > .pd-evo:last-child .pd-bars{flex:1;justify-content:space-around}
+  .pd-col > .pd-actions:last-child .qa-grid{flex:1;grid-auto-rows:1fr}
+  .pd-col > .pd-duo:last-child{grid-auto-rows:1fr}
+
+  /* « À traiter » : la flèche va au bord droit, le texte prend la place */
+  .pd-todo .trow > .txt{flex:1 1 auto}
+
+  /* Blocs pleine largeur : quatre compteurs ou quatre actions sur une ligne */
+  .hx-sec > .pd-duo.pa-quad,.pd > .pd-duo.pa-quad,.pd > .pd-actions .qa-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+  /* Liste « Activité récente » pleine largeur : deux colonnes au lieu de lignes très étirées */
+  .pd > .pd-todo{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:10px;row-gap:8px;align-content:start}
+  .pd > .pd-todo > .pd-pat-head{grid-column:1 / -1}
+  .pd > .pd-todo > .trow{margin:0!important}
+}
+/* Fenêtres moyennes : quatre cartes côte à côte deviennent trop étroites */
+@media (min-width: 901px) and (max-width: 1180px) {
+  .hx-sec > .pd-duo.pa-quad,.pd > .pd-duo.pa-quad,.pd > .pd-actions .qa-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+/* Compteurs et actions rapides compacts : à partir de 1400 px (en dessous, les colonnes sont trop étroites) */
+@media (min-width: 1400px) {
+  /* Compteurs : icône à gauche, texte à droite — deux fois moins hauts, sans vide */
+  .main .content .pd-mini{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto auto auto;
+    column-gap:14px;row-gap:2px;align-content:center;align-items:center;padding:16px 52px 16px 16px!important;min-height:0}
+  .main .content .pd-mini > .pd-ic{grid-row:1 / span 3;align-self:center;margin:0!important;width:46px!important;height:46px!important}
+  .main .content .pd-mini > .pd-lab,.main .content .pd-mini > .pd-val,.main .content .pd-mini > .pd-foot{grid-column:2;margin:0}
+  .main .content .pd-mini > .ds-go{top:50%!important;transform:translateY(-50%);right:14px!important}
+  .main .content .pd-mini:hover > .ds-go{transform:translate(3px,-50%)}
+
+  /* Actions rapides : en ligne, compactes */
+  .main .content .pd-qa{display:flex;flex-direction:row;align-items:center;justify-content:flex-start;text-align:left;gap:12px;padding:14px 48px 14px 14px!important;min-height:68px}
+  .main .content .pd-qa > .ic-bubble{margin:0!important;flex:none;width:42px!important;height:42px!important}
+  .main .content .pd-qa > b{margin:0;font-size:.95rem;line-height:1.3}
+  .main .content .pd-qa > .ds-go{top:50%!important;transform:translateY(-50%);right:12px!important}
+  .main .content .pd-qa:hover > .ds-go{transform:translate(3px,-50%)}
+}
+
+/* =============================================================================
+   Finitions professionnelles sur ordinateur (voir js/99e-pro.js) — ≥ 901 px
+   ============================================================================= */
+@media (min-width: 901px) {
+  /* --- Tableaux ---------------------------------------------------------- */
+  .main .content .table-wrap thead th{white-space:nowrap;font-size:.76rem;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);font-weight:600;padding:12px 16px}
+  .main .content .table-wrap td{padding:13px 16px}
+  .main .content .table-wrap table.dense td,.main .content .table-wrap table.dense th{padding-left:10px;padding-right:10px}
+  .main .content td.nw,.main .content td .nw{white-space:nowrap}
+  .main .content td.td-actions{white-space:nowrap;width:1%;text-align:right}
+  .main .content td.td-actions > div,.main .content td.td-actions > .row{flex-wrap:nowrap!important;justify-content:flex-end}
+  .main .content td.td-actions{font-size:0}                      /* supprime les espaces entre boutons en ligne */
+  .main .content td.td-actions > *{font-size:.86rem}
+  .main .content td.td-actions > .btn,.main .content td.td-actions > button,.main .content td.td-actions > a.btn{margin:0 0 0 6px}
+  #app .main .content td .btn.sm,#app .main .content td .btn{min-height:34px;padding:0 12px;font-size:.84rem;border-radius:10px}
+  .main .content td .btn svg{width:15px;height:15px}
+  .main .content table.actions-souples td.td-actions{white-space:normal;width:auto}
+  .main .content table.souple td.nw,.main .content table.souple td .nw{white-space:normal}
+  .main .content table.actions-souples td.td-actions > div,.main .content table.actions-souples td.td-actions > .row{flex-wrap:wrap!important;gap:6px}
+  /* Premier texte de ligne (nom du bien, de la personne) : ne s'écrase pas sous les colonnes chiffrées */
+  .main .content .table-wrap td:first-child:not(.td-actions):not(:has(input[type="checkbox"])){min-width:150px}
+
+  /* --- Champ fichier : bouton dans le style de l'application ------------- */
+  .main .content input[type="file"],.modal input[type="file"]{padding:7px 8px;font:inherit;font-size:.88rem;color:var(--muted);cursor:pointer;line-height:1.2;height:auto}
+  .main .content input[type="file"]::file-selector-button,.modal input[type="file"]::file-selector-button{
+    font:inherit;font-size:.85rem;font-weight:600;color:var(--ds-ink,#0C2745);background:#fff;border:1px solid var(--line-strong,#D5DEEA);
+    border-radius:10px;padding:8px 14px;margin-right:12px;cursor:pointer;transition:border-color .15s,background .15s}
+  .main .content input[type="file"]:hover::file-selector-button,.modal input[type="file"]:hover::file-selector-button{border-color:var(--brand);background:var(--surface-2,#F5F8FC)}
+
+  /* --- Cases à cocher en série : grille de pastilles ---------------------- */
+  .main .content .choix,.modal .choix{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px!important}
+  .main .content .choix > label,.modal .choix > label{display:flex;align-items:center;gap:10px;margin:0;padding:10px 12px;border:1px solid var(--line);border-radius:12px;
+    background:#fff;font-size:.88rem;line-height:1.3;cursor:pointer;transition:border-color .15s,background .15s}
+  .main .content .choix > label:hover,.modal .choix > label:hover{border-color:var(--line-strong,#C9D5E3)}
+  .main .content .choix > label:has(input:checked),.modal .choix > label:has(input:checked){border-color:var(--brand);background:#F2F7FD}
+  .main .content .choix > label > input,.modal .choix > label > input{margin:0;flex:none}
+
+  /* --- Gestion : fil d'Ariane, section et export sur une seule barre ------- */
+  .main .content > .gbar{display:flex;align-items:center;gap:10px;margin:0 0 16px}
+  .main .content > .gbar > .gback{flex:1 1 auto;margin:0!important;min-width:0}
+  .main .content > .gbar > .gsel{flex:0 0 280px;margin:0!important}
+  .main .content > .gbar > .gsel select{height:46px}
+  .main .content > .gbar > .btn-export{flex:none;height:46px;margin:0}
+
+  /* --- Assistant « Ajouter un bien » centré, plus large ------------------- */
+  .main .content > #wiz{max-width:920px!important;margin-inline:auto}
+  .main .content > .crumbs:has(+ .vh + #wiz),.main .content > .crumbs:has(+ #wiz){max-width:920px;margin-inline:auto}
+
+  /* --- Profil et paramètres : colonne de gauche empilée (js/99e-pro.js) -- */
+  .main .content .two-col > .pro-gauche{display:flex;flex-direction:column;gap:14px;min-width:0}
+  .main .content .two-col > .pro-gauche > *{margin:0!important}
+  .main .content .two-col{align-items:start}
+
+  /* --- Devis / facture : lignes « désignation · quantité · prix » sur une ligne, fenêtre plus large */
+  .modal:has(form[data-action="g2-save-doc"]){width:min(760px,calc(100% - 48px))}
+  form[data-action="g2-save-doc"] > .form-grid:has(> .field > input[name^="q"]){grid-template-columns:minmax(0,1fr) 90px 170px;margin-top:-4px}
+
+  /* --- Cartes de formulaire à largeur fixe : elles suivent leur colonne ---- */
+  .main .content .card[style*="max-width:640px"],.main .content .card[style*="max-width: 640px"]{max-width:none!important}
+
+  /* --- Actions nombreuses dans un tableau : les secondaires en icône (le libellé reste en info-bulle) */
+  #app .main .content td.td-actions .ic-only{font-size:0!important;width:34px;min-width:34px;padding:0!important;gap:0}
+  #app .main .content td.td-actions .ic-only svg{width:16px;height:16px}
+}
+
+/* --- Page Statistiques (js/99f-stats.js) : nouvelles classes, valables partout */
+.stat-grille{display:grid;grid-template-columns:1fr;gap:14px}
+.stat-carte{margin:0}
+.stat-tete{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.stat-tete h3{margin:0}
+.stat-total{font-weight:800;color:var(--ds-ink,#0C2745);font-size:1.05rem;white-space:nowrap}
+.stat-bars li{grid-template-columns:minmax(90px,150px) minmax(0,1fr) auto!important}
+.stat-bars .pd-m{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stat-bars .pd-amt{white-space:nowrap;text-align:right;min-width:28px}
+@media (min-width: 901px){.stat-grille{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* =============================================================================
+   Aucun débordement sur ordinateur : un tableau qui reste trop large malgré les
+   marges fines et les actions en icônes passe en cartes (comme sur téléphone),
+   rangées en grille. Classe posée par js/99e-pro.js, ≥ 901 px uniquement.
+   ============================================================================= */
+@media (min-width: 901px) {
+  /* Onglets d'une fiche de bien : passent à la ligne au lieu de sortir de l'écran */
+  .main .content .btabs{flex-wrap:wrap;row-gap:2px}
+  .main .content .table-wrap.en-cartes{border:0;background:none;box-shadow:none;overflow:visible;border-radius:0}
+  .main .content .table-wrap.en-cartes table{display:block;width:100%;min-width:0}
+  .main .content .table-wrap.en-cartes thead{display:none}
+  .main .content .table-wrap.en-cartes tbody{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+  .main .content .table-wrap.en-cartes tr{display:flex;flex-direction:column;position:relative;background:var(--surface,#fff);border:1px solid var(--line);
+    border-radius:16px;padding:13px 15px 11px;box-shadow:var(--sh-1);min-width:0}
+  .main .content .table-wrap.en-cartes td{display:flex;justify-content:space-between;align-items:center;gap:12px;width:auto;min-width:0!important;
+    border:0;padding:5px 0!important;text-align:right;font-size:.88rem;line-height:1.35;white-space:normal!important}
+  .main .content .table-wrap.en-cartes td::before{content:attr(data-label);color:var(--muted);font-size:.74rem;font-weight:500;text-align:left;flex:none;max-width:44%}
+  .main .content .table-wrap.en-cartes td[data-label=""]::before,.main .content .table-wrap.en-cartes td:not([data-label])::before{display:none}
+  .main .content .table-wrap.en-cartes td:first-child{display:block;text-align:left;font-size:1rem;padding-bottom:9px!important;margin-bottom:4px;border-bottom:1px solid var(--line)}
+  .main .content .table-wrap.en-cartes td:first-child::before{display:none}
+  .main .content .table-wrap.en-cartes td.td-actions,.main .content .table-wrap.en-cartes td:last-child:not(:first-child){justify-content:flex-start;flex-wrap:wrap;padding-top:10px!important;width:auto;text-align:left;font-size:.88rem}
+  .main .content .table-wrap.en-cartes td.td-actions::before,.main .content .table-wrap.en-cartes td:last-child:not(:first-child)::before{display:none}
+  .main .content .table-wrap.en-cartes td.td-actions > div,.main .content .table-wrap.en-cartes td.td-actions > .row{flex-wrap:wrap!important;justify-content:flex-start}
+  .main .content .table-wrap.en-cartes td:has(> input[type="checkbox"]){position:absolute;top:12px;right:12px;z-index:3;width:30px;height:30px;padding:0!important;border:0;display:grid;place-items:center;background:var(--surface,#fff);border-radius:9px;box-shadow:0 2px 8px rgba(12,39,69,.18)}
+  .main .content .table-wrap.en-cartes td:has(> input[type="checkbox"])::before{display:none}
+  .main .content .table-wrap.en-cartes td:has(> .photo){display:block;padding:0!important;margin:0 0 10px;border:0}
+  .main .content .table-wrap.en-cartes td:has(> .photo)::before{display:none}
+  .main .content .table-wrap.en-cartes td > .photo{width:100%!important;height:130px!important;border-radius:12px!important;overflow:hidden;display:block}
+  .main .content .table-wrap.en-cartes td > .photo img{width:100%;height:100%;object-fit:cover;display:block}
+}

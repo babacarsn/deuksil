@@ -56,7 +56,7 @@ const ok = (id, c, msg) => { out.push([id, c, msg]); console.log(`${c ? 'OK  ' :
   await p.evaluate(id => document.querySelector(`[data-action="g-end-lease"][data-id="${id}"]`)?.click(), bail.id); await p.waitForTimeout(300);
   await p.click('form[data-action="g-end-lease-ok"] button.btn.danger').catch(() => {}); await p.waitForTimeout(400);
   const fin = await p.evaluate(([id, pid]) => [DB.findItem(DB.K.leases, id).status, DB.findItem(DB.K.leases, id).endedAt, gProp(pid).status, DB.filterItems(DB.K.rents, r => r.leaseId === id).length], [bail.id, sel]);
-  ok('R5', fin[0] === 'termine' && fin[2] === 'disponible', `bail ${fin[0]} le ${fin[1]}, bien ${fin[2]}, ${fin[3]} loyers gardés`);
+  ok('R5', fin[0] === 'termine' && fin[2] === 'liberation', `bail ${fin[0]} le ${fin[1]}, bien ${fin[2]}, ${fin[3]} loyers gardés`);
 
   // 6. Vendre maintenant puis signer
   await goto(p, '#/manage/deals');

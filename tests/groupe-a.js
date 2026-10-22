@@ -6,7 +6,7 @@ const ETAPES = (process.env.ETAPES || 'A1,A2,A3,A4,A5,A6').split(',');
 (async () => {
   const {b, p} = await open(); await p.setViewportSize({width: 1280, height: 900}); await p.waitForTimeout(4800);
   let ok = 0, ko = 0; const T = (id, c, m) => { c ? ok++ : ko++; console.log(`${c ? 'OK  ' : 'ÉCHEC'} ${id}  ${m}`); };
-  const remplir = (sel, vals, envoyer = true) => p.evaluate(([sel, vals, envoyer]) => { const f = document.querySelector(sel); if (!f) return false; Object.entries(vals).forEach(([k, v]) => { const i = f.querySelector(`[name="${k}"]`); if (i) i.value = v; }); if (envoyer) f.requestSubmit(f.querySelector('button:not([type=button])') || undefined); return true; }, [sel, vals, envoyer]);
+  const remplir = (sel, vals, envoyer = true) => p.evaluate(([sel, vals, envoyer]) => { const f = document.querySelector(sel); if (!f) return false; Object.entries(vals).forEach(([k, v]) => { const i = f.querySelector(`[name="${k}"]`); if (i) { if (i.type === 'checkbox') i.checked = !!v; else i.value = v; } }); if (envoyer) f.requestSubmit(f.querySelector('button:not([type=button])') || undefined); return true; }, [sel, vals, envoyer]);
 
   if (ETAPES.includes('A1')) {
     for (const [cni, page, ancien] of [['1900000000003', '#/owner/profile', 'demo123'], ['1900000000005', '#/client/profile', 'demo123'], ['1900000000002', '#/client/profile', 'demo123'], ['1900000000004', '#/agency/settings', 'demo123'], ['1900000000001', '#/admin/settings', 'admin123']]) {
@@ -34,7 +34,7 @@ const ETAPES = (process.env.ETAPES || 'A1,A2,A3,A4,A5,A6').split(',');
     // Une vraie agence s'inscrit, puis enregistre un propriétaire mandant.
     await p.evaluate(() => { localStorage.removeItem(DB.K.session); location.hash = '#/register'; }); await p.waitForTimeout(700);
     await p.evaluate(() => { const f = document.querySelector('form[data-action="register"]'); f.querySelector('input[name="role"][value="agency"]').checked = true;
-      Object.entries({cni: '1999999999701', firstName: 'Awa', lastName: 'Agence', phone: '770009701', password: 'Agence-701', password2: 'Agence-701', agencyName: 'Keur Immo'}).forEach(([k, v]) => { const i = f.querySelector(`[name="${k}"]`); if (i) i.value = v; }); f.requestSubmit(); }); await p.waitForTimeout(900);
+      Object.entries({cni: '1999999999701', firstName: 'Awa', lastName: 'Agence', phone: '770009701', password: 'Agence-701', password2: 'Agence-701', agencyName: 'Keur Immo', address: 'Plateau, Dakar', email: 'awa.agence701@exemple.sn', cgu: true}).forEach(([k, v]) => { const i = f.querySelector(`[name="${k}"]`); if (i) { if (i.type === 'checkbox') i.checked = !!v; else i.value = v; } }); f.requestSubmit(); }); await p.waitForTimeout(900);
     await goto(p, '#/manage/owners'); await p.waitForTimeout(600);
     await remplir('form[data-action="g9-owner"]', {name: 'Modou Diagne', phone: '771119701', cni: '1999999999702', rate: '8'}); await p.waitForTimeout(1500);
     const vu1 = await p.evaluate(() => (document.querySelector('.mdp-prov') || {}).textContent || '');

@@ -22,7 +22,7 @@ function render() {
   $('#app').innerHTML = shellPublic(`<section class="section" style="border:0"><div class="wrap" style="max-width:560px;text-align:center">
     <div style="display:flex;justify-content:center;color:var(--line-strong);margin-bottom:6px">${icon('compass', 84)}</div>
     <h2>Cette adresse n'existe pas</h2>
-    <p class="muted">La page demandée n'est pas disponible dans cette démonstration. Elle a peut-être été déplacée ou l'annonce n'existe plus.</p>
+    <p class="muted">La page demandée n'existe pas ou n'est plus disponible. Elle a peut-être été déplacée, ou l'annonce a été retirée.</p>
     <div class="row" style="justify-content:center;gap:10px;margin-top:10px">
       <a class="btn" href="#/">Retour à l'accueil</a>
       <a class="btn ghost" href="#/search">Rechercher un bien</a>

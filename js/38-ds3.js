@@ -193,26 +193,49 @@ propRoute.fn = pid => {
       <span id="wiz-end" class="hidden" style="display:none;gap:10px"><button class="btn ghost" name="intent" value="draft">Enregistrer le brouillon</button><button class="btn" name="intent" value="publish">Enregistrer et publier</button></span></div></form>`);
 };
 /* Inscription par étapes */
-const regRoute = routes.find(r => r.re.source.includes('register'));
+const regRoute = {re: /^\/register/, fn: () => ''}; routes.push(regRoute);   // l'écran est défini juste en dessous
 /* Inscription publique : Client, Propriétaire ou Agence. Un client qui reçoit un bail devient locataire. */
 const ROLE_OPT = [['client', 'user', 'Client', () => 'Recherche, favoris, contact et visites'], ['owner', 'home', 'Propriétaire', () => 'Publication de biens et gestion locative'],
   ['agency', 'building', 'Agence', () => 'Portefeuille, agents et mandats']];
+/* Profil coché à l'arrivée : celui du lien (« Publier un bien » → Propriétaire,
+   « Créer un compte agence » → Agence). Le routeur retire « ?role=… » de
+   l'adresse et le garde dans LIEN ; si la page est redessinée sur place, on
+   garde le choix déjà fait. */
+function roleInscriptionDemande() {
+  const ok = v => ROLE_OPT.some(o => o[0] === v) ? v : null;
+  if (typeof LIEN !== 'undefined' && LIEN && LIEN.path === '#/register' && !LIEN.roleLu && Date.now() - LIEN.at < 2000) { LIEN.roleLu = true; const v = ok(LIEN.p.get('role')); if (v) return v; }
+  const brut = (location.hash.split('role=')[1] || '').replace(/[^a-z]/g, ''); if (ok(brut)) return brut;
+  const coche = document.querySelector('#wiz input[name="role"]:checked'); if (coche && ok(coche.value)) return coche.value;
+  return 'client';
+}
 regRoute.fn = () => {
-  const preset = (location.hash.split('role=')[1] || 'client').replace(/[^a-z]/g, ''), r = ROLE_OPT.some(o => o[0] === preset) ? preset : 'client';
-  const pw = n => `<div class="pw-wrap"><input class="input" type="password" name="${n}" required><button type="button" class="pw-toggle" data-action="toggle-pw" aria-label="Afficher le mot de passe">${icon('eye', 17)}</button></div>`;
+  const r = roleInscriptionDemande(), ag = r === 'agency';
+  const req = '<span class="req" title="Champ obligatoire">*</span>';
+  const pw = (n, id, auto) => `<div class="pw-wrap"><input class="input" type="password" id="${id}" name="${n}" minlength="8" autocomplete="${auto}" placeholder="${n === 'password2' ? 'Retapez le mot de passe' : '8 caractères minimum'}" required><button type="button" class="pw-toggle" data-action="toggle-pw" aria-label="Afficher le mot de passe">${icon('eye', 17)}</button></div>`;
+  const champ = (id, lab, input, aide = '') => `<div class="field"><label for="${id}">${lab}</label>${input}${aide ? `<p class="small fhint" style="margin:6px 0 0">${aide}</p>` : ''}</div>`;
   return shellPublic(`<section class="wrap" style="max-width:680px;padding:34px 0 60px">${crumbHtml('#/', 'Accueil', 'Créer mon compte')}
-    <form data-action="register" id="wiz">${stepsHtml(3, 1)}
+    <form data-action="register" id="wiz" novalidate>${stepsHtml(3, 1)}
     <div class="wstep on" data-step="1"><div class="wiz-card"><h3>1. Votre profil</h3><p class="wiz-q">Quel type de compte souhaitez-vous créer ?</p>
       <div class="opts">${ROLE_OPT.map(([k, ic, l, d]) => `<label class="opt"><input type="radio" name="role" value="${k}" ${k === r ? 'checked' : ''}><span class="oic">${icon(ic, 22)}</span><span>${l}<small>${d()}</small></span></label>`).join('')}</div></div></div>
     <div class="wstep" data-step="2"><div class="wiz-card"><h3>2. Vos informations</h3>
-      <p class="small muted" style="margin:-6px 0 14px">L'identification se fait par numéro de CNI. Utilisez un numéro fictif : cette version est une démonstration.</p>
-      <div id="agency-fields" class="${r === 'agency' ? '' : 'hidden'}"><div class="field"><label>Nom de l'agence</label><input class="input" name="agencyName" placeholder="Teranga Immobilier"></div><div class="field"><label>Adresse</label><input class="input" name="address" placeholder="Almadies, Dakar"></div></div>
-      <div class="field"><label>Numéro de CNI (13 chiffres)</label><input class="input" name="cni" inputmode="numeric" maxlength="13" placeholder="1900000000123" required></div>
-      <div class="form-grid"><div class="field"><label>Prénom</label><input class="input" name="firstName" required></div><div class="field"><label>Nom</label><input class="input" name="lastName" required></div></div>
-      <div class="field"><label>Téléphone</label><input class="input" name="phone" placeholder="+221 77 123 45 67" required></div></div></div>
-    <div class="wstep" data-step="3"><div class="wiz-card"><h3>3. Sécurité</h3><div class="form-grid"><div class="field"><label>Mot de passe</label>${pw('password')}</div><div class="field"><label>Confirmation</label>${pw('password2')}</div></div><div id="reg-err"></div></div></div>
+      <div id="agency-fields" class="${ag ? '' : 'hidden'}">
+        ${champ('reg-agence', `Nom de l'agence ${req}`, `<input class="input" id="reg-agence" name="agencyName" placeholder="Teranga Immobilier" autocomplete="organization" ${ag ? 'required' : 'disabled'}>`)}
+        ${champ('reg-adresse', `Adresse de l'agence ${req}`, `<input class="input" id="reg-adresse" name="address" placeholder="Route des Almadies, Dakar" autocomplete="street-address" ${ag ? 'required' : 'disabled'}>`)}
+        <div class="form-grid">${champ('reg-ninea', 'NINEA', `<input class="input" id="reg-ninea" name="ninea" placeholder="0012345678 2V2" ${ag ? '' : 'disabled'}>`)}
+          ${champ('reg-rccm', 'RCCM', `<input class="input" id="reg-rccm" name="rccm" placeholder="SN-DKR-2024-B-12345" ${ag ? '' : 'disabled'}>`)}</div></div>
+      <div class="form-grid">${champ('reg-prenom', `Prénom ${req}`, '<input class="input" id="reg-prenom" name="firstName" autocomplete="given-name" required>')}
+        ${champ('reg-nom', `Nom ${req}`, '<input class="input" id="reg-nom" name="lastName" autocomplete="family-name" required>')}</div>
+      ${champ('reg-email', `Adresse e-mail ${req}`, '<input class="input" id="reg-email" name="email" type="email" placeholder="vous@exemple.com" autocomplete="email" required>', 'Elle vous servira à vous connecter et à recevoir vos codes de sécurité.')}
+      ${champ('reg-tel', `Téléphone ${req}`, '<input class="input" id="reg-tel" name="phone" type="tel" inputmode="tel" placeholder="77 123 45 67" autocomplete="tel" required>')}
+      ${champ('reg-cni', `Numéro de CNI ${req}`, '<input class="input" id="reg-cni" name="cni" inputmode="numeric" maxlength="13" placeholder="13 chiffres" autocomplete="off" required>', 'Il sert à vérifier votre identité. Il n\'est jamais affiché publiquement.')}</div></div>
+    <div class="wstep" data-step="3"><div class="wiz-card"><h3>3. Sécurité</h3>
+      <div class="form-grid">${champ('reg-mdp', `Mot de passe ${req}`, pw('password', 'reg-mdp', 'new-password'))}${champ('reg-mdp2', `Confirmation ${req}`, pw('password2', 'reg-mdp2', 'new-password'))}</div>
+      <p class="small fhint" style="margin:-4px 0 14px">8 caractères minimum, avec au moins une lettre et un chiffre.</p>
+      <div class="field"><label class="check" style="align-items:flex-start;font-weight:500"><input type="checkbox" name="cgu" value="oui" required style="margin-top:2px">
+        <span>J'accepte les <a href="#/legal/cgu" target="_blank">conditions d'utilisation</a> et la <a href="#/legal/confidentialite" target="_blank">politique de confidentialité</a> de DEUKSIL. ${req}</span></label></div>
+      <div id="reg-err"></div></div></div>
     <div class="wiz-foot"><button type="button" class="btn ghost" data-action="wiz-prev" id="wiz-prev" disabled>${icon('chevLeft', 16)} Précédent</button><span class="grow"></span>
-      <button type="button" class="btn" data-action="wiz-next" id="wiz-next">Suivant ${icon('arrowRight', 16)}</button><button class="btn hidden" id="wiz-end" style="display:none">Continuer vers le paiement</button></div>
+      <button type="button" class="btn" data-action="wiz-next" id="wiz-next">Suivant ${icon('arrowRight', 16)}</button><button class="btn hidden" id="wiz-end" style="display:none">Créer mon compte</button></div>
     <p class="small muted" style="margin:18px 0 0;text-align:center">Déjà inscrit ? <a href="#/login">Se connecter</a></p></form></section>`);
 };
 function wizGo(form, n) {

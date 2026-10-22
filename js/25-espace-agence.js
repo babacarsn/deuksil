@@ -92,8 +92,8 @@ route(/^\/agency\/settings$/, () => {
         </form>
         <form class="card" data-action="save-notif-prefs">
           <h3 style="margin-bottom:14px">Notifications</h3>
-          <label class="check" style="margin-bottom:10px"><input type="checkbox" name="email" ${prefs.email ? 'checked' : ''}>Recevoir les notifications par e-mail (simulation)</label><br>
-          <label class="check" style="margin-bottom:10px"><input type="checkbox" name="sms" ${prefs.sms ? 'checked' : ''}>Recevoir les notifications par SMS (simulation)</label><br>
+          <label class="check" style="margin-bottom:10px"><input type="checkbox" name="email" ${prefs.email ? 'checked' : ''}>Recevoir les notifications par e-mail</label><br>
+          <label class="check" style="margin-bottom:10px"><input type="checkbox" name="sms" ${prefs.sms ? 'checked' : ''}>Recevoir les notifications par SMS</label><br>
           <label class="check" style="margin-bottom:10px"><input type="checkbox" name="newRequest" ${prefs.newRequest ? 'checked' : ''}>Alerte à chaque nouvelle demande de visite</label><br>
           <label class="check" style="margin-bottom:14px"><input type="checkbox" name="newMessage" ${prefs.newMessage ? 'checked' : ''}>Alerte à chaque nouveau message</label>
           <button class="btn ghost">Enregistrer les préférences</button>

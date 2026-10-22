@@ -43,7 +43,7 @@ document.head.insertAdjacentHTML('beforeend', '<style>'
 const DEMO_ACCOUNTS = [['Client', '1900000000002', 'demo123'], ['Propriétaire', '1900000000003', 'demo123'],
   ['Agence', '1900000000004', 'demo123'], ['Locataire', '1900000000013', 'demo123'], ['Administrateur', '1900000000001', 'admin123']];
 
-routes.find(r => r.re.source === '^\\/login$').fn = () => `<div class="auth">
+route(/^\/login$/, () => `<div class="auth">
   <aside class="auth-side">
     <img class="bg" src="${PHOTOS.cover}" alt="" loading="eager">
     <a class="logo" href="#/"><img src="${LOGO_LIGHT}" alt="DEUKSIL" class="mark"><span>EUKSIL</span></a>
@@ -68,17 +68,17 @@ routes.find(r => r.re.source === '^\\/login$').fn = () => `<div class="auth">
       <p class="lede">Connectez-vous à votre espace immobilier.</p>
 
       <button type="button" class="g-btn" data-action="g-choose">${gLogo(19)} Continuer avec Google</button>
-      <div class="auth-or">ou avec votre adresse Gmail</div>
+      <div class="auth-or">ou avec votre adresse e-mail</div>
 
       <form data-action="login">
-        <div class="field"><label for="au-cni">Adresse Gmail</label>
+        <div class="field"><label for="au-cni">Adresse e-mail</label>
           <div class="ifield"><span class="ifx">${icon('user', 18)}</span>
-            <input class="input" id="au-cni" name="cni" type="email" placeholder="prenom.nom@gmail.com" required autocomplete="username"></div></div>
+            <input class="input" id="au-cni" name="cni" type="email" placeholder="vous@exemple.com" required autocomplete="username"></div></div>
         <div class="field" style="margin-bottom:6px"><label for="au-pwd">Mot de passe</label>
           <div class="ifield"><span class="ifx">${icon('lock', 18)}</span>
             <input class="input" id="au-pwd" name="password" type="password" placeholder="Votre mot de passe" required autocomplete="current-password">
             <button type="button" class="pw-toggle" data-action="toggle-pw" aria-label="Afficher le mot de passe">${icon('eye', 18)}</button></div></div>
-        <a class="auth-forgot" href="#/login" data-action="forgot-pw">${icon('alert', 14)} Mot de passe oublié ?</a>
+        <a class="auth-forgot" href="#/mot-de-passe-oublie">${icon('alert', 14)} Mot de passe oublié ?</a>
         <div id="login-err"></div>
         <button class="btn block">Se connecter ${icon('arrowRight', 17)}</button>
       </form>
@@ -97,11 +97,6 @@ routes.find(r => r.re.source === '^\\/login$').fn = () => `<div class="auth">
       </div>
     </div>
   </main>
-</div>`;
+</div>`);
 
-document.addEventListener('click', e => {
-  const f = e.target.closest('[data-action="forgot-pw"]');
-  if (f) { e.preventDefault(); modal('Mot de passe oublié', `<p class="small">Dans cette démonstration, la réinitialisation n'est pas branchée : il n'y a ni serveur ni envoi de SMS.</p>
-    <p class="small muted">Utilisez un compte de démonstration, ou créez-en un nouveau avec une CNI fictive.</p>
-    <div class="row" style="gap:8px;margin-top:12px"><button class="btn" data-action="close-modal">J'ai compris</button><a class="btn ghost" href="#/register" data-action="close-modal">Créer un compte</a></div>`); }
-});
+/* « Mot de passe oublié ? » mène à la page dédiée (js/99g-formulaires.js). */

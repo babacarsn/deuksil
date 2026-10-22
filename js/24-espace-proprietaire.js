@@ -101,7 +101,10 @@ route(/^\/agency\/properties$/, () => {
 });
 
 /* --- Photos du bien : compression côté navigateur, stockage en base64 dans le bien --- */
-const MAX_PHOTOS = 8, MAX_PHOTO_DIM = 1280, PHOTO_QUALITY = .72;
+/* 20 photos par annonce (propriétaire et agence). Chaque photo est réduite à
+   1080 px de côté au plus : 20 photos tiennent ainsi dans le stockage du
+   navigateur tant qu'il n'y a pas de serveur de fichiers. */
+const MAX_PHOTOS = 20, MAX_PHOTO_DIM = 1080, PHOTO_QUALITY = .7;
 let formPhotos = [], formPhotosFor = null;
 function resetFormPhotosIfNeeded(pid, existing) {
   if (formPhotosFor !== pid) { formPhotos = (existing || []).slice(); formPhotosFor = pid; }
@@ -145,7 +148,7 @@ function photoUploadHtml() {
       <label class="upload-btn">
         <input type="file" accept="image/*" multiple data-action="photos-input" ${formPhotos.length >= MAX_PHOTOS ? 'disabled' : ''}>
         ${icon('upload', 20)}<span>Ajouter des photos</span>
-        <span class="small muted">JPG ou PNG, ${MAX_PHOTOS} photos maximum — ${formPhotos.length}/${MAX_PHOTOS}</span>
+        <span class="small muted">JPG ou PNG, jusqu'à ${MAX_PHOTOS} photos — ${formPhotos.length}/${MAX_PHOTOS}. La première sert de couverture.</span>
       </label>
       ${formPhotos.length ? `<div class="photo-grid">${formPhotos.map((src, i) => `
         <div class="photo-thumb">
