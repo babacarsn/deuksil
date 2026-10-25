@@ -8,6 +8,21 @@
 let aiSample = null;
 let aiSearchAvailable = false;
 async function initAi() {
+  if (typeof SB !== 'undefined' && SB) {
+    const appeler = async corps => {
+      const {data, error} = await SB.functions.invoke('assistant-ia', {body: corps});
+      if (error || !data || typeof data.text !== 'string') throw {code: 'erreur'};
+      return data.text;
+    };
+    aiSample = async (turns, opts = {}) => {
+      const text = await appeler({mode: 'chat', turns});
+      if (opts.onText) opts.onText({text});
+      return {text};
+    };
+    aiSample.json = async prompt => JSON.parse(await appeler({mode: 'json', prompt}));
+    aiSearchAvailable = true;
+    return;
+  }
   if (!(window.claude && typeof window.claude.use === 'function')) return;
   try {
     const ns = await window.claude.use('sample');
@@ -123,6 +138,13 @@ Demande du client, en français : "${query.trim()}"`;
 
 /* ---- Chat flottant : conversation libre avec Claude, texte ou voix ---- */
 let aiChatHistory = [];
+const aiCle = () => 'deuksil-ai-chat:' + ((typeof Auth !== 'undefined' && Auth.current() && Auth.current().id) || 'visiteur');
+function aiChatCharger() {
+  try { const v = JSON.parse(localStorage.getItem(aiCle()) || '[]'); aiChatHistory = Array.isArray(v) ? v.filter(m => m && m.content).slice(-40) : []; } catch (e) { aiChatHistory = []; }
+}
+function aiChatSauver() {
+  try { localStorage.setItem(aiCle(), JSON.stringify(aiChatHistory.filter(m => m.content).slice(-40))); } catch (e) {}
+}
 let aiChatBusy = false;
 function aiErrorMessage(e) {
   return e && e.code === 'not_granted' ? "Autorisation refusée pour l'assistant."
@@ -139,10 +161,11 @@ Réponds toujours en français, de façon brève (2 à 4 phrases), concrète et 
 Utilisateur actuel : ${role}.`;
 }
 function renderAiChatInPlace() {
+   aiChatSauver();
   const list = $('#ai-chat-list');
   if (!list) return;
   list.innerHTML = aiChatHistory.length
-    ? aiChatHistory.map(m => `<div class="bubble ${m.role === 'user' ? 'me' : ''}">${m.content ? esc(m.content) : '<span class="small muted">…</span>'}</div>`).join('')
+    ? aiChatHistory.map(m => `<div class="bubble ${m.role === 'user' ? 'me' : ''}">${m.content ? esc(m.content) : '<span class="ai-dots"><i></i><i></i><i></i></span>'}</div>`).join('')
     : `<p class="small muted">Posez une question sur DEUKSIL, une annonce, ou dites ce que vous cherchez.</p>`;
   list.scrollTop = list.scrollHeight;
 }
@@ -201,6 +224,8 @@ function openAiChat() {
         <button class="btn sm" type="submit" aria-label="Envoyer">${icon('arrowRight', 15)}</button>
       </form>
     </div>`);
+      if (!aiChatHistory.length) aiChatCharger();
+  renderAiChatInPlace();
   renderAiChatInPlace();
   setTimeout(() => $('#ai-chat-text')?.focus(), 30);
 }
