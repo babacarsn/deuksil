@@ -7,13 +7,13 @@
    Valeurs : Supabase → Project Settings → API (voir README_SUPABASE.md §3).
    ========================================================================== */
 const DEUKSIL_CONFIG = {
-  supabaseUrl: '',          // ex. 'https://abcdefghijklmno.supabase.co'
-  supabaseAnonKey: '',      // clé « anon » (ou « publishable ») du projet
+  supabaseUrl: 'https://fqrmulupzaqmvjoybela.supabase.co',          // ex. 'https://abcdefghijklmno.supabase.co'
+  supabaseAnonKey: 'sb_publishable_wxCyWMCe_w50pBtSkb6CDQ_UayTczfE',      // clé « anon » (ou « publishable ») du projet
   /* Connexion Google : true une fois le fournisseur Google activé dans
      Supabase (Authentication → Providers → Google). */
-  googleActif: false,
+  googleActif: true,
   /* Adresse publique du site (redirections après connexion Google ou lien e-mail). */
-  siteUrl: '',
+  siteUrl: 'http://localhost:8080',
   /* Éditeur du site (mentions légales, politique de confidentialité).
      Un champ vide s'affiche « à compléter » : à renseigner avant l'ouverture. */
   editeur: {
