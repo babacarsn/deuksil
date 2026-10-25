@@ -1,29 +1,16 @@
 /* =============================================================================
-   MODULE : 99g-formulaires.js — formulaires de compte prêts pour la mise en ligne
-     1. Serveur : un seul point d'appel vers l'API (DEUKSIL_CONFIG, 00-config.js).
+   MODULE : 99g-formulaires.js — formulaires de compte (Supabase Auth)
+     1. Outils communs (messages sous les champs, encadrés d'état).
      2. Inscription : contrôles complets (e-mail, téléphone, CNI, mot de passe,
-        conditions d'utilisation), champs de l'agence, pré-remplissage Google.
-     3. Mot de passe oublié → code reçu → nouveau mot de passe.
-     4. Vérification de l'adresse e-mail (code à 6 chiffres).
-     5. Page Contact (assistance).
-   Sans serveur configuré, chaque formulaire s'affiche et se contrôle
-   normalement ; ce qui exige un envoi (code par e-mail ou SMS) le dit
-   clairement et oriente vers l'assistance au lieu de simuler un envoi.
+        conditions d'utilisation), champs de l'agence ; compte créé par
+        Supabase Auth, code de confirmation envoyé par e-mail.
+     3. Mot de passe oublié → code reçu par e-mail → nouveau mot de passe.
+     4. Vérification de l'adresse e-mail (code à 6 chiffres, renvoi du code).
+     5. Page Contact (enregistrée dans la table contact_messages).
+   Les contrôles du navigateur aident la saisie ; les vraies règles (rôle,
+   unicité de l'e-mail et de la CNI, longueur du mot de passe) sont appliquées
+   par Supabase Auth et par la base.
    ============================================================================= */
-
-/* --- 1. Serveur ------------------------------------------------------------ */
-const Serveur = {
-  actif() { return !!String(DEUKSIL_CONFIG.apiBase || '').trim(); },
-  async envoyer(cle, donnees) {
-    const C = DEUKSIL_CONFIG, url = String(C.apiBase).trim().replace(/\/+$/, '') + ((C.routes || {})[cle] || '/' + cle);
-    let r;
-    try { r = await fetch(url, {method: 'POST', credentials: 'include', headers: {'Content-Type': 'application/json', Accept: 'application/json'}, body: JSON.stringify(donnees)}); }
-    catch (e) { throw new Error('Le serveur DEUKSIL ne répond pas. Vérifiez votre connexion et réessayez.'); }
-    let j = {}; try { j = await r.json(); } catch (e) {}
-    if (!r.ok) throw new Error(j.message || j.error || `La demande a été refusée (erreur ${r.status}). Réessayez dans un instant.`);
-    return j;
-  }
-};
 
 /* --- Outils communs -------------------------------------------------------- */
 const RE_EMAIL = /^[^\s@]+@[^\s@.]+(\.[^\s@.]+)*\.[a-z]{2,}$/i;
@@ -37,7 +24,7 @@ const memoire = {
   ecrire(k, v) { try { sessionStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
   oublier(k) { try { sessionStorage.removeItem(k); } catch (e) {} }
 };
-const CLE_REINIT = 'deuksil_reinit', CLE_VERIF = 'deuksil_verif_email', CLE_GOOGLE = 'deuksil_inscription_google';
+const CLE_REINIT = 'deuksil_reinit', CLE_VERIF = 'deuksil_verif_email';
 
 /* Message sous le champ concerné (même rendu que js/94-finalisation.js). */
 function erreurIci(f, nom, msg) {
@@ -73,10 +60,6 @@ function etatForm(f, ton, titre, texte, actions = '') {
   z.scrollIntoView({block: 'nearest', behavior: 'smooth'});
   return z;
 }
-const pasEncoreActif = (f, quoi) => etatForm(f, 'info', `${quoi} n'est pas encore activé`,
-  'DEUKSIL n\'envoie pas encore de codes par e-mail ou SMS. Pour retrouver l\'accès à votre compte dès maintenant, écrivez à l\'assistance : nous vous répondrons rapidement.',
-  `<a class="btn sm" href="#/contact?sujet=acces">${icon('message', 15)} Contacter l'assistance</a>`);
-
 document.head.insertAdjacentHTML('beforeend', `<style>
 .f-etat{display:flex;gap:12px;align-items:flex-start;margin:16px 0 0;padding:14px 16px;border-radius:14px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink)}
 .f-etat.info{background:var(--info-soft);border-color:color-mix(in srgb,var(--info) 22%,transparent)}
@@ -121,7 +104,7 @@ const champMdp = (id, nom, lab, auto = 'new-password') => champ(id, lab, `<div c
 
 /* --- 2. Inscription -------------------------------------------------------- */
 function controleInscription(f, etape) {
-  const d = formData(f), t = k => String(d[k] || '').trim(), U = DB.getData(DB.K.users);
+  const d = formData(f), t = k => String(d[k] || '').trim();
   const fautes = [], si = (cond, nom, msg) => { if (!cond) fautes.push([nom, msg]); };
   if (!etape || etape === 1) si(['client', 'owner', 'agency'].includes(d.role), 'role', 'Choisissez le type de compte.');
   if (!etape || etape === 2) {
@@ -132,16 +115,14 @@ function controleInscription(f, etape) {
     si(t('firstName').length >= 2, 'firstName', 'Indiquez votre prénom.');
     si(t('lastName').length >= 2, 'lastName', 'Indiquez votre nom.');
     const em = t('email').toLowerCase();
-    if (!RE_EMAIL.test(em)) si(false, 'email', 'Adresse e-mail invalide. Exemple : vous@exemple.com');
-    else si(!U.some(u => String(u.email || '').toLowerCase() === em), 'email', 'Un compte existe déjà avec cette adresse e-mail. Connectez-vous, ou utilisez « Mot de passe oublié ».');
+    si(RE_EMAIL.test(em), 'email', 'Adresse e-mail invalide. Exemple : vous@exemple.com');   // unicité : vérifiée par Supabase Auth
     si(telSenegal(d.phone), 'phone', 'Numéro de téléphone invalide : 9 chiffres, par exemple 77 123 45 67.');
     const cni = t('cni').replace(/\s/g, '');
-    if (!/^\d{13}$/.test(cni)) si(false, 'cni', 'Le numéro de CNI comporte 13 chiffres.');
-    else si(!U.some(u => u.cni === cni), 'cni', 'Un compte existe déjà avec ce numéro de CNI. Connectez-vous ou contactez l\'assistance.');
+    si(/^\d{13}$/.test(cni), 'cni', 'Le numéro de CNI comporte 13 chiffres.');                // unicité : index unique en base
   }
   if (!etape || etape === 3) {
     si(!motDePasseFaible(d.password), 'password', 'Mot de passe trop faible : 8 caractères minimum, avec au moins une lettre et un chiffre.');
-    si(!(typeof MDP_DEMO !== 'undefined' && MDP_DEMO.includes(d.password)), 'password', 'Ce mot de passe est trop connu : choisissez-en un autre.');
+    si(!(typeof MDP_INTERDITS !== 'undefined' && MDP_INTERDITS.includes(String(d.password || '').toLowerCase())), 'password', 'Ce mot de passe est trop courant : choisissez-en un autre.');
     si(d.password === d.password2, 'password2', 'Les deux mots de passe ne correspondent pas.');
     si(!!d.cgu, 'cgu', 'Acceptez les conditions d\'utilisation pour créer votre compte.');
   }
@@ -163,74 +144,61 @@ window.addEventListener('click', e => {
   if (faute) { e.preventDefault(); e.stopImmediatePropagation(); erreurIci(f, faute[0], faute[1]); }
   else try { effacerErreursChamps(f); } catch (err) {}
 }, true);
-/* Envoi : tout est contrôlé ; avec un serveur, le compte y est créé d'abord. */
-window.addEventListener('submit', e => {
+/* Envoi : tout est contrôlé ici pour guider la saisie, puis Supabase Auth crée le
+   compte (js/27-actions.js, startRegistration) ; la base crée le profil et
+   applique ses propres règles (rôle autorisé, CNI unique). */
+window.addEventListener('submit', async e => {
   const f = e.target.closest && e.target.closest('form[data-action="register"]'); if (!f) return;
-  appliquerRole(f);                                   // profil changé sans événement (saisie automatique)
-  const faute = controleInscription(f, 0);
-  if (faute) { e.preventDefault(); e.stopImmediatePropagation(); erreurIci(f, faute[0], faute[1]); return; }
-  memoire.oublier(CLE_GOOGLE);
-  if (!Serveur.actif()) return;                       // mode local : js/27-actions.js crée le compte
   e.preventDefault(); e.stopImmediatePropagation();
-  inscrireSurServeur(f);
-}, true);
-async function inscrireSurServeur(f) {
-  const d = formData(f), t = k => String(d[k] || '').trim();
-  occupe(f, true, 'Création du compte…');
-  try {
-    await Serveur.envoyer('inscription', {role: d.role, firstName: t('firstName'), lastName: t('lastName'), email: t('email').toLowerCase(), phone: t('phone'),
-      cni: t('cni'), password: d.password, agencyName: t('agencyName'), address: t('address'), ninea: t('ninea'), rccm: t('rccm'), cgu: true});
-  } catch (err) { occupe(f, false); return erreurIci(f, '', err.message); }
-  occupe(f, false);
-  memoire.ecrire(CLE_VERIF, t('email').toLowerCase());
-  startRegistration(d);                               // copie locale : l'application lit encore ses données dans le navigateur
-  setTimeout(() => { if (Auth.current()) go('#/verifier-email'); }, 400);
-}
-/* Arrivée depuis Google sans compte : nom et adresse déjà remplis. */
-function preRemplirInscription() {
-  if (location.hash.split('?')[0] !== '#/register') return;
-  const f = document.querySelector('form[data-action="register"]'); if (!f) return;
+  if (f.dataset.envoi) return;                         // pas de double envoi
   appliquerRole(f);
-  const g = memoire.lire(CLE_GOOGLE); if (!g || Date.now() - g.t > 30 * 60000 || f.dataset.google) return;
-  f.dataset.google = '1';
-  [['email', g.email], ['firstName', g.firstName], ['lastName', g.lastName]].forEach(([n, v]) => { const i = f.querySelector(`[name="${n}"]`); if (i && v && !i.value) i.value = v; });
-  const carte = f.querySelector('.wstep[data-step="1"] .wiz-card');
-  if (carte) carte.insertAdjacentHTML('afterbegin', `<div class="f-google">${typeof gLogo === 'function' ? gLogo(18) : ''}<span>Compte Google : <b>${esc(g.email)}</b>. Choisissez votre profil, puis complétez vos informations.</span></div>`);
-}
+  const faute = controleInscription(f, 0);
+  if (faute) return erreurIci(f, faute[0], faute[1]);
+  try { effacerErreursChamps(f); } catch (err) {}
+  f.dataset.envoi = '1'; occupe(f, true, 'Création du compte…');
+  let r;
+  try { r = await startRegistration(formData(f)); } catch (err) { r = {error: messageAuth(err)}; }
+  delete f.dataset.envoi;
+  if (document.body.contains(f)) occupe(f, false);
+  if (r && r.error) {
+    const champ = /e-mail|adresse/i.test(r.error) ? 'email' : /CNI/i.test(r.error) ? 'cni' : /mot de passe/i.test(r.error) ? 'password' : '';
+    return erreurIci(f, champ, r.error);
+  }
+}, true);
 
 /* --- 3. Mot de passe oublié ------------------------------------------------ */
 route(/^\/mot-de-passe-oublie$/, () => {
   const mem = memoire.lire(CLE_REINIT) || {};
-  return pageCompte({badge: 'Récupération du compte', titre: 'Mot de passe oublié', lede: 'Indiquez l\'adresse e-mail ou le téléphone de votre compte : nous vous enverrons un code pour choisir un nouveau mot de passe.',
+  return pageCompte({badge: 'Récupération du compte', titre: 'Mot de passe oublié', lede: 'Indiquez l\'adresse e-mail de votre compte : nous vous enverrons un code pour choisir un nouveau mot de passe.',
     corps: `<form data-action="mdp-oubli" novalidate>
-      ${champ('mo-id', 'Adresse e-mail ou téléphone', `<input class="input" data-ds="1" data-ic="user" id="mo-id" name="identifiant" autocomplete="username" placeholder="vous@exemple.com ou 77 123 45 67" value="${esc(mem.identifiant || '')}" required>`)}
+      ${champ('mo-id', 'Adresse e-mail', `<input class="input" id="mo-id" name="email" type="email" autocomplete="username" placeholder="vous@exemple.com" value="${esc(mem.email || '')}" required>`)}
       <div class="f-zone-err"></div>
       <button class="btn block">Recevoir un code ${icon('arrowRight', 17)}</button>
     </form>
     <div class="f-liens"><a href="#/reinitialiser-mot-de-passe">J'ai déjà un code</a><a href="#/login">Je me souviens de mon mot de passe</a></div>`});
 });
-const identifiantValide = v => { v = String(v || '').trim(); return RE_EMAIL.test(v) ? v.toLowerCase() : telSenegal(v) ? v : ''; };
 window.addEventListener('submit', async e => {
   const f = e.target.closest && e.target.closest('form[data-action="mdp-oubli"]'); if (!f) return;
   e.preventDefault(); e.stopImmediatePropagation();
-  const id = identifiantValide(formData(f).identifiant);
-  if (!id) return erreurIci(f, 'identifiant', 'Saisissez une adresse e-mail valide ou un numéro à 9 chiffres (ex. 77 123 45 67).');
+  const email = String(formData(f).email || '').trim().toLowerCase();
+  if (!RE_EMAIL.test(email)) return erreurIci(f, 'email', 'Saisissez une adresse e-mail valide.');
   try { effacerErreursChamps(f); } catch (err) {}
-  memoire.ecrire(CLE_REINIT, {identifiant: id, t: Date.now()});
-  if (!Serveur.actif()) return pasEncoreActif(f, 'L\'envoi du code');
+  memoire.ecrire(CLE_REINIT, {email, t: Date.now()});
   occupe(f, true);
-  try { await Serveur.envoyer('motDePasseOublie', {identifiant: id}); }
-  catch (err) { occupe(f, false); return etatForm(f, 'bad', 'Envoi impossible', esc(err.message)); }
+  const {error} = await SB.auth.resetPasswordForEmail(email, {redirectTo: (DEUKSIL_CONFIG.siteUrl || location.origin + location.pathname).replace(/#.*$/, '')});
   occupe(f, false);
-  etatForm(f, 'ok', 'Code envoyé', `Si un compte correspond à <b>${esc(id)}</b>, vous allez recevoir un code à 6 chiffres par ${RE_EMAIL.test(id) ? 'e-mail' : 'SMS'}. Il est valable 15 minutes. Pensez à regarder vos courriers indésirables.`,
+  if (error && /rate|too many|seconds/i.test(error.message || '')) return etatForm(f, 'bad', 'Trop de demandes', messageAuth(error));
+  if (error) return etatForm(f, 'bad', 'Envoi impossible', esc(messageAuth(error)));
+  /* Même réponse que le compte existe ou non : on ne révèle pas qui est inscrit. */
+  etatForm(f, 'ok', 'Code envoyé', `Si un compte correspond à <b>${esc(email)}</b>, vous allez recevoir un code à 6 chiffres par e-mail. Il est valable 15 minutes. Pensez à regarder vos courriers indésirables.`,
     `<a class="btn sm" href="#/reinitialiser-mot-de-passe">Saisir le code</a>`);
 }, true);
 
 route(/^\/reinitialiser-mot-de-passe$/, () => {
   const mem = memoire.lire(CLE_REINIT) || {};
-  return pageCompte({badge: 'Récupération du compte', titre: 'Nouveau mot de passe', lede: 'Saisissez le code reçu, puis choisissez votre nouveau mot de passe.', retour: ['#/mot-de-passe-oublie', 'Recevoir un autre code'],
+  return pageCompte({badge: 'Récupération du compte', titre: 'Nouveau mot de passe', lede: 'Saisissez le code reçu par e-mail, puis choisissez votre nouveau mot de passe.', retour: ['#/mot-de-passe-oublie', 'Recevoir un autre code'],
     corps: `<form data-action="mdp-reinit" novalidate>
-      ${champ('mr-id', 'Adresse e-mail ou téléphone', `<input class="input" data-ds="1" data-ic="user" id="mr-id" name="identifiant" autocomplete="username" value="${esc(mem.identifiant || '')}" required>`)}
+      ${champ('mr-id', 'Adresse e-mail', `<input class="input" id="mr-id" name="email" type="email" autocomplete="username" value="${esc(mem.email || '')}" required>`)}
       ${champ('mr-code', 'Code à 6 chiffres', '<input class="input f-code" id="mr-code" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="••••••" required>')}
       ${champMdp('mr-mdp', 'nouveau', 'Nouveau mot de passe')}
       ${champMdp('mr-mdp2', 'confirme', 'Confirmer le mot de passe')}
@@ -243,33 +211,41 @@ route(/^\/reinitialiser-mot-de-passe$/, () => {
 window.addEventListener('submit', async e => {
   const f = e.target.closest && e.target.closest('form[data-action="mdp-reinit"]'); if (!f) return;
   e.preventDefault(); e.stopImmediatePropagation();
-  const d = formData(f), id = identifiantValide(d.identifiant), code = String(d.code || '').replace(/\D/g, '');
-  if (!id) return erreurIci(f, 'identifiant', 'Saisissez l\'adresse e-mail ou le téléphone de votre compte.');
+  const d = formData(f), email = String(d.email || '').trim().toLowerCase(), code = String(d.code || '').replace(/\D/g, '');
+  if (!RE_EMAIL.test(email)) return erreurIci(f, 'email', 'Saisissez l\'adresse e-mail de votre compte.');
   if (code.length !== 6) return erreurIci(f, 'code', 'Le code comporte 6 chiffres.');
-  if (motDePasseFaible(d.nouveau)) return erreurIci(f, 'nouveau', 'Mot de passe trop faible : 8 caractères minimum, avec au moins une lettre et un chiffre.');
-  if (d.nouveau !== d.confirme) return erreurIci(f, 'confirme', 'Les deux mots de passe ne correspondent pas.');
+  const refus = refusNouveauMotDePasse(d.nouveau, d.confirme);
+  if (refus) return erreurIci(f, /correspondent/.test(refus) ? 'confirme' : 'nouveau', refus);
   try { effacerErreursChamps(f); } catch (err) {}
-  if (!Serveur.actif()) return pasEncoreActif(f, 'La vérification du code');
-  occupe(f, true, 'Enregistrement…');
-  try { await Serveur.envoyer('reinitialisation', {identifiant: id, code, password: d.nouveau}); }
-  catch (err) { occupe(f, false); return etatForm(f, 'bad', 'Code refusé', esc(err.message)); }
-  occupe(f, false); memoire.oublier(CLE_REINIT); f.reset();
-  etatForm(f, 'ok', 'Mot de passe modifié', 'Vous pouvez maintenant vous connecter avec votre nouveau mot de passe.', `<a class="btn sm" href="#/login">Se connecter</a>`);
+  occupe(f, true, 'Vérification…');
+  const v = await SB.auth.verifyOtp({email, token: code, type: 'recovery'});
+  if (v.error) { occupe(f, false); return erreurIci(f, 'code', messageAuth(v.error)); }
+  const {error} = await SB.auth.updateUser({password: d.nouveau});
+  occupe(f, false);
+  if (error) return erreurIci(f, 'nouveau', messageAuth(error));
+  memoire.oublier(CLE_REINIT); f.reset();
+  /* La vérification du code a ouvert une session : on charge l'espace du compte. */
+  DB.session = v.data.session; await DB.charger();
+  /* La session ouverte relance l'affichage (le message dans le formulaire serait
+     effacé) : on confirme par une notification et on mène à l'espace du compte. */
+  const u = Auth.current();
+  toast('Mot de passe modifié : votre nouveau mot de passe est enregistré.');
+  go(u ? Auth.home(u) : '#/login');
 }, true);
 
 /* --- 4. Vérification de l'adresse e-mail ----------------------------------- */
 route(/^\/verifier-email$/, () => {
   const u = Auth.current(), email = (u && !u.member && u.email) || memoire.lire(CLE_VERIF) || '';
-  const fait = u && !u.member && u.emailVerifie;
+  const fait = u && DB.session && DB.session.user && DB.session.user.email_confirmed_at;
   return pageCompte({badge: 'Sécurité du compte', titre: 'Vérifiez votre adresse e-mail', retour: u ? [Auth.home(u), 'Retour à mon espace'] : ['#/login', 'Retour à la connexion'],
-    lede: fait ? 'Votre adresse e-mail est déjà vérifiée.' : 'Saisissez le code à 6 chiffres envoyé à votre adresse e-mail.',
+    lede: fait ? 'Votre adresse e-mail est confirmée.' : 'Saisissez le code à 6 chiffres envoyé à votre adresse e-mail pour activer votre compte.',
     corps: fait ? `<a class="btn block" href="${Auth.home(u)}">Aller à mon espace</a>` : `<form data-action="email-verif" novalidate>
       ${champ('ve-email', 'Adresse e-mail', `<input class="input" id="ve-email" name="email" type="email" autocomplete="email" value="${esc(email)}" required>`)}
       ${champ('ve-code', 'Code à 6 chiffres', '<input class="input f-code" id="ve-code" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="••••••" required>')}
       <div class="f-zone-err"></div>
       <button class="btn block">Vérifier mon adresse</button>
     </form>
-    <div class="f-liens"><a href="#/verifier-email" data-action="email-renvoi">Renvoyer le code</a>${u ? `<a href="${Auth.home(u)}">Plus tard</a>` : ''}</div>`});
+    <div class="f-liens"><a href="#/verifier-email" data-action="email-renvoi">Renvoyer le code</a><a href="#/login">Se connecter</a></div>`});
 });
 window.addEventListener('submit', async e => {
   const f = e.target.closest && e.target.closest('form[data-action="email-verif"]'); if (!f) return;
@@ -278,15 +254,15 @@ window.addEventListener('submit', async e => {
   if (!RE_EMAIL.test(email)) return erreurIci(f, 'email', 'Adresse e-mail invalide.');
   if (code.length !== 6) return erreurIci(f, 'code', 'Le code comporte 6 chiffres.');
   try { effacerErreursChamps(f); } catch (err) {}
-  if (!Serveur.actif()) return etatForm(f, 'info', 'La vérification par code n\'est pas encore activée', 'DEUKSIL n\'envoie pas encore de codes par e-mail. Votre compte fonctionne normalement en attendant.');
   occupe(f, true, 'Vérification…');
-  try { await Serveur.envoyer('verifierEmail', {email, code}); }
-  catch (err) { occupe(f, false); return etatForm(f, 'bad', 'Code refusé', esc(err.message)); }
-  occupe(f, false); memoire.oublier(CLE_VERIF);
-  const u = DB.findItem(DB.K.users, x => String(x.email || '').toLowerCase() === email);
-  if (u) DB.updateItem(DB.K.users, u.id, {emailVerifie: true, emailVerifieLe: now()});
-  const moi = Auth.current();
-  etatForm(f, 'ok', 'Adresse vérifiée', 'Merci : votre adresse e-mail est confirmée.', moi ? `<a class="btn sm" href="${Auth.home(moi)}">Aller à mon espace</a>` : '<a class="btn sm" href="#/login">Se connecter</a>');
+  const {data, error} = await SB.auth.verifyOtp({email, token: code, type: 'signup'});
+  if (error) { occupe(f, false); return erreurIci(f, 'code', messageAuth(error)); }
+  memoire.oublier(CLE_VERIF);
+  DB.session = data.session; await DB.charger();
+  occupe(f, false);
+  const u = Auth.current();
+  if (u) { toast('Adresse confirmée : bienvenue sur DEUKSIL.'); go(Auth.home(u)); }
+  else etatForm(f, 'ok', 'Adresse vérifiée', 'Votre adresse e-mail est confirmée.', '<a class="btn sm" href="#/login">Se connecter</a>');
 }, true);
 document.addEventListener('click', async e => {
   const b = e.target.closest('[data-action="email-renvoi"]'); if (!b) return;
@@ -294,13 +270,12 @@ document.addEventListener('click', async e => {
   const f = document.querySelector('form[data-action="email-verif"]'); if (!f) return;
   const email = String(formData(f).email || '').trim().toLowerCase();
   if (!RE_EMAIL.test(email)) return erreurIci(f, 'email', 'Indiquez l\'adresse e-mail à vérifier.');
-  if (!Serveur.actif()) return etatForm(f, 'info', 'L\'envoi du code n\'est pas encore activé', 'DEUKSIL n\'envoie pas encore de codes par e-mail. Votre compte fonctionne normalement en attendant.');
-  try { await Serveur.envoyer('renvoyerCode', {email}); etatForm(f, 'ok', 'Nouveau code envoyé', `Un nouveau code a été envoyé à <b>${esc(email)}</b>.`); }
-  catch (err) { etatForm(f, 'bad', 'Envoi impossible', esc(err.message)); }
+  const {error} = await SB.auth.resend({type: 'signup', email});
+  if (error) return etatForm(f, 'bad', 'Envoi impossible', esc(messageAuth(error)));
+  etatForm(f, 'ok', 'Nouveau code envoyé', `Si un compte en attente correspond à <b>${esc(email)}</b>, un nouveau code vient d'être envoyé.`);
 });
 
 /* --- 5. Contact ------------------------------------------------------------ */
-DB.K.contacts = DB.K.contacts || 'deuksil_contacts';
 const SUJETS = [['question', 'Question sur DEUKSIL'], ['acces', 'Accès à mon compte'], ['annonce', 'Une annonce'], ['technique', 'Problème technique'],
   ['agence', 'Partenariat agence'], ['abus', 'Signaler un abus'], ['autre', 'Autre']];
 route(/^\/contact$/, () => {
@@ -312,9 +287,9 @@ route(/^\/contact$/, () => {
     <div class="page-head"><div><h1>Contacter DEUKSIL</h1><p class="muted">Une question, un souci d'accès, une annonce à signaler : écrivez-nous, nous vous répondons par e-mail.</p></div></div>
     <div class="ct-grid">
       <div><form class="card" data-action="contact-form" novalidate>
-        <div class="form-grid">${champ('ct-nom', 'Nom complet <span class="req">*</span>', `<input class="input" id="ct-nom" name="name" autocomplete="name" value="${esc([moi.firstName, moi.lastName].filter(Boolean).join(' '))}" required>`)}
-          ${champ('ct-email', 'Adresse e-mail <span class="req">*</span>', `<input class="input" id="ct-email" name="email" type="email" autocomplete="email" value="${esc(moi.email || u && u.email || '')}" required>`)}</div>
-        <div class="form-grid">${champ('ct-tel', 'Téléphone', `<input class="input" id="ct-tel" name="phone" type="tel" autocomplete="tel" placeholder="77 123 45 67" value="${esc(moi.phone || '')}">`)}
+        <div class="form-grid">${champ('ct-nom', 'Nom complet <span class="req">*</span>', `<input class="input" id="ct-nom" name="name" autocomplete="name" maxlength="120" value="${esc([moi.firstName, moi.lastName].filter(Boolean).join(' '))}" required>`)}
+          ${champ('ct-email', 'Adresse e-mail <span class="req">*</span>', `<input class="input" id="ct-email" name="email" type="email" autocomplete="email" maxlength="254" value="${esc(moi.email || u && u.email || '')}" required>`)}</div>
+        <div class="form-grid">${champ('ct-tel', 'Téléphone', `<input class="input" id="ct-tel" name="phone" type="tel" autocomplete="tel" maxlength="30" placeholder="77 123 45 67" value="${esc(moi.phone || '')}">`)}
           ${champ('ct-sujet', 'Sujet <span class="req">*</span>', `<select class="input" id="ct-sujet" name="subject" required>${SUJETS.map(([k, l]) => `<option value="${k}" ${k === sujet ? 'selected' : ''}>${l}</option>`).join('')}</select>`)}</div>
         ${champ('ct-msg', 'Message <span class="req">*</span>', '<textarea class="input" id="ct-msg" name="message" rows="6" maxlength="3000" placeholder="Décrivez votre demande. Pour une annonce, indiquez son titre ou son adresse." required></textarea>')}
         <div class="f-zone-err"></div>
@@ -329,35 +304,51 @@ route(/^\/contact$/, () => {
 window.addEventListener('submit', async e => {
   const f = e.target.closest && e.target.closest('form[data-action="contact-form"]'); if (!f) return;
   e.preventDefault(); e.stopImmediatePropagation();
+  if (f.dataset.envoi) return;
   const d = formData(f), t = k => String(d[k] || '').trim();
   if (t('name').length < 2) return erreurIci(f, 'name', 'Indiquez votre nom.');
   if (!RE_EMAIL.test(t('email'))) return erreurIci(f, 'email', 'Adresse e-mail invalide : nous en avons besoin pour vous répondre.');
   if (t('phone') && !telSenegal(t('phone')) && !/^\+\d{8,15}$/.test(t('phone').replace(/\s/g, ''))) return erreurIci(f, 'phone', 'Numéro de téléphone invalide.');
+  if (!SUJETS.some(x => x[0] === t('subject'))) return erreurIci(f, 'subject', 'Choisissez un sujet.');
   if (t('message').length < 10) return erreurIci(f, 'message', 'Votre message est trop court (10 caractères minimum).');
   try { effacerErreursChamps(f); } catch (err) {}
-  const msg = {name: t('name'), email: t('email').toLowerCase(), phone: t('phone'), subject: t('subject'), message: t('message').slice(0, 3000)};
-  const libelle = (SUJETS.find(s => s[0] === msg.subject) || [, 'Message'])[1];
-  if (Serveur.actif()) {
-    occupe(f, true);
-    try { await Serveur.envoyer('contact', msg); } catch (err) { occupe(f, false); return etatForm(f, 'bad', 'Envoi impossible', esc(err.message)); }
-    occupe(f, false);
-  } else {
-    const u = Auth.current();
-    DB.addItem(DB.K.contacts, {...msg, userId: u ? u.id : '', statut: 'nouveau'});
-    if (!DB.lastWriteOk) return;
-    notify('user_admin', `Contact · ${libelle} — ${msg.name} (${msg.email}${msg.phone ? ', ' + msg.phone : ''}) : ${msg.message.slice(0, 280)}`, '#/admin/dashboard');
-    try { logActivity(`Message de contact reçu : ${libelle} (${msg.name})`); } catch (err) {}
-  }
+  const u = Auth.current(), moi = DB.session && DB.session.user ? DB.session.user.id : null;
+  const msg = {name: t('name').slice(0, 120), email: t('email').toLowerCase(), phone: t('phone') || null, subject: t('subject'), message: t('message').slice(0, 3000), user_id: moi};
+  f.dataset.envoi = '1'; occupe(f, true);
+  /* Insertion directe (le visiteur peut écrire, jamais relire) ; l'administration est prévenue par la base. */
+  const {error} = await SB.from('contact_messages').insert(msg);
+  delete f.dataset.envoi; occupe(f, false);
+  if (error) return etatForm(f, 'bad', 'Envoi impossible', esc(messageErreur(error)));
   f.reset();
   etatForm(f, 'ok', 'Message envoyé', `Merci ${esc(msg.name.split(' ')[0])}. Nous vous répondrons à <b>${esc(msg.email)}</b> sous 48 h ouvrées.`);
 }, true);
 
-/* --- Titres d'onglet et pré-remplissage après chaque affichage ------------- */
+/* --- Titres d'onglet après chaque affichage --------------------------------- */
 const TITRES_FORMULAIRES = {'#/mot-de-passe-oublie': 'Mot de passe oublié | DEUKSIL', '#/reinitialiser-mot-de-passe': 'Nouveau mot de passe | DEUKSIL',
-  '#/verifier-email': 'Vérifier mon adresse e-mail | DEUKSIL', '#/contact': 'Contacter DEUKSIL | DEUKSIL'};
+  '#/verifier-email': 'Vérifier mon adresse e-mail | DEUKSIL', '#/contact': 'Contacter DEUKSIL | DEUKSIL', '#/completer-profil': 'Compléter mon profil | DEUKSIL'};
 const _afterRenderFormulaires = afterRender;
 afterRender = function () {
   const r = _afterRenderFormulaires.apply(this, arguments);
-  try { const t = TITRES_FORMULAIRES[location.hash.split('?')[0]]; if (t) document.title = t; preRemplirInscription(); } catch (e) {}
+  try { const t = TITRES_FORMULAIRES[location.hash.split('?')[0]]; if (t) document.title = t; if (location.hash.split('?')[0] === '#/register') appliquerRole(document.querySelector('form[data-action="register"]')); } catch (e) {}
   return r;
 };
+
+/* --- 6. Administration : messages reçus par le formulaire de contact ---------- */
+const LIB_SUJET = Object.fromEntries(SUJETS);
+if (MENUS_RAW.admin && !MENUS_RAW.admin.some(m => m[0] === '#/admin/contacts')) MENUS_RAW.admin.splice(MENUS_RAW.admin.length - 1, 0, ['#/admin/contacts', 'Messages de contact', 'message']);
+route(/^\/admin\/contacts$/, () => {
+  const u = Auth.guard('admin'); if (!u) return false;
+  const L = DB.getData(DB.K.contacts).sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
+  const nouveaux = L.filter(m => m.statut === 'nouveau').length;
+  return shellApp(u, page('Messages de contact', `${pluriel(L.length, 'message')} · ${nouveaux} à traiter`) + (L.length ? gTable(['Reçu le', 'Expéditeur', 'Sujet', 'Message', 'État', ''],
+    L.map(m => `<tr><td class="small">${dateTimeFr(m.createdAt)}</td><td class="small"><b>${esc(m.name)}</b><br><span class="muted">${esc(m.email)}${m.phone ? ' · ' + esc(m.phone) : ''}</span></td>
+      <td>${badge(LIB_SUJET[m.subject] || m.subject, m.subject === 'abus' ? 'bad' : 'info')}</td><td class="small" style="max-width:420px;white-space:pre-wrap">${esc(m.message)}</td>
+      <td>${badge(m.statut === 'traite' ? 'Traité' : 'À traiter', m.statut === 'traite' ? 'ok' : 'warn')}</td>
+      <td>${m.statut === 'traite' ? '' : `<button class="btn ghost sm" data-action="contact-traite" data-id="${m.id}">Marquer traité</button>`}</td></tr>`))
+    : `<div class="empty"><b>Aucun message</b><p class="small">Les messages envoyés depuis la page Contact apparaîtront ici.</p></div>`));
+});
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-action="contact-traite"]'); if (!b) return;
+  const u = Auth.current(); if (!u || u.role !== 'admin') return;
+  DB.updateItem(DB.K.contacts, b.dataset.id, {statut: 'traite'}); toast('Message marqué comme traité.'); render();
+});

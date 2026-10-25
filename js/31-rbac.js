@@ -39,7 +39,7 @@ routes.forEach(r => {
   r.fn = (...a) => {
     const u = Auth.current(), path = location.hash.slice(1);
     if (u && u.member && !memberCan(u, permFor(path))) { toast('Accès non autorisé pour votre profil.', 'bad'); go(Auth.home(u)); return false; }
-    if (u && ['tenant', 'investor', 'promoter'].includes(u.role) && /^\/(owner|agency|manage|admin)\//.test(path)) { toast('Espace non accessible à votre profil.', 'bad'); go(Auth.home(u)); return false; }
+    if (u && u.role === 'tenant' && /^\/(owner|agency|manage|admin)\//.test(path)) { toast('Espace non accessible à votre profil.', 'bad'); go(Auth.home(u)); return false; }
     if (u && u.member && /^\/manage\//.test(path)) {   /* n'afficher que les onglets autorisés */
       const saved = GTABS.slice(); GTABS.splice(0, GTABS.length, ...saved.filter(t => memberCan(u, permFor('/manage/' + t[0]))));
       try { return f(...a); } finally { GTABS.splice(0, GTABS.length, ...saved); }
@@ -65,27 +65,29 @@ vueGestion(['team'], function (u, tab) {
   const free = gMine('leases', u).filter(l => l.status === 'actif' && !tenants.some(t => t.leaseId === l.id));
   return `<form class="card" data-action="g4-member" style="margin-bottom:18px"><h4 style="margin-top:0">Ajouter un membre d'équipe</h4><div class="form-grid">
     <div class="field"><label>Prénom</label><input class="input" name="firstName" required></div><div class="field"><label>Nom</label><input class="input" name="lastName" required></div>
-    <div class="field"><label>CNI (13 chiffres, fictive)</label><input class="input" name="cni" required pattern="\\d{13}"></div><div class="field"><label>Téléphone</label><input class="input" name="phone"></div>
-    <div class="field"><label>Mot de passe</label><input class="input" type="password" name="password" minlength="6" required></div>
+    <div class="field"><label>Adresse e-mail (identifiant de connexion)</label><input class="input" type="email" name="email" required autocomplete="off"></div><div class="field"><label>Téléphone</label><input class="input" name="phone"></div>
+    <div class="field"><label>CNI (13 chiffres, facultatif)</label><input class="input" name="cni" pattern="\\d{13}" inputmode="numeric"></div>
     <div class="field"><label>Rôle</label><select class="input" name="role"><option value="manager">Gestionnaire</option><option value="agent">Agent</option></select></div></div>
     <p class="small"><b>Permissions</b> (l'administration du compte, l'abonnement et l'équipe ne sont jamais délégables)</p>
     <div class="row" style="gap:14px;flex-wrap:wrap;margin-bottom:12px">${Object.entries(PERMS).map(([k, v]) => `<label class="small"><input type="checkbox" name="perm_${k}" ${MEMBER_DEFAULT.agent.includes(k) ? 'checked' : ''}> ${v}</label>`).join('')}</div>
     <button class="btn">Créer le compte</button><p class="err" id="g4-err"></p></form>` +
-    gTable(['Nom', 'Rôle', 'Permissions', 'Statut', ''], team.map(m => `<tr><td class="small"><b>${esc(m.firstName)} ${esc(m.lastName)}</b><br><span class="muted">${m.cni}</span></td><td>${badge(MEMBER_LABEL[m.role], 'info')}</td>
+    gTable(['Nom', 'Rôle', 'Permissions', 'Statut', ''], team.map(m => `<tr><td class="small"><b>${esc(m.firstName)} ${esc(m.lastName)}</b><br><span class="muted">${esc(m.email || '')}</span></td><td>${badge(MEMBER_LABEL[m.role], 'info')}</td>
       <td class="small">${(m.perms || []).map(p => esc(PERMS[p])).join(', ') || '—'}</td><td>${badge(m.status === 'actif' ? 'Actif' : 'Suspendu', m.status === 'actif' ? 'ok' : 'bad')}</td>
       <td><div class="row" style="gap:6px"><button class="btn ghost sm" data-action="g4-toggle" data-id="${m.id}">${m.status === 'actif' ? 'Suspendre' : 'Réactiver'}</button><button class="btn ghost sm" data-action="g4-del" data-id="${m.id}" aria-label="Supprimer">${icon('trash', 14)}</button></div></td></tr>`), ['Aucun membre', 'Ajoutez un gestionnaire ou un agent avec des permissions précises.']) +
     `<form class="card" data-action="g4-tenant" style="margin:24px 0 18px"><h4 style="margin-top:0">Donner un accès à un locataire</h4><div class="form-grid">
     <div class="field"><label>Bail</label><select class="input" name="leaseId" required>${free.map(l => `<option value="${l.id}">${esc(l.tenant)} — ${esc((gProp(l.propertyId) || {}).title || '')}</option>`).join('') || '<option value="">Aucun bail sans accès</option>'}</select></div>
-    <div class="field"><label>CNI du locataire (13 chiffres)</label><input class="input" name="cni" required pattern="\\d{13}"></div>
-    <div class="field"><label>Mot de passe</label><input class="input" type="password" name="password" minlength="6" required></div></div><button class="btn">Créer l'accès locataire</button></form>` +
-    gTable(['Locataire', 'CNI', 'Bail', ''], tenants.map(t => `<tr><td class="small"><b>${esc(t.firstName)} ${esc(t.lastName)}</b></td><td class="small">${t.cni}</td><td class="small">${esc((gProp((DB.findItem(DB.K.leases, t.leaseId) || {}).propertyId) || {}).title || '—')}</td><td><button class="btn ghost sm" data-action="g4-del" data-id="${t.id}" aria-label="Supprimer">${icon('trash', 14)}</button></td></tr>`), ['Aucun accès locataire', 'Le locataire pourra suivre ses loyers et signaler un problème.']);
+    <div class="field"><label>Adresse e-mail du locataire</label><input class="input" type="email" name="email" required autocomplete="off"></div></div>
+    <p class="small muted" style="margin:0 0 10px">Un mot de passe provisoire est généré et affiché une seule fois ; le locataire choisit le sien à sa première connexion.</p><button class="btn">Ouvrir l'accès locataire</button></form>` +
+    gTable(['Locataire', 'E-mail', 'Bail', ''], tenants.map(t => `<tr><td class="small"><b>${esc(t.firstName)} ${esc(t.lastName)}</b></td><td class="small">${esc(t.email || '')}</td><td class="small">${esc((gProp((DB.findItem(DB.K.leases, t.leaseId) || {}).propertyId) || {}).title || '—')}</td><td><button class="btn ghost sm" data-action="g4-del" data-id="${t.id}" aria-label="Supprimer">${icon('trash', 14)}</button></td></tr>`), ['Aucun accès locataire', 'Le locataire pourra suivre ses loyers et signaler un problème.']);
 });
 function g4User(u, d, extra) {
   const err = m => { $('#g4-err') && ($('#g4-err').textContent = m); toast(m, 'bad'); return null; };
-  if (!/^\d{13}$/.test(d.cni)) return err('La CNI doit comporter 13 chiffres.');
-  if (DB.findItem(DB.K.users, x => x.cni === d.cni)) return err('Un compte existe déjà avec cette CNI.');
-  if ((d.password || '').length < 6) return err('Mot de passe : 6 caractères minimum.');
-  return DB.addItem(DB.K.users, {cni: d.cni, firstName: d.firstName, lastName: d.lastName, phone: d.phone || '', password: d.password, status: 'actif', registrationPaid: true, agencyName: '', address: '', agencyDesc: '', ...extra});
+  const email = String(d.email || '').trim().toLowerCase();
+  if (!EMAIL_VALIDE.test(email)) return err('Indiquez une adresse e-mail valide : c\'est l\'identifiant de connexion.');
+  if (d.cni && !/^\d{13}$/.test(d.cni)) return err('La CNI doit comporter 13 chiffres.');
+  /* Le compte est créé par la fonction serveur « gerer-acces » ; le mot de passe
+     provisoire est affiché une fois (montrerMotDePasseProvisoire). */
+  return DB.addItem(DB.K.users, {email, cni: d.cni || '', firstName: d.firstName, lastName: d.lastName, phone: d.phone || '', status: 'actif', mdpProvisoire: true, ...extra});
 }
 document.addEventListener('submit', e => {
   const f = e.target.closest('[data-action^="g4-"]'), u = Auth.current(); if (!f || !u || u.member) return;
@@ -94,12 +96,11 @@ document.addEventListener('submit', e => {
     if (!['manager', 'agent'].includes(d.role)) return;
     const perms = Object.keys(PERMS).filter(k => d['perm_' + k]);
     const m = g4User(u, d, {role: d.role, parentId: u.id, perms}); if (!m) return;
-    audit('Membre créé', `${m.firstName} ${m.lastName} (${MEMBER_LABEL[m.role]})`); toast('Compte créé. Il se connecte avec sa CNI.'); render();
+    audit('Membre créé', `${m.firstName} ${m.lastName} (${MEMBER_LABEL[m.role]})`); f.reset(); render();
   }
   if (a === 'g4-tenant') {
     const l = DB.findItem(DB.K.leases, x => x.id === d.leaseId && x.ownerId === u.id && x.status === 'actif'); if (!l) { toast('Choisissez un bail actif.', 'bad'); return; }
-    const [fn, ...ln] = l.tenant.split(' '), t = g4User(u, {...d, firstName: fn, lastName: ln.join(' ') || '-', phone: l.phone}, {role: 'tenant', leaseId: l.id, ownerRef: u.id}); if (!t) return;
-    audit('Accès locataire', l.tenant); toast('Accès locataire créé.'); render();
+    ouvrirAccesLocataire(l, d.email);
   }
 });
 document.addEventListener('click', e => {
@@ -134,19 +135,4 @@ document.addEventListener('submit', e => {
   notify(l.ownerId, `Maintenance signalée par ${u.firstName} : ${t}`, '#/manage/tickets'); toast('Demande envoyée.'); render();
 });
 
-/* Comptes de démonstration : gestionnaire, agent, locataire */
-function seedV4() {
-  if (DB.findItem(DB.K.users, x => x.cni === '1900000000011')) return;
-  const owner = DB.findItem(DB.K.users, x => x.cni === '1900000000003'), agency = DB.findItem(DB.K.users, x => x.cni === '1900000000004'); if (!owner || !agency) return;
-  const base = {password: 'demo123', status: 'actif', registrationPaid: true, agencyName: '', address: '', agencyDesc: ''};
-  DB.addItem(DB.K.users, {...base, cni: '1900000000011', firstName: 'Moussa', lastName: 'Gestionnaire', phone: '770000011', role: 'manager', parentId: owner.id, perms: MEMBER_DEFAULT.manager});
-  DB.addItem(DB.K.users, {...base, cni: '1900000000012', firstName: 'Aïssatou', lastName: 'Agent', phone: '770000012', role: 'agent', parentId: agency.id, perms: MEMBER_DEFAULT.agent});
-  const pr = myProps(owner).find(p => p.transaction === 'location'); if (!pr) return;
-  const l = DB.addItem(DB.K.leases, {ownerId: owner.id, propertyId: pr.id, tenant: 'Tacko Samb', phone: '770000013', rent: pr.price || 250000, deposit: 500000, start: addDays(now(), -90).slice(0, 10), months: 12, status: 'actif'});
-  const s = new Date(l.start);
-  for (let i = 0; i < 12; i++) { const m = new Date(s.getFullYear(), s.getMonth() + i, 1); DB.addItem(DB.K.rents, {ownerId: owner.id, leaseId: l.id, month: `${m.getFullYear()}-${String(m.getMonth() + 1).padStart(2, '0')}`, amount: l.rent, paidAt: i < 2 ? addDays(l.start, i * 30) : null}); }
-  DB.addItem(DB.K.users, {...base, cni: '1900000000013', firstName: 'Tacko', lastName: 'Samb', phone: '770000013', role: 'tenant', leaseId: l.id, ownerRef: owner.id});
-  DB.updateItem(DB.K.properties, pr.id, {status: 'loue'});
-}
-etapeAmorcage('équipes et locataire de démonstration', seedV4);
 window.__menuRdy = true;

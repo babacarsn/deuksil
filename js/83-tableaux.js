@@ -85,7 +85,7 @@ function tbPage(c) {
 }
 const tbMois6 = () => [...Array(6)].map((_, i) => moisCle(curMonth() + '-01', i - 5));
 const badgeMois = m => `${moisCourt(m)} ${m.slice(0, 4)}`;
-const photoDe = (p, repli) => p ? ((p.photos && p.photos.length) ? p.photos[0] : (p.type ? demoPhotos(p)[0] : repli)) : repli;
+const photoDe = (p, repli) => p ? ((p.photos && p.photos.length) ? p.photos[0] : repli) : repli;
 const remplacerRoute = (source, fn) => { const r = routes.find(x => x.re.source === source); if (r) r.fn = fn; return r; };
 
 /* --- 2. Client ------------------------------------------------------------- */

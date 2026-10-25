@@ -124,22 +124,7 @@ function nettoyerChoixBail() {
   }
 }
 
-/* --- 6. Reprise des comptes existants ----------------------------------- */
-/* Les comptes créés avant cette version n'ont pas de `leaseIds`. On les
-   complète une fois, sans rien écraser. */
-const MB_FLAG = 'deuksil_multibail_v1';
-function reprendreComptes() {
-  try {
-    if (localStorage.getItem(MB_FLAG)) return;
-    DB.filterItems(DB.K.users, u => u.leaseId && !Array.isArray(u.leaseIds))
-      .forEach(u => DB.updateItem(DB.K.users, u.id, {leaseIds: [u.leaseId]}));
-    localStorage.setItem(MB_FLAG, '1');
-  } catch (e) {}
-}
-
 new MutationObserver(() => requestAnimationFrame(() => {
-  try { reprendreComptes(); } catch (e) {}
   try { selecteurLogement(); } catch (e) {}
   try { nettoyerChoixBail(); } catch (e) {}
 })).observe(document.body, {childList: true, subtree: true});
-setTimeout(reprendreComptes, 1200);

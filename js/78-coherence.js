@@ -282,18 +282,3 @@ window.addEventListener('click', e => {
   autoFileThen('contract', n, `Renouvelé : ${n.ref}, du ${dateFr(debut)} au ${dateFr(fin)}`);
 }, true);
 
-/* --- 8. Deux onglets ouverts --------------------------------------------- */
-/* Les données sont partagées par tous les onglets du navigateur. Quand un
-   autre onglet écrit, celui-ci se redessine — sauf si une saisie est en
-   cours : on prévient, et l'écriture sera de toute façon revérifiée. */
-let syncPrevenu = 0;
-window.addEventListener('storage', e => {
-  if (!e.key || !/^deuksil_/.test(e.key) || e.key === DB.K.session) return;
-  const saisie = document.querySelector('#modal-root .modal, #modal-root form')
-    || (document.activeElement && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName) && document.activeElement.closest('form'));
-  if (!saisie) { render(); return; }
-  if (Date.now() - syncPrevenu > 15000) {
-    syncPrevenu = Date.now();
-    toast('Des données ont changé dans un autre onglet. Elles seront revérifiées à l\'enregistrement.');
-  }
-});

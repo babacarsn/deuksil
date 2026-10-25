@@ -1,5 +1,32 @@
-tests/resultats.json
-tests/regression.json
+# --- Secrets : JAMAIS dans Git -------------------------------------------------
+.env
+.env.*
+!.env.example
+supabase/.env
+supabase/functions/.env
+supabase/.temp/
+*.pem
+*.key
+# Clés locales de la réplique de test (générées)
+supabase/tests-local/replique/keys.json
+supabase/tests-local/replique/env
+supabase/tests-local/replique/.run/
+
+# --- Résultats et artefacts de tests -------------------------------------------
 node_modules/
 tests/*.png
-tests/resultats-agence.json
+tests/resultats*.json
+tests/regression.json
+tests/audit-*.json
+supabase/tests-local/resultats/
+supabase/tests-local/perf/resultats-*.json.tmp
+playwright-report/
+test-results/
+
+# --- Divers ----------------------------------------------------------------------
+.DS_Store
+*.log
+
+# Sauvegardes (données personnelles) : jamais dans Git
+supabase/sauvegarde/sauvegardes/
+supabase/sauvegarde/node_modules/

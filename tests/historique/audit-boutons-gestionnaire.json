@@ -1,0 +1,146 @@
+[
+ {
+  "page": "#/owner/properties",
+  "bouton": "Disponible En discussion Loué Vendu Archivé En mai",
+  "action": "set-status",
+  "souci": "aucun effet visible"
+ },
+ {
+  "page": "#/owner/properties",
+  "bouton": "Disponible En discussion Loué Vendu Archivé En mai",
+  "action": "set-status",
+  "souci": "aucun effet visible"
+ },
+ {
+  "page": "#/owner/properties",
+  "bouton": "Disponible En discussion Loué Vendu Archivé En mai",
+  "action": "set-status",
+  "souci": "aucun effet visible"
+ },
+ {
+  "page": "#/owner/properties",
+  "bouton": "Disponible En discussion Loué Vendu Archivé En mai",
+  "action": "set-status",
+  "souci": "aucun effet visible"
+ },
+ {
+  "page": "#/owner/properties",
+  "bouton": "Disponible En discussion Loué Vendu Archivé En mai",
+  "action": "set-status",
+  "souci": "aucun effet visible"
+ },
+ {
+  "page": "#/owner/properties",
+  "bouton": "Disponible En discussion Loué Vendu Archivé En mai",
+  "action": "set-status",
+  "souci": "aucun effet visible"
+ },
+ {
+  "page": "#/owner/properties",
+  "bouton": "Disponible En discussion Loué Vendu Archivé En mai",
+  "action": "set-status",
+  "souci": "aucun effet visible"
+ },
+ {
+  "page": "#/owner/property/new",
+  "bouton": "Précédent",
+  "action": "wiz-prev",
+  "souci": "aucun effet visible"
+ },
+ {
+  "page": "#/manage/rents",
+  "bouton": "Locataires & baux Fiches locataires Unités Message",
+  "action": "g-goto",
+  "souci": "aucun effet visible"
+ },
+ {
+  "page": "#/manage/rents",
+  "bouton": "Exporter en CSV",
+  "action": "g3-csv",
+  "souci": "aucun effet visible"
+ },
+ {
+  "page": "#/manage/leases",
+  "bouton": "Locataires & baux Fiches locataires Unités Message",
+  "action": "g-goto",
+  "souci": "aucun effet visible"
+ },
+ {
+  "page": "#/manage/leases",
+  "bouton": "Exporter en CSV",
+  "action": "g3-csv",
+  "souci": "aucun effet visible"
+ },
+ {
+  "page": "#/manage/leases",
+  "bouton": "— Une personne sans compte — Ibrahima Sarr · +221 ",
+  "action": "bc-choisir",
+  "souci": "aucun effet visible"
+ },
+ {
+  "page": "#/manage/tenants",
+  "bouton": "Locataires & baux Fiches locataires Unités Message",
+  "action": "g-goto",
+  "souci": "aucun effet visible"
+ },
+ {
+  "page": "#/manage/units",
+  "bouton": "Locataires & baux Fiches locataires Unités Message",
+  "action": "g-goto",
+  "souci": "aucun effet visible"
+ },
+ {
+  "page": "#/manage/units",
+  "bouton": "Exporter en CSV",
+  "action": "g3-csv",
+  "souci": "aucun effet visible"
+ },
+ {
+  "page": "#/manage/deals",
+  "bouton": "Locataires & baux Fiches locataires Unités Message",
+  "action": "g-goto",
+  "souci": "aucun effet visible"
+ },
+ {
+  "page": "#/manage/deals",
+  "bouton": "— Une personne sans compte — Ibrahima Sarr · +221 ",
+  "action": "bc-acquereur",
+  "souci": "aucun effet visible"
+ },
+ {
+  "page": "#/manage/tickets",
+  "bouton": "Locataires & baux Fiches locataires Unités Message",
+  "action": "g-goto",
+  "souci": "aucun effet visible"
+ },
+ {
+  "page": "#/manage/tickets",
+  "bouton": "Exporter en CSV",
+  "action": "g3-csv",
+  "souci": "aucun effet visible"
+ },
+ {
+  "page": "#/manage/providers",
+  "bouton": "Locataires & baux Fiches locataires Unités Message",
+  "action": "g-goto",
+  "souci": "aucun effet visible"
+ },
+ {
+  "page": "#/manage/contracts",
+  "bouton": "Locataires & baux Fiches locataires Unités Message",
+  "action": "g-goto",
+  "souci": "aucun effet visible"
+ },
+ {
+  "page": "#/manage/contracts",
+  "bouton": "Exporter en CSV",
+  "action": "g3-csv",
+  "souci": "aucun effet visible"
+ },
+ {
+  "page": "#/manage/contracts",
+  "bouton": "— Saisir un nom — Tacko Samb · 770000013 Ibrahima ",
+  "action": "ct-choisir",
+  "souci": "aucun effet visible"
+ }
+]

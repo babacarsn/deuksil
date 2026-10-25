@@ -1,0 +1,306 @@
+{
+ "admin": {
+  "page": "#/admin/dashboard",
+  "sections": [
+   "Administration#DEUKSIL",
+   "Activité#de#la#plateforme",
+   "Plateforme",
+   "Nouveaux#comptes",
+   "À#traiter",
+   "Actions#rapides",
+   "Activité#récente"
+  ],
+  "actionsRapides": [
+   "Valider#les#annonces → #/admin/listings",
+   "Signalements → #/admin/signalements",
+   "Utilisateurs → #/admin/users",
+   "Paramètres → #/admin/settings"
+  ],
+  "tuiles": 9,
+  "menu": [
+   "Tableau#de#bord → #/admin/dashboard",
+   "Utilisateurs → #/admin/users",
+   "Validation#des#annonces → #/admin/listings",
+   "Tous#les#biens → #/admin/properties",
+   "Statistiques → #/admin/reports",
+   "Signalements → #/admin/signalements",
+   "Vérifications → #/admin/verifications",
+   "Documents → #/coffre",
+   "Paramètres → #/admin/settings"
+  ],
+  "barre": [
+   "Accueil → #/admin/dashboard",
+   "Utilisateurs → #/admin/users",
+   "Validation#des#annonces → #/admin/listings",
+   "Tous#les#biens → #/admin/properties",
+   "Statistiques → #/admin/reports"
+  ],
+  "animations": true
+ },
+ "proprietaire": {
+  "page": "#/owner/dashboard",
+  "sections": [
+   "Votre#portefeuille#en#un#coup#d'œil",
+   "Revenus#locatifs",
+   "Mon#patrimoine",
+   "Évolution#des#revenus",
+   "À#traiter",
+   "Actions#rapides"
+  ],
+  "actionsRapides": [
+   "Ajouter#un#bien → #/owner/property/new",
+   "Ajouter#un#locataire → #/manage/leases",
+   "Ajouter#un#acheteur → #/manage/deals",
+   "Ajouter#un#document → #/coffre"
+  ],
+  "tuiles": 6,
+  "menu": [
+   "Tableau#de#bord → #/owner/dashboard",
+   "Mes#biens → #/owner/properties",
+   "Visites# → #/owner/visits",
+   "Locataires → #/manage/leases",
+   "Loyers → #/manage/rents",
+   "Ventes → #/manage/deals",
+   "Travaux → #/manage/tickets",
+   "Finances → #/manage/finance",
+   "Documents → #/coffre",
+   "Messages# → #/owner/messages",
+   "Paramètres → #/owner/profile"
+  ],
+  "barre": [
+   "Accueil → #/owner/dashboard",
+   "Mes#biens → #/owner/properties",
+   "Publier → #/owner/property/new",
+   "Gestion → #/manage",
+   "Messages → #/owner/messages"
+  ],
+  "animations": true
+ },
+ "gestionnaire": {
+  "page": "#/owner/dashboard",
+  "sections": [
+   "Votre#portefeuille#en#un#coup#d'œil",
+   "Revenus#locatifs",
+   "Mon#patrimoine",
+   "Évolution#des#revenus",
+   "À#traiter",
+   "Actions#rapides"
+  ],
+  "actionsRapides": [
+   "Ajouter#un#bien → #/owner/property/new",
+   "Ajouter#un#locataire → #/manage/leases",
+   "Ajouter#un#acheteur → #/manage/deals",
+   "Ajouter#un#document → #/coffre"
+  ],
+  "tuiles": 6,
+  "menu": [
+   "Tableau#de#bord → #/owner/dashboard",
+   "Mes#biens → #/owner/properties",
+   "Visites# → #/owner/visits",
+   "Locataires → #/manage/leases",
+   "Loyers → #/manage/rents",
+   "Travaux → #/manage/tickets",
+   "Documents → #/coffre",
+   "Messages# → #/owner/messages",
+   "Gestion → #/manage",
+   "Mon#profil → #/agent/profil"
+  ],
+  "barre": [
+   "Accueil → #/owner/dashboard",
+   "Mes#biens → #/owner/properties",
+   "Publier → #/owner/property/new",
+   "Loyers → #/manage/rents",
+   "Messages → #/owner/messages"
+  ],
+  "animations": true
+ },
+ "agence": {
+  "page": "#/agency/dashboard",
+  "sections": [
+   "Votre#portefeuille#et#vos#mandats",
+   "Commissions#de#l'agence",
+   "Mon#portefeuille",
+   "Évolution#des#encaissements",
+   "À#traiter",
+   "Actions#rapides"
+  ],
+  "actionsRapides": [
+   "Ajouter#un#propriétaire → #/manage/owners",
+   "Ajouter#un#bien → #/owner/property/new",
+   "Encaisser#un#loyer → #/manage/rents",
+   "Créer#une#facture → #/manage/docs"
+  ],
+  "tuiles": 8,
+  "menu": [
+   "Tableau#de#bord → #/agency/dashboard",
+   "Propriétaires → #/manage/owners",
+   "Mandats → #/manage/mandates",
+   "Biens → #/agency/properties",
+   "Clients → #/agency/clients",
+   "Unités → #/manage/units",
+   "Locataires → #/manage/tenants",
+   "Loyers → #/manage/rents",
+   "Ventes → #/manage/deals",
+   "Devis#&#Factures → #/manage/docs",
+   "Reversements → #/manage/transfers",
+   "Honoraires → #/agency/commissions",
+   "Documents → #/coffre",
+   "Paramètres → #/agency/settings"
+  ],
+  "barre": [
+   "Accueil → #/agency/dashboard",
+   "Biens → #/agency/properties",
+   "Publier → #/owner/property/new",
+   "Gestion → #/manage",
+   "Messages → #/agency/messages"
+  ],
+  "animations": true
+ },
+ "agent": {
+  "page": "#/agency/dashboard",
+  "sections": [
+   "Votre#journée",
+   "Ma#commission",
+   "Prochaines#visites",
+   "À#traiter",
+   "Actions#rapides"
+  ],
+  "actionsRapides": [
+   "Ajouter#un#bien → #/owner/property/new",
+   "Nouvelle#demande#client → #/agency/clients",
+   "Planifier#une#visite → #/agency/visits",
+   "Mes#commissions → #/agent/commissions"
+  ],
+  "tuiles": 7,
+  "menu": [
+   "Tableau#de#bord → #/agency/dashboard",
+   "Mes#biens → #/agency/properties",
+   "Mes#visites → #/agency/visits",
+   "Mes#clients → #/agency/clients",
+   "Messages# → #/agency/messages",
+   "Mes#commissions → #/agent/commissions",
+   "Mon#profil → #/agent/profil"
+  ],
+  "barre": [
+   "Accueil → #/agency/dashboard",
+   "Mes#biens → #/agency/properties",
+   "Publier → #/owner/property/new",
+   "Visites → #/agency/visits",
+   "Messages → #/agency/messages"
+  ],
+  "animations": true
+ },
+ "client": {
+  "page": "#/client/dashboard",
+  "sections": [
+   "Trouvez#votre#prochain#bien#immobilier#a",
+   "Mon#espace",
+   "Biens#immobiliers#en#vedette",
+   "Maison#à#Kanel",
+   "Appartement#F#à#Sacré-Cœur#",
+   "Terrain#m²#à#Mbour",
+   "Bureau#équipé#au#Plateau",
+   "Villa#pieds#dans#l'eau#à#Somone",
+   "Studio#meublé#à#Mermoz",
+   "Terrain#agricole#à#Thiès",
+   "Bureau#à#Kaffrine",
+   "Case#de#vacances#à#Cap#Skirring",
+   "Bureaux#&#commerces#près#de#vous"
+  ],
+  "actionsRapides": [],
+  "tuiles": 4,
+  "menu": [
+   "Tableau#de#bord → #/client/dashboard",
+   "Rechercher → #/search",
+   "Mes#favoris# → #/client/favorites",
+   "Mes#visites → #/client/visits",
+   "Messages# → #/client/messages",
+   "Mes#alertes → #/client/alerts",
+   "Documents → #/coffre",
+   "Mon#profil → #/client/profile"
+  ],
+  "barre": [
+   "Accueil → #/client/dashboard",
+   "Favoris → #/client/favorites",
+   "Rechercher → #/search",
+   "Visites → #/client/visits",
+   "Messages → #/client/messages"
+  ],
+  "animations": true
+ },
+ "locataire": {
+  "page": "#/client/dashboard",
+  "sections": [
+   "Trouvez#votre#prochain#bien#immobilier#a",
+   "Mon#espace",
+   "Biens#immobiliers#en#vedette",
+   "Maison#à#Kanel",
+   "Appartement#F#à#Sacré-Cœur#",
+   "Terrain#m²#à#Mbour",
+   "Bureau#équipé#au#Plateau",
+   "Villa#pieds#dans#l'eau#à#Somone",
+   "Studio#meublé#à#Mermoz",
+   "Terrain#agricole#à#Thiès",
+   "Bureau#à#Kaffrine",
+   "Case#de#vacances#à#Cap#Skirring",
+   "Bureaux#&#commerces#près#de#vous"
+  ],
+  "actionsRapides": [],
+  "tuiles": 4,
+  "menu": [
+   "Tableau#de#bord → #/client/dashboard",
+   "Mon#logement → #/tenant/home",
+   "Mon#loyer → #/tenant/rents",
+   "Mes#quittances → #/tenant/quittances",
+   "Maintenance → #/tenant/tickets",
+   "Rechercher → #/search",
+   "Mes#favoris# → #/client/favorites",
+   "Mes#visites# → #/client/visits",
+   "Messages# → #/client/messages",
+   "Mes#alertes# → #/client/alerts",
+   "Documents → #/coffre",
+   "Mon#profil → #/client/profile"
+  ],
+  "barre": [
+   "Logement → #/tenant/home",
+   "Mon#loyer → #/tenant/rents",
+   "Signaler → #/tenant/tickets",
+   "Messages# → #/client/messages",
+   "Documents → #/coffre"
+  ],
+  "animations": true
+ },
+ "mandant": {
+  "page": "#/owner/dashboard",
+  "sections": [
+   "Votre#portefeuille#en#un#coup#d'œil",
+   "Revenus#de#vos#biens",
+   "Mes#biens#confiés",
+   "Net#des#derniers#mois",
+   "À#suivre",
+   "Actions#rapides"
+  ],
+  "actionsRapides": [
+   "Mes#relevés → #/mandant/releves",
+   "Mes#biens#confiés → #/owner/properties",
+   "Mes#documents → #/coffre",
+   "Écrire#à#mon#agence → #/owner/messages"
+  ],
+  "tuiles": 8,
+  "menu": [
+   "Tableau#de#bord → #/owner/dashboard",
+   "Mes#biens#confiés → #/owner/properties",
+   "Mes#relevés → #/mandant/releves",
+   "Documents → #/coffre",
+   "Mon#profil → #/owner/profile"
+  ],
+  "barre": [
+   "Accueil → #/owner/dashboard",
+   "Biens#confiés → #/owner/properties",
+   "Relevés → #/mandant/releves",
+   "Documents → #/coffre",
+   "Messages → #/owner/messages"
+  ],
+  "animations": true
+ }
+}

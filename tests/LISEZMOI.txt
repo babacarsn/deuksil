@@ -1,10 +1,27 @@
-Tests automatisés (Node + Playwright, Chromium) :
+Tests navigateur (Node + Playwright, Chromium) — base de TEST uniquement
+=======================================================================
+
+Prérequis : une base de test préparée (README_SUPABASE.md §14), l'application
+servie sur APP_URL (défaut http://127.0.0.1:54321/), le fichier
+supabase/tests-local/comptes-test.json produit par l'import du jeu de test.
+
   npm install playwright
-  node tests/audit-proprietaire.js        24 règles métier (biens, paiements, baux, accès)
-  node tests/audit-proprietaire.js P1,V7  seulement certains cas
-  node tests/regression.js                parcours normaux par l'interface + tour des pages par rôle
-  node tests/recherche.js                 recherche en temps réel (Gestion, listes, biens) + débordements mobile
-  node tests/tableaux.js                  tableau de bord de chaque rôle : affichage et débordement mobile
-  node tests/suggestions.js               la liste de suggestions de l'accueil passe au-dessus des blocs
-  node tests/defilement.js                défilement des biens en vedette (automatique et flèches)
-Le cas S4 échoue par construction : il rappelle qu'aucun serveur ne contrôle les accès.
+  export MOT_DE_PASSE_TEST=...          # mot de passe commun des comptes de test
+
+Suites maintenues (vérifiées le 22/10/2026 contre la réplique locale) :
+  node tests/acces-comptes.js     ouverture d'accès (locataire, équipe, mandant),
+                                  rattachement à un compte existant, 1re connexion
+  node tests/sonde-pages.js       9 profils × toutes les pages de menu :
+                                  erreurs JavaScript, requêtes refusées, pages vides
+  node tests/ecritures-auto.js    écritures déclenchées sans action de l'utilisateur
+  node tests/xss-sonde.js         XSS stockée (MODIFIE la base : la reconstruire ensuite)
+
+Projet Supabase hébergé : les e-mails ne peuvent pas être lus par le test ;
+suivre à la place la fiche RECETTE_MANUELLE_FORMULAIRES.md (36 points).
+
+Tests de l'API (sans navigateur) : supabase/tests-local/securite-rls.test.js
+
+harnais.js : connexion réelle (Supabase Auth), navigation, attente des écritures.
+
+Les autres scripts de ce dossier datent des versions précédentes ; voir
+tests/ETAT_DES_TESTS.md pour leur état contre la version Supabase.

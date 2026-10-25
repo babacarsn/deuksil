@@ -114,14 +114,3 @@ document.addEventListener('submit', async e => {
   catch { toast('Fichier trop volumineux (4 Mo max) ou illisible.', 'bad'); }
 });
 
-/* Démo : un contrat, un devis et une facture pour que les tiroirs ne soient pas vides */
-function seedV7() {
-  if (localStorage.getItem(DB.K.v7seed)) return;
-  const owner = DB.findItem(DB.K.users, x => x.cni === '1900000000003'), ten = DB.findItem(DB.K.users, x => x.cni === '1900000000013'), l = ten && DB.findItem(DB.K.leases, ten.leaseId); if (!owner || !l) return;
-  localStorage.setItem(DB.K.v7seed, '1');
-  DB.addItem(DB.K.contracts, {ownerId: owner.id, ref: nref('CTR', 'contracts'), type: 'location', party: l.tenant, propertyId: l.propertyId, start: l.start, end: addDays(l.start, 365).slice(0, 10), amount: l.rent, deposit: l.deposit, charges: 0, conditions: '', status: 'actif'});
-  const items = [{label: 'Frais de dossier', qty: 1, price: 50000}];
-  DB.addItem(DB.K.docs, {ownerId: owner.id, type: 'DEV', ref: nref('DEV', 'docs'), client: l.tenant, propertyId: l.propertyId, items, discount: 0, tax: 0, status: 'accepté', due: addDays(now(), 30).slice(0, 10)});
-  DB.addItem(DB.K.docs, {ownerId: owner.id, type: 'FAC', ref: nref('FAC', 'docs'), client: l.tenant, propertyId: l.propertyId, items, discount: 0, tax: 0, status: 'émise', due: addDays(now(), 30).slice(0, 10)});
-}
-etapeAmorcage('coffre de documents', seedV7);

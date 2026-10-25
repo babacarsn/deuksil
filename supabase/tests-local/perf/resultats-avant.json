@@ -1,0 +1,678 @@
+{
+  "etiquette": "avant",
+  "date": "2026-10-22T07:16:57.504Z",
+  "passages": 5,
+  "postgres": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+  "volumes": [
+    {
+      "relname": "rents",
+      "n_live_tup": "144125"
+    },
+    {
+      "relname": "notifications",
+      "n_live_tup": "124226"
+    },
+    {
+      "relname": "conversation_messages",
+      "n_live_tup": "120012"
+    },
+    {
+      "relname": "audit_log",
+      "n_live_tup": "100005"
+    },
+    {
+      "relname": "favorites",
+      "n_live_tup": "50004"
+    },
+    {
+      "relname": "visits",
+      "n_live_tup": "42008"
+    },
+    {
+      "relname": "profiles",
+      "n_live_tup": "34429"
+    },
+    {
+      "relname": "properties",
+      "n_live_tup": "30052"
+    },
+    {
+      "relname": "billing_docs",
+      "n_live_tup": "30005"
+    },
+    {
+      "relname": "billing_payments",
+      "n_live_tup": "23915"
+    },
+    {
+      "relname": "conversations",
+      "n_live_tup": "20002"
+    },
+    {
+      "relname": "documents",
+      "n_live_tup": "20000"
+    },
+    {
+      "relname": "leases",
+      "n_live_tup": "12011"
+    },
+    {
+      "relname": "tickets",
+      "n_live_tup": "10003"
+    },
+    {
+      "relname": "activity_log",
+      "n_live_tup": "9"
+    },
+    {
+      "relname": "lease_messages",
+      "n_live_tup": "6"
+    },
+    {
+      "relname": "contracts",
+      "n_live_tup": "4"
+    },
+    {
+      "relname": "deals",
+      "n_live_tup": "3"
+    },
+    {
+      "relname": "client_requests",
+      "n_live_tup": "3"
+    },
+    {
+      "relname": "owner_records",
+      "n_live_tup": "2"
+    },
+    {
+      "relname": "reports",
+      "n_live_tup": "1"
+    },
+    {
+      "relname": "saved_searches",
+      "n_live_tup": "1"
+    },
+    {
+      "relname": "owner_transfers",
+      "n_live_tup": "1"
+    },
+    {
+      "relname": "fees",
+      "n_live_tup": "0"
+    },
+    {
+      "relname": "agency_link_requests",
+      "n_live_tup": "0"
+    },
+    {
+      "relname": "inspections",
+      "n_live_tup": "0"
+    },
+    {
+      "relname": "units",
+      "n_live_tup": "0"
+    },
+    {
+      "relname": "expenses",
+      "n_live_tup": "0"
+    },
+    {
+      "relname": "contact_messages",
+      "n_live_tup": "0"
+    },
+    {
+      "relname": "providers",
+      "n_live_tup": "0"
+    },
+    {
+      "relname": "mandates",
+      "n_live_tup": "0"
+    },
+    {
+      "relname": "sale_mandates",
+      "n_live_tup": "0"
+    }
+  ],
+  "resultats": [
+    {
+      "role": "anon",
+      "nom": "Catalogue public (annonces publiées)",
+      "sql": "select * from public.properties order by created_at limit 1000",
+      "ecrit": false,
+      "passages": 5,
+      "ms_mediane": 183.697,
+      "ms_min": 162.438,
+      "ms_max": 211.081,
+      "lignes": 1000,
+      "tampons_lus": 73066,
+      "parcours_sequentiels": [
+        "properties (24051 lignes gardées, 6001 écartées)"
+      ],
+      "index": []
+    },
+    {
+      "role": "anon",
+      "nom": "Annuaire public (rpc annuaire)",
+      "sql": "select * from public.annuaire()",
+      "ecrit": false,
+      "passages": 5,
+      "ms_mediane": 1297.13,
+      "ms_min": 1265.818,
+      "ms_max": 1395.376,
+      "lignes": 1809,
+      "tampons_lus": 776,
+      "parcours_sequentiels": [],
+      "index": []
+    },
+    {
+      "role": "proprietaire",
+      "nom": "Propriétaire : annuaire (rpc annuaire)",
+      "sql": "select * from public.annuaire()",
+      "ecrit": false,
+      "passages": 5,
+      "ms_mediane": 21120.535,
+      "ms_min": 20213.958,
+      "ms_max": 21656.947,
+      "lignes": 1809,
+      "tampons_lus": 9196701,
+      "parcours_sequentiels": [],
+      "index": []
+    },
+    {
+      "role": "client",
+      "nom": "Client : annuaire (rpc annuaire)",
+      "sql": "select * from public.annuaire()",
+      "ecrit": false,
+      "passages": 5,
+      "ms_mediane": 20678.214,
+      "ms_min": 20584.793,
+      "ms_max": 20922.323,
+      "lignes": 1810,
+      "tampons_lus": 9196700,
+      "parcours_sequentiels": [],
+      "index": []
+    },
+    {
+      "role": "proprietaire",
+      "nom": "Propriétaire : ses biens",
+      "sql": "select * from public.properties order by created_at limit 1000 offset 0",
+      "ecrit": false,
+      "passages": 5,
+      "ms_mediane": 491.593,
+      "ms_min": 444.313,
+      "ms_max": 551.679,
+      "lignes": 1000,
+      "tampons_lus": 104783,
+      "parcours_sequentiels": [
+        "properties (24051 lignes gardées, 6001 écartées)"
+      ],
+      "index": []
+    },
+    {
+      "role": "proprietaire",
+      "nom": "Propriétaire : ses baux",
+      "sql": "select * from public.leases order by created_at limit 1000 offset 0",
+      "ecrit": false,
+      "passages": 5,
+      "ms_mediane": 280.224,
+      "ms_min": 241.214,
+      "ms_max": 316.174,
+      "lignes": 0,
+      "tampons_lus": 31243,
+      "parcours_sequentiels": [
+        "leases (0 lignes gardées, 12011 écartées)"
+      ],
+      "index": []
+    },
+    {
+      "role": "proprietaire",
+      "nom": "Propriétaire : ses loyers",
+      "sql": "select * from public.rents order by created_at limit 1000 offset 0",
+      "ecrit": false,
+      "passages": 5,
+      "ms_mediane": 263.292,
+      "ms_min": 254.418,
+      "ms_max": 325.714,
+      "lignes": 0,
+      "tampons_lus": 33748,
+      "parcours_sequentiels": [
+        "rents (0 lignes gardées, 144125 écartées)"
+      ],
+      "index": []
+    },
+    {
+      "role": "proprietaire",
+      "nom": "Propriétaire : ses visites",
+      "sql": "select * from public.visits order by created_at limit 1000 offset 0",
+      "ecrit": false,
+      "passages": 5,
+      "ms_mediane": 6.746,
+      "ms_min": 5.059,
+      "ms_max": 9.523,
+      "lignes": 0,
+      "tampons_lus": 744,
+      "parcours_sequentiels": [
+        "visits (0 lignes gardées, 42008 écartées)"
+      ],
+      "index": []
+    },
+    {
+      "role": "proprietaire",
+      "nom": "Propriétaire : ses notifications",
+      "sql": "select * from public.notifications order by created_at limit 1000 offset 0",
+      "ecrit": false,
+      "passages": 5,
+      "ms_mediane": 18.659,
+      "ms_min": 17.626,
+      "ms_max": 27.989,
+      "lignes": 111,
+      "tampons_lus": 2861,
+      "parcours_sequentiels": [
+        "notifications (111 lignes gardées, 199930 écartées)"
+      ],
+      "index": []
+    },
+    {
+      "role": "proprietaire",
+      "nom": "Propriétaire : conversations",
+      "sql": "select * from public.conversations order by created_at limit 1000 offset 0",
+      "ecrit": false,
+      "passages": 5,
+      "ms_mediane": 5.848,
+      "ms_min": 5.102,
+      "ms_max": 8.31,
+      "lignes": 0,
+      "tampons_lus": 352,
+      "parcours_sequentiels": [
+        "conversations (0 lignes gardées, 20002 écartées)"
+      ],
+      "index": []
+    },
+    {
+      "role": "proprietaire",
+      "nom": "Propriétaire : messages des conversations",
+      "sql": "select * from public.conversation_messages order by created_at limit 1000 offset 0",
+      "ecrit": false,
+      "passages": 5,
+      "ms_mediane": 179.533,
+      "ms_min": 170.858,
+      "ms_max": 193.304,
+      "lignes": 0,
+      "tampons_lus": 2067,
+      "parcours_sequentiels": [
+        "conversation_messages (0 lignes gardées, 120012 écartées)",
+        "conversations (0 lignes gardées, 20002 écartées)"
+      ],
+      "index": []
+    },
+    {
+      "role": "proprietaire",
+      "nom": "Propriétaire : profils visibles",
+      "sql": "select * from public.profiles order by created_at limit 1000 offset 0",
+      "ecrit": false,
+      "passages": 5,
+      "ms_mediane": 10.146,
+      "ms_min": 8.73,
+      "ms_max": 17.024,
+      "lignes": 1,
+      "tampons_lus": 790,
+      "parcours_sequentiels": [
+        "profiles (1 lignes gardées, 34428 écartées)"
+      ],
+      "index": []
+    },
+    {
+      "role": "agence",
+      "nom": "Agence : factures",
+      "sql": "select * from public.billing_docs order by created_at limit 1000 offset 0",
+      "ecrit": false,
+      "passages": 5,
+      "ms_mediane": 248.421,
+      "ms_min": 244.94,
+      "ms_max": 277.316,
+      "lignes": 16,
+      "tampons_lus": 31834,
+      "parcours_sequentiels": [
+        "billing_docs (16 lignes gardées, 29989 écartées)"
+      ],
+      "index": []
+    },
+    {
+      "role": "agence",
+      "nom": "Agence : encaissements",
+      "sql": "select * from public.billing_payments order by created_at limit 1000 offset 0",
+      "ecrit": false,
+      "passages": 5,
+      "ms_mediane": 5.423,
+      "ms_min": 3.834,
+      "ms_max": 6.305,
+      "lignes": 14,
+      "tampons_lus": 470,
+      "parcours_sequentiels": [
+        "billing_payments (14 lignes gardées, 23901 écartées)"
+      ],
+      "index": []
+    },
+    {
+      "role": "agence",
+      "nom": "Agence : documents",
+      "sql": "select * from public.documents order by created_at limit 1000 offset 0",
+      "ecrit": false,
+      "passages": 5,
+      "ms_mediane": 2.902,
+      "ms_min": 2.786,
+      "ms_max": 3.243,
+      "lignes": 11,
+      "tampons_lus": 403,
+      "parcours_sequentiels": [
+        "documents (11 lignes gardées, 19989 écartées)"
+      ],
+      "index": []
+    },
+    {
+      "role": "agence",
+      "nom": "Agence : tickets",
+      "sql": "select * from public.tickets order by created_at limit 1000 offset 0",
+      "ecrit": false,
+      "passages": 5,
+      "ms_mediane": 2.682,
+      "ms_min": 2.5,
+      "ms_max": 2.811,
+      "lignes": 64,
+      "tampons_lus": 189,
+      "parcours_sequentiels": [
+        "tickets (64 lignes gardées, 9939 écartées)"
+      ],
+      "index": []
+    },
+    {
+      "role": "agence",
+      "nom": "Agence : journal d'audit",
+      "sql": "select * from public.audit_log order by created_at limit 1000 offset 0",
+      "ecrit": false,
+      "passages": 5,
+      "ms_mediane": 11.585,
+      "ms_min": 9.448,
+      "ms_max": 15.539,
+      "lignes": 55,
+      "tampons_lus": 1439,
+      "parcours_sequentiels": [
+        "audit_log (55 lignes gardées, 99950 écartées)"
+      ],
+      "index": []
+    },
+    {
+      "role": "agent",
+      "nom": "Agent : biens de l'agence",
+      "sql": "select * from public.properties order by created_at limit 1000 offset 0",
+      "ecrit": false,
+      "passages": 5,
+      "ms_mediane": 516.702,
+      "ms_min": 482.375,
+      "ms_max": 535.053,
+      "lignes": 1000,
+      "tampons_lus": 104789,
+      "parcours_sequentiels": [
+        "properties (24151 lignes gardées, 5901 écartées)"
+      ],
+      "index": []
+    },
+    {
+      "role": "agent",
+      "nom": "Agent : visites de l'agence",
+      "sql": "select * from public.visits order by created_at limit 1000 offset 0",
+      "ecrit": false,
+      "passages": 5,
+      "ms_mediane": 5.677,
+      "ms_min": 5.16,
+      "ms_max": 6.424,
+      "lignes": 200,
+      "tampons_lus": 750,
+      "parcours_sequentiels": [
+        "visits (200 lignes gardées, 41808 écartées)"
+      ],
+      "index": []
+    },
+    {
+      "role": "locataire",
+      "nom": "Locataire : ses loyers",
+      "sql": "select * from public.rents order by created_at limit 1000 offset 0",
+      "ecrit": false,
+      "passages": 5,
+      "ms_mediane": 272.766,
+      "ms_min": 261.629,
+      "ms_max": 320.199,
+      "lignes": 12,
+      "tampons_lus": 33748,
+      "parcours_sequentiels": [
+        "rents (12 lignes gardées, 144113 écartées)"
+      ],
+      "index": []
+    },
+    {
+      "role": "locataire",
+      "nom": "Locataire : son bail",
+      "sql": "select * from public.leases order by created_at limit 1000 offset 0",
+      "ecrit": false,
+      "passages": 5,
+      "ms_mediane": 254.233,
+      "ms_min": 243.787,
+      "ms_max": 358.341,
+      "lignes": 1,
+      "tampons_lus": 31243,
+      "parcours_sequentiels": [
+        "leases (1 lignes gardées, 12010 écartées)"
+      ],
+      "index": []
+    },
+    {
+      "role": "locataire",
+      "nom": "Locataire : tickets",
+      "sql": "select * from public.tickets order by created_at limit 1000 offset 0",
+      "ecrit": false,
+      "passages": 5,
+      "ms_mediane": 2.772,
+      "ms_min": 2.54,
+      "ms_max": 3.011,
+      "lignes": 1,
+      "tampons_lus": 189,
+      "parcours_sequentiels": [
+        "tickets (1 lignes gardées, 10002 écartées)"
+      ],
+      "index": []
+    },
+    {
+      "role": "client",
+      "nom": "Client : ses visites",
+      "sql": "select * from public.visits order by created_at limit 1000 offset 0",
+      "ecrit": false,
+      "passages": 5,
+      "ms_mediane": 5.286,
+      "ms_min": 4.941,
+      "ms_max": 10.124,
+      "lignes": 3,
+      "tampons_lus": 744,
+      "parcours_sequentiels": [
+        "visits (3 lignes gardées, 42005 écartées)"
+      ],
+      "index": []
+    },
+    {
+      "role": "client",
+      "nom": "Client : ses favoris",
+      "sql": "select * from public.favorites order by created_at limit 1000 offset 0",
+      "ecrit": false,
+      "passages": 5,
+      "ms_mediane": 0.162,
+      "ms_min": 0.129,
+      "ms_max": 0.177,
+      "lignes": 3,
+      "tampons_lus": 6,
+      "parcours_sequentiels": [],
+      "index": [
+        "favorites_user_id_property_id_key"
+      ]
+    },
+    {
+      "role": "client",
+      "nom": "Client : ses notifications",
+      "sql": "select * from public.notifications order by created_at limit 1000 offset 0",
+      "ecrit": false,
+      "passages": 5,
+      "ms_mediane": 36.905,
+      "ms_min": 22.231,
+      "ms_max": 37.498,
+      "lignes": 10,
+      "tampons_lus": 2861,
+      "parcours_sequentiels": [
+        "notifications (10 lignes gardées, 200031 écartées)"
+      ],
+      "index": []
+    },
+    {
+      "role": "client",
+      "nom": "Client : conversations",
+      "sql": "select * from public.conversations order by created_at limit 1000 offset 0",
+      "ecrit": false,
+      "passages": 5,
+      "ms_mediane": 5.205,
+      "ms_min": 5.125,
+      "ms_max": 5.669,
+      "lignes": 1,
+      "tampons_lus": 352,
+      "parcours_sequentiels": [
+        "conversations (1 lignes gardées, 20001 écartées)"
+      ],
+      "index": []
+    },
+    {
+      "role": "client",
+      "nom": "Client : messages",
+      "sql": "select * from public.conversation_messages order by created_at limit 1000 offset 0",
+      "ecrit": false,
+      "passages": 5,
+      "ms_mediane": 182.987,
+      "ms_min": 170.816,
+      "ms_max": 201.984,
+      "lignes": 6,
+      "tampons_lus": 2067,
+      "parcours_sequentiels": [
+        "conversation_messages (6 lignes gardées, 120006 écartées)",
+        "conversations (1 lignes gardées, 20001 écartées)"
+      ],
+      "index": []
+    },
+    {
+      "role": "client",
+      "nom": "Client : notifier un propriétaire contacté",
+      "sql": "select public.notifier('560cdcf8-228a-457e-9c20-ceca7174bf1f', 'Test de mesure', '#/')",
+      "ecrit": true,
+      "passages": 5,
+      "ms_mediane": 31.373,
+      "ms_min": 30.579,
+      "ms_max": 47.919,
+      "lignes": 1,
+      "tampons_lus": 3639,
+      "parcours_sequentiels": [],
+      "index": []
+    },
+    {
+      "role": "admin",
+      "nom": "Administrateur : biens (tous)",
+      "sql": "select * from public.properties order by created_at limit 1000 offset 0",
+      "ecrit": false,
+      "passages": 5,
+      "ms_mediane": 490.747,
+      "ms_min": 457.148,
+      "ms_max": 614.512,
+      "lignes": 1000,
+      "tampons_lus": 104783,
+      "parcours_sequentiels": [
+        "properties (30052 lignes gardées, 0 écartées)"
+      ],
+      "index": []
+    },
+    {
+      "role": "admin",
+      "nom": "Administrateur : loyers (tous)",
+      "sql": "select * from public.rents order by created_at limit 1000 offset 0",
+      "ecrit": false,
+      "passages": 5,
+      "ms_mediane": 326.466,
+      "ms_min": 306.279,
+      "ms_max": 395.664,
+      "lignes": 1000,
+      "tampons_lus": 33748,
+      "parcours_sequentiels": [
+        "rents (144125 lignes gardées, 0 écartées)"
+      ],
+      "index": []
+    },
+    {
+      "role": "admin",
+      "nom": "Administrateur : messages (tous)",
+      "sql": "select * from public.conversation_messages order by created_at limit 1000 offset 0",
+      "ecrit": false,
+      "passages": 5,
+      "ms_mediane": 276.581,
+      "ms_min": 243.671,
+      "ms_max": 306.383,
+      "lignes": 1000,
+      "tampons_lus": 2067,
+      "parcours_sequentiels": [
+        "conversation_messages (120012 lignes gardées, 0 écartées)",
+        "conversations (20002 lignes gardées, 0 écartées)"
+      ],
+      "index": []
+    },
+    {
+      "role": "serveur",
+      "nom": "Rappels quotidiens (app.generer_rappels)",
+      "sql": "select * from app.generer_rappels()",
+      "ecrit": true,
+      "passages": 2,
+      "ms_mediane": 77849.618,
+      "ms_min": 74285.488,
+      "ms_max": 77849.618,
+      "lignes": 7,
+      "tampons_lus": 10278852,
+      "parcours_sequentiels": [],
+      "index": []
+    },
+    {
+      "role": "proprietaire",
+      "nom": "Suppression d'un bien (cascade)",
+      "sql": "delete from public.properties where id = (select id from public.properties where owner_id = '5c5a0d33-63a4-75f8-35c1-987578340d5d' and not exists (select 1 from public.leases l where l.property_id = properties.id) limit 1)",
+      "ecrit": true,
+      "passages": 5,
+      "ms_mediane": 6.357,
+      "ms_min": 6.13,
+      "ms_max": 7.208,
+      "lignes": 0,
+      "tampons_lus": 913,
+      "parcours_sequentiels": [
+        "properties (0 lignes gardées, 30052 écartées)",
+        "leases (0 lignes gardées, 0 écartées)"
+      ],
+      "index": [
+        "properties_pkey"
+      ]
+    },
+    {
+      "role": "serveur",
+      "nom": "Suppression d'un compte client (cascade)",
+      "sql": "delete from auth.users where id = 'b7f2ffea-42d4-56ff-c2b0-043b9659e5bf'",
+      "ecrit": true,
+      "passages": 5,
+      "ms_mediane": 181.257,
+      "ms_min": 173.112,
+      "ms_max": 183.956,
+      "lignes": 0,
+      "tampons_lus": 5,
+      "parcours_sequentiels": [],
+      "index": [
+        "users_pkey"
+      ]
+    }
+  ]
+}

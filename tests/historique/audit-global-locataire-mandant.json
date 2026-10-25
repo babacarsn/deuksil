@@ -1,0 +1,25 @@
+{
+ "out": [
+  {
+   "profil": "mandant",
+   "largeur": 1280,
+   "page": "#/owner/property/new",
+   "titre": "Mon espace · Espace Propriétaire | DEUKSIL",
+   "pb": [
+    "0 H1"
+   ]
+  }
+ ],
+ "icones": {
+  "<pathd=\"M2112a88001-88H7l-43v-4.6A880112112z\"></path>": [
+   "locataire #/client/dashboard",
+   "locataire #/tenant/home",
+   "locataire #/tenant/rents",
+   "locataire #/tenant/tickets"
+  ],
+  "aucune": [
+   "locataire #/tenant/home",
+   "locataire #/tenant/rents"
+  ]
+ }
+}

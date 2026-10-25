@@ -9,33 +9,9 @@
    son logement, de ses loyers, de ses quittances et du signalement de
    pannes. Le bail porté par son compte sert de marqueur interne ; pour
    l'utilisateur, il n'y a qu'un seul type « Client ».
-   Les espaces investisseur et promoteur sont retirés.
    ========================================================================== */
 
-/* --- 1. Retrait des espaces investisseur et promoteur ------------------- */
-const ROLES_RETIRES = ['investor', 'promoter'];
-
-(function retirerRoles() {
-  /* les écrans */
-  for (let i = routes.length - 1; i >= 0; i--) {
-    if (/\\\/(invest|promo)\\\//.test(routes[i].re.source)) routes.splice(i, 1);
-  }
-  /* les menus */
-  ROLES_RETIRES.forEach(r => { delete MENUS_RAW[r]; });
-  /* les comptes de démonstration */
-  try {
-    DB.filterItems(DB.K.users, u => ROLES_RETIRES.includes(u.role))
-      .forEach(u => DB.deleteItem(DB.K.users, u.id));
-  } catch (e) {}
-})();
-
-/* Le jeu de démonstration les recrée à chaque amorçage : on nettoie après. */
-etapeAmorcage('retrait des rôles supprimés', () => {
-  DB.filterItems(DB.K.users, u => ROLES_RETIRES.includes(u.role))
-    .forEach(u => DB.deleteItem(DB.K.users, u.id));
-}, true);
-
-/* --- 2. Un client qui loue reste un client ------------------------------ */
+/* --- 1. Un client qui loue reste un client ------------------------------ */
 /* Le compte porteur d'un bail passe toutes les portes de l'espace client :
    il cherche, met en favori, demande des visites, écrit aux propriétaires. */
 const _guardR = Auth.guard;
@@ -65,14 +41,3 @@ Auth.home = function (u) {
   MENUS_RAW.tenant = [base[0], ...bail, ...base.slice(1).filter(e => !deja.has(e[0]))].filter(Boolean);
 })();
 
-/* --- 3. Comptes de démonstration : quatre portes d'entrée --------------- */
-if (typeof DEMO_ACCOUNTS !== 'undefined') {
-  DEMO_ACCOUNTS.length = 0;
-  DEMO_ACCOUNTS.push(
-    ['Client avec un bail en cours', '1900000000002', 'demo123'],
-    ['Client qui cherche un bien', '1900000000006', 'demo123'],
-    ['Propriétaire', '1900000000003', 'demo123'],
-    ['Agence', '1900000000004', 'demo123'],
-    ['Agent d\'agence', '1900000000012', 'demo123'],
-    ['Administration', '1900000000001', 'admin123']);
-}

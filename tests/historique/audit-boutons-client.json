@@ -1,0 +1,32 @@
+[
+ {
+  "page": "#/client/dashboard",
+  "bouton": "Biens précédents",
+  "action": "",
+  "souci": "aucun effet visible"
+ },
+ {
+  "page": "#/client/dashboard",
+  "bouton": "Biens suivants",
+  "action": "",
+  "souci": "aucun effet visible"
+ },
+ {
+  "page": "#/search",
+  "bouton": "Toutes Dakar Diourbel Fatick Kaffrine Kaolack Kédo",
+  "action": "search-region-change",
+  "souci": "aucun effet visible"
+ },
+ {
+  "page": "#/search",
+  "bouton": "Toutes",
+  "action": "search-city-change",
+  "souci": "aucun effet visible"
+ },
+ {
+  "page": "#/search",
+  "bouton": "Plus récents Prix croissant Prix décroissant Les p",
+  "action": "sort-change",
+  "souci": "aucun effet visible"
+ }
+]

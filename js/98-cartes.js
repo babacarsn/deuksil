@@ -12,7 +12,7 @@ if (typeof ICONS !== 'undefined') {
 }
 if (typeof ICONS !== 'undefined' && !ICONS.surface) ICONS.surface = '<rect x="3.5" y="3.5" width="17" height="17" rx="1.5"/><path d="M7.5 16.5l9-9"/>';
 const OPERATION_CARTE = {location: ['À louer', 'loc'], vente: ['À vendre', 'vente'], terrain: ['À vendre', 'vente']};
-const nbPhotos = p => (p.photos && p.photos.length) || (p.type ? demoPhotos(p).length : 1);
+const nbPhotos = p => (p.photos && p.photos.length) || 1;
 function foncierCourt(p) {
   const s = (p.foncier && p.foncier.statut) || p.statutFoncier || '';
   if (!s) return 'Terrain nu';
@@ -38,7 +38,7 @@ function caracteristiques(p) {
 }
 propertyCard = function (p, favIds = []) {
   const [op, ton] = OPERATION_CARTE[p.transaction] || ['', ''];
-  const own = p.photos && p.photos.length ? p.photos : (p.type ? demoPhotos(p) : null);
+  const own = p.photos && p.photos.length ? p.photos : null;
   const src = own && own[0];
   const fav = (favIds || []).includes(p.id);
   return `<article class="prop carte-bien">

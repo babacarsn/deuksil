@@ -44,19 +44,8 @@ route(/^\/agency\/dashboard$/, () => {
     </div>`);
 });
 
-route(/^\/agency\/agents$/, () => {
-  const u = Auth.guard('agency'); if (!u) return false;
-  const agents = DB.filterItems(DB.K.agents, a => a.agencyId === u.id);
-  return shellApp(u, page('Agents', `${agents.length} agent${agents.length > 1 ? 's' : ''} dans votre équipe`,
-    `<button class="btn" data-action="add-agent">${icon('plus', 16)} Ajouter un agent</button>`) +
-    (agents.length ? `<div class="table-wrap"><table><thead><tr><th>Agent</th><th>Téléphone</th><th>CNI</th><th>Rôle</th><th>Statut</th><th>Actions</th></tr></thead><tbody>
-      ${agents.map(a => `<tr><td><div class="row">${avatarHtml(a, 36)}<b class="small">${esc(a.firstName)} ${esc(a.lastName)}</b></div></td>
-        <td class="small">${esc(a.phone)}</td><td class="small">${esc(a.cni)}</td><td class="small">${esc(a.role)}</td>
-        <td>${badge(a.status, a.status === 'actif' ? 'ok' : a.status === 'suspendu' ? 'bad' : '')}</td>
-        <td><div class="row" style="gap:6px"><button class="btn ghost sm" data-action="agent-toggle" data-id="${a.id}">${a.status === 'actif' ? 'Désactiver' : 'Activer'}</button>
-        <button class="btn ghost sm" data-action="agent-del" data-id="${a.id}">Supprimer</button></div></td></tr>`).join('')}</tbody></table></div>`
-      : `<div class="empty"><b>Aucun agent</b><p class="small">Ajoutez vos collaborateurs pour leur confier des mandats.</p></div>`));
-});
+/* « Équipe » : page définie par 90-agence-metier (membres réels de l'agence). */
+route(/^\/agency\/agents$/, () => { go('#/agency/dashboard'); return false; });
 
 route(/^\/agency\/clients$/, () => {
   const u = Auth.guard('agency'); if (!u) return false;
@@ -107,15 +96,5 @@ route(/^\/agency\/settings$/, () => {
     </div>`);
 });
 
-route(/^\/agency\/commissions$/, () => {
-  const u = Auth.guard('agency'); if (!u) return false;
-  const closed = myProps(u).filter(p => ['loue', 'vendu'].includes(p.status));
-  const rows = closed.map(p => ({p, rate: p.status === 'vendu' ? 0.03 : 1, amount: p.status === 'vendu' ? p.price * 0.03 : p.price}));
-  const total = rows.reduce((s, r) => s + r.amount, 0);
-  return shellApp(u, page('Commissions', 'Simulation : 3 % sur les ventes, un mois de loyer sur les locations.') + `
-    <div class="kpis">${kpi(closed.length, 'Transactions conclues')}${kpi(money(total), 'Commissions estimées', 'brand')}</div>
-    <div style="margin-top:18px">${rows.length ? `<div class="table-wrap"><table><thead><tr><th>Bien</th><th>Type</th><th>Montant du bien</th><th>Commission</th></tr></thead><tbody>
-      ${rows.map(r => `<tr><td><b class="small">${esc(r.p.title)}</b></td><td>${badge(STATUS_LABEL[r.p.status], STATUS_TONE[r.p.status])}</td>
-        <td>${money(r.p.price)}</td><td><b>${money(Math.round(r.amount))}</b></td></tr>`).join('')}</tbody></table></div>`
-      : `<div class="empty"><b>Aucune transaction conclue</b><p class="small">Passez un bien en « Loué » ou « Vendu » pour voir la commission estimée.</p></div>`}</div>`);
-});
+/* « Honoraires & cautions » : page définie par 90-agence-metier (honoraires réels, table fees). */
+route(/^\/agency\/commissions$/, () => { go('#/agency/dashboard'); return false; });

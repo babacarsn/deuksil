@@ -1,0 +1,6 @@
+{
+  "name": "deuksil-sauvegarde",
+  "private": true,
+  "description": "Sauvegarde et restauration DEUKSIL (base + fichiers Supabase)",
+  "dependencies": { "@supabase/supabase-js": "2.45.4" }
+}

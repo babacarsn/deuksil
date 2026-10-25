@@ -9,24 +9,7 @@
       client qui avait visité.
    ========================================================================== */
 
-/* --- 1. Le locataire est accueilli dans son espace ---------------------- */
-const _compteBail = compteDuBail;
-compteDuBail = function (bail) {
-  const u = _compteBail(bail);
-  if (!u) return u;
-  try {
-    const prop = DB.findItem(DB.K.users, bail.ownerId);
-    const bien = (gProp(bail.propertyId) || {}).title || 'votre logement';
-    notify(u.id, `Bienvenue : votre espace locataire pour « ${bien} » est ouvert.`, '#/tenant/home');
-    /* Un premier mot du propriétaire, pour que le fil ne soit pas vide. */
-    if (!DB.findItem(DB.K.tmsgs, m => m.leaseId === bail.id)) {
-      DB.addItem(DB.K.tmsgs, {leaseId: bail.id, from: 'owner', read: false,
-        text: `Bienvenue ${u.firstName}. Vous trouverez ici vos loyers et vos quittances, et vous pouvez me signaler tout problème dans le logement.`});
-    }
-    if (prop) notify(prop.id, `${u.firstName} ${u.lastName} a reçu son accès locataire.`, '#/manage/tenants');
-  } catch (e) {}
-  return u;
-};
+/* --- 1. L'accueil du locataire : voir accueillirLocataire (55-comptes). --- */
 
 /* --- 2. Relance d'un loyer : dans l'application, et datée --------------- */
 function poserRelances() {

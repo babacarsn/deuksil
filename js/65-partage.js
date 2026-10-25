@@ -185,7 +185,10 @@ function prevenirDestinataires() {
   const dire = (cle, qui, texte, cat) => {
     if (faits.has(cle)) return;
     faits.add(cle); change = true;
-    notify(qui.id, texte, '#/coffre/' + cat);
+    /* La clé rend l'envoi idempotent côté serveur (une seule notification par
+       document et par destinataire, même depuis un autre appareil) ; la liste
+       gardée dans ce navigateur évite seulement de redemander à chaque affichage. */
+    DB.addItem(DB.K.notifications, {userId: qui.id, text: texte, read: false, link: '#/coffre/' + cat, key: 'partage-' + cle});
   };
   try {
     DB.filterItems(DB.K.docs, d => d.ownerId === u.id).forEach(d => {

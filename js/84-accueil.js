@@ -160,32 +160,13 @@ function hxProfils() {
         <a class="hx-pill hx-pill-navy" href="#/register?role=agency">Créer un compte agence ${icon('arrowRight', 16)}</a></div>
     </article></section>`;
 }
+/* Chiffres clés : totaux réels calculés par la base (public.chiffres_publics),
+   et non comptés dans la partie des données visible par le visiteur. */
 function hxChiffres() {
-  const C = [['home', DB.getData(DB.K.properties).length, 'biens référencés'], ['users', DB.getData(DB.K.users).length, 'comptes actifs'],
-    ['pin', Object.values(LOCATIONS).reduce((s, c) => s + Object.keys(c).length, 0), 'villes couvertes'], ['calendar', DB.getData(DB.K.visits).length, 'visites organisées']];
+  const K = DB.chiffres; if (!K) return '';
+  const C = [['home', K.biens, 'biens en ligne'], ['users', K.comptes, 'comptes actifs'], ['pin', Object.values(LOCATIONS).reduce((n, c) => n + Object.keys(c).length, 0), 'villes couvertes'], ['calendar', K.visites, 'visites organisées']];
   return `<section class="hx-sec hx-stats" aria-label="DEUKSIL en chiffres">${C.map(([ic, n, l]) =>
-    `<div class="hx-stat"><span class="hx-stat-ic">${icon(ic, 26)}</span><span><b>${n.toLocaleString('fr-FR')}</b><span>${l}</span></span></div>`).join('')}</section>`;
-}
-/* Témoignages : ils défilent comme les biens (un à la fois sur téléphone).
-   Ce sont des exemples de démonstration : la section le dit, et ils sont à
-   remplacer par de vrais avis, avec l'accord de leurs auteurs, avant la mise
-   en ligne. */
-const AVIS = [
-  ['Aïcha Diouf', 'Locataire à Sacré-Cœur', 'J\'ai trouvé mon appartement en trois jours. Je voyais tout de suite si le bien était encore disponible, ça m\'a évité des visites pour rien.'],
-  ['Mamadou Fall', 'Propriétaire, Almadies', 'Depuis que je publie sur DEUKSIL, je reçois des demandes de personnes déjà identifiées. Je perds moins de temps qu\'avec les annonces sur les groupes WhatsApp.'],
-  ['Cheikh Gueye', 'Teranga Immobilier, agence', 'La gestion de nos agents et de nos mandats est enfin centralisée. Nos clients voient l\'état réel de chaque bien, ça évite les malentendus.'],
-  ['Fatou Sarr', 'Acheteuse à Ouakam', 'Les prix, les surfaces et les photos sont clairs. J\'ai pu comparer trois terrains avant de demander une seule visite.'],
-  ['Ousmane Diallo', 'Propriétaire, biens confiés à une agence', 'Je vois chaque mois ce qui a été encaissé, la commission et ce qui m\'a été reversé. Je n\'ai plus besoin d\'appeler l\'agence pour savoir.']];
-const ICONS_GUILLEMETS = '<svg class="hx-quote" viewBox="0 0 32 24" aria-hidden="true"><path d="M0 24V14.4C0 6.6 4.4 1.8 12 0l1.6 3.2C9.2 4.6 7 7.4 6.8 11.2H12V24H0Zm18 0V14.4C18 6.6 22.4 1.8 30 0l1.6 3.2c-4.4 1.4-6.6 4.2-6.8 8H30V24H18Z" fill="currentColor"/></svg>';
-function hxAvis() {
-  const init = n => n.split(/\s+/).map(x => x[0]).slice(0, 2).join('').toUpperCase();
-  return `<section class="hx-sec hx-avis" aria-labelledby="hx-avis-t">
-    <p class="hx-kicker hx-kicker-line">Ils utilisent DEUKSIL</p><h2 class="hx-h2" id="hx-avis-t">Ce qu'en disent propriétaires et locataires</h2>
-    <div class="hx-head hx-head-nav"><p class="hx-demo">Exemples de démonstration</p><span class="hx-nav"><button type="button" class="hx-arrow" data-car="prev" aria-label="Avis précédent">${icon('arrowLeft', 17)}</button><button type="button" class="hx-arrow" data-car="next" aria-label="Avis suivant">${icon('arrowRight', 17)}</button></span></div>
-    <div class="hx-car hx-car-avis" role="region" aria-label="Témoignages, défilement automatique" tabindex="0">${AVIS.map(([n, r, q]) => `<figure class="hx-avis-card">
-      ${ICONS_GUILLEMETS}<blockquote>« ${esc(q)} »</blockquote>
-      <figcaption><span class="hx-av" style="background:${avatarColor(n)}">${typeof portraitUrl === 'function' ? `<img src="${portraitUrl({id: 'avis-' + n, firstName: n.split(' ')[0]})}" alt="">` : init(n)}</span><span><b>${esc(n)}</b><span>${esc(r)}</span></span></figcaption></figure>`).join('')}</div>
-  </section>`;
+    `<div class="hx-stat"><span class="hx-stat-ic">${icon(ic, 26)}</span><span><b>${(+n || 0).toLocaleString('fr-FR')}</b><span>${l}</span></span></div>`).join('')}</section>`;
 }
 /* Questions fréquentes : une icône par sujet, réponse dépliable. */
 ICONS.pourcent = '<circle cx="7" cy="7" r="2.5"/><circle cx="17" cy="17" r="2.5"/><path d="M19 5 5 19"/>';
@@ -196,8 +177,7 @@ const FAQ = [
   ['money', 'DEUKSIL est-il payant ?', 'Non : l\'inscription et l\'utilisation sont gratuites, sans abonnement. Chaque profil reste rattaché à un numéro de CNI, ce qui limite les faux comptes.'],
   ['checkCircle', 'Les annonces sont-elles à jour ?', 'Le statut de chaque bien suit ses baux et ses ventes : disponible, en discussion, loué ou vendu. Un bien loué ou vendu disparaît des résultats de recherche.'],
   ['calendar', 'Comment se passe une visite ?', 'Vous proposez une date et une heure depuis la fiche du bien. Le propriétaire accepte, refuse ou propose un autre créneau, et vous recevez une notification.'],
-  ['pourcent', 'DEUKSIL prend-il une commission sur les loyers ?', 'Non. Aucune commission n\'est prélevée sur vos loyers ni sur vos ventes, et aucun paiement ne transite par DEUKSIL.'],
-  ['labo', 'Cette version est-elle la version finale ?', 'Non : il s\'agit d\'une démonstration. Les données sont enregistrées dans votre navigateur et ne sont pas partagées entre appareils.']];
+  ['pourcent', 'DEUKSIL prend-il une commission sur les loyers ?', 'Non. Aucune commission n\'est prélevée sur vos loyers ni sur vos ventes, et aucun paiement ne transite par DEUKSIL.']];
 function hxFaq() {
   return `<section class="hx-sec hx-faq" id="faq" aria-labelledby="hx-faq-t">
     <p class="hx-kicker hx-kicker-line">Questions fréquentes</p><h2 class="hx-h2" id="hx-faq-t">Ce qu'on nous demande le plus</h2>
@@ -285,8 +265,10 @@ document.addEventListener('click', e => {
        les témoignages, la FAQ et le pied de page restent. */
     const t = suite.indexOf('<section class="section"><div class="wrap">\n    <p class="kicker">Ils utilisent DEUKSIL');
     const pied = suite.indexOf('<footer class="site">');
-    if (t > -1 && pied > -1) suite = `<section class="wrap hx-main hx-bas">${hxEtapes()}${hxProfils()}${hxChiffres()}${hxAvis()}${hxFaq()}</section>` + suite.slice(pied);
+    if (t > -1 && pied > -1) suite = `<section class="wrap hx-main hx-bas">${hxEtapes()}${hxProfils()}${hxChiffres()}${hxFaq()}</section>` + suite.slice(pied);
     else if (t > -1) suite = `<section class="wrap hx-main hx-bas">${hxEtapes()}${hxProfils()}${hxChiffres()}</section>` + suite.slice(t);
+    /* Sans bloc de témoignages (retiré : pas d'avis inventés), les sections se placent avant le pied de page. */
+    else if (pied > -1) suite = `<section class="wrap hx-main hx-bas">${hxEtapes()}${hxProfils()}${hxChiffres()}${hxFaq()}</section>` + suite.slice(pied);
     suite = suite.replace(/<footer class="site">[\s\S]*?<\/footer>/, piedDePage());
     const tete = html.slice(0, html.indexOf('<section class="hero2"'));
     return tete + hxHero(u, false) + `<section class="wrap hx-main">${hxCats()}${hxVedette(pubs, favIds)}${hxUne(pubs)}${u ? activityHtml(u) : ''}</section>` + suite;

@@ -1,0 +1,434 @@
+[
+ {
+  "profil": "admin",
+  "page": "#/admin/dashboard",
+  "label": "Annonces à valider",
+  "href": "#/admin/listings?s=attente",
+  "final": "#/admin/listings",
+  "titre": "Modération des annonces",
+  "souci": ""
+ },
+ {
+  "profil": "admin",
+  "page": "#/admin/dashboard",
+  "label": "Utilisateurs",
+  "href": "#/admin/users",
+  "final": "#/admin/users",
+  "titre": "Utilisateurs",
+  "souci": ""
+ },
+ {
+  "profil": "admin",
+  "page": "#/admin/dashboard",
+  "label": "Voir tous les biens",
+  "href": "#/admin/properties",
+  "final": "#/admin/properties",
+  "titre": "Tous les biens",
+  "souci": ""
+ },
+ {
+  "profil": "admin",
+  "page": "#/admin/dashboard",
+  "label": "Utilisateurs 26 6 propriétaires · 2 agences",
+  "href": "#/admin/users",
+  "final": "#/admin/users",
+  "titre": "Utilisateurs",
+  "souci": ""
+ },
+ {
+  "profil": "admin",
+  "page": "#/admin/dashboard",
+  "label": "Annonces publiées 39 sur 52 biens",
+  "href": "#/admin/listings",
+  "final": "#/admin/listings",
+  "titre": "Modération des annonces",
+  "souci": ""
+ },
+ {
+  "profil": "admin",
+  "page": "#/admin/dashboard",
+  "label": "Signalements 1 À examiner",
+  "href": "#/admin/signalements",
+  "final": "#/admin/signalements",
+  "titre": "Signalements",
+  "souci": ""
+ },
+ {
+  "profil": "admin",
+  "page": "#/admin/dashboard",
+  "label": "À valider 0 Rien en attente",
+  "href": "#/admin/listings?s=attente",
+  "final": "#/admin/listings",
+  "titre": "Modération des annonces",
+  "souci": ""
+ },
+ {
+  "profil": "admin",
+  "page": "#/admin/dashboard",
+  "label": "Utilisateurs 26 comptes · 2 suspendus Accéder à la liste",
+  "href": "#/admin/users",
+  "final": "#/admin/users",
+  "titre": "Utilisateurs",
+  "souci": ""
+ },
+ {
+  "profil": "admin",
+  "page": "#/admin/dashboard",
+  "label": "Annonces 39 en ligne · 0 à valider Accéder à la liste",
+  "href": "#/admin/listings",
+  "final": "#/admin/listings",
+  "titre": "Modération des annonces",
+  "souci": ""
+ },
+ {
+  "profil": "admin",
+  "page": "#/admin/dashboard",
+  "label": "Signalements 1 signalement à traiter Accéder à la liste",
+  "href": "#/admin/signalements",
+  "final": "#/admin/signalements",
+  "titre": "Signalements",
+  "souci": ""
+ },
+ {
+  "profil": "admin",
+  "page": "#/admin/dashboard",
+  "label": "Vérifications Niveaux de confiance des comptes et des annonces Accéder à la liste",
+  "href": "#/admin/verifications",
+  "final": "#/admin/verifications",
+  "titre": "Vérifications",
+  "souci": ""
+ },
+ {
+  "profil": "admin",
+  "page": "#/admin/dashboard",
+  "label": "1 signalement à examiner Annonces signalées par les utilisateurs",
+  "href": "#/admin/signalements",
+  "final": "#/admin/signalements",
+  "titre": "Signalements",
+  "souci": ""
+ },
+ {
+  "profil": "admin",
+  "page": "#/admin/dashboard",
+  "label": "2 comptes suspendus Sahel Properties, Moussa Sy",
+  "href": "#/admin/users?f=suspendu",
+  "final": "#/admin/users",
+  "titre": "Utilisateurs",
+  "souci": ""
+ },
+ {
+  "profil": "admin",
+  "page": "#/admin/dashboard",
+  "label": "Valider les annonces",
+  "href": "#/admin/listings?s=attente",
+  "final": "#/admin/listings",
+  "titre": "Modération des annonces",
+  "souci": ""
+ },
+ {
+  "profil": "admin",
+  "page": "#/admin/dashboard",
+  "label": "Signalements",
+  "href": "#/admin/signalements",
+  "final": "#/admin/signalements",
+  "titre": "Signalements",
+  "souci": ""
+ },
+ {
+  "profil": "admin",
+  "page": "#/admin/dashboard",
+  "label": "Paramètres",
+  "href": "#/admin/settings",
+  "final": "#/admin/settings",
+  "titre": "Paramètres",
+  "souci": ""
+ },
+ {
+  "profil": "admin",
+  "page": "#/admin/listings",
+  "label": "Voir",
+  "href": "#/annonce/appartement-lumineux-aux-almadies-0nosfac",
+  "final": "#/annonce/appartement-lumineux-aux-almadies-0nosfac",
+  "titre": "Appartement lumineux aux Almadies",
+  "souci": ""
+ },
+ {
+  "profil": "admin",
+  "page": "#/admin/listings",
+  "label": "Voir",
+  "href": "#/annonce/villa-contemporaine-avec-piscine-0oir8d9",
+  "final": "#/annonce/villa-contemporaine-avec-piscine-0oir8d9",
+  "titre": "Villa contemporaine avec piscine",
+  "souci": ""
+ },
+ {
+  "profil": "admin",
+  "page": "#/admin/listings",
+  "label": "Voir",
+  "href": "#/annonce/studio-meuble-a-mermoz-0o8rmoa",
+  "final": "#/annonce/studio-meuble-a-mermoz-0o8rmoa",
+  "titre": "Studio meublé à Mermoz",
+  "souci": ""
+ },
+ {
+  "profil": "admin",
+  "page": "#/admin/listings",
+  "label": "Voir",
+  "href": "#/annonce/appartement-f3-a-sacre-c-ur-3-0mutm7f",
+  "final": "#/annonce/appartement-f3-a-sacre-c-ur-3-0mutm7f",
+  "titre": "Appartement F3 à Sacré-Cœur 3",
+  "souci": ""
+ },
+ {
+  "profil": "admin",
+  "page": "#/admin/listings",
+  "label": "Voir",
+  "href": "#/annonce/maison-familiale-a-yoff-0mku0ig",
+  "final": "#/annonce/maison-familiale-a-yoff-0mku0ig",
+  "titre": "Maison familiale à Yoff",
+  "souci": ""
+ },
+ {
+  "profil": "admin",
+  "page": "#/admin/listings",
+  "label": "Voir",
+  "href": "#/annonce/chambre-independante-aux-parcelles-0nestld",
+  "final": "#/annonce/chambre-independante-aux-parcelles-0nestld",
+  "titre": "Chambre indépendante aux Parcelles",
+  "souci": ""
+ },
+ {
+  "profil": "admin",
+  "page": "#/admin/listings",
+  "label": "Voir",
+  "href": "#/annonce/bureau-equipe-au-plateau-0n4t7we",
+  "final": "#/annonce/bureau-equipe-au-plateau-0n4t7we",
+  "titre": "Bureau équipé au Plateau",
+  "souci": ""
+ },
+ {
+  "profil": "admin",
+  "page": "#/admin/listings",
+  "label": "Voir",
+  "href": "#/annonce/appartement-neuf-a-ouakam-0lqv7fj",
+  "final": "#/annonce/appartement-neuf-a-ouakam-0lqv7fj",
+  "titre": "Appartement neuf à Ouakam",
+  "souci": ""
+ },
+ {
+  "profil": "admin",
+  "page": "#/admin/listings",
+  "label": "Voir",
+  "href": "#/annonce/villa-duplex-au-point-e-0lgvlqk",
+  "final": "#/annonce/villa-duplex-au-point-e-0lgvlqk",
+  "titre": "Villa duplex au Point E",
+  "souci": ""
+ },
+ {
+  "profil": "admin",
+  "page": "#/admin/listings",
+  "label": "Voir",
+  "href": "#/annonce/maison-a-renover-a-rufisque-0mar9bi",
+  "final": "#/annonce/maison-a-renover-a-rufisque-0mar9bi",
+  "titre": "Maison à rénover à Rufisque",
+  "souci": ""
+ },
+ {
+  "profil": "admin",
+  "page": "#/admin/listings",
+  "label": "Voir",
+  "href": "#/annonce/villa-moderne-a-ngor-1qq7q7o",
+  "final": "#/annonce/villa-moderne-a-ngor-1qq7q7o",
+  "titre": "Villa moderne à Ngor",
+  "souci": ""
+ },
+ {
+  "profil": "admin",
+  "page": "#/admin/signalements",
+  "label": "Appartement lumineux aux Almadies",
+  "href": "#/annonce/appartement-lumineux-aux-almadies-0nosfac",
+  "final": "#/annonce/appartement-lumineux-aux-almadies-0nosfac",
+  "titre": "Appartement lumineux aux Almadies",
+  "souci": ""
+ },
+ {
+  "profil": "admin",
+  "page": "#/admin/verifications",
+  "label": "Voir l'annonce",
+  "href": "#/annonce/terrain-300-m2-a-mbour-0mkqv0h",
+  "final": "#/annonce/terrain-300-m2-a-mbour-0mkqv0h",
+  "titre": "Terrain 300 m² à Mbour",
+  "souci": ""
+ },
+ {
+  "profil": "admin",
+  "page": "#/admin/verifications",
+  "label": "Voir l'annonce",
+  "href": "#/annonce/terrain-viabilise-a-saly-0lqs1xk",
+  "final": "#/annonce/terrain-viabilise-a-saly-0lqs1xk",
+  "titre": "Terrain viabilisé à Saly",
+  "souci": ""
+ },
+ {
+  "profil": "admin",
+  "page": "#/admin/verifications",
+  "label": "Voir l'annonce",
+  "href": "#/annonce/terrain-agricole-a-thies-0m0rnmj",
+  "final": "#/annonce/terrain-agricole-a-thies-0m0rnmj",
+  "titre": "Terrain agricole à Thiès",
+  "souci": ""
+ },
+ {
+  "profil": "admin",
+  "page": "#/admin/verifications",
+  "label": "Voir l'annonce",
+  "href": "#/annonce/terrain-500-m2-a-bargny-0k2ra9r",
+  "final": "#/annonce/terrain-500-m2-a-bargny-0k2ra9r",
+  "titre": "Terrain 500 m² à Bargny",
+  "souci": ""
+ },
+ {
+  "profil": "admin",
+  "page": "#/admin/verifications",
+  "label": "Voir l'annonce",
+  "href": "#/annonce/terrain-500-m2-viabilise-a-diamniadio-1untgue",
+  "final": "#/annonce/terrain-500-m2-viabilise-a-diamniadio-1untgue",
+  "titre": "Terrain 500 m² viabilisé à Diamniadio",
+  "souci": ""
+ },
+ {
+  "profil": "admin",
+  "page": "#/admin/verifications",
+  "label": "Voir l'annonce",
+  "href": "#/annonce/terrain-250-m2-a-diamniadio-1f6favz",
+  "final": "#/annonce/terrain-250-m2-a-diamniadio-1f6favz",
+  "titre": "Terrain 250 m² à Diamniadio",
+  "souci": ""
+ },
+ {
+  "profil": "admin",
+  "page": "#/admin/verifications",
+  "label": "Voir l'annonce",
+  "href": "#/annonce/terrain-400-m2-a-fatick-1p95w41",
+  "final": "#/annonce/terrain-400-m2-a-fatick-1p95w41",
+  "titre": "Terrain 400 m² à Fatick",
+  "souci": ""
+ },
+ {
+  "profil": "admin",
+  "page": "#/admin/verifications",
+  "label": "Voir l'annonce",
+  "href": "#/annonce/terrain-600-m2-a-kebemer-0mv4r9c",
+  "final": "#/annonce/terrain-600-m2-a-kebemer-0mv4r9c",
+  "titre": "Terrain 600 m² à Kébémer",
+  "souci": ""
+ },
+ {
+  "profil": "admin",
+  "page": "#/admin/verifications",
+  "label": "Voir l'annonce",
+  "href": "#/annonce/terrain-500-m2-a-kolda-19a9lq4",
+  "final": "#/annonce/terrain-500-m2-a-kolda-19a9lq4",
+  "titre": "Terrain 500 m² à Kolda",
+  "souci": ""
+ },
+ {
+  "profil": "admin",
+  "page": "#/coffre",
+  "label": "Factures Factures émises et factures fournisseurs 4",
+  "href": "#/coffre/factures",
+  "final": "#/coffre/factures",
+  "titre": "Factures",
+  "souci": ""
+ },
+ {
+  "profil": "admin",
+  "page": "#/coffre",
+  "label": "Devis & proformas Offres envoyées aux clients 1",
+  "href": "#/coffre/devis",
+  "final": "#/coffre/devis",
+  "titre": "Devis & proformas",
+  "souci": ""
+ },
+ {
+  "profil": "admin",
+  "page": "#/coffre",
+  "label": "Avoirs Notes de crédit 0",
+  "href": "#/coffre/avoirs",
+  "final": "#/coffre/avoirs",
+  "titre": "Avoirs",
+  "souci": ""
+ },
+ {
+  "profil": "admin",
+  "page": "#/coffre",
+  "label": "Reçus de paiement Preuves d'encaissement 3",
+  "href": "#/coffre/recus",
+  "final": "#/coffre/recus",
+  "titre": "Reçus de paiement",
+  "souci": ""
+ },
+ {
+  "profil": "admin",
+  "page": "#/coffre",
+  "label": "Quittances de loyer Loyers payés 64",
+  "href": "#/coffre/quittances",
+  "final": "#/coffre/quittances",
+  "titre": "Quittances de loyer",
+  "souci": ""
+ },
+ {
+  "profil": "admin",
+  "page": "#/coffre",
+  "label": "Contrats Baux, mandats, ventes 4",
+  "href": "#/coffre/contrats",
+  "final": "#/coffre/contrats",
+  "titre": "Contrats",
+  "souci": ""
+ },
+ {
+  "profil": "admin",
+  "page": "#/coffre",
+  "label": "Pièces d'identité CNI, passeport 0",
+  "href": "#/coffre/identite",
+  "final": "#/coffre/identite",
+  "titre": "Pièces d'identité",
+  "souci": ""
+ },
+ {
+  "profil": "admin",
+  "page": "#/coffre",
+  "label": "Titres & propriété Titre foncier, bail, plan 0",
+  "href": "#/coffre/propriete",
+  "final": "#/coffre/propriete",
+  "titre": "Titres & propriété",
+  "souci": ""
+ },
+ {
+  "profil": "admin",
+  "page": "#/coffre",
+  "label": "Assurances Attestations et polices 0",
+  "href": "#/coffre/assurance",
+  "final": "#/coffre/assurance",
+  "titre": "Assurances",
+  "souci": ""
+ },
+ {
+  "profil": "admin",
+  "page": "#/coffre",
+  "label": "Documents techniques Diagnostics, plans, devis travaux 0",
+  "href": "#/coffre/technique",
+  "final": "#/coffre/technique",
+  "titre": "Documents techniques",
+  "souci": ""
+ },
+ {
+  "profil": "admin",
+  "page": "#/coffre",
+  "label": "Autres documents Tout le reste 0",
+  "href": "#/coffre/autres",
+  "final": "#/coffre/autres",
+  "titre": "Autres documents",
+  "souci": ""
+ }
+]

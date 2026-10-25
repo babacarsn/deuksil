@@ -269,7 +269,7 @@ const nomAgence = id => { const a = DB.findItem(DB.K.users, id); return a ? (a.a
 
 /* 1. Pas de second compte. */
 const _compteMandantFin = compteMandant;
-compteMandant = function (fiche) {
+compteMandant = function (fiche, email) {
   if (!fiche || !fiche.name || fiche.compteId || fiche.status === 'close') return null;
   if (DB.findItem(DB.K.users, u => u.ownerRec === fiche.id)) return null;
   const ex = compteExistant(fiche);
@@ -284,7 +284,7 @@ compteMandant = function (fiche) {
     }
     return null;
   }
-  return _compteMandantFin(fiche);
+  return _compteMandantFin(fiche, email);
 };
 /* 2. Une seule fiche par propriétaire dans l'agence. */
 window.addEventListener('submit', e => {
@@ -449,7 +449,8 @@ const _currentFin = Auth.current.bind(Auth);
 Auth.current = function () {
   const u = _currentFin();
   if (u && (u.status === 'suspendu' || (u.member && u.member.status === 'suspendu'))) {
-    try { localStorage.removeItem(DB.K.session); } catch (e) {}
+    /* Session fermée aussi côté Supabase (la base refuse déjà ses requêtes : app.espace() est NULL). */
+    if (!Auth._fermeture) { Auth._fermeture = true; SB.auth.signOut().finally(() => { Auth._fermeture = false; DB.session = null; }); }
     return null;
   }
   return u;

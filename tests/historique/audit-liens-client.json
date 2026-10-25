@@ -1,0 +1,308 @@
+[
+ {
+  "profil": "client",
+  "page": "#/client/dashboard",
+  "label": "Mes favoris 1 Biens mis de côté",
+  "href": "#/client/favorites",
+  "final": "#/client/favorites",
+  "titre": "Mes favoris",
+  "souci": ""
+ },
+ {
+  "profil": "client",
+  "page": "#/client/dashboard",
+  "label": "Visites à venir 0 3 demandes au total",
+  "href": "#/client/visits?f=avenir",
+  "final": "#/client/visits",
+  "titre": "Mes demandes et visites",
+  "souci": ""
+ },
+ {
+  "profil": "client",
+  "page": "#/client/dashboard",
+  "label": "Messages non lus 2 Des réponses vous attendent",
+  "href": "#/client/messages",
+  "final": "#/client/messages",
+  "titre": "Messages",
+  "souci": ""
+ },
+ {
+  "profil": "client",
+  "page": "#/client/dashboard",
+  "label": "Mes alertes 0 Soyez prévenu des nouveautés",
+  "href": "#/client/alerts",
+  "final": "#/client/alerts",
+  "titre": "Mes alertes",
+  "souci": ""
+ },
+ {
+  "profil": "client",
+  "page": "#/client/dashboard",
+  "label": "Voir tous",
+  "href": "#/search",
+  "final": "#/search",
+  "titre": "Rechercher un bien",
+  "souci": ""
+ },
+ {
+  "profil": "client",
+  "page": "#/client/dashboard",
+  "label": "Voir plus",
+  "href": "#/property/propertie_xy1aq9y7",
+  "final": "#/property/propertie_xy1aq9y7",
+  "titre": "Maison à Kanel",
+  "souci": ""
+ },
+ {
+  "profil": "client",
+  "page": "#/client/dashboard",
+  "label": "Voir plus",
+  "href": "#/property/property_004",
+  "final": "#/property/property_004",
+  "titre": "Appartement F3 à Sacré-Cœur 3",
+  "souci": ""
+ },
+ {
+  "profil": "client",
+  "page": "#/client/dashboard",
+  "label": "Voir plus",
+  "href": "#/property/property_011",
+  "final": "#/property/property_011",
+  "titre": "Terrain 300 m² à Mbour",
+  "souci": ""
+ },
+ {
+  "profil": "client",
+  "page": "#/client/dashboard",
+  "label": "Voir plus",
+  "href": "#/property/property_007",
+  "final": "#/property/property_007",
+  "titre": "Bureau équipé au Plateau",
+  "souci": ""
+ },
+ {
+  "profil": "client",
+  "page": "#/client/dashboard",
+  "label": "Voir plus",
+  "href": "#/property/propertie_xy11f9s7",
+  "final": "#/property/propertie_xy11f9s7",
+  "titre": "Villa pieds dans l'eau à Somone",
+  "souci": ""
+ },
+ {
+  "profil": "client",
+  "page": "#/client/dashboard",
+  "label": "Voir plus",
+  "href": "#/property/property_003",
+  "final": "#/property/property_003",
+  "titre": "Studio meublé à Mermoz",
+  "souci": ""
+ },
+ {
+  "profil": "client",
+  "page": "#/client/dashboard",
+  "label": "Voir plus",
+  "href": "#/property/property_013",
+  "final": "#/property/property_013",
+  "titre": "Terrain agricole à Thiès",
+  "souci": ""
+ },
+ {
+  "profil": "client",
+  "page": "#/client/dashboard",
+  "label": "Voir plus",
+  "href": "#/property/propertie_xy2bhvx9",
+  "final": "#/property/propertie_xy2bhvx9",
+  "titre": "Bureau à Kaffrine",
+  "souci": ""
+ },
+ {
+  "profil": "client",
+  "page": "#/client/dashboard",
+  "label": "Voir plus",
+  "href": "#/property/propertie_xy1h1937",
+  "final": "#/property/propertie_xy1h1937",
+  "titre": "Case de vacances à Cap Skirring",
+  "souci": ""
+ },
+ {
+  "profil": "client",
+  "page": "#/client/dashboard",
+  "label": "Découvrir",
+  "href": "#/search",
+  "final": "#/search",
+  "titre": "Rechercher un bien",
+  "souci": ""
+ },
+ {
+  "profil": "client",
+  "page": "#/client/dashboard",
+  "label": "L'agence a répondu à votre question. 18 oct. 2026",
+  "href": "#/client/messages",
+  "final": "#/client/messages",
+  "titre": "Messages",
+  "souci": ""
+ },
+ {
+  "profil": "client",
+  "page": "#/search",
+  "label": "Voir le bien",
+  "href": "#/property/property_022",
+  "final": "#/property/property_022",
+  "titre": "Terrain 500 m² à Bargny",
+  "souci": ""
+ },
+ {
+  "profil": "client",
+  "page": "#/search",
+  "label": "Voir le bien",
+  "href": "#/property/propertie_xy28p1uk",
+  "final": "#/property/propertie_xy28p1uk",
+  "titre": "Maison à Vélingara",
+  "souci": ""
+ },
+ {
+  "profil": "client",
+  "page": "#/search",
+  "label": "Voir le bien",
+  "href": "#/property/property_012",
+  "final": "#/property/property_012",
+  "titre": "Terrain viabilisé à Saly",
+  "souci": ""
+ },
+ {
+  "profil": "client",
+  "page": "#/search",
+  "label": "Voir le bien",
+  "href": "#/property/propertie_xy0n50kh",
+  "final": "#/property/propertie_xy0n50kh",
+  "titre": "Villa R+1 à Keur Massar",
+  "souci": ""
+ },
+ {
+  "profil": "client",
+  "page": "#/search",
+  "label": "Voir le bien",
+  "href": "#/property/property_021",
+  "final": "#/property/property_021",
+  "titre": "Appartement F4 aux Almadies",
+  "souci": ""
+ },
+ {
+  "profil": "client",
+  "page": "#/search",
+  "label": "Voir le bien",
+  "href": "#/property/propertie_xy2a1kx1",
+  "final": "#/property/propertie_xy2a1kx1",
+  "titre": "Villa à Kédougou",
+  "souci": ""
+ },
+ {
+  "profil": "client",
+  "page": "#/search",
+  "label": "Voir le bien",
+  "href": "#/property/propertie_xy0n0vdg",
+  "final": "#/property/propertie_xy0n0vdg",
+  "titre": "Appartement F2 à Grand Yoff",
+  "souci": ""
+ },
+ {
+  "profil": "client",
+  "page": "#/search",
+  "label": "Voir le bien",
+  "href": "#/property/propertie_xy2bhvx9",
+  "final": "#/property/propertie_xy2bhvx9",
+  "titre": "Bureau à Kaffrine",
+  "souci": ""
+ },
+ {
+  "profil": "client",
+  "page": "#/search",
+  "label": "Voir le bien",
+  "href": "#/property/property_017",
+  "final": "#/property/property_017",
+  "titre": "Local commercial à Kaolack",
+  "souci": ""
+ },
+ {
+  "profil": "client",
+  "page": "#/client/favorites",
+  "label": "Voir le bien",
+  "href": "#/property/property_002",
+  "final": "#/property/property_002",
+  "titre": "Villa contemporaine avec piscine",
+  "souci": ""
+ },
+ {
+  "profil": "client",
+  "page": "#/client/visits",
+  "label": "Voir",
+  "href": "#/property/property_002",
+  "final": "#/property/property_002",
+  "titre": "Villa contemporaine avec piscine",
+  "souci": ""
+ },
+ {
+  "profil": "client",
+  "page": "#/client/visits",
+  "label": "Voir",
+  "href": "#/property/property_008",
+  "final": "#/property/property_008",
+  "titre": "Appartement neuf à Ouakam",
+  "souci": ""
+ },
+ {
+  "profil": "client",
+  "page": "#/client/visits",
+  "label": "Voir",
+  "href": "#/property/property_003",
+  "final": "#/property/property_003",
+  "titre": "Studio meublé à Mermoz",
+  "souci": ""
+ },
+ {
+  "profil": "client",
+  "page": "#/client/messages",
+  "label": "Voir le bien",
+  "href": "#/property/property_002",
+  "final": "#/property/property_002",
+  "titre": "Villa contemporaine avec piscine",
+  "souci": ""
+ },
+ {
+  "profil": "client",
+  "page": "#/client/alerts",
+  "label": "Créer une alerte depuis la recherche",
+  "href": "#/search",
+  "final": "#/search",
+  "titre": "Rechercher un bien",
+  "souci": ""
+ },
+ {
+  "profil": "client",
+  "page": "#/coffre",
+  "label": "Pièces d'identité CNI, passeport 0",
+  "href": "#/coffre/identite",
+  "final": "#/coffre/identite",
+  "titre": "Pièces d'identité",
+  "souci": ""
+ },
+ {
+  "profil": "client",
+  "page": "#/coffre",
+  "label": "Justificatifs de revenus Bulletins, attestations 0",
+  "href": "#/coffre/revenus",
+  "final": "#/coffre/revenus",
+  "titre": "Justificatifs de revenus",
+  "souci": ""
+ },
+ {
+  "profil": "client",
+  "page": "#/coffre",
+  "label": "Autres documents Tout le reste 0",
+  "href": "#/coffre/autres",
+  "final": "#/coffre/autres",
+  "titre": "Autres documents",
+  "souci": ""
+ }
+]

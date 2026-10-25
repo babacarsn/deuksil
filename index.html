@@ -23,6 +23,11 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="DEUKSIL">
+<!-- Politique de sécurité du contenu (défense en profondeur contre l'injection de
+     script) : scripts uniquement depuis ce site, aucun gestionnaire inline.
+     connect-src : ajouter le domaine personnalisé Supabase s'il y en a un. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co http://127.0.0.1:54321 ws://127.0.0.1:54321; frame-src 'self' blob:; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -32,15 +37,17 @@
 <div id="app"></div>
 <div id="toasts"></div>
 <div id="modal-root"></div>
+<script src="js/vendor/supabase-js-2.45.4.min.js"></script>
 <script src="js/00-config.js"></script>
 <script src="js/00-suivi-formulaire.js"></script>
 <script src="js/00-images.js"></script>
 <script src="js/00-logo-pdf.js"></script>
 <script src="js/01-utils.js"></script>
 <script src="js/02-icons.js"></script>
+<script src="js/02c-schema.js"></script>
 <script src="js/03-storage.js"></script>
 <script src="js/04-referentiels.js"></script>
-<script src="js/05-seed.js"></script>
+<script src="js/05-donnees.js"></script>
 <script src="js/06-ui.js"></script>
 <script src="js/07-sound.js"></script>
 <script src="js/08-auth.js"></script>
@@ -82,12 +89,10 @@
 <script src="js/48-kpitone.js"></script>
 <script src="js/49-espaces.js"></script>
 <script src="js/50-tfilter.js"></script>
-<script src="js/51-uatfix.js"></script>
 <script src="js/52-marque.js"></script>
 <script src="js/53-obligatoire.js"></script>
 <script src="js/54-baux.js"></script>
 <script src="js/55-comptes.js"></script>
-<script src="js/56-vie.js"></script>
 <script src="js/57-roles.js"></script>
 <script src="js/58-bail-client.js"></script>
 <script src="js/59-interactions.js"></script>
@@ -108,7 +113,6 @@
 <script src="js/74-envoi.js"></script>
 <script src="js/75-barre.js"></script>
 <script src="js/76-demarrage.js"></script>
-<script src="js/77-jeu-de-test.js"></script>
 <script src="js/78-coherence.js"></script>
 <script src="js/79-recherche.js"></script>
 <script src="js/80-tableau-proprietaire.js"></script>
@@ -118,7 +122,6 @@
 <script src="js/84-accueil.js"></script>
 <script src="js/85-animations.js"></script>
 <script src="js/86-portraits.js"></script>
-<script src="js/87-noms.js"></script>
 <script src="js/88-espace.js"></script>
 <script src="js/89-design.js"></script>
 <script src="js/90-agence-metier.js"></script>
@@ -128,7 +131,7 @@
 <script src="js/94-finalisation.js"></script>
 <script src="js/95-securite.js"></script>
 <script src="js/96-complements.js"></script>
-<script src="js/97-demo.js"></script>
+<script src="js/97-visiteur.js"></script>
 <script src="js/98-cartes.js"></script>
 <script src="js/98b-finitions.js"></script>
 <script src="js/99-maj.js"></script>

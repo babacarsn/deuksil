@@ -279,7 +279,7 @@ dsHabiller = function (root) { _dsHabiller4(root); dsListes(root); };
    le nom du champ ou son libellé. Les champs déjà remplis ne changent pas. */
 const DS_EXEMPLES = [
   [/cni/i, 'Ex. 1234567890123 (13 chiffres)'], [/mail/i, 'exemple@mail.sn'], [/phone|tél|telephone|whatsapp/i, '77 000 00 00'],
-  [/password|mot de passe/i, '6 caractères minimum'], [/iban|rib|compte bancaire/i, 'SN08 …'],
+  [/password|mot de passe/i, '8 caractères minimum'], [/iban|rib|compte bancaire/i, 'SN08 …'],
   [/firstname|prénom|prenom/i, 'Ex. Awa'], [/lastname|^nom$|\bnom\b(?! complet)/i, 'Ex. Diop'],
   [/address|adresse/i, 'Ex. Rue 10 x Corniche, Almadies, Dakar'],
   [/tenant|locataire|buyer|acqu|client|name|nom complet|société|societe|propriétaire|proprietaire|vendeur|fournisseur|prestataire/i, 'Ex. Mamadou Diallo'], [/quartier|lieu/i, 'Ex. Almadies, Mermoz…'], [/city|ville/i, 'Ex. Dakar'],
@@ -299,7 +299,7 @@ function dsExemples(root) {
     const cle = (el.name || '') + ' ' + lab;
     if (el.type === 'password') {
       el.placeholder = /ancien|actuel|current/i.test(el.name + ' ' + lab + ' ' + (el.autocomplete || '')) ? 'Votre mot de passe actuel'
-        : /confirm|password2/i.test(el.name + ' ' + lab) ? 'Retapez le nouveau mot de passe' : '6 caractères minimum';
+        : /confirm|password2/i.test(el.name + ' ' + lab) ? 'Retapez le nouveau mot de passe' : '8 caractères minimum';
       return;
     }
     const m = DS_EXEMPLES.find(([re]) => re.test(el.name || '')) || DS_EXEMPLES.find(([re]) => re.test(lab));

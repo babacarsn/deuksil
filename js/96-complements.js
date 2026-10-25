@@ -163,26 +163,8 @@ function complementsReleve(fiche) {
    (12 mois au plus) : les échéances sont créées, les parties prévenues, et
    l'opération est journalisée. Sinon, rien ne change. */
 const reconductionActive = u => !!(u && (u.regles || {}).reconductionTacite);
-function reconduireBaux() {
-  let u = null; try { u = Auth.current(); } catch (e) {}
-  if (!u || !['owner', 'agency'].includes(u.role) || (u.member && !(u.perms || []).includes('gestion'))) return 0;
-  const proprio = DB.findItem(DB.K.users, u.id); if (!reconductionActive(proprio)) return 0;
-  let n = 0;
-  DB.filterItems(DB.K.leases, l => l.ownerId === u.id && l.status === 'actif' && !l.preavis && leaseEnd(l) < ymd()).forEach(l => {
-    const k = Math.min(12, Math.max(1, +l.dureeInitiale || +l.months || 12)), depart = leaseEnd(l);
-    if (typeof bailEnConflit === 'function' && bailEnConflit(l.propertyId, l.unitId, depart, k, l.id)) return;
-    const deja = new Set(DB.filterItems(DB.K.rents, r => r.leaseId === l.id).map(r => r.month));
-    for (let i = l.months; i < l.months + k; i++) { const m = moisCle(l.start, i); if (!deja.has(m)) DB.addItem(DB.K.rents, {ownerId: l.ownerId, leaseId: l.id, month: m, amount: +l.rent, paidAt: null}); }
-    DB.updateItem(DB.K.leases, l.id, {months: l.months + k, dureeInitiale: l.dureeInitiale || l.months, reconductions: [...(l.reconductions || []), {le: ymd(), depuis: depart, mois: k}]});
-    audit('Bail reconduit tacitement', `${l.tenant} · ${k} mois à partir du ${dateFr(depart)}`);
-    notify(u.id, `Bail de ${l.tenant} reconduit tacitement pour ${k} mois (échu le ${dateFr(depart)}, sans préavis).`, '#/manage/leases');
-    const loc = typeof locataireDuBail === 'function' && locataireDuBail(l); if (loc) notify(loc.id, `Votre bail est reconduit pour ${k} mois aux mêmes conditions (loyer ${money(l.rent)}).`, '#/tenant/rents');
-    n++;
-  });
-  return n;
-}
-addEventListener('hashchange', () => { try { reconduireBaux(); } catch (e) {} });
-[2500].forEach(t => setTimeout(() => { try { reconduireBaux(); } catch (e) {} }, t));
+/* La reconduction elle-même est faite par la base, chaque matin (app.reconduire_baux,
+   appelée par app.generer_rappels) : une seule fois, même avec plusieurs membres d'équipe. */
 /* Le réglage : dans les règles de l'agence, et dans le profil du propriétaire. */
 function caseReconduction() {
   const u = Auth.current(); if (!u || u.member) return;

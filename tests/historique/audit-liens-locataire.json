@@ -1,0 +1,533 @@
+[
+ {
+  "profil": "locataire",
+  "page": "#/client/dashboard",
+  "label": "Mes favoris 3 Biens mis de côté",
+  "href": "#/client/favorites",
+  "final": "#/client/favorites",
+  "titre": "Mes favoris",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/client/dashboard",
+  "label": "Visites à venir 2 3 demandes au total",
+  "href": "#/client/visits?f=avenir",
+  "final": "#/client/visits",
+  "titre": "Mes demandes et visites",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/client/dashboard",
+  "label": "Messages non lus 5 Des réponses vous attendent",
+  "href": "#/client/messages",
+  "final": "#/client/messages",
+  "titre": "Messages",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/client/dashboard",
+  "label": "Mes alertes 1 Recherches surveillées",
+  "href": "#/client/alerts",
+  "final": "#/client/alerts",
+  "titre": "Mes alertes",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/client/dashboard",
+  "label": "Voir tous",
+  "href": "#/search",
+  "final": "#/search",
+  "titre": "Rechercher un bien",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/client/dashboard",
+  "label": "Voir plus",
+  "href": "#/property/propertie_xwxevvou",
+  "final": "#/property/propertie_xwxevvou",
+  "titre": "Maison à Kanel",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/client/dashboard",
+  "label": "Voir plus",
+  "href": "#/property/property_004",
+  "final": "#/property/property_004",
+  "titre": "Appartement F3 à Sacré-Cœur 3",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/client/dashboard",
+  "label": "Voir plus",
+  "href": "#/property/property_011",
+  "final": "#/property/property_011",
+  "titre": "Terrain 300 m² à Mbour",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/client/dashboard",
+  "label": "Voir plus",
+  "href": "#/property/property_007",
+  "final": "#/property/property_007",
+  "titre": "Bureau équipé au Plateau",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/client/dashboard",
+  "label": "Voir plus",
+  "href": "#/property/propertie_xwx3adyh",
+  "final": "#/property/propertie_xwx3adyh",
+  "titre": "Villa pieds dans l'eau à Somone",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/client/dashboard",
+  "label": "Voir plus",
+  "href": "#/property/property_003",
+  "final": "#/property/property_003",
+  "titre": "Studio meublé à Mermoz",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/client/dashboard",
+  "label": "Voir plus",
+  "href": "#/property/property_013",
+  "final": "#/property/property_013",
+  "titre": "Terrain agricole à Thiès",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/client/dashboard",
+  "label": "Voir plus",
+  "href": "#/property/propertie_xwxor3wm",
+  "final": "#/property/propertie_xwxor3wm",
+  "titre": "Bureau à Kaffrine",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/client/dashboard",
+  "label": "Voir plus",
+  "href": "#/property/propertie_xwxhd57e",
+  "final": "#/property/propertie_xwxhd57e",
+  "titre": "Case de vacances à Cap Skirring",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/client/dashboard",
+  "label": "Découvrir",
+  "href": "#/search",
+  "final": "#/search",
+  "titre": "Rechercher un bien",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/client/dashboard",
+  "label": "Votre visite de samedi 10h est confirmée. 18 oct. 2026",
+  "href": "#/client/visits",
+  "final": "#/client/visits",
+  "titre": "Mes demandes et visites",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/client/dashboard",
+  "label": "Votre demande de visite a été acceptée. 18 oct. 2026",
+  "href": "#/client/visits",
+  "final": "#/client/visits",
+  "titre": "Mes demandes et visites",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/tenant/home",
+  "label": "Le contacter",
+  "href": "#/client/messages",
+  "final": "#/client/messages",
+  "titre": "Messages",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/tenant/home",
+  "label": "Mes quittances",
+  "href": "#/tenant/quittances",
+  "final": "#/tenant/quittances",
+  "titre": "Mes quittances",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/tenant/home",
+  "label": "Signaler un problème",
+  "href": "#/tenant/tickets",
+  "final": "#/tenant/tickets",
+  "titre": "Maintenance",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/tenant/home",
+  "label": "Voir mes loyers",
+  "href": "#/tenant/rents",
+  "final": "#/tenant/rents",
+  "titre": "Mes loyers",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/tenant/home",
+  "label": "Loyers en retard 900 000 FCFA 2 mois à régulariser",
+  "href": "#/tenant/rents?f=retard",
+  "final": "#/tenant/rents",
+  "titre": "Mes loyers",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/tenant/home",
+  "label": "Payé en 2026 900 000 FCFA 2 quittances disponibles",
+  "href": "#/tenant/payments",
+  "final": "#/tenant/payments",
+  "titre": "Mes paiements",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/tenant/home",
+  "label": "Loyer mensuel 450 000 FCFA Échéance le 5 du mois",
+  "href": "#/tenant/rents",
+  "final": "#/tenant/rents",
+  "titre": "Mes loyers",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/tenant/home",
+  "label": "Fin du bail 20 juil. 2027 Dans 275 jours",
+  "href": "#/coffre/contrats",
+  "final": "#/coffre/contrats",
+  "titre": "Contrats",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/tenant/home",
+  "label": "Appartement lumineux aux Almadies Almadies, Dakar · bail du 20 juil. 2026 au 20 juil. 2027",
+  "href": "#/tenant/rents",
+  "final": "#/tenant/rents",
+  "titre": "Mes loyers",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/tenant/home",
+  "label": "Mes quittances 2 quittances à télécharger Voir mes quittances",
+  "href": "#/tenant/quittances",
+  "final": "#/tenant/quittances",
+  "titre": "Mes quittances",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/tenant/home",
+  "label": "Mes demandes d'intervention Signalez une panne ou un problème Voir mes demandes",
+  "href": "#/tenant/tickets",
+  "final": "#/tenant/tickets",
+  "titre": "Maintenance",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/tenant/home",
+  "label": "Mon propriétaire Échangez avec votre bailleur Ouvrir la messagerie",
+  "href": "#/client/messages",
+  "final": "#/client/messages",
+  "titre": "Messages",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/tenant/home",
+  "label": "Loyer de septembre 2026 en retard 450 000 FCFA à régler",
+  "href": "#/tenant/rents?q=septembre 2026",
+  "final": "#/tenant/rents",
+  "titre": "Mes loyers",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/tenant/home",
+  "label": "Loyer de octobre 2026 en retard 450 000 FCFA à régler",
+  "href": "#/tenant/rents?q=octobre 2026",
+  "final": "#/tenant/rents",
+  "titre": "Mes loyers",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/tenant/home",
+  "label": "Mes loyers",
+  "href": "#/tenant/rents",
+  "final": "#/tenant/rents",
+  "titre": "Mes loyers",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/tenant/home",
+  "label": "Contacter le propriétaire",
+  "href": "#/client/messages",
+  "final": "#/client/messages",
+  "titre": "Messages",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/tenant/rents",
+  "label": "Le contacter",
+  "href": "#/client/messages",
+  "final": "#/client/messages",
+  "titre": "Messages",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/search",
+  "label": "Voir le bien",
+  "href": "#/property/property_022",
+  "final": "#/property/property_022",
+  "titre": "Terrain 500 m² à Bargny",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/search",
+  "label": "Voir le bien",
+  "href": "#/property/propertie_xwxl3o7w",
+  "final": "#/property/propertie_xwxl3o7w",
+  "titre": "Maison à Vélingara",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/search",
+  "label": "Voir le bien",
+  "href": "#/property/property_012",
+  "final": "#/property/property_012",
+  "titre": "Terrain viabilisé à Saly",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/search",
+  "label": "Voir le bien",
+  "href": "#/property/propertie_xwwzosgg",
+  "final": "#/property/propertie_xwwzosgg",
+  "titre": "Villa R+1 à Keur Massar",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/search",
+  "label": "Voir le bien",
+  "href": "#/property/property_021",
+  "final": "#/property/property_021",
+  "titre": "Appartement F4 aux Almadies",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/search",
+  "label": "Voir le bien",
+  "href": "#/property/propertie_xwxmirpk",
+  "final": "#/property/propertie_xwxmirpk",
+  "titre": "Villa à Kédougou",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/search",
+  "label": "Voir le bien",
+  "href": "#/property/propertie_xwx0magl",
+  "final": "#/property/propertie_xwx0magl",
+  "titre": "Appartement F2 à Grand Yoff",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/search",
+  "label": "Voir le bien",
+  "href": "#/property/propertie_xwxor3wm",
+  "final": "#/property/propertie_xwxor3wm",
+  "titre": "Bureau à Kaffrine",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/search",
+  "label": "Voir le bien",
+  "href": "#/property/property_017",
+  "final": "#/property/property_017",
+  "titre": "Local commercial à Kaolack",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/client/favorites",
+  "label": "Voir le bien",
+  "href": "#/property/property_001",
+  "final": "#/property/property_001",
+  "titre": "Appartement lumineux aux Almadies",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/client/favorites",
+  "label": "Voir le bien",
+  "href": "#/property/property_003",
+  "final": "#/property/property_003",
+  "titre": "Studio meublé à Mermoz",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/client/favorites",
+  "label": "Voir le bien",
+  "href": "#/property/property_011",
+  "final": "#/property/property_011",
+  "titre": "Terrain 300 m² à Mbour",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/client/visits",
+  "label": "Voir",
+  "href": "#/property/property_001",
+  "final": "#/property/property_001",
+  "titre": "Appartement lumineux aux Almadies",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/client/visits",
+  "label": "Voir",
+  "href": "#/property/property_004",
+  "final": "#/property/property_004",
+  "titre": "Appartement F3 à Sacré-Cœur 3",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/client/visits",
+  "label": "Voir",
+  "href": "#/property/property_003",
+  "final": "#/property/property_003",
+  "titre": "Studio meublé à Mermoz",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/client/messages",
+  "label": "Voir le bien",
+  "href": "#/property/property_001",
+  "final": "#/property/property_001",
+  "titre": "Appartement lumineux aux Almadies",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/client/alerts",
+  "label": "Créer une alerte depuis la recherche",
+  "href": "#/search",
+  "final": "#/search",
+  "titre": "Rechercher un bien",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/coffre",
+  "label": "Factures Factures reçues de votre propriétaire ou de votre agence 2",
+  "href": "#/coffre/factures",
+  "final": "#/coffre/factures",
+  "titre": "Factures",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/coffre",
+  "label": "Devis & proformas Devis et proformas qui vous ont été adressés 1",
+  "href": "#/coffre/devis",
+  "final": "#/coffre/devis",
+  "titre": "Devis & proformas",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/coffre",
+  "label": "Reçus de paiement Vos preuves de paiement 1",
+  "href": "#/coffre/recus",
+  "final": "#/coffre/recus",
+  "titre": "Reçus de paiement",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/coffre",
+  "label": "Quittances de loyer Vos loyers payés 2",
+  "href": "#/coffre/quittances",
+  "final": "#/coffre/quittances",
+  "titre": "Quittances de loyer",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/coffre",
+  "label": "Contrats Vos baux et contrats 2",
+  "href": "#/coffre/contrats",
+  "final": "#/coffre/contrats",
+  "titre": "Contrats",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/coffre",
+  "label": "Pièces d'identité CNI, passeport 0",
+  "href": "#/coffre/identite",
+  "final": "#/coffre/identite",
+  "titre": "Pièces d'identité",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/coffre",
+  "label": "Assurances Attestations et polices 0",
+  "href": "#/coffre/assurance",
+  "final": "#/coffre/assurance",
+  "titre": "Assurances",
+  "souci": ""
+ },
+ {
+  "profil": "locataire",
+  "page": "#/coffre",
+  "label": "Autres documents Tout le reste 0",
+  "href": "#/coffre/autres",
+  "final": "#/coffre/autres",
+  "titre": "Autres documents",
+  "souci": ""
+ }
+]

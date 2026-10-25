@@ -18,10 +18,6 @@ async function saveFile(name, content) {
 function dlBtn(name, content, label = 'Télécharger') { const k = 'dl' + Object.keys(DLSTORE).length; DLSTORE[k] = {name, content}; return `<button class="btn" data-action="g3-save" data-id="${k}">${label}</button>`; }
 const dlLink = (html, name) => pdfBtn(name);
 
-function syncContracts(u) {
-  const today = now().slice(0, 10);
-  gMine('contracts', u).filter(c => c.status === 'actif' && c.end && c.end < today).forEach(c => { DB.updateItem(DB.K.contracts, c.id, {status: 'expiré'}); audit('Contrat expiré', c.ref); });
-}
 function contractHtml(c, u) {
   const p = gProp(c.propertyId), me = ownerLabel(u);
   return `<div style="font-family:sans-serif;color:#0C2745"><h2>${CTYPE[c.type].toUpperCase()}</h2><p><b>N° ${c.ref}</b> — ${c.status}</p>
@@ -52,7 +48,6 @@ vueGestion(['providers', 'contracts'], function (u, tab) {
       <div class="field"><label>Téléphone</label><input class="input" name="phone" required></div></div><button class="btn">Ajouter</button></form>` +
       gTable(['Nom', 'Métier', 'Téléphone', ''], list.slice().reverse().map(p => `<tr><td class="small"><b>${esc(p.name)}</b></td><td class="small">${esc(p.job)}</td><td><a href="${telHref(p.phone)}">${esc(p.phone)}</a></td><td><button class="btn ghost sm" data-action="g3-delprov" data-id="${p.id}" aria-label="Supprimer">${icon('trash', 14)}</button></td></tr>`), ['Aucun prestataire', 'Gardez ici vos plombiers, électriciens et artisans de confiance.']);
   }
-  syncContracts(u);
   const list = gMine('contracts', u), props = myProps(u), soon = c => c.status === 'actif' && daysBetween(now(), c.end) <= 30;
   return csv + `<form class="card" data-action="g3-contract" style="margin-bottom:18px"><h4 style="margin-top:0">Nouveau contrat</h4><div class="form-grid">
     <div class="field"><label>Type</label><select class="input" name="type">${Object.entries(CTYPE).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}</select></div>
