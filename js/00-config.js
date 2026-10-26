@@ -13,7 +13,7 @@ const DEUKSIL_CONFIG = {
      Supabase (Authentication → Providers → Google). */
   googleActif: true,
   /* Adresse publique du site (redirections après connexion Google ou lien e-mail). */
-  siteUrl: 'http://localhost:8080',
+  siteUrl: 'https://deuksil.vercel.app/',
   /* Éditeur du site (mentions légales, politique de confidentialité).
      Un champ vide s'affiche « à compléter » : à renseigner avant l'ouverture. */
   editeur: {
