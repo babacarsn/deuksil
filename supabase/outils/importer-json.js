@@ -118,7 +118,7 @@ function ligne(t, o) {
     const c = Object.keys(r);
     await sur('profil ' + u.id, `update public.profiles set ${c.map((x, i) => `"${x}" = $${i + 1}`).join(', ')} where id = $${c.length + 1}`, [...c.map(x => r[x]), mapId(u.id)]);
   }
-  let n = 0;
+  let n = 0; const numeros = {};
   for (const t of ORDRE) {
     const nom = Object.keys(TABLE_DE).find(k => TABLE_DE[k] === t), L = collections[nom] || [];
     for (const o of L) {
@@ -142,6 +142,12 @@ function ligne(t, o) {
         const r = ligne(t, o);
         if ('owner_id' in S[t] && !r.owner_id && r.lease_id) r.owner_id = (await db.query('select owner_id from public.leases where id = $1', [r.lease_id])).rows[0]?.owner_id || null;
         if ('owner_id' in S[t] && !r.owner_id && r.property_id) r.owner_id = (await db.query('select owner_id from public.properties where id = $1', [r.property_id])).rows[0]?.owner_id || null;
+        /* Les interventions de l'ancienne version recevaient leur numéro à l'affichage :
+           sans lui, on le pose ici (les déclencheurs de numérotation sont coupés pendant l'import). */
+        if (t === 'tickets' && !r.ref && r.owner_id) {
+          numeros[r.owner_id] = (numeros[r.owner_id] || 0) + 1;
+          r.ref = `MNT-${new Date().getFullYear()}-${String(numeros[r.owner_id]).padStart(5, '0')}`;
+        }
         await inserer(t, r);
       }
       n++;

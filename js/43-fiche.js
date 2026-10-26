@@ -158,7 +158,7 @@ function ficheTab(u, p, tab) {
         ${todo.map(([t, d, h, ic, tint]) => `<a class="trow" href="${h}"><span class="itile sm ${tint}">${icon(ic, 16)}</span><div class="txt" style="min-width:0"><b>${esc(t)}</b><div class="sub">${esc(d)}</div></div>${icon('arrowRight', 16)}</a>`).join('')}</div>` : ''}
     </div></div>`;
 }
-route(/^\/bien\/([\w]+)(?:\/(apercu|unites|finances|travaux|docs|suivi))?$/, (pid, tab) => {
+route(/^\/bien\/([\w-]+)(?:\/(apercu|unites|finances|travaux|docs|suivi))?$/, (pid, tab) => {
   const u = Auth.current();
   if (!u || !['owner', 'agency'].includes(u.role)) { toast('Espace réservé aux propriétaires et agences.', 'bad'); go('#/login'); return false; }
   const p = DB.findItem(DB.K.properties, pid);

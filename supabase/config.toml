@@ -6,6 +6,7 @@
 #   supabase db reset         # rejoue supabase/migrations sur la base locale
 #   supabase db push          # applique les migrations au projet lié
 #   supabase functions deploy gerer-acces
+#   supabase functions deploy assistant-ia --no-verify-jwt   (secret : GEMINI_API_KEY)
 # Les réglages [auth] ci-dessous s'appliquent au local ; sur le projet hébergé,
 # les reporter dans le tableau de bord (README_SUPABASE.md §3) ou via
 # « supabase config push » si votre version de la CLI le propose.
@@ -87,3 +88,11 @@ policy = "per_worker"
 # Le jeton de l'appelant est vérifié par la plateforme, puis à nouveau par la fonction.
 [functions.gerer-acces]
 verify_jwt = true
+
+# Assistant DEUKSIL (relais vers Gemini). Ouvert aussi aux visiteurs sans compte :
+# la clé publique « sb_publishable_… » n'est pas un jeton JWT, la vérification de
+# la plateforme est donc désactivée pour cette fonction. La clé Gemini reste côté
+# serveur (supabase secrets set GEMINI_API_KEY=…) ; limiter DEUKSIL_ORIGINES au
+# domaine du site et surveiller le quota Gemini (README_SUPABASE.md §11).
+[functions.assistant-ia]
+verify_jwt = false

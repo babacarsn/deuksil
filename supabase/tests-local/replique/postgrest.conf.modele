@@ -1,8 +1,0 @@
-db-uri = "postgres://authenticator:authpass@127.0.0.1:${PG_PORT}/postgres"
-db-schemas = "public"
-db-anon-role = "anon"
-jwt-secret = "${JWT_SECRET}"
-server-host = "127.0.0.1"
-server-port = 3000
-db-pool = 20
-db-max-rows = 1000

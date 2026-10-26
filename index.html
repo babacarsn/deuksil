@@ -26,7 +26,7 @@
 <!-- Politique de sécurité du contenu (défense en profondeur contre l'injection de
      script) : scripts uniquement depuis ce site, aucun gestionnaire inline.
      connect-src : ajouter le domaine personnalisé Supabase s'il y en a un. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co http://127.0.0.1:54321 ws://127.0.0.1:54321; frame-src 'self' blob:; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co; frame-src 'self' blob:; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -140,6 +140,8 @@
 <script src="js/99e-pro.js"></script>
 <script src="js/99f-stats.js"></script>
 <script src="js/99g-formulaires.js"></script>
+<script src="js/99h-ia-gestion.js"></script>
+<script src="js/99i-ia-outils.js"></script>
 <link rel="stylesheet" href="css/02-refonte.css">
 <link rel="stylesheet" href="css/03-bureau.css">
 </body>

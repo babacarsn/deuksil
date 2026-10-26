@@ -61,7 +61,7 @@ if (_tenantRoute) {
     const next = rents.find(r => !r.paidAt);
     const late = rents.filter(r => !r.paidAt && rentState(r)[1] === 'bad');
     const paid = rents.filter(r => r.paidAt);
-    const photo = p ? ((p.photos && p.photos.length) ? p.photos[0] : PHOTOS.cover) : PHOTOS.cover;
+    const photo = photoDe(p, PHOTOS.cover);
 
     const hero = spaceHero(PHOTOS.bnClient, 'Bonjour ' + u.firstName, 'Votre logement et vos loyers',
       [['#/tenant/quittances', 'Mes quittances', 'file'], ['#/tenant/tickets', 'Signaler un problème', 'alert']]);

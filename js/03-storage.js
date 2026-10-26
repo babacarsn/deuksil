@@ -38,7 +38,7 @@ const ORDRE_ECRITURE = ['profiles', 'owner_records', 'properties', 'units', 'lea
   'sale_mandates', 'owner_transfers', 'fees', 'favorites', 'saved_searches', 'visits', 'client_requests', 'conversations',
   'notifications', 'agency_link_requests', 'reports', 'audit_log', 'activity_log', 'contact_messages'];
 /* Champs de l'interface qui ne sont jamais envoyés (secrets, anciens champs locaux, champs calculés). */
-const CHAMPS_LOCAUX = new Set(['password', 'pwHash', 'registrationPaid', 'demo', 'demandesDemo', 'plan', 'emailVerifie', 'emailVerifieLe',
+const CHAMPS_LOCAUX = new Set(['password', 'pwHash', 'registrationPaid', 'plan', 'emailVerifie', 'emailVerifieLe',
   'emailVerifiePar', 'member', 'perms_', 'dataUrl', '_id', 'fin']);
 /* Champs renommés (interface → colonne). */
 const SB_ALIAS = {profiles: {avatarPhoto: 'avatar_url'}};

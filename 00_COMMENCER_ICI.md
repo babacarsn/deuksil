@@ -2,6 +2,8 @@
 
 Ce dossier contient **tout** ce qu'il faut pour configurer et mettre en service DEUKSIL sur Supabase.
 
+> **Mise en ligne (Supabase + Gemini, site `https://deuksil.vercel.app`) : `README_SUPABASE_GEMINI.md`.**
+>
 > **Pour configurer, un seul fichier suffit : `README_CONFIGURATION.md`** — toutes les commandes et tous les réglages, de bout en bout, dans l'ordre. Les documents ci-dessous sont des compléments.
 
 Documents complémentaires :
@@ -35,21 +37,21 @@ README_SUPABASE.md               référence complète
 
 supabase/
   migrations/      8 scripts SQL de la base            → étape 5
-  functions/       fonction serveur gerer-acces        → étape 7
+  functions/       fonctions serveur gerer-acces et assistant-ia → étape 7
   templates/       modèles des e-mails                 → étape 4
   config.toml      réglages Supabase                   → étapes 3-4
   outils/          import du jeu de TEST, schéma       → étape 9
   sauvegarde/      sauvegarder.sh, restaurer.sh        → étapes 10 et 14
-  tests-local/     tests de sécurité, jeu de test, mesures, réplique locale → étapes 9 et 11
+  outils/          …, vider-projet.sql / vider-fichiers.js / verifier-projet-vide.sql (remise à zéro)
+  (tests-local/    dans DEUKSIL_OUTILS_DE_TEST.zip : tests de sécurité, jeu de test, mesures → étapes 9 et 11)
 
 tests/
   RECETTE_MANUELLE_FORMULAIRES.md  fiche à cocher      → étape 9
-  *.js             tests navigateur automatiques       → étape 9
-  historique/      anciens tests (version démo), non utilisés
+  (*.js            dans DEUKSIL_OUTILS_DE_TEST.zip : tests navigateur → étape 9)
 
 js/00-config.js    le seul fichier du site à renseigner → étape 8
 index.html, css/, js/, img/   le site lui-même
-docs/              rapports ; docs/historique/ = anciennes notes (version démo)
+docs/              rapports (sécurité, performances, index)
 ```
 
 ## Trois règles
@@ -66,4 +68,3 @@ docs/              rapports ; docs/historique/ = anciennes notes (version démo)
 
 * Validation sur Supabase hébergé : Storage, fonction serveur, `config.toml` et restauration n'ont été testés que sur une réplique locale — les étapes 7, 9 et 10 du guide les valident.
 
-* Anciens tests de la version démo à adapter ou supprimer (`tests/ETAT_DES_TESTS.md`).

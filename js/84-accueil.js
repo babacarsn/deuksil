@@ -54,7 +54,7 @@ function biensEnVedette(pubs, n = 9) {
 function hxCarte(p, favIds) {
   const fav = favIds.includes(p.id), terrain = p.transaction === 'terrain' || p.type === 'terrain';
   return `<article class="hx-card">
-    <div class="hx-ph"><img src="${esc(photoDe(p, PHOTOS.villa1))}" alt="" loading="lazy">
+    <div class="hx-ph">${p.photos && p.photos.length ? `<img src="${esc(p.photos[0])}" alt="" loading="lazy">` : sceneSvg(p)}
       <button class="hx-fav${fav ? ' on' : ''}" data-action="toggle-fav" data-id="${p.id}" aria-pressed="${fav}" aria-label="${fav ? 'Retirer des favoris' : 'Ajouter aux favoris'}">${icon('heart', 20, fav)}</button>
       <span class="hx-chip">${esc(TYPE_FR[p.type] || 'Bien')}</span></div>
     <div class="hx-cb">
@@ -164,7 +164,7 @@ function hxProfils() {
    et non comptés dans la partie des données visible par le visiteur. */
 function hxChiffres() {
   const K = DB.chiffres; if (!K) return '';
-  const C = [['home', K.biens, 'biens en ligne'], ['users', K.comptes, 'comptes actifs'], ['pin', Object.values(LOCATIONS).reduce((n, c) => n + Object.keys(c).length, 0), 'villes couvertes'], ['calendar', K.visites, 'visites organisées']];
+  const C = [['home', K.biens, 'biens référencés'], ['users', K.comptes, 'comptes actifs'], ['pin', Object.values(LOCATIONS).reduce((n, c) => n + Object.keys(c).length, 0), 'villes couvertes'], ['calendar', K.visites, 'visites organisées']];
   return `<section class="hx-sec hx-stats" aria-label="DEUKSIL en chiffres">${C.map(([ic, n, l]) =>
     `<div class="hx-stat"><span class="hx-stat-ic">${icon(ic, 26)}</span><span><b>${(+n || 0).toLocaleString('fr-FR')}</b><span>${l}</span></span></div>`).join('')}</section>`;
 }

@@ -151,6 +151,8 @@ node supabase/outils/generer-schema-front.js           # après un changement de
 
 ## 6. `supabase/tests-local/` — tests et données de test
 
+> 📦 **Les outils de test ne sont pas dans ce dossier** : le projet est livré **vide** (aucun compte, aucun bien, aucune donnée). Les tests automatiques et le jeu de données de test (`supabase/tests-local/`, `tests/*.js`) sont dans **`DEUKSIL_OUTILS_DE_TEST.zip`**, à décompresser à la racine du projet **uniquement sur le poste qui teste le projet Supabase de TEST**. Ne jamais publier ces fichiers sur l'hébergement.
+
 | Élément | Rôle |
 |---|---|
 | `securite-rls.test.js` | **65 tests de sécurité** : se connecte avec 11 vrais comptes et vérifie que chacun ne voit et ne modifie que ce qu'il doit |
@@ -179,7 +181,6 @@ Attendu : `65/65 tests réussis`.
 | `ecritures-auto.js` | vérifie que le site n'écrit rien sans action de l'utilisateur | `node tests/ecritures-auto.js` → aucune ligne |
 | `xss-sonde.js` | tente d'injecter du code dans les données (**modifie la base : en dernier**) | `node tests/xss-sonde.js` → « Aucune exécution » |
 | `RECETTE_MANUELLE_FORMULAIRES.md` | fiche à cocher : inscription, code e-mail, mot de passe oublié, photos, contact | à la main, 15 min |
-| `historique/` | anciens tests de la version démo | ne pas utiliser |
 
 Prérequis une fois : `npm install playwright pg && npx playwright install chromium`.
 
@@ -239,7 +240,6 @@ Puis publier les fichiers du site chez l'hébergeur.
 | `AUDIT_SECURITE.md` | on veut savoir ce qui a été sécurisé, testé, et ce qui reste à surveiller |
 | `PERFORMANCES.md` | on veut les mesures avant / après et les limites connues |
 | `INDEX.md` | on se demande pourquoi un index existe |
-| `historique/` | anciennes notes de la version démo (ne plus suivre) |
 
 ---
 

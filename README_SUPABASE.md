@@ -205,7 +205,8 @@ Points clés :
 * `js/03-storage.js` crée le client (`createClient(supabaseUrl, supabaseAnonKey)`), charge les tables utiles au rôle (`tablesALire`), par pages de 1000, et écrit dans l'ordre des dépendances. Une écriture refusée (RLS, contrainte) est **annulée à l'écran** et un message clair est affiché (`messageErreur`).
 * Cas particuliers (`ADAPTATEURS`) : comptes → fonction Edge `gerer-acces` ; notification pour un autre compte → `rpc('notifier')` ; vues / contacts d'une annonce d'autrui → `rpc('compter')` ; tables numérotées → relecture du numéro attribué par la base ; fichiers `data:` → Storage.
 * Session : `js/08-auth.js` (connexion e-mail + mot de passe, déconnexion), `js/76-demarrage.js` (`onAuthStateChange` ; les rechargements sont différés pour ne pas bloquer le verrou de supabase-js).
-* Serveur : la seule logique hors base est la fonction Edge `gerer-acces` (actions `creer`, `mot-de-passe`, `supprimer`), qui vérifie le jeton de l'appelant (`auth.getUser`), son statut de titulaire et le rattachement du compte visé.
+* Assistant : fonction Edge `assistant-ia` (relais vers Gemini, clé `GEMINI_API_KEY` en secret côté serveur), appelée par `js/14-ai.js` ; ouverte aux visiteurs (`verify_jwt = false`), d'où `DEUKSIL_ORIGINES` limité au site et un suivi du quota Gemini. L'historique de la discussion reste dans le navigateur (`localStorage`, 40 messages, effacé à la déconnexion). Questions de gestion (`js/99h-ia-gestion.js`) : le navigateur joint un résumé des données que l'utilisateur voit déjà (RLS, droits des membres) ; la fonction n'accepte ce résumé que pour un utilisateur connecté (`auth.getUser`) et si `GEMINI_PAYANT=oui` (offre payante de Gemini). L'assistant ne modifie aucune donnée. Outils des écrans (`js/99i-ia-outils.js`) : mode `tache` de la fonction, consignes fixées côté serveur ; rédaction d'annonce, estimation, rapprochement et modération (rôle admin vérifié en base) sans données personnelles ; relance, rapport/relevé, résumé de conversation et lecture de pièce exigent `GEMINI_PAYANT=oui`.
+* Serveur : la seule autre logique hors base est la fonction Edge `gerer-acces` (actions `creer`, `mot-de-passe`, `supprimer`), qui vérifie le jeton de l'appelant (`auth.getUser`), son statut de titulaire et le rattachement du compte visé.
 
 ## 12. Migrations
 
@@ -218,14 +219,15 @@ Points clés :
 
 ## 13. Suppression du mode démo
 
-Retiré de l'application (détail dans l'historique `docs/historique/`) :
+Retiré de l'application :
 
 | Élément de démonstration | Remplacé par |
 |---|---|
 | stockage `localStorage`, comptes et mots de passe locaux (`demo123`, `admin123`), jeu de données préchargé (`05-seed`, `77-jeu-de-test`, `97-demo`, `56-vie`, `87-noms`, `51-uatfix`) | Supabase (Auth + base) ; aucune donnée préchargée ; états vides explicites |
 | paiements simulés (PayDunya, `09-payments`, `10-paydunya`) | aucun paiement dans l'application |
 | photos « de démonstration » attribuées aux annonces sans photo | illustration neutre ; seules les photos déposées sont affichées |
-| statistiques et avis fictifs de l'accueil | chiffres réels (`rpc chiffres_publics`) ; pas d'avis inventés |
+| statistiques et avis fictifs (témoignages) de l'accueil | chiffres réels (`rpc chiffres_publics`) ; pas d'avis inventés |
+| anciens tests, notes et fiches de recette de la version démo (`tests/historique/`, `docs/historique/`, `recette/`) | supprimés |
 | notifications « par e-mail (simulation) » | mention retirée |
 | rappels, expirations, reconductions écrits par le navigateur | `app.generer_rappels()` / `app.reconduire_baux()` (pg_cron) |
 | **création automatique de comptes** locataires / mandants avec des adresses inventées et `demo123` | ouverture d'accès explicite avec l'adresse réelle, mot de passe provisoire aléatoire, changement à la 1re connexion |
@@ -262,7 +264,7 @@ Résultats obtenus le 22/10/2026 sur la réplique locale :
 | CSP (6 profils) | 0 violation |
 | rappels exécutés deux fois | 2e passage : 0 création |
 
-Les anciens scripts de test (version de démonstration) sont rangés dans `tests/historique/` ; leur état est dans `tests/ETAT_DES_TESTS.md`.
+État des tests : `tests/ETAT_DES_TESTS.md`.
 
 **À refaire sur un projet Supabase de test avant la production** (Storage et Edge n'ont été testés qu'en émulation locale).
 
@@ -345,9 +347,11 @@ Causes : fonctions d'appartenance réévaluées pour chaque ligne, prédicats no
 - [ ] `select count(*) from pg_tables where schemaname = 'public' and not rowsecurity;` → 0
 - [ ] pg_cron actif, tâche `deuksil-rappels` planifiée et exécutée une fois
 - [ ] Fonction `gerer-acces` déployée, `DEUKSIL_ORIGINES` défini
+- [ ] Fonction `assistant-ia` déployée (`--no-verify-jwt`), `GEMINI_API_KEY` en secret, `siteUrl` réel dans `js/00-config.js`
 - [ ] `js/00-config.js` renseigné (URL, clé **anon**, siteUrl, éditeur) — aucune clé `service_role` dans le dépôt (`grep -r service_role js/` → rien)
 - [ ] En-têtes HTTP de sécurité sur l'hébergement ; CSP adaptée si domaine personnalisé
 - [ ] Premier administrateur créé, MFA activée, `admin_mfa_obligatoire = 'oui'`
 - [ ] Sauvegarde exportée **et restauration testée** sur un projet neuf
 - [ ] Aucune donnée de test en production (`select count(*) from profiles where email like '%@deuksil.test'` → 0)
+- [ ] Projet de production **vide** avant le premier administrateur : `supabase/outils/verifier-projet-vide.sql` → 0 partout
 - [ ] Mentions légales complétées (`editeur` dans `js/00-config.js`)

@@ -81,6 +81,10 @@ Projet : ☐ test ☐ production  Rempli par : ________________  Date : ____ / _
 | G1 | Déploiement | `supabase functions deploy gerer-acces` | CLI | — | ☐ |
 | G2 | `DEUKSIL_ORIGINES` | adresse(s) du site, séparées par des virgules : ________________ | `supabase secrets set` | non | ☐ |
 | G3 | `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` | **ne rien faire** : fournis automatiquement par Supabase | — | — | — |
+| G4 | Assistant | `supabase functions deploy assistant-ia --no-verify-jwt` | CLI | — | ☐ |
+| G5 | `GEMINI_API_KEY` | clé Gemini (Google AI Studio) — **ne pas l'écrire ici** | `supabase secrets set` | **OUI** | ☐ |
+| G6 | `GEMINI_MODEL` | facultatif, défaut `gemini-flash-latest` | `supabase secrets set` | non | ☐ |
+| G7 | `GEMINI_PAYANT` | `oui` **seulement** si la facturation Gemini est activée (questions sur les factures, contrats, loyers…) | `supabase secrets set` | non | ☐ |
 
 ## H. Site — `js/00-config.js` (étape 8)
 

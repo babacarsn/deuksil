@@ -7,7 +7,7 @@ MISE EN SERVICE
 L'application a besoin d'un projet Supabase (comptes, base de
 données, fichiers). Suivre README_SUPABASE.md :
   1. créer le projet, appliquer les migrations (supabase/migrations) ;
-  2. déployer la fonction « gerer-acces » ;
+  2. déployer les fonctions « gerer-acces » et « assistant-ia » ;
   3. renseigner js/00-config.js (adresse + clé publique « anon ») ;
   4. publier les fichiers sur un hébergement HTTPS.
 

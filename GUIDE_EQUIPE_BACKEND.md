@@ -193,8 +193,6 @@ Cocher **toute** la checklist `README_SUPABASE.md` §19. Puis parcours manuel : 
 
 1. **Recherche des annonces côté serveur** : aujourd'hui l'interface charge tout le catalogue public à l'ouverture ; à faire avant une forte croissance (docs/PERFORMANCES.md, « Ce qui reste »).
 
-2. **Anciens tests** de la version démo : `tests/historique/`, à adapter ou supprimer (`tests/ETAT_DES_TESTS.md`).
+2. **Validations sur Supabase hébergé** : Storage, fonction Edge, `config.toml` et restauration (`session_replication_role`) n'ont été testés que sur la réplique locale — les étapes 7, 9 et 10 les valident.
 
-3. **Validations sur Supabase hébergé** : Storage, fonction Edge, `config.toml` et restauration (`session_replication_role`) n'ont été testés que sur la réplique locale — les étapes 7, 9 et 10 les valident.
-
-4. Décisions produit listées dans `docs/AUDIT_SECURITE.md` §8 (annuaire, notifications, MFA, offre de sauvegarde).
+3. Décisions produit listées dans `docs/AUDIT_SECURITE.md` §8 (annuaire, notifications, MFA, offre de sauvegarde).

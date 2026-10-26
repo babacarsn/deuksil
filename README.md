@@ -3,7 +3,7 @@
 Plateforme immobilière et logiciel de gestion locative pour le Sénégal : annonces, visites, messagerie, baux et loyers, facturation, documents, espaces propriétaire, agence (avec équipe), locataire, propriétaire mandant, client et administration.
 
 * **Interface** : HTML / CSS / JavaScript sans framework (`index.html`, `css/`, `js/`), application web installable (PWA).
-* **Serveur** : [Supabase](https://supabase.com) — authentification, base PostgreSQL protégée par la RLS, stockage des fichiers, une fonction Edge.
+* **Serveur** : [Supabase](https://supabase.com) — authentification, base PostgreSQL protégée par la RLS, stockage des fichiers, deux fonctions Edge (`gerer-acces`, `assistant-ia`).
 
 ## Démarrer
 
@@ -17,6 +17,7 @@ Sans configuration, l'application affiche « Configuration incomplète » : elle
 
 | | |
 |---|---|
+| [README_SUPABASE_GEMINI.md](README_SUPABASE_GEMINI.md) | **mise en ligne : réglages Supabase et Gemini, assistant IA, premier administrateur** |
 | [README_CONFIGURATION.md](README_CONFIGURATION.md) | **configuration complète de bout en bout : le seul fichier nécessaire** |
 | [00_COMMENCER_ICI.md](00_COMMENCER_ICI.md) | **point d'entrée : quoi ouvrir, dans quel ordre** |
 | [DEUKSIL_Dossier_Configuration.pdf](DEUKSIL_Dossier_Configuration.pdf) | guide + fiche des paramètres + recette + checklist, en un PDF à imprimer |
@@ -27,7 +28,6 @@ Sans configuration, l'application affiche « Configuration incomplète » : elle
 | [docs/AUDIT_SECURITE.md](docs/AUDIT_SECURITE.md) | audit de sécurité et tests |
 | [docs/INDEX.md](docs/INDEX.md) | justification des index |
 | [docs/PERFORMANCES.md](docs/PERFORMANCES.md) | mesures avant / après |
-| [docs/historique/](docs/historique/) | documentation des versions de démonstration (obsolète) |
 
 ## Structure
 

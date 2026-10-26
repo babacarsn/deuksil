@@ -18,7 +18,7 @@ Version du 22 octobre 2026.
 | [4. Régler l'API et l'authentification](#4-régler-lapi-et-lauthentification-tableau-de-bord) | réglages par clics dans le tableau de bord | 20 min |
 | [5. Créer la base de données](#5-créer-la-base-de-données-migrations) | 8 migrations en une commande | 5 min |
 | [6. Activer les rappels quotidiens](#6-activer-les-rappels-quotidiens-pg_cron) | tâche planifiée | 5 min |
-| [7. Déployer la fonction serveur](#7-déployer-la-fonction-serveur-gerer-acces) | `gerer-acces` | 5 min |
+| [7. Déployer la fonction serveur](#7-déployer-la-fonction-serveur-gerer-acces) | `gerer-acces`, `assistant-ia` | 5 min |
 | [8. Brancher et publier le site](#8-brancher-et-publier-le-site) | `js/00-config.js`, hébergement | 15 min |
 | [9. Tester](#9-tester-le-projet-de-test) | tests automatiques + recette manuelle | 1 h |
 | [10. Sauvegarde et restauration d'essai](#10-sauvegarde-et-restauration-dessai) | une fois, avant toute vraie donnée | 30 min |
@@ -57,7 +57,7 @@ Version du 22 octobre 2026.
 * la **fonction serveur** `gerer-acces` (`supabase/functions/gerer-acces/`) ;
 * les **modèles d'e-mails** (`supabase/templates/`) ;
 * les **scripts de sauvegarde et restauration** (`supabase/sauvegarde/`) ;
-* les **tests** automatiques (`supabase/tests-local/`, `tests/`) ;
+* les **tests** automatiques (`supabase/tests-local/`, `tests/`) — livrés à part dans `DEUKSIL_OUTILS_DE_TEST.zip` (partie 9) ;
 * le **site** complet.
 
 Tout cela a été testé sur une copie locale de Supabase. Votre travail : **installer** tout cela dans **vos** projets Supabase et **vérifier** que tout fonctionne.
@@ -331,6 +331,42 @@ Ne **pas** définir `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_
 > ```
 > doit afficher **401** (« connexion requise » : la fonction refuse les inconnus — c'est le bon comportement).
 
+### 7.2 Assistant DEUKSIL (assistant-ia)
+
+Relais vers Gemini pour l'assistant de recherche et la discussion (`js/14-ai.js`). La clé Gemini reste côté serveur. La fonction est ouverte aux visiteurs sans compte (déploiement `--no-verify-jwt`, comme dans `config.toml`) : limiter `DEUKSIL_ORIGINES` au domaine du site et suivre le quota Gemini.
+
+```bash
+supabase functions deploy assistant-ia --no-verify-jwt
+supabase secrets set GEMINI_API_KEY="$GEMINI_API_KEY"      # secret
+supabase secrets set GEMINI_MODEL="${GEMINI_MODEL:-gemini-flash-latest}"
+supabase secrets set GEMINI_PAYANT=oui     # SEULEMENT si la facturation Gemini est activée (voir ci-dessous)
+supabase secrets list            # doit montrer GEMINI_API_KEY et DEUKSIL_ORIGINES
+```
+
+> **✅ Contrôle** :
+> ```bash
+> curl -s -X POST "$SUPABASE_URL/functions/v1/assistant-ia" -H "apikey: $SUPABASE_ANON_KEY" -H "content-type: application/json" \
+>   -d '{"mode":"chat","turns":[{"role":"system","content":"Réponds en une phrase."},{"role":"user","content":"Bonjour"}]}'
+> ```
+> doit renvoyer `{"text":"…"}`. `{"message":"Assistant non configuré."}` = `GEMINI_API_KEY` manquante.
+
+**Questions de gestion (factures, devis, proformas, contrats, loyers, impayés, aide à la décision)** : l'assistant reçoit alors un résumé des données que l'utilisateur connecté voit déjà dans son espace (droits des membres d'équipe respectés). La fonction n'accepte ce mode que si l'utilisateur est connecté (jeton vérifié par Supabase Auth) **et** si `GEMINI_PAYANT=oui`. Ne mettre `oui` qu'après avoir activé la **facturation** du projet Google AI Studio / Google Cloud de la clé : les conditions de l'offre gratuite interdisent d'envoyer des données personnelles ou confidentielles et autorisent Google à les utiliser pour améliorer ses produits ; l'offre payante ne les utilise pas. Sans `oui`, l'assistant répond aux questions générales et le signale.
+
+**Outils de l'assistant dans les écrans** (`js/99i-ia-outils.js`, mode `tache` de la fonction) :
+
+| Outil | Écran | Offre payante exigée |
+|---|---|---|
+| Rédiger l'annonce (titre + description) | formulaire d'un bien | non |
+| Estimer le prix (fourchette indicative, comparables DEUKSIL) | formulaire d'un bien | non |
+| Suggestions de biens pour une demande client (anonymisée) | Agence → Clients | non |
+| Analyser une annonce (prix anormal, texte copié, doublon, coordonnées) | Administration → Modération — rôle admin vérifié dans la base | non |
+| Message de relance d'impayé (messagerie, WhatsApp, copie) | Gestion → Loyers | **oui** |
+| Rapport du mois / relevé expliqué d'un propriétaire mandant | Gestion, Gestion → Rapports | **oui** |
+| Résumer une conversation | Messagerie | **oui** |
+| Lire une facture ou un reçu (photo) et préremplir la dépense | Gestion → Dépenses | **oui** |
+
+Chaque outil calcule d'abord ce qu'il peut sans IA (comparables, signaux, chiffres du mois, modèle de relance) : si l'assistant ne répond pas ou n'est pas activé, ce résultat reste affiché. Rien n'est enregistré sans un clic de l'utilisateur. Contrôle : un propriétaire de test voit les boutons « Rédiger avec l'assistant » et « Estimer le prix » dans le formulaire d'un bien.
+
 ---
 
 ## 8. Brancher et publier le site
@@ -384,6 +420,8 @@ Puis envoyer le contenu de `../deuksil-site` chez l'hébergeur (FTP, panneau d'h
 ## 9. Tester le projet de TEST
 
 > ⚠️ **Jamais sur la production** : ces étapes créent des comptes et des données de test.
+
+> 📦 **Les outils de test ne sont pas dans ce dossier** : le projet est livré **vide** (aucun compte, aucun bien, aucune donnée). Les tests automatiques et le jeu de données de test (`supabase/tests-local/`, `tests/*.js`) sont dans **`DEUKSIL_OUTILS_DE_TEST.zip`**, à décompresser à la racine du projet **uniquement sur le poste qui teste le projet Supabase de TEST**. Ne jamais publier ces fichiers sur l'hébergement.
 
 ### 9.1 Charger le jeu de données de test
 
@@ -539,6 +577,8 @@ Tableau de bord → `deuksil-restauration` → Project Settings → General → 
 
 ## 11. Passer en PRODUCTION
 
+> Le projet de production part **vide**. Pour remettre à zéro un projet qui aurait reçu des données par erreur : sauvegarde d'abord, puis `psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "set deuksil.vider = 'oui'" -f supabase/outils/vider-projet.sql`, `CONFIRMER=oui node supabase/outils/vider-fichiers.js` (Storage), et contrôle avec `supabase/outils/verifier-projet-vide.sql` (toutes les lignes à 0).
+
 ### 11.1 Créer et configurer le projet
 
 Refaire, sur un **nouveau** projet `deuksil-prod`, avec un fichier **`.env.prod`** :
@@ -550,7 +590,7 @@ Refaire, sur un **nouveau** projet `deuksil-prod`, avec un fichier **`.env.prod`
 | 4 | tous les réglages | Site URL / Redirect URLs = adresse **réelle** |
 | 5 | `supabase db push` | — |
 | 6 | pg_cron + tâche | — |
-| 7 | `supabase functions deploy gerer-acces` + `secrets set` | `DEUKSIL_ORIGINES` = adresse réelle |
+| 7 | `supabase functions deploy gerer-acces` et `assistant-ia --no-verify-jwt` + `secrets set` | `DEUKSIL_ORIGINES` = adresse réelle ; `GEMINI_API_KEY` |
 | 8 | `js/00-config.js` avec les valeurs **prod** + mentions légales **complètes** | publier sur l'adresse réelle |
 | 9 | ❌ **NE PAS** importer le jeu de test ni lancer les tests automatiques | seulement un parcours manuel court (inscription, connexion) |
 
@@ -559,7 +599,8 @@ set -a; source .env.prod; set +a          # bien charger le fichier PROD
 supabase link --project-ref <ref-prod>
 supabase db push
 supabase functions deploy gerer-acces
-supabase secrets set DEUKSIL_ORIGINES="$DEUKSIL_ORIGINES"
+supabase functions deploy assistant-ia --no-verify-jwt
+supabase secrets set DEUKSIL_ORIGINES="$DEUKSIL_ORIGINES" GEMINI_API_KEY="$GEMINI_API_KEY"
 ```
 
 ### 11.2 Premier administrateur
@@ -615,11 +656,14 @@ cd supabase/sauvegarde && ./sauvegarder.sh
 | ☐ | RLS partout | requête de la partie 5 → `sans_rls_0` = 0 |
 | ☐ | Tâche `deuksil-rappels` active | `select * from cron.job;` |
 | ☐ | Fonction `gerer-acces` déployée, `DEUKSIL_ORIGINES` défini | `curl … → 401` ; `supabase secrets list` |
+| ☐ | Fonction `assistant-ia` déployée, `GEMINI_API_KEY` défini, `DEUKSIL_ORIGINES` = adresse réelle | contrôle de la partie 7.2 |
+| ☐ | `js/00-config.js` : `siteUrl` = adresse **réelle** (pas `http://localhost:8080`) | lecture du fichier |
 | ☐ | `js/00-config.js` : URL et clé **anon** de **prod**, `siteUrl`, mentions légales complètes | lecture du fichier |
 | ☐ | Aucune clé `service_role` dans le site | `grep -rn service_role js/` → commentaire d'avertissement seulement |
 | ☐ | En-têtes HTTP de sécurité | partie 11.3 |
 | ☐ | Administrateur créé, MFA activée puis obligatoire | partie 11.2 |
 | ☐ | Aucune donnée de test en production | `select count(*) from public.profiles where email like '%@deuksil.test';` → 0 |
+| ☐ | Projet **vide** avant le premier administrateur | `psql "$DATABASE_URL" -f supabase/outils/verifier-projet-vide.sql` → 0 partout |
 | ☐ | Sauvegarde de production faite, restauration testée (partie 10) | dossier chiffré rangé hors du projet |
 | ☐ | Parcours manuel en production : inscription + code, connexion, publication d'un bien avec photo, message, déconnexion | — |
 
@@ -713,14 +757,15 @@ index.html, sw.js, manifest.webmanifest, css/, js/, img/   le site (partie 8.3)
 supabase/
   migrations/               8 scripts SQL de la base (partie 5)
   functions/gerer-acces/    fonction serveur (partie 7)
+  functions/assistant-ia/   assistant (relais Gemini, partie 7.2)
   templates/                modèles d'e-mails (partie 4.5)
   config.toml               réglages de référence (base locale)
   outils/importer-json.js   import du jeu de TEST (partie 9.1)
   outils/generer-schema-front.js   mise à jour du schéma du site (partie 13)
   sauvegarde/               sauvegarder.sh, restaurer.sh (parties 10, 11.4, 13)
-  tests-local/              test de sécurité, jeu de test (partie 9)
+  tests-local/              (dans DEUKSIL_OUTILS_DE_TEST.zip) test de sécurité, jeu de test (partie 9)
 
-tests/                      tests navigateur (partie 9) ; historique/ = anciens tests, ne pas utiliser
+tests/                      fiche de recette manuelle ; tests navigateur dans DEUKSIL_OUTILS_DE_TEST.zip (partie 9)
 docs/                       rapports détaillés (sécurité, performances, index) — lecture facultative
 README_SUPABASE.md          référence technique complète — lecture facultative
 ```

@@ -53,7 +53,7 @@ const slugTitre = t => String(t || 'bien').normalize('NFD').replace(/[̀-ͯ]/g, 
   .replace(/m²/g, 'm2').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60) || 'bien';
 function annonceHref(p) { return p ? `#/annonce/${slugTitre(p.title)}-${refPublique(p.id)}` : '#/search'; }
 function bienDeRef(ref) { return DB.getData(DB.K.properties).find(p => refPublique(p.id) === ref) || null; }
-const routeFiche = () => routes.find(r => r.re.source === '^\\/property\\/([\\w]+)$');
+const routeFiche = () => routes.find(r => r.re.source === '^\\/property\\/([\\w-]+)$');
 routes.unshift({re: /^\/annonce\/([a-z0-9-]+)$/, fn: s => {
   const p = bienDeRef(String(s).split('-').pop());
   return routeFiche().fn(p ? p.id : '__introuvable');

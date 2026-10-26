@@ -369,7 +369,7 @@ function ficheVente(u, d) {
     </div>`;
 }
 
-route(/^\/vente\/([\w]+)$/, vid => {
+route(/^\/vente\/([\w-]+)$/, vid => {
   const u = Auth.current();
   if (!u || !['owner', 'agency'].includes(u.role)) { toast('Espace réservé aux propriétaires.', 'bad'); go('#/login'); return false; }
   const d = DB.findItem(DB.K.deals, x => x.id === vid && x.ownerId === u.id);
