@@ -236,17 +236,17 @@ route(/^\/agent\/profil$/, () => {
     <form class="card" data-action="agent-profil" style="max-width:640px" data-sub="Vos coordonnées"><h4>Mes informations</h4>
       <div class="form-grid"><div class="field"><label>Prénom</label><input class="input" value="${esc(m.firstName)}" disabled></div>
         <div class="field"><label>Nom</label><input class="input" value="${esc(m.lastName)}" disabled></div>
-        <div class="field"><label>CNI (identifiant de connexion)</label><input class="input" value="${esc(m.cni)}" disabled></div>
+        <div class="field"><label>Adresse e-mail (identifiant de connexion)</label><input class="input" value="${esc(m.email || '')}" disabled></div>
         <div class="field"><label>Téléphone</label><input class="input" type="tel" name="phone" value="${esc(m.phone || '')}" required></div></div>
-      <p class="small muted">Nom et CNI se modifient par le responsable de l'agence.</p>
+      <p class="small muted">Nom et adresse e-mail se modifient par le responsable de l'agence.</p>
       <button class="btn">Enregistrer</button></form>
-    <form class="card" data-action="agent-mdp" style="max-width:640px;margin-top:16px" data-sub="6 caractères minimum"><h4>Changer mon mot de passe</h4>
-      <div class="form-grid"><div class="field"><label>Mot de passe actuel</label><input class="input" type="password" name="ancien" required autocomplete="current-password"></div>
-        <div class="field"><label>Nouveau mot de passe</label><input class="input" type="password" name="nouveau" minlength="6" required autocomplete="new-password"></div>
-        <div class="field"><label>Confirmer</label><input class="input" type="password" name="confirme" minlength="6" required autocomplete="new-password"></div></div>
+    <form class="card" data-action="agent-mdp" style="max-width:640px;margin-top:16px" data-sub="8 caractères minimum"><h4>Changer mon mot de passe</h4>
+      <div class="form-grid"><div class="field"><label for="ag-mdp-ancien">Mot de passe actuel</label><input class="input" id="ag-mdp-ancien" type="password" name="ancien" required autocomplete="current-password"></div>
+        <div class="field"><label for="ag-mdp-nouveau">Nouveau mot de passe</label><input class="input" id="ag-mdp-nouveau" type="password" name="nouveau" minlength="8" required autocomplete="new-password" placeholder="8 caractères minimum"></div>
+        <div class="field"><label for="ag-mdp-confirme">Confirmer</label><input class="input" id="ag-mdp-confirme" type="password" name="confirme" minlength="8" required autocomplete="new-password" placeholder="Retapez le mot de passe"></div></div>
       <button class="btn">Changer le mot de passe</button></form>`);
 });
-window.addEventListener('submit', e => {
+window.addEventListener('submit', async e => {
   const f = e.target.closest && e.target.closest('form[data-action="agent-profil"],form[data-action="agent-mdp"]'); if (!f) return;
   e.preventDefault(); e.stopImmediatePropagation();
   const u = Auth.current(); if (!u || !u.member) return;
@@ -256,35 +256,16 @@ window.addEventListener('submit', e => {
     if (String(d.phone).replace(/\D/g, '').length < 9) return toast('Indiquez un téléphone valide (9 chiffres).', 'bad');
     DB.updateItem(DB.K.users, m.id, {phone: d.phone.trim()}); toast('Téléphone enregistré.');
   } else {
-    if (!(typeof verifierMotDePasse === 'function' ? verifierMotDePasse(m, d.ancien) : d.ancien === m.password)) return toast('Le mot de passe actuel est incorrect.', 'bad');
-    if ((d.nouveau || '').length < 6) return toast('Le nouveau mot de passe doit faire 6 caractères minimum.', 'bad');
-    if (d.nouveau !== d.confirme) return toast('Les deux mots de passe ne correspondent pas.', 'bad');
     if (d.nouveau === d.ancien) return toast('Choisissez un mot de passe différent de l\'actuel.', 'bad');
-    DB.updateItem(DB.K.users, m.id, {password: d.nouveau}); audit('Mot de passe modifié', `${m.firstName} ${m.lastName}`); toast('Mot de passe changé.'); f.reset();
+    const refus = refusNouveauMotDePasse(d.nouveau, d.confirme); if (refus) return toast(refus, 'bad');
+    const err = await changerMonMotDePasse(d.ancien, d.nouveau); if (err) return toast(err, 'bad');
+    audit('Mot de passe modifié', `${m.firstName} ${m.lastName}`); toast('Mot de passe changé.'); f.reset();
   }
   render();
 }, true);
 
 /* Le panneau du compte (mobile) et le menu mènent l'agent à son profil. */
 if (typeof DS_FORM_IC !== 'undefined') DS_FORM_IC.unshift([/agent-profil/, 'user'], [/agent-mdp/, 'key'], [/agent-cr/, 'file']);
-
-/* Jeu de démonstration : si aucune attribution n'existe encore, les biens de
-   l'agence sont répartis entre ses agents actifs (une seule fois), en
-   commençant par les biens qui ont des visites. */
-Object.assign(DB.K, {attribV1: 'deuksil_attrib_v1'});
-function attributionDemo() {
-  if (localStorage.getItem(DB.K.attribV1) || !localStorage.getItem('deuksil_agents_v2')) return;
-  DB.filterItems(DB.K.users, u => u.role === 'agency').forEach(ag => {
-    const props = DB.filterItems(DB.K.properties, p => p.ownerId === ag.id);
-    if (!props.length || props.some(p => p.agentId)) return;
-    const agents = DB.filterItems(DB.K.users, x => x.parentId === ag.id && x.role === 'agent' && x.status === 'actif');
-    if (!agents.length) return;
-    const vis = DB.getData(DB.K.visits), nbVis = p => vis.filter(v => v.propertyId === p.id).length;
-    props.slice().sort((a, b) => nbVis(b) - nbVis(a)).forEach((p, i) => { if (i < agents.length * 3) DB.updateItem(DB.K.properties, p.id, {agentId: agents[i % agents.length].id}); });
-  });
-  localStorage.setItem(DB.K.attribV1, '1');
-}
-[800, 2200, 4500].forEach(t => setTimeout(() => { try { attributionDemo(); } catch (e) {} }, t));
 
 /* ==========================================================================
    Suite — six pratiques d'agence :
@@ -432,21 +413,9 @@ document.addEventListener('click', e => {
   DB.getData(DB.K.notifications).filter(n => n.userId === u.member.id && !n.read).forEach(n => _updateAgent.call(DB, DB.K.notifications, n.id, {read: true}));
 }, true);
 
-/* --- 11. Rappels de visite (la veille et le jour même) ---------------------- */
-function rappelsVisites() {
-  const u = Auth.current(); if (!u || u.role !== 'agency') return;
-  const auj = ymd(), dem = new Date(new Date(auj + 'T12:00:00').getTime() + 864e5).toISOString().slice(0, 10);
-  DB.filterItems(DB.K.visits, v => v.ownerId === u.id && ['acceptee', 'attente'].includes(v.status) && (v.date === auj || v.date === dem)).forEach(v => {
-    const cle = v.date === auj ? 'rappelJ0' : 'rappelJ1'; if (v[cle]) return;
-    const p = gProp(v.propertyId) || {}, c = clientVisite(v), dest = agentDeVisite(v) || u.id;
-    const quand = v.date === auj ? `Aujourd'hui à ${v.time || '—'}` : `Demain à ${v.time || '—'}`;
-    notify(dest, `${quand} : visite de « ${p.title || 'bien'} » avec ${displayName(c).trim()}${c.phone ? ' (' + c.phone + ')' : ''}${v.status === 'attente' ? ' — encore à confirmer' : ''}.`, '#/agency/visits');
-    _updateAgent.call(DB, DB.K.visits, v.id, {[cle]: now()});
-  });
-}
-addEventListener('hashchange', () => { try { rappelsVisites(); } catch (e) {} });
-setInterval(() => { try { rappelsVisites(); } catch (e) {} }, 5 * 60 * 1000);
-[1200, 3000].forEach(t => setTimeout(() => { try { rappelsVisites(); } catch (e) {} }, t));
+/* --- 11. Rappels de visite (la veille et le jour même) ----------------------
+   Envoyés par la base (app.generer_rappels, chaque matin) à l'agent chargé de la
+   visite, ou au titulaire de l'espace. */
 
 /* --- 12. Validation des biens publiés par un agent -------------------------- */
 LISTING_LABEL.avalider = 'À valider par l\'agence';

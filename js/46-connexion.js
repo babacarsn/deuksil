@@ -35,13 +35,8 @@ document.head.insertAdjacentHTML('beforeend', '<style>'
   + '.auth-box .btn.block{min-height:54px;border-radius:14px;font-size:.98rem;gap:10px}'
   + '.auth-or{display:flex;align-items:center;gap:14px;margin:22px 0;color:var(--muted);font-size:.82rem}'
   + '.auth-or::before,.auth-or::after{content:"";flex:1;height:1px;background:var(--line)}'
-  + '.auth-demo{margin-top:26px;border:1px solid var(--line);border-radius:var(--r-card);background:var(--surface);padding:16px}'
-  + '.auth-demo .row-between{padding:7px 0;gap:10px}'
   + '@media (max-width:980px){.auth{grid-template-columns:1fr}.auth-side{display:none}.auth-main{min-height:100vh;padding:18px 16px 32px}}'
   + '</style>');
-
-const DEMO_ACCOUNTS = [['Client', '1900000000002', 'demo123'], ['Propriétaire', '1900000000003', 'demo123'],
-  ['Agence', '1900000000004', 'demo123'], ['Locataire', '1900000000013', 'demo123'], ['Administrateur', '1900000000001', 'admin123']];
 
 route(/^\/login$/, () => `<div class="auth">
   <aside class="auth-side">
@@ -86,15 +81,6 @@ route(/^\/login$/, () => `<div class="auth">
       <p class="small muted" style="text-align:center;margin:18px 0 0">Vous n'avez pas encore de compte ? <a href="#/register"><b>Créer un compte</b></a></p>
 
 
-      <div class="auth-demo">
-        <b class="small">Comptes de démonstration</b>
-        <div style="margin-top:8px">
-          ${DEMO_ACCOUNTS.map(([r, c, p]) => { const u = DB.findItem(DB.K.users, x => x.cni === c) || {};
-            return `<div class="row-between small"><span style="min-width:0"><b>${r}</b><br><span class="muted">${esc(u.email || c)} · ${p}</span></span>
-            <button class="btn ghost sm" data-action="fill-login" data-cni="${esc(u.email || c)}" data-pwd="${p}">Utiliser</button></div>`; }).join('')}
-        </div>
-        <p class="small muted" style="margin:10px 0 0">Démonstration : les mots de passe sont stockés en clair dans le navigateur.</p>
-      </div>
     </div>
   </main>
 </div>`);

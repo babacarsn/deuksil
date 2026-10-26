@@ -117,8 +117,8 @@ function honoraireVente(u, d) {
 }
 /* Nouveau bail signé dans l'application par une agence → frais de location,
    et la caution est notée chez qui la règle l'indique. Les baux déjà
-   présents (jeu de démonstration) ne reçoivent rien d'office : on peut leur
-   facturer les frais depuis « Suivi du bail ». */
+   enregistrés ne reçoivent rien d'office : on peut leur facturer les frais
+   depuis « Suivi du bail ». */
 let agBailSaisi = false;
 window.addEventListener('submit', e => {
   if (e.target.closest && e.target.closest('form[data-action="g-lease"]')) { agBailSaisi = true; setTimeout(() => { agBailSaisi = false; }, 0); }
@@ -429,19 +429,6 @@ document.addEventListener('click', e => {
 });
 
 /* --- G. Une seule équipe ----------------------------------------------------- */
-function migrerAgents() {
-  /* Une fois les données en place (sinon on réessaie plus tard). */
-  if (localStorage.getItem('deuksil_agents_v2') || !DB.getData(DB.K.users).length) return;
-  DB.getData(DB.K.agents).forEach(a => {
-    const ag = DB.findItem(DB.K.users, a.agencyId); if (!ag) return;
-    if (!DB.findItem(DB.K.users, x => x.cni === a.cni)) DB.addItem(DB.K.users, {cni: a.cni, firstName: a.firstName, lastName: a.lastName, phone: a.phone || '', password: 'demo123',
-      role: 'agent', parentId: ag.id, perms: MEMBER_DEFAULT.agent, status: a.status === 'actif' ? 'actif' : 'suspendu', titre: a.role || '', registrationPaid: true, agencyName: '', address: '', agencyDesc: ''});
-    DB.deleteItem(DB.K.agents, a.id);
-  });
-  localStorage.setItem('deuksil_agents_v2', '1');
-}
-try { migrerAgents(); } catch (e) {}
-[600, 1800, 4000].forEach(t => setTimeout(() => { try { migrerAgents(); } catch (e) {} }, t));
 const membresDe = u => DB.filterItems(DB.K.users, x => x.parentId === u.id);
 (() => {
   const r = routes.find(x => x.re.source === '^\\/agency\\/agents$'); if (!r) return;

@@ -79,7 +79,7 @@ function enrichirFormulaireBail() {
     </select>
     <div class="small muted" style="margin-top:5px" data-bc-aide>${liste.length
       ? 'Une personne peut louer plusieurs logements : choisir un locataire actuel ajoute un bail à son compte, sans créer de doublon.'
-      : 'Aucun client ne vous a encore contacté. Saisissez son nom ci-dessous : un accès lui sera créé.'}</div>`;
+      : 'Aucun client ne vous a encore contacté. Saisissez son nom ci-dessous ; vous pourrez ensuite lui ouvrir un accès avec son adresse e-mail.'}</div>`;
   champ.closest('.field').before(bloc);
 }
 
@@ -97,11 +97,11 @@ document.addEventListener('change', e => {
     const r = resumeBaux(c);
     if (aide) aide.textContent = r
       ? `${c.firstName} ${r}. Ce bail s'ajoutera aux siens : un seul compte, plusieurs logements.`
-      : `${c.firstName} n'a pas encore de logement chez vous. Un accès lui sera créé.`;
+      : `${c.firstName} n'a pas encore de logement chez vous. Le bail sera ajouté à son compte.`;
   } else {
     nom.readOnly = false; if (tel) tel.readOnly = false;
     nom.value = ''; if (tel) tel.value = '';
-    if (aide) aide.textContent = "Saisissez son nom ci-dessous : un accès lui sera créé.";
+    if (aide) aide.textContent = "Saisissez son nom ci-dessous ; vous pourrez ensuite lui ouvrir un accès avec son adresse e-mail.";
   }
 });
 
@@ -110,55 +110,16 @@ new MutationObserver(() => requestAnimationFrame(() => {
 })).observe(document.body, {childList: true, subtree: true});
 
 /* --- 2. Le bail se rattache au compte existant -------------------------- */
-/* On remplace la création systématique d'un compte : si la personne en a
-   déjà un, c'est le sien qui porte le bail. */
-compteDuBail = function (bail) {
-  if (!bail || !bail.tenant || !bail.id) return null;
-  if (locataireDuBail(bail)) return null;
-
-  const deja = compteExistantPour(bail);
-  if (deja) {
-    const maj = rattacherBail(deja, bail);
-    return {...maj, __existant: true};
-  }
-
-  const mots = String(bail.tenant).trim().split(/\s+/);
-  const prenom = mots.shift() || 'Locataire';
-  const nom = mots.join(' ');
-  const base = sansAccent(prenom) + '.' + (sansAccent(nom) || 'locataire');
-  const u = DB.addItem(DB.K.users, {
-    password: 'demo123', status: 'actif', registrationPaid: true,
-    firstName: prenom, lastName: nom, phone: bail.phone || '',
-    role: 'tenant', leaseId: bail.id, leaseIds: [bail.id], ownerRef: bail.ownerId,
-    email: emailLibre(base), cni: '', agencyName: '', address: '', agencyDesc: ''
-  });
-  return DB.lastWriteOk === false ? null : u;
-};
-
-/* --- 3. Le jeu de démonstration ne garde qu'une seule Fatou ------------- */
-function fusionnerDoublons() {
-  const porteurs = DB.filterItems(DB.K.users, u => bauxDe(u).length);
-  porteurs.forEach(loc => {
-    const jumeau = DB.findItem(DB.K.users, u => u.id !== loc.id && !bauxDe(u).length
-      && ['client', 'tenant'].includes(u.role)
-      && (nomCle(u) === nomCle(loc) || (telCle(u.phone) && telCle(u.phone) === telCle(loc.phone))));
-    if (!jumeau) return;
-    /* Le compte conservé est celui qui a une vie : visites, favoris, messages. */
-    const vie = i => {
-      try {
-        return DB.getData(DB.K.visits).filter(v => v.clientId === i).length
-          + DB.getData(DB.K.messages).filter(m => Array.isArray(m.participants) && m.participants.includes(i)).length
-          + DB.getData(DB.K.favorites).filter(x => x.clientId === i).length;
-      } catch (e) { return 0; }
-    };
-    const garde = vie(jumeau.id) >= vie(loc.id) ? jumeau : loc;
-    const jette = garde === jumeau ? loc : jumeau;
-    /* Le compte conservé hérite de TOUS les baux, pas seulement du dernier. */
-    const ids = [...new Set([...bauxDe(garde), ...bauxDe(loc)].map(b => b.id))];
-    DB.updateItem(DB.K.users, garde.id,
-      {leaseIds: ids, leaseId: ids[0] || '', ownerRef: loc.ownerRef, role: 'tenant'});
-    DB.deleteItem(DB.K.users, jette.id);
-  });
-}
-etapeAmorcage('fusion des comptes en double', fusionnerDoublons, true);
-setTimeout(() => { try { fusionnerDoublons(); } catch (e) {} }, 1700);
+/* Si le propriétaire a choisi dans la liste une personne qui a déjà un compte,
+   le nouveau bail est rattaché à ce compte dès qu'il est enregistré (contrôle
+   de la relation par la base : fonction rattacher_locataire). */
+document.addEventListener('submit', e => {
+  const f = e.target.closest && e.target.closest('.main form[data-action="g-lease"]'); if (!f) return;
+  const sel = f.querySelector('[data-action="bc-choisir"]'), compteId = sel && sel.value; if (!compteId) return;
+  const u = Auth.current(), nom = (f.querySelector('[name="tenant"]') || {}).value, debut = Date.now();
+  setTimeout(async () => {
+    const bail = DB.filterItems(DB.K.leases, l => l.ownerId === (u && u.id) && l.tenant === nom && new Date(l.createdAt).getTime() >= debut - 1000)
+      .sort((a, b) => a.createdAt < b.createdAt ? 1 : -1)[0];
+    if (bail && !locataireDuBail(bail)) await ouvrirAccesLocataire(bail, null, compteId);
+  }, 50);
+});

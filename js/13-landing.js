@@ -98,19 +98,17 @@ route(/^\/(?:#[\w-]+)?$/, () => {
     ${[["DEUKSIL est-il payant ?", "Non : l'inscription et l'utilisation sont gratuites, sans abonnement. Chaque profil reste rattaché à un numéro de CNI, ce qui limite les faux comptes."],
        ["Les annonces sont-elles à jour ?", "Chaque propriétaire met à jour le statut de son bien : disponible, en discussion, loué ou vendu. Une annonce louée disparaît des résultats de recherche."],
        ["Comment se passe une visite ?", "Vous proposez une date et une heure depuis la fiche du bien. Le propriétaire accepte, refuse ou reporte, et vous recevez une notification."],
-       ["DEUKSIL prend-il une commission sur les loyers ?", "Non. Aucune commission n'est prélevée sur vos loyers ni sur vos ventes."],
-       ["Cette version est-elle la version finale ?", "Non : il s'agit d'une démonstration front-end. Les données sont stockées dans votre navigateur et les paiements sont simulés."]]
+       ["DEUKSIL prend-il une commission sur les loyers ?", "Non. Aucune commission n'est prélevée sur vos loyers ni sur vos ventes."]]
       .map(([q, a]) => `<details><summary>${q}</summary><p class="muted" style="margin:10px 0 0">${a}</p></details>`).join('')}
   </div></section>
 
   <footer class="site"><div class="wrap">
     <div class="row-between" style="align-items:flex-start;gap:30px">
       <div style="max-width:320px"><a class="logo" href="#/" style="color:#fff"><img src="${LOGO_LIGHT}" alt="DEUKSIL" class="mark"><span>EUKSIL</span></a>
-        <p class="small" style="opacity:.7;margin-top:10px">Plateforme immobilière sénégalaise. Démonstration front-end : données fictives, paiements simulés.</p></div>
+        <p class="small" style="opacity:.7;margin-top:10px">Plateforme immobilière sénégalaise.</p></div>
       <div class="stack"><b class="small">Plateforme</b><a href="#/search">Rechercher</a><a href="#/register">Créer un compte</a><a href="#/login">Se connecter</a></div>
       <div class="stack"><b class="small">Légal</b><a href="#/legal/mentions">Mentions légales</a><a href="#/legal/cgu">Conditions d'utilisation</a><a href="#/legal/confidentialite">Confidentialité</a></div>
-      <div class="stack"><b class="small">Démonstration</b><a href="#/login">Comptes de test</a><a href="#/" data-action="reset-demo">Réinitialiser les données</a></div>
     </div>
-    <p class="small" style="opacity:.55;margin-top:32px">© ${new Date().getFullYear()} DEUKSIL — simulation. Aucune donnée réelle, aucune CNI réelle.</p>
+    <p class="small" style="opacity:.55;margin-top:32px">© ${new Date().getFullYear()} DEUKSIL</p>
   </div></footer>`);
 });

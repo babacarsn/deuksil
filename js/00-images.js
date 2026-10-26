@@ -1,6 +1,6 @@
 /* ==========================================================================
    MODULE : images.js — chemins des visuels et helpers de base.
-   Les logos et les photos de démonstration sont des fichiers de img/ : le
+   Les logos et les photos décoratives sont des fichiers de img/ : le
    navigateur ne les télécharge qu'au moment de les afficher, au lieu de
    charger 1,8 Mo de base64 avant le premier écran.
    ========================================================================== */
@@ -10,7 +10,14 @@ const LOGO_DARK = 'img/logo-d-bleu.svg';     /* D bleu nuit, pour les fonds clai
 const $  = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const uid = p => p + '_' + Date.now().toString(36).slice(-4) + Math.random().toString(36).slice(2, 6);
+/* Identifiant unique (UUID v4) : généré dans le navigateur pour que l'écriture
+   puisse être affichée tout de suite, puis enregistrée telle quelle dans Supabase. */
+const uid = () => {
+  if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  const b = crypto.getRandomValues(new Uint8Array(16)); b[6] = (b[6] & 15) | 64; b[8] = (b[8] & 63) | 128;
+  const h = [...b].map(x => x.toString(16).padStart(2, '0')).join('');
+  return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
+};
 const now = () => new Date().toISOString();
 const money = n => Number(n).toLocaleString('fr-FR').replace(/\u202f|\u00a0/g, ' ') + ' FCFA';
 const dateFr = d => d ? new Date(d).toLocaleDateString('fr-FR', {day:'2-digit', month:'short', year:'numeric'}) : '—';
@@ -125,6 +132,6 @@ function sceneSvg(p) {
     <rect y="262" width="400" height="38" fill="${pal.road}" opacity=".35"/>
   </svg>`;
 }
-/* Photothèque de démonstration (JPEG encodés) */
+/* Photos décoratives (bandeaux des tableaux de bord, couverture de l'accueil) */
 const PHOTOS = {"cover": "img/photos/cover.jpg", "villa1": "img/photos/villa1.jpg", "villa2": "img/photos/villa2.jpg", "villa3": "img/photos/villa3.jpg", "villa4": "img/photos/villa4.jpg", "maison1": "img/photos/maison1.jpg", "maison2": "img/photos/maison2.jpg", "maison3": "img/photos/maison3.jpg", "terrain": "img/photos/terrain.jpg", "local1": "img/photos/local1.jpg", "local2": "img/photos/local2.jpg", "bureau": "img/photos/bureau.jpg"};
 Object.assign(PHOTOS, {"bnClient": "img/photos/bnClient.jpg", "bnOwner": "img/photos/bnOwner.jpg", "bnAgency": "img/photos/bnAgency.jpg", "bnPromo": "img/photos/bnPromo.jpg"});

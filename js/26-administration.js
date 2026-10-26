@@ -122,14 +122,12 @@ route(/^\/admin\/reports$/, () => {
 
 route(/^\/admin\/settings$/, () => {
   const u = Auth.guard('admin'); if (!u) return false;
-  return shellApp(u, page('Paramètres', 'Modèle économique et outils de démonstration.') + `
+  return shellApp(u, page('Paramètres', 'Modèle économique et sécurité de la plateforme.') + `
     <div class="two-col">
       <div class="card"><h3>Modèle économique</h3>
         <p class="small">DEUKSIL est <b>gratuit</b> : aucun frais d'inscription, aucun abonnement et aucune commission sur les loyers ou les ventes.</p>
         <p class="small muted">Les comptes sont actifs dès leur création. Les paiements visibles dans la plateforme sont ceux que les propriétaires et agences encaissent auprès de leurs propres locataires et clients.</p></div>
-      <div class="card"><h3>Données de démonstration</h3>
-        <p class="small muted">Toutes les données vivent dans le <code>localStorage</code> de ce navigateur. Vous pouvez repartir du jeu initial à tout moment.</p>
-        <div class="stack"><button class="btn ghost" data-action="export-data">Exporter les données (JSON)</button>
-          <button class="btn danger" data-action="reset-demo">Réinitialiser la démonstration</button></div></div>
+      <div class="card"><h3>Données et sauvegardes</h3>
+        <p class="small muted">Les données sont enregistrées dans la base Supabase de DEUKSIL ; chaque compte ne voit que ce que les règles de sécurité de la base lui autorisent. Les sauvegardes et exports se font depuis le tableau de bord Supabase (voir README_SUPABASE.md).</p></div>
     </div>`);
 });

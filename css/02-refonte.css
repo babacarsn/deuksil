@@ -615,7 +615,7 @@ body:has(.hx:not(.hx-in-app)) header.nav{position:absolute;left:0;right:0;top:0;
 .hx-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
 .hx-card{background:var(--surface);border-radius:20px;box-shadow:0 10px 30px -16px rgba(12,39,69,.28);border:1px solid var(--line);overflow:hidden;display:flex;flex-direction:column;min-width:0}
 .hx-ph{position:relative;aspect-ratio:16/11;background:var(--surface-3)}
-.hx-ph img{width:100%;height:100%;object-fit:cover;display:block}
+.hx-ph img,.hx-ph svg.scene{width:100%;height:100%;object-fit:cover;display:block}
 .hx-fav{position:absolute;top:10px;right:10px;width:40px;height:40px;border:0;background:rgba(12,39,69,.18);border-radius:50%;color:#fff;display:grid;place-items:center;cursor:pointer;backdrop-filter:blur(2px)}
 .hx-fav.on{color:#FF5A6A;background:#fff}
 .hx-chip{position:absolute;left:14px;bottom:-12px;background:var(--info);color:#fff;font-size:.8rem;font-weight:600;padding:5px 12px;border-radius:999px;box-shadow:0 6px 14px -6px rgba(12,39,69,.6)}
@@ -908,21 +908,12 @@ body:has(.hx:not(.hx-in-app)) header.nav{position:absolute;left:0;right:0;top:0;
   .hx-act-date{font-size:.72rem}
 }
 
-/* ---- Accueil : témoignages et questions fréquentes d'après la maquette ---- */
+/* ---- Accueil : questions fréquentes d'après la maquette ---- */
 .hx-kicker-line{display:flex;align-items:center;gap:12px}
 .hx-kicker-line::after{content:"";width:44px;height:2px;border-radius:2px;background:var(--logo-gold)}
-.hx-avis .hx-h2,.hx-faq .hx-h2{max-width:22ch}
+.hx-faq .hx-h2{max-width:22ch}
 .hx-head-nav{margin:-6px 0 12px}
-.hx-demo{margin:0;color:var(--muted);font-size:.8rem}
-.hx-car-avis{grid-auto-columns:calc((100% - 2 * 14px) / 3);gap:14px;align-items:stretch}
-.hx-avis-card{margin:0;scroll-snap-align:start;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:24px 24px 22px;
-  box-shadow:0 10px 30px -22px rgba(12,39,69,.35);display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:18px;row-gap:16px;align-content:start}
-.hx-quote{width:30px;height:24px;color:#8EA0B6;margin-top:4px}
-.hx-avis-card blockquote{margin:0;color:var(--logo-navy);font-size:1rem;line-height:1.6}
-.hx-avis-card figcaption{grid-column:2;display:flex;align-items:center;gap:14px}
 .hx-av{flex:none;display:grid;place-items:center;width:52px;height:52px;border-radius:50%;color:#fff;font-weight:700;font-size:1rem}
-.hx-avis-card figcaption b{display:block;color:var(--logo-navy);font-size:.98rem}
-.hx-avis-card figcaption span span{color:var(--muted);font-size:.86rem}
 
 .hx-faq-list{display:flex;flex-direction:column;gap:12px}
 .hx-q{background:var(--surface);border:1px solid var(--line);border-radius:16px;transition:box-shadow .2s,border-color .2s}
@@ -936,12 +927,7 @@ body:has(.hx:not(.hx-in-app)) header.nav{position:absolute;left:0;right:0;top:0;
 .hx-q p{margin:0;padding:0 20px 18px 88px;color:var(--ink-2);line-height:1.6;font-size:.94rem}
 .hx-q summary:focus-visible{outline:2px solid var(--logo-navy);outline-offset:-2px;border-radius:16px}
 
-@media (max-width:900px){.hx-car-avis{grid-auto-columns:calc((100% - 14px) / 2)}}
 @media (max-width:760px){
-  .hx-car-avis{grid-auto-columns:100%;gap:10px}
-  .hx-avis-card{padding:18px 18px 18px;column-gap:14px;border-radius:16px}
-  .hx-quote{width:24px;height:19px}
-  .hx-avis-card blockquote{font-size:.9rem}
   .hx-av{width:44px;height:44px;font-size:.9rem}
   .hx-head-nav .hx-nav{display:flex}
   .hx-q summary{gap:12px;padding:12px 14px}
@@ -1020,9 +1006,9 @@ html,body{overflow-x:clip}
 @keyframes reflet{to{background-position:-200% 0}}
 
 /* 4. Survol : les cartes se soulèvent, les photos zooment */
-.hx-card,.prop,.hx-une,.hx-prof,.hx-avis-card,.hx-step,.hx-stat,.pd-card,.quick-card,.kpi,.kpi-rich,.hx-q{transition:transform .35s var(--ease-out),box-shadow .35s var(--ease-out),border-color .25s}
+.hx-card,.prop,.hx-une,.hx-prof,.hx-step,.hx-stat,.pd-card,.quick-card,.kpi,.kpi-rich,.hx-q{transition:transform .35s var(--ease-out),box-shadow .35s var(--ease-out),border-color .25s}
 @media (hover:hover){
-  .hx-card:hover,.prop:hover,.hx-une:hover,.hx-prof:hover,.hx-avis-card:hover,.hx-step:hover,.quick-card:hover,a.pd-card:hover,.pd-item:hover{transform:translateY(-6px);box-shadow:0 18px 40px -18px rgba(12,39,69,.45)}
+  .hx-card:hover,.prop:hover,.hx-une:hover,.hx-prof:hover,.hx-step:hover,.quick-card:hover,a.pd-card:hover,.pd-item:hover{transform:translateY(-6px);box-shadow:0 18px 40px -18px rgba(12,39,69,.45)}
   .hx-stat:hover,.kpi:hover,.kpi-rich:hover{transform:translateY(-3px)}
   .hx-card img,.prop img,.hx-une img,.hx-prof img,.pd-thumb img{transition:transform .8s var(--ease-out)}
   .hx-card:hover img,.prop:hover img,.hx-une:hover img,.hx-prof:hover img,.pd-item:hover .pd-thumb img{transform:scale(1.08)}
@@ -1565,14 +1551,6 @@ a.lien-off .ds-go, a.lien-off .pd-more{display:none}
 .champ-err-form{margin:0 0 12px;padding:10px 12px;border-radius:12px;background:#FDECEC}
 .input.champ-ko,input.champ-ko,select.champ-ko,textarea.champ-ko{border-color:var(--bad,#B42318)!important;box-shadow:0 0 0 3px rgba(180,35,24,.12)!important}
 
-/* Guide de test (97-demo.js) */
-.demo-grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
-.demo-scen{display:flex;flex-direction:column;padding:16px}
-.demo-scen ol{margin:0 0 12px;padding-left:18px;flex:1}
-.demo-scen ol li{margin:3px 0}
-.demo-scen .btn{align-self:flex-start}
-.auth-demo .row-between{flex-wrap:nowrap}
-.auth-demo .row-between .btn{flex-shrink:0}
 
 /* Carte d'un bien — résultats de recherche (98-cartes.js) : compacte, 2 colonnes sur téléphone */
 .props:has(.carte-bien){grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:20px}

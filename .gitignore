@@ -1,5 +1,4 @@
-tests/resultats.json
-tests/regression.json
+﻿.env
+.env.*
 node_modules/
-tests/*.png
-tests/resultats-agence.json
+.vercel/

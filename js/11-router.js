@@ -9,6 +9,7 @@ const route = (re, fn) => routes.push({re, fn});
    de l'adresse et gardés dans LIEN, le temps que la page les applique. */
 let LIEN = null;
 function render() {
+  if (!DB.pret) return;               // les données ne sont pas encore chargées (voir js/76-demarrage.js)
   const h0 = location.hash || '#/', iq = h0.indexOf('?');
   if (iq >= 0) {
     LIEN = {path: h0.slice(0, iq), p: new URLSearchParams(h0.slice(iq + 1)), at: Date.now()};

@@ -1,101 +1,39 @@
 /* ==========================================================================
-   MODULE : securite.js — partie 4 : ce qui peut être renforcé sans serveur.
-     S1. Mots de passe : jamais stockés en clair (empreinte salée et
-         répétée), comptes existants convertis au chargement.
-     S2. Connexion : un seul message d'erreur (on ne révèle pas si un compte
-         existe) et pause de 5 min après 5 essais manqués.
+   MODULE : securite.js — comptes et mots de passe (Supabase Auth).
+   Les mots de passe ne transitent jamais par les tables : Supabase Auth les
+   stocke chiffrés (bcrypt) et limite lui-même les tentatives répétées.
      S3. Admin : détection des comptes en double (CNI ou téléphone) et
          rapprochement prudent : rien n'est supprimé.
-     S4. Comptes de démonstration marqués « Démo » dans l'administration.
-   Limite : tout reste dans le navigateur. Un vrai serveur devra reprendre
-   ces règles (voir AUDIT.md §4 et §7).
+     A1. Changer son mot de passe, pour tous les profils (mot de passe actuel
+         vérifié par Supabase Auth).
+     A2. Comptes ouverts par un tiers (équipe, locataire, mandant) : mot de
+         passe provisoire tiré au hasard par la fonction serveur « gerer-acces »,
+         affiché une seule fois ; à la première connexion, la personne choisit
+         le sien avant tout le reste.
+     A3. Vérification foncière par l'administration.
    ========================================================================== */
 
-/* --- SHA-256 (synchrone, sans dépendance) ---------------------------------- */
-function sha256(texte) {
-  const K = [0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5, 0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
-    0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da, 0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
-    0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85, 0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
-    0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3, 0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2];
-  const octets = new TextEncoder().encode(texte), l = octets.length;
-  const n = (((l + 9) >> 6) + 1) << 4, w = new Uint32Array(n);
-  for (let i = 0; i < l; i++) w[i >> 2] |= octets[i] << (24 - (i % 4) * 8);
-  w[l >> 2] |= 0x80 << (24 - (l % 4) * 8); w[n - 1] = l * 8;
-  let [a0, b0, c0, d0, e0, f0, g0, h0] = [0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19];
-  const r = (x, k) => (x >>> k) | (x << (32 - k)), m = new Uint32Array(64);
-  for (let i = 0; i < n; i += 16) {
-    for (let t = 0; t < 64; t++) m[t] = t < 16 ? w[i + t] : (r(m[t - 2], 17) ^ r(m[t - 2], 19) ^ (m[t - 2] >>> 10)) + m[t - 7] + (r(m[t - 15], 7) ^ r(m[t - 15], 18) ^ (m[t - 15] >>> 3)) + m[t - 16];
-    let [a, b, c, d, e, f, g, h] = [a0, b0, c0, d0, e0, f0, g0, h0];
-    for (let t = 0; t < 64; t++) {
-      const t1 = (h + (r(e, 6) ^ r(e, 11) ^ r(e, 25)) + ((e & f) ^ (~e & g)) + K[t] + m[t]) | 0, t2 = ((r(a, 2) ^ r(a, 13) ^ r(a, 22)) + ((a & b) ^ (a & c) ^ (b & c))) | 0;
-      h = g; g = f; f = e; e = (d + t1) | 0; d = c; c = b; b = a; a = (t1 + t2) | 0;
-    }
-    a0 = (a0 + a) | 0; b0 = (b0 + b) | 0; c0 = (c0 + c) | 0; d0 = (d0 + d) | 0; e0 = (e0 + e) | 0; f0 = (f0 + f) | 0; g0 = (g0 + g) | 0; h0 = (h0 + h) | 0;
+/* --- Règles communes d'un nouveau mot de passe -------------------------------- */
+const MDP_INTERDITS = ['demo123', 'admin123', 'password', 'motdepasse', '12345678', 'azerty123', 'deuksil123'];
+const mdpTropFaible = p => String(p || '').length < 8 || !/[A-Za-zÀ-ÿ]/.test(p) || !/\d/.test(p);
+function refusNouveauMotDePasse(nouveau, confirme) {
+  if (mdpTropFaible(nouveau)) return 'Mot de passe trop faible : 8 caractères minimum, avec au moins une lettre et un chiffre.';
+  if (nouveau !== confirme) return 'Les deux mots de passe ne correspondent pas.';
+  if (MDP_INTERDITS.includes(String(nouveau).toLowerCase())) return 'Ce mot de passe est trop courant : choisissez-en un autre.';
+  return '';
+}
+/* Change le mot de passe du compte connecté. Si « ancien » est fourni, il est
+   d'abord vérifié par Supabase Auth (nouvelle connexion avec ce mot de passe). */
+async function changerMonMotDePasse(ancien, nouveau) {
+  const email = DB.session && DB.session.user ? DB.session.user.email : '';
+  if (!email) return 'Session expirée : reconnectez-vous.';
+  if (ancien !== null) {
+    const {error} = await SB.auth.signInWithPassword({email, password: ancien});
+    if (error) return /rate|too many/i.test(error.message || '') ? messageAuth(error) : 'Le mot de passe actuel est incorrect.';
   }
-  return [a0, b0, c0, d0, e0, f0, g0, h0].map(x => (x >>> 0).toString(16).padStart(8, '0')).join('');
+  const {error} = await SB.auth.updateUser({password: nouveau});
+  return error ? messageAuth(error) : '';
 }
-
-/* --- S1. Empreinte salée et répétée ---------------------------------------- */
-const PW_TOURS = 1500;
-function empreinte(mdp, sel) { let h = sel + ':' + String(mdp); for (let i = 0; i < PW_TOURS; i++) h = sha256(sel + h); return 'v1$' + sel + '$' + h; }
-function nouveauSel() { const a = new Uint8Array(12); (crypto || window.msCrypto).getRandomValues(a); return [...a].map(x => x.toString(16).padStart(2, '0')).join(''); }
-function verifierMotDePasse(u, mdp) {
-  if (!u) return false;
-  if (u.pwHash) { const [, sel] = u.pwHash.split('$'); return empreinte(mdp, sel) === u.pwHash; }
-  return typeof u.password === 'string' && u.password === mdp;   // compte pas encore converti
-}
-const MDP_DEMO = ['demo123', 'admin123'];
-function proteger(u) {
-  if (!u || typeof u.password !== 'string') return u;
-  const {password, ...reste} = u;
-  return {...reste, pwHash: empreinte(password, nouveauSel()), ...(MDP_DEMO.includes(password) && !('demo' in u) ? {demo: true} : {})};
-}
-/* Toute écriture d'un mot de passe passe par l'empreinte. */
-const _addItemMdp = DB.addItem;
-DB.addItem = function (k, item) { return _addItemMdp.call(DB, k, k === DB.K.users ? proteger(item) : item); };
-const _updateMdp = DB.updateItem;
-DB.updateItem = function (k, id, patch) {
-  if (k === DB.K.users && patch && typeof patch.password === 'string') {
-    const {password, ...reste} = patch;
-    patch = {...reste, pwHash: empreinte(password, nouveauSel()), pwChangeLe: now()};
-    const r = _updateMdp.call(DB, k, id, patch);
-    /* L'ancien champ en clair disparaît aussi de la fiche enregistrée. */
-    const l = DB.getData(k), i = l.findIndex(x => x.id === id); if (i >= 0 && 'password' in l[i]) { delete l[i].password; DB.setData(k, l); }
-    return r;
-  }
-  return _updateMdp.call(DB, k, id, patch);
-};
-/* Les comptes déjà enregistrés (jeu de démonstration, anciens comptes). */
-function convertirMotsDePasse() {
-  const l = DB.getData(DB.K.users); let n = 0;
-  const out = l.map(u => { if (typeof u.password === 'string') { n++; return proteger(u); } return u; });
-  if (n) DB.setData(DB.K.users, out);
-  return n;
-}
-convertirMotsDePasse();
-[300, 1500, 4000, 8000].forEach(t => setTimeout(() => { try { convertirMotsDePasse(); } catch (e) {} }, t));
-
-/* --- S2. Connexion : un seul message, essais limités ----------------------- */
-const ESSAIS_MAX = 5, PAUSE_MIN = 5, CLE_ESSAIS = 'deuksil_essais';
-const essais = () => { try { return JSON.parse(localStorage.getItem(CLE_ESSAIS)) || {}; } catch (e) { return {}; } };
-const noterEssais = o => { try { localStorage.setItem(CLE_ESSAIS, JSON.stringify(o)); } catch (e) {} };
-Auth.login = function (identifiant, mdp) {
-  const v = String(identifiant || '').trim().toLowerCase(), E = essais(), e = E[v] || {n: 0, jusqua: 0};
-  if (e.jusqua > Date.now()) return {error: `Trop d'essais manqués. Réessayez dans ${Math.ceil((e.jusqua - Date.now()) / 60000)} min.`};
-  const u = DB.findItem(DB.K.users, x => x.cni === v || String(x.email || '').toLowerCase() === v);
-  if (!u || !verifierMotDePasse(u, mdp)) {
-    e.n = (e.n || 0) + 1;
-    if (e.n >= ESSAIS_MAX) { e.jusqua = Date.now() + PAUSE_MIN * 60000; e.n = 0; }
-    E[v] = e; noterEssais(E);
-    return {error: e.jusqua > Date.now() ? `Trop d'essais manqués. Réessayez dans ${PAUSE_MIN} min.` : 'Identifiant ou mot de passe incorrect.'};
-  }
-  delete E[v]; noterEssais(E);
-  if (u.status === 'suspendu') return {error: 'Compte suspendu. Contactez le support DEUKSIL.'};
-  if (typeof u.password === 'string') DB.updateItem(DB.K.users, u.id, {password: u.password});   // conversion au passage
-  try { resetSessionUiState(); } catch (err) {}
-  localStorage.setItem(DB.K.session, JSON.stringify({id: u.id, at: now()}));
-  return {user: DB.findItem(DB.K.users, u.id)};
-};
 
 /* --- S3. Doublons : repérer, vérifier, rapprocher sans rien supprimer ------
    Une même CNI sur deux comptes est une correspondance fiable ; un même
@@ -140,57 +78,35 @@ document.addEventListener('click', e => {
     }});
 });
 
-/* --- S4. Comptes de démonstration marqués --------------------------------- */
-function badgesDemo() {
-  if (location.hash.split('?')[0] !== '#/admin/users') return;
-  document.querySelectorAll('#app table tbody tr:not([data-demo])').forEach(tr => {
-    tr.dataset.demo = '1';
-    const b = tr.querySelector('[data-action="user-toggle"], [data-action="user-del"]'); const x = b && DB.findItem(DB.K.users, b.dataset.id);
-    if (!x) return;
-    const td = tr.querySelector('td');
-    if (x.demo && td) td.insertAdjacentHTML('beforeend', ` ${badge('Démo', 'info')}`);
-    if (x.doublonDe && td) td.insertAdjacentHTML('beforeend', ` ${badge('Doublon rapproché', '')}`);
-  });
-}
-new MutationObserver(() => requestAnimationFrame(() => { try { carteDoublons(); badgesDemo(); } catch (e) {} })).observe(document.body, {childList: true, subtree: true});
+new MutationObserver(() => requestAnimationFrame(() => { try { carteDoublons(); } catch (e) {} })).observe(document.body, {childList: true, subtree: true});
 
 /* ==========================================================================
-   GROUPE A
    A1. Changer son mot de passe, pour tous les profils.
    ========================================================================== */
-/* Seuls les agents avaient cet écran. Le propriétaire, le client, le
-   locataire, l'agence et l'admin reçoivent la même carte sur leur page de
-   profil ou de paramètres. Les membres d'équipe gardent « Mon profil ». */
 const PAGES_MDP = /^#\/(client\/profile|owner\/profile|agency\/settings|admin\/settings)$/;
 function carteMotDePasse() {
   if (!PAGES_MDP.test(location.hash)) return;
   const u = Auth.current(); if (!u || u.member) return;
   const c = document.querySelector('#app .content'); if (!c || c.querySelector('form[data-action="mdp-change"]')) return;
-  c.insertAdjacentHTML('beforeend', `<form class="card" data-action="mdp-change" id="changer-mot-de-passe" style="max-width:640px;margin-top:18px" data-sub="6 caractères minimum">
+  c.insertAdjacentHTML('beforeend', `<form class="card" data-action="mdp-change" id="changer-mot-de-passe" style="max-width:640px;margin-top:18px" data-sub="8 caractères minimum">
     <h4>Changer mon mot de passe</h4>
-    <div class="form-grid"><div class="field"><label>Mot de passe actuel</label><input class="input" type="password" name="ancien" required autocomplete="current-password"></div>
-      <div class="field"><label>Nouveau mot de passe</label><input class="input" type="password" name="nouveau" minlength="6" required autocomplete="new-password"></div>
-      <div class="field"><label>Confirmer le nouveau</label><input class="input" type="password" name="confirme" minlength="6" required autocomplete="new-password"></div></div>
+    <div class="form-grid"><div class="field"><label for="mdp-ancien">Mot de passe actuel</label><input class="input" id="mdp-ancien" type="password" name="ancien" required autocomplete="current-password"></div>
+      <div class="field"><label for="mdp-nouveau">Nouveau mot de passe</label><input class="input" id="mdp-nouveau" type="password" name="nouveau" minlength="8" required autocomplete="new-password" placeholder="8 caractères minimum"></div>
+      <div class="field"><label for="mdp-confirme">Confirmer le nouveau</label><input class="input" id="mdp-confirme" type="password" name="confirme" minlength="8" required autocomplete="new-password" placeholder="Retapez le mot de passe"></div></div>
     <button class="btn">Changer le mot de passe</button></form>`);
 }
 new MutationObserver(() => requestAnimationFrame(() => { try { carteMotDePasse(); } catch (e) {} })).observe(document.body, {childList: true, subtree: true});
-/* Règles communes (aussi pour le choix d'un mot de passe provisoire, A2). */
-function refusNouveauMotDePasse(compte, ancien, nouveau, confirme, verifierAncien = true) {
-  if (verifierAncien && !verifierMotDePasse(compte, ancien)) return 'Le mot de passe actuel est incorrect.';
-  if ((nouveau || '').length < 6) return 'Le nouveau mot de passe doit faire 6 caractères minimum.';
-  if (nouveau !== confirme) return 'Les deux mots de passe ne correspondent pas.';
-  if (verifierMotDePasse(compte, nouveau)) return 'Choisissez un mot de passe différent de l\'actuel.';
-  if (MDP_DEMO.includes(nouveau)) return 'Ce mot de passe est celui des comptes de démonstration : choisissez-en un autre.';
-  return '';
-}
-window.addEventListener('submit', e => {
+window.addEventListener('submit', async e => {
   const f = e.target.closest && e.target.closest('form[data-action="mdp-change"]'); if (!f) return;
   e.preventDefault(); e.stopImmediatePropagation();
   const u = Auth.current(); if (!u || u.member) return;
-  const compte = DB.findItem(DB.K.users, u.id), d = formData(f);
-  const refus = refusNouveauMotDePasse(compte, d.ancien, d.nouveau, d.confirme); if (refus) return toast(refus, 'bad');
-  DB.updateItem(DB.K.users, compte.id, {password: d.nouveau, mdpProvisoire: false});
-  logActivity(`${displayName(compte)} a changé son mot de passe`);
+  const d = formData(f);
+  if (d.nouveau === d.ancien) return toast('Choisissez un mot de passe différent de l\'actuel.', 'bad');
+  const refus = refusNouveauMotDePasse(d.nouveau, d.confirme); if (refus) return toast(refus, 'bad');
+  const b = f.querySelector('button'); b.disabled = true;
+  const err = await changerMonMotDePasse(d.ancien, d.nouveau); b.disabled = false;
+  if (err) return toast(err, 'bad');
+  logActivity(`${displayName(u)} a changé son mot de passe`);
   f.reset(); toast('Mot de passe changé.');
 }, true);
 /* Le gestionnaire (membre d'un propriétaire) n'avait aucun accès à sa page
@@ -203,59 +119,21 @@ window.addEventListener('submit', e => {
   }});
 })();
 
-/* --- A2. Mot de passe provisoire pour un compte créé par quelqu'un d'autre --
-   Les comptes ouverts par une agence ou un propriétaire (mandant, locataire,
-   membre d'équipe) recevaient tous « demo123 », connu de tous. Désormais :
-   - créé par un compte réel : mot de passe aléatoire, montré une seule fois
-     à celui qui crée le compte (il le transmet), jamais enregistré en clair ;
-     un mot de passe choisi par le créateur (membre d'équipe) est lui aussi
-     provisoire ;
-   - à la première connexion, la personne choisit son propre mot de passe
-     avant d'accéder à quoi que ce soit ;
-   - créé par un compte de démonstration : rien ne change (demo123), pour
-     que la démonstration reste utilisable. */
-function mdpAleatoire() {
-  const A = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789', a = new Uint32Array(10); crypto.getRandomValues(a);
-  const s = [...a].map(x => A[x % A.length]).join(''); return s.slice(0, 5) + '-' + s.slice(5);
-}
-let provisoireMontre = null;
-const _addItemProvisoire = DB.addItem;
-DB.addItem = function (k, item) {
-  if (k === DB.K.users && item && typeof item.password === 'string') {
-    let createur = null; try { createur = Auth.current(); } catch (e) {}
-    if (createur && !createur.demo && !(createur.member && createur.member.demo)) {
-      if (MDP_DEMO.includes(item.password)) {
-        const mdp = mdpAleatoire();
-        item = {...item, password: mdp, demo: false, mdpProvisoire: true};
-        provisoireMontre = {nom: `${item.firstName || ''} ${item.lastName || ''}`.trim(), identifiant: item.email || item.cni || '', mdp, t: Date.now()};
-        setTimeout(montrerProvisoire, 350);
-      } else item = {...item, demo: false, mdpProvisoire: true};
-    }
-  }
-  return _addItemProvisoire.call(DB, k, item);
-};
-function montrerProvisoire() {
-  const P = provisoireMontre; if (!P || Date.now() - P.t > 5000) return;
-  if (document.querySelector('.modal')) return setTimeout(montrerProvisoire, 600);
-  provisoireMontre = null;
-  modal('Accès créé', `<p style="margin-top:0">${esc(P.nom)} peut se connecter avec :</p>
-    <div class="fin-l"><span>Identifiant</span><b>${esc(P.identifiant)}</b></div>
-    <div class="fin-l"><span>Mot de passe provisoire</span><b class="mdp-prov" style="font-family:monospace;font-size:1.1rem">${esc(P.mdp)}</b></div>
-    <p class="small muted" style="margin:12px 0 0">Transmettez-le à ${esc(P.nom.split(' ')[0] || 'la personne')} (en main propre, SMS ou WhatsApp). Il ne sera plus affiché : DEUKSIL ne le conserve pas en clair. À sa première connexion, elle choisira son propre mot de passe.</p>
-    <div class="row" style="gap:10px;margin-top:14px"><button class="btn" data-action="close-modal">J'ai noté le mot de passe</button></div>`);
-}
-/* Les messages et la fiche qui annonçaient « mot de passe : demo123 ». */
-const _toastProvisoire = toast;
-toast = function (m, ton) {
-  if (typeof m === 'string' && /mot de passe : demo123/.test(m) && (provisoireMontre || document.querySelector('.mdp-prov'))) m = m.replace(/\s*\(mot de passe : demo123\)/, ' (mot de passe provisoire affiché à l\'écran)');
-  return _toastProvisoire.call(this, m, ton);
-};
-if (typeof accesLocataire === 'function') {
-  const _accesProv = accesLocataire;
-  accesLocataire = function (bail) {
-    const h = _accesProv(bail), u = locataireDuBail(bail);
-    return u && !u.demo ? h.replace('mot de passe : demo123', u.mdpProvisoire ? 'mot de passe provisoire, à changer à la 1re connexion' : 'mot de passe personnel') : h;
+/* ==========================================================================
+   A2. Mot de passe provisoire d'un compte ouvert par un tiers.
+   ========================================================================== */
+/* Appelée par js/03-storage.js quand la fonction serveur a créé le compte. */
+function montrerMotDePasseProvisoire(compte, mdp) {
+  const nom = `${compte.firstName || ''} ${compte.lastName || ''}`.trim() || 'Cette personne';
+  const afficher = () => {
+    if (document.querySelector('.modal')) return setTimeout(afficher, 600);
+    modal('Accès créé', `<p style="margin-top:0">${esc(nom)} peut se connecter avec :</p>
+      <div class="fin-l"><span>Identifiant</span><b>${esc(compte.email || '')}</b></div>
+      <div class="fin-l"><span>Mot de passe provisoire</span><b class="mdp-prov" style="font-family:monospace;font-size:1.1rem">${esc(mdp)}</b></div>
+      <p class="small muted" style="margin:12px 0 0">Transmettez-le à ${esc(nom.split(' ')[0])} (en main propre, SMS ou WhatsApp). Il ne sera plus affiché : DEUKSIL ne le conserve pas. À sa première connexion, elle choisira son propre mot de passe.</p>
+      <div class="row" style="gap:10px;margin-top:14px"><button class="btn" data-action="close-modal">J'ai noté le mot de passe</button></div>`);
   };
+  afficher();
 }
 /* Première connexion : choisir son mot de passe avant tout le reste. */
 const compteConnecte = u => u ? DB.findItem(DB.K.users, (u.member || u).id) : null;
@@ -266,7 +144,6 @@ function exigerNouveauMdp() {
   return false;
 }
 addEventListener('hashchange', () => { try { exigerNouveauMdp(); } catch (e) {} });
-[200, 1200].forEach(t => setTimeout(() => { try { exigerNouveauMdp(); } catch (e) {} }, t));
 route(/^\/mot-de-passe$/, () => {
   const u = Auth.current(), c = compteConnecte(u);
   if (!c) { go('#/login'); return false; }
@@ -275,46 +152,53 @@ route(/^\/mot-de-passe$/, () => {
     <form class="card" data-action="mdp-premier" data-sub="Votre mot de passe personnel">
       <h2 style="margin-top:0">Bienvenue ${esc(c.firstName || '')}</h2>
       <p class="small muted">Votre compte a été ouvert par ${esc(c.parentId ? nomAgence(c.parentId) : c.mandantOf ? nomAgence(c.mandantOf) : c.ownerRef ? nomAgence(c.ownerRef) : 'un tiers')} avec un mot de passe provisoire. Choisissez le vôtre pour continuer : vous seul le connaîtrez.</p>
-      <div class="field"><label>Nouveau mot de passe</label><input class="input" type="password" name="nouveau" minlength="6" required autocomplete="new-password"></div>
-      <div class="field"><label>Confirmer</label><input class="input" type="password" name="confirme" minlength="6" required autocomplete="new-password"></div>
+      <div class="field"><label for="mdp1-nouveau">Nouveau mot de passe</label><input class="input" id="mdp1-nouveau" type="password" name="nouveau" minlength="8" required autocomplete="new-password" placeholder="8 caractères minimum"></div>
+      <div class="field"><label for="mdp1-confirme">Confirmer</label><input class="input" id="mdp1-confirme" type="password" name="confirme" minlength="8" required autocomplete="new-password" placeholder="Retapez le mot de passe"></div>
       <button class="btn block">Enregistrer et continuer</button>
       <p class="small" style="margin:14px 0 0;text-align:center"><a href="#/" data-action="logout">Se déconnecter</a></p></form></section>`);
 });
-window.addEventListener('submit', e => {
+window.addEventListener('submit', async e => {
   const f = e.target.closest && e.target.closest('form[data-action="mdp-premier"]'); if (!f) return;
   e.preventDefault(); e.stopImmediatePropagation();
   const u = Auth.current(), c = compteConnecte(u); if (!c) return;
-  const d = formData(f), refus = refusNouveauMotDePasse(c, '', d.nouveau, d.confirme, false); if (refus) return toast(refus, 'bad');
-  DB.updateItem(DB.K.users, c.id, {password: d.nouveau, mdpProvisoire: false});
+  const d = formData(f), refus = refusNouveauMotDePasse(d.nouveau, d.confirme); if (refus) return toast(refus, 'bad');
+  const b = f.querySelector('button'); b.disabled = true;
+  const err = await changerMonMotDePasse(null, d.nouveau); b.disabled = false;
+  if (err) return toast(err, 'bad');
+  DB.updateItem(DB.K.users, c.id, {mdpProvisoire: false});
+  await DB.attendre();
   logActivity(`${displayName(c)} a choisi son mot de passe personnel`);
-  toast('Mot de passe enregistré. Bienvenue sur DEUKSIL.'); go(Auth.home(Auth.current()));
+  const moi = Auth.current(); toast('Mot de passe enregistré. Bienvenue sur DEUKSIL.'); go(moi ? Auth.home(moi) : '#/');
 }, true);
 /* Mot de passe provisoire perdu (fenêtre fermée trop vite) : celui qui a
-   créé le compte peut en générer un nouveau, tant que la personne n'a pas
-   choisi le sien. Après, seul le titulaire connaît son mot de passe. */
+   créé le compte en obtient un nouveau, tant que la personne n'a pas choisi
+   le sien. Après, seul le titulaire connaît son mot de passe. */
 const createurDe = (c, u) => !!c && !!u && [c.mandantOf, c.ownerRef, c.parentId].includes(u.id);
-document.addEventListener('click', e => {
+document.addEventListener('click', async e => {
   const b = e.target.closest('[data-action="mdp-regenerer"]'); if (!b) return;
   e.preventDefault();
   const u = Auth.current(), c = DB.findItem(DB.K.users, b.dataset.id);
   if (!u || u.member || !createurDe(c, u)) return toast('Action non autorisée.', 'bad');
   if (!c.mdpProvisoire) return toast(`${c.firstName} a déjà choisi son mot de passe : lui seul peut le changer.`, 'bad');
-  const mdp = mdpAleatoire();
-  DB.updateItem(DB.K.users, c.id, {password: mdp, mdpProvisoire: true});
-  audit('Mot de passe provisoire régénéré', displayName(c));
-  provisoireMontre = {nom: displayName(c), identifiant: c.email || c.cni, mdp, t: Date.now()}; montrerProvisoire();
+  b.disabled = true;
+  try {
+    const r = await appelerFonction('gerer-acces', {action: 'mot-de-passe', id: c.id});
+    audit('Mot de passe provisoire régénéré', displayName(c));
+    montrerMotDePasseProvisoire(c, r.motDePasse);
+  } catch (err) { toast(err.message || 'Action impossible.', 'bad'); }
+  b.disabled = false;
 });
 function boutonsRegenerer() {
   const u = Auth.current(); if (!u || u.member || !['owner', 'agency'].includes(u.role)) return;
   if (/^#\/manage\/owners/.test(location.hash)) document.querySelectorAll('#app [data-action="g9-ofiche"][data-id]:not([data-regen])').forEach(b => {
     b.dataset.regen = '1';
-    const c = DB.findItem(DB.K.users, x => x.ownerRec === b.dataset.id && x.mdpProvisoire && !x.demo);
+    const c = DB.findItem(DB.K.users, x => x.ownerRec === b.dataset.id && x.mdpProvisoire);
     if (c && createurDe(c, u)) b.insertAdjacentHTML('afterend', `<button class="btn ghost sm" data-action="mdp-regenerer" data-id="${c.id}" title="Nouveau mot de passe provisoire">${icon('key', 14)} Accès</button>`);
   });
   document.querySelectorAll('#app .acces-loc:not([data-regen])').forEach(z => {
     z.dataset.regen = '1';
     const mail = (z.textContent.match(/[\w.+-]+@[\w.-]+/) || [])[0]; if (!mail) return;
-    const c = DB.findItem(DB.K.users, x => x.email === mail && x.mdpProvisoire && !x.demo);
+    const c = DB.findItem(DB.K.users, x => x.email === mail && x.mdpProvisoire);
     if (c && createurDe(c, u)) z.insertAdjacentHTML('beforeend', `<button class="btn ghost sm" data-action="mdp-regenerer" data-id="${c.id}" style="margin-left:auto">${icon('key', 14)} Nouveau mot de passe provisoire</button>`);
   });
 }

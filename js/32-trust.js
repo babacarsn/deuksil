@@ -91,13 +91,3 @@ document.addEventListener('submit', e => {
   closeModal(); toast('Signalement envoyé. Merci.');
 });
 
-/* Démo : un signalement et quelques niveaux de vérification */
-function seedV5() {
-  if (localStorage.getItem(DB.K.v5seed)) return;
-  const props = DB.filterItems(DB.K.properties, p => p.listingStatus === 'publiee'), cl = DB.findItem(DB.K.users, x => x.cni === '1900000000002'); if (!props.length || !cl) return;
-  localStorage.setItem(DB.K.v5seed, '1');
-  DB.addItem(DB.K.reports, {propertyId: props[0].id, title: props[0].title, ownerId: props[0].ownerId, reporterId: cl.id, reason: 'Prix trompeur', comment: 'Le prix affiché ne correspond pas à celui annoncé au téléphone.', status: 'nouveau'});
-  DB.updateItem(DB.K.properties, props[0].id, {verifLevel: 'annonce'});
-  [['1900000000003', 'identite'], ['1900000000004', 'pro']].forEach(([c, l]) => { const x = DB.findItem(DB.K.users, y => y.cni === c); if (x) DB.updateItem(DB.K.users, x.id, {verifLevel: l}); });
-}
-etapeAmorcage('signalements', seedV5);

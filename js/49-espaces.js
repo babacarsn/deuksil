@@ -61,7 +61,7 @@ if (_tenantRoute) {
     const next = rents.find(r => !r.paidAt);
     const late = rents.filter(r => !r.paidAt && rentState(r)[1] === 'bad');
     const paid = rents.filter(r => r.paidAt);
-    const photo = p ? ((p.photos && p.photos.length) ? p.photos[0] : (p.type ? demoPhotos(p)[0] : PHOTOS.cover)) : PHOTOS.cover;
+    const photo = photoDe(p, PHOTOS.cover);
 
     const hero = spaceHero(PHOTOS.bnClient, 'Bonjour ' + u.firstName, 'Votre logement et vos loyers',
       [['#/tenant/quittances', 'Mes quittances', 'file'], ['#/tenant/tickets', 'Signaler un problème', 'alert']]);
@@ -101,63 +101,3 @@ if (_tenantRoute) {
   };
 }
 
-/* ---------- Investisseur : bandeau + bande de KPI ---------- */
-const _investRoute = routes.find(r => r.re.source === '^\\/invest\\/home$');
-if (_investRoute) {
-  const _iFn = _investRoute.fn;
-  _investRoute.fn = () => {
-    const html = _iFn();
-    if (typeof html !== 'string') return html;
-    const u = Auth.current(); if (!u) return html;
-    const A = DB.filterItems(DB.K.iassets, a => a.ownerId === u.id);
-    const inv = sumA(A, a => a.buy), val = sumA(A, a => a.value);
-    const rent = sumA(A, a => a.rent) * 12, ch = sumA(A, a => a.charges) * 12;
-    const plus = val - inv, cash = Math.round((rent - ch) / 12);
-
-    const hero = spaceHero(PHOTOS.bnOwner, 'Bonjour ' + u.firstName, 'Votre patrimoine en un coup d\'œil',
-      [['#/coffre', 'Mes documents', 'file']]);
-    const band = `<h3 style="margin:22px 0 12px">Ce que vaut votre patrimoine</h3>
-      <div class="dash-top">
-        ${heroKpi('Valeur actuelle', money(val), 'trendUp',
-          inv ? [(plus >= 0 ? '+' : '') + Math.round(plus / inv * 100) + ' % depuis l\'achat', plus >= 0 ? 'ok' : 'bad'] : null)}
-        ${kpiRich(money(plus), 'Plus-value', 'chart', plus < 0 ? 'bad' : 'ok', {label: money(inv) + ' investis', tone: ''})}
-        ${kpiRich(inv ? ((rent - ch) / inv * 100).toFixed(1) + ' %' : '—', 'Rendement net annuel', 'money', 'brand',
-          {label: money(cash) + ' par mois', tone: cash < 0 ? 'bad' : ''})}
-      </div>
-      <div class="kpis" style="margin-top:14px">
-        ${kpiRich(A.length, 'Actif' + (A.length > 1 ? 's' : '') + ' en portefeuille', 'home', 'info')}
-        ${kpiRich(money(rent), 'Loyers encaissés par an', 'repeat', 'gold')}
-      </div>`;
-    const head = page('Mon patrimoine', 'Suivez la valeur, les loyers et la rentabilité de vos investissements.');
-    return swapBlock(html.replace(head, hero + band), '<div class="kpis">', '');
-  };
-}
-
-/* ---------- Promoteur : bandeau + bande de KPI ---------- */
-const _promoRoute = routes.find(r => r.re.source === '^\\/promo\\/home$');
-if (_promoRoute) {
-  const _pFn = _promoRoute.fn;
-  _promoRoute.fn = () => {
-    const html = _pFn();
-    if (typeof html !== 'string') return html;
-    const u = Auth.current(); if (!u) return html;
-    const PR = DB.filterItems(DB.K.programs, p => p.ownerId === u.id);
-    const L = DB.filterItems(DB.K.lots, l => l.ownerId === u.id);
-    const sold = L.filter(l => l.status === 'vendu'), res = L.filter(l => l.status === 'réservé');
-    const ca = sumA(sold, l => l.price), pc = L.length ? Math.round(sold.length / L.length * 100) : 0;
-
-    const hero = spaceHero(PHOTOS.bnPromo, 'Bonjour ' + u.firstName, 'Vos programmes et leurs ventes',
-      [['#/coffre', 'Mes documents', 'file']]);
-    const band = `<h3 style="margin:22px 0 12px">Où en sont vos ventes</h3>
-      <div class="dash-top">
-        ${heroKpi('Chiffre d\'affaires vendu', money(ca), 'trendUp',
-          L.length ? [sold.length + ' lot' + (sold.length > 1 ? 's' : '') + ' vendu' + (sold.length > 1 ? 's' : '') + ' sur ' + L.length + ' (' + pc + ' %)', pc >= 50 ? 'ok' : ''] : null)}
-        ${kpiRich(res.length, 'Lot' + (res.length > 1 ? 's' : '') + ' réservé' + (res.length > 1 ? 's' : ''), 'calendar', 'gold',
-          {label: money(sumA(res, l => l.price)) + ' à confirmer', tone: ''})}
-        ${kpiRich(L.length - sold.length - res.length, 'Lot' + (L.length - sold.length - res.length > 1 ? 's' : '') + ' encore disponible' + (L.length - sold.length - res.length > 1 ? 's' : ''), 'home', 'info',
-          {label: PR.length + ' programme' + (PR.length > 1 ? 's' : ''), tone: ''})}
-      </div>`;
-    const head = page('Mes programmes', 'Programmes immobiliers, lots et avancement des ventes.');
-    return swapBlock(html.replace(head, hero + band), '<div class="kpis">', '');
-  };
-}

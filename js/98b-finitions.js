@@ -1,7 +1,6 @@
 /* =========================================================================
-   98b-finitions.js — Audit et finalisation de la démo
+   98b-finitions.js — Finitions
    1. Fin de bail : le bien n'est pas remis en location sans confirmation.
-   2. Cohérence des statuts au chargement (bien « loué » sans bail).
    3. Fiche publique : un bien non disponible ne propose ni visite ni contact.
    4. Titres : un seul H1 par page (fiche, inscription).
    5. Adresses publiques propres : #/annonce/<titre>-<référence opaque>.
@@ -9,7 +8,7 @@
    7. Retour à la page demandée après connexion (accès direct à une route).
    8. Locataire : « Messages » dans la barre du bas, avec le compteur non lu.
    Rappel : masquer un identifiant dans l'adresse n'est pas une sécurité ;
-   les contrôles d'accès réels seront faits par le serveur.
+   les contrôles d'accès réels sont faits par la base (RLS).
    ========================================================================= */
 
 /* --- 1. Fin de bail ---------------------------------------------------------- */
@@ -44,16 +43,6 @@ window.addEventListener('submit', e => {
 const _applySearchFin = applySearch;
 applySearch = function () { return _applySearchFin().filter(p => p.status !== 'liberation'); };
 
-/* --- 2. Cohérence au chargement --------------------------------------------- */
-function reparerStatuts() {
-  try {
-    const actifs = new Set(DB.getData(DB.K.leases).filter(l => l.status === 'actif').map(l => l.propertyId));
-    const avecUnites = new Set((DB.getData(DB.K.units) || []).map(x => x.propertyId));
-    DB.getData(DB.K.properties).filter(p => p.status === 'loue' && !actifs.has(p.id) && !avecUnites.has(p.id))
-      .forEach(p => DB.updateItem(DB.K.properties, p.id, {status: 'liberation'}));
-  } catch (e) {}
-}
-
 /* --- 5. Adresses publiques --------------------------------------------------- */
 function refPublique(id) {
   let h = 2166136261; const s = String(id);
@@ -64,7 +53,7 @@ const slugTitre = t => String(t || 'bien').normalize('NFD').replace(/[̀-ͯ]/g, 
   .replace(/m²/g, 'm2').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60) || 'bien';
 function annonceHref(p) { return p ? `#/annonce/${slugTitre(p.title)}-${refPublique(p.id)}` : '#/search'; }
 function bienDeRef(ref) { return DB.getData(DB.K.properties).find(p => refPublique(p.id) === ref) || null; }
-const routeFiche = () => routes.find(r => r.re.source === '^\\/property\\/([\\w]+)$');
+const routeFiche = () => routes.find(r => r.re.source === '^\\/property\\/([\\w-]+)$');
 routes.unshift({re: /^\/annonce\/([a-z0-9-]+)$/, fn: s => {
   const p = bienDeRef(String(s).split('-').pop());
   return routeFiche().fn(p ? p.id : '__introuvable');
@@ -97,7 +86,7 @@ const DISPO = ['disponible', 'discussion'];
 })();
 
 /* --- 6. Référencement -------------------------------------------------------- */
-const PRIVE = /^#\/(client|owner|agency|admin|tenant|manage|coffre|bien\/|mandant|agent|guide-demo|mot-de-passe|notifications|profil)/;
+const PRIVE = /^#\/(client|owner|agency|admin|tenant|manage|coffre|bien\/|mandant|agent|mot-de-passe|notifications|profil)/;
 function meta(sel, attr, nom, val) {
   let m = document.head.querySelector(sel);
   if (!m) { m = document.createElement(sel.startsWith('link') ? 'link' : 'meta'); m.setAttribute(attr, nom); if (sel.startsWith('link')) m.rel = nom; document.head.appendChild(m); }
@@ -130,7 +119,7 @@ function seoDeLaPage() {
       const libre = DISPO.includes(p.status) && p.listingStatus === 'publiee';
       const prix = money(p.price) + (p.transaction === 'location' ? ' / mois' : '');
       const lieu = [p.quartier, p.city].filter(Boolean).join(', ');
-      const img = ((p.photos && p.photos[0]) || (p.type ? demoPhotos(p)[0] : '') || '');
+      const img = ((p.photos && p.photos[0]) || '' || '');
       const imgAbs = img && !/^data:/.test(img) ? new URL(img, location.href).href : '';
       return poserSEO({titre: `${p.title} — ${prix} · ${lieu} | DEUKSIL`, type: 'product', image: imgAbs,
         desc: texteCourt(`${p.transaction === 'location' ? 'À louer' : 'À vendre'} à ${lieu} : ${p.title}, ${p.surface} m², ${prix}. ${p.description || ''}`),
@@ -164,7 +153,6 @@ function seoDeLaPage() {
 /* --- Après chaque affichage : adresses propres, liens, référencement ---------- */
 const _afterRenderFin = afterRender;
 afterRender = function () {
-  reparerStatuts();
   const r = _afterRenderFin.apply(this, arguments);
   try {
     const m = (location.hash || '').match(/^#\/property\/(\w+)$/);
@@ -266,26 +254,6 @@ window.addEventListener('submit', e => {
   try { audit('Client confié', `${dm.name} → ${m.firstName}`); } catch (err) {}
   closeModal(); toast(`${dm.name} est confié à ${m.firstName}.`); render();
 }, true);
-/* Données de démonstration : deux demandes suivies par Aïssatou, une par Ousmane. */
-function demandesDeDemo() {
-  try {
-    const ag = DB.findItem(DB.K.users, x => x.cni === '1900000000004'); if (!ag || ag.demandesDemo) return;
-    const ids = Object.fromEntries(DB.getData(DB.K.users).filter(x => x.parentId === ag.id && x.role === 'agent').map(x => [x.firstName, x.id]));
-    if (!ids['Aïssatou'] || !ids['Ousmane']) return;   // l'équipe n'est pas encore créée : on réessaiera
-    if (!DB.getData(DB.K.demandes).some(x => x.ownerId === ag.id)) {
-      [['Fatou Diop', '77 512 34 56', 'location', 'appartement', 350000, 'Mermoz', 2, ids['Aïssatou']],
-       ['Abdou Ndiaye', '76 223 45 67', 'vente', 'villa', 90000000, 'Almadies', 4, ids['Aïssatou']],
-       ['Mariama Ba', '78 334 56 78', 'location', 'studio', 150000, 'Plateau', 0, ids['Ousmane']]]
-        .forEach(([name, phone, transaction, type, budget, lieu, rooms, agentId]) => DB.addItem(DB.K.demandes, {ownerId: ag.id, name, phone, transaction, type, budget, lieu, rooms, agentId, status: 'active', createdAt: now()}));
-      DB.updateItem(DB.K.users, ag.id, {demandesDemo: true});
-      return true;
-    }
-    DB.updateItem(DB.K.users, ag.id, {demandesDemo: true});
-  } catch (e) {}
-}
-const _afterRenderDm = afterRender;
-afterRender = function () { const r = _afterRenderDm.apply(this, arguments); if (demandesDeDemo() && /^#\/agency\//.test(location.hash)) setTimeout(render, 0); return r; };
-
 /* --- 10. Recette P6 : une visite à venir ne peut pas être « terminée » -------- */
 const visiteFuture = id => { const v = DB.findItem(DB.K.visits, id); return !!(v && v.date && v.date > ymd()); };
 window.addEventListener('click', e => {

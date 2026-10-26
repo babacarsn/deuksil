@@ -1,93 +1,90 @@
 /* ==========================================================================
-   MODULE : comptes.js — un locataire inscrit sur un bail reçoit un compte.
-   Jusqu'ici, créer un bail ne créait qu'un nom sur une ligne : la personne
-   ne pouvait pas se connecter, ne voyait pas ses loyers, ne recevait pas
-   ses quittances et ne pouvait rien signaler. Seul le locataire de
-   démonstration pré-enregistré bouclait le cycle. On crée désormais le
-   compte avec le bail, et on remet ses identifiants au propriétaire.
+   MODULE : comptes.js — accès du locataire à son espace.
+   Le bailleur (ou l'agence) ouvre l'accès explicitement, avec l'adresse
+   e-mail RÉELLE du locataire :
+   * si cette personne a déjà un compte DEUKSIL et vous a contacté, le bail
+     est rattaché à son compte (fonction serveur rattacher_locataire) ;
+   * sinon, le compte est créé par la fonction serveur « gerer-acces », qui
+     génère un mot de passe provisoire affiché une seule fois.
+   Aucun compte n'est créé automatiquement et aucune adresse n'est inventée.
    ========================================================================== */
-const sansAccent = s => String(s || '').toLowerCase().normalize('NFD')
-  .replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '');
+const EMAIL_VALIDE = /^[^\s@]+@[^\s@.]+(\.[^\s@.]+)*\.[a-z]{2,}$/i;
 
-function emailLibre(base) {
-  let mail = base + '@gmail.com', n = 2;
-  while (DB.findItem(DB.K.users, u => (u.email || '').toLowerCase() === mail)) {
-    mail = base + n + '@gmail.com'; n++;
-  }
-  return mail;
-}
-
-/* Crée le compte locataire d'un bail, s'il n'existe pas déjà. */
-function compteDuBail(bail) {
-  if (!bail || !bail.tenant || !bail.id) return null;
-  if (locataireDuBail(bail)) return null;
-  const mots = String(bail.tenant).trim().split(/\s+/);
-  const prenom = mots.shift() || 'Locataire';
-  const nom = mots.join(' ');
-  const base = sansAccent(prenom) + '.' + (sansAccent(nom) || 'locataire');
-  const mail = emailLibre(base);
-  const u = DB.addItem(DB.K.users, {
-    password: 'demo123', status: 'actif', registrationPaid: true,
-    firstName: prenom, lastName: nom, phone: bail.phone || '',
-    role: 'tenant', leaseId: bail.id, leaseIds: [bail.id], ownerRef: bail.ownerId,
-    email: mail, cni: '', agencyName: '', address: '', agencyDesc: ''
-  });
-  return DB.lastWriteOk === false ? null : u;
-}
-
-/* Réconciliation : tout bail actif a son compte. Plus robuste que de se
-   greffer sur chaque endroit qui crée un bail. */
-let _comptesEnCours = false;
-function assurerComptes() {
-  if (_comptesEnCours) return;
-  const moi = Auth.current();
-  if (!moi || !['owner', 'agency'].includes(moi.role)) return;
-  _comptesEnCours = true;
+/* Message d'accueil du locataire, une fois son accès ouvert. */
+function accueillirLocataire(u, bail) {
   try {
-    const baux = DB.filterItems(DB.K.leases, l => l.ownerId === moi.id && l.status === 'actif');
-    baux.forEach(bail => {
-      const u = compteDuBail(bail);
-      if (!u) return;
-      /* Un second logement ne vaut pas un second compte : on le signale
-         autrement, sinon le propriétaire croit avoir créé un doublon. */
-      if (u.__existant) {
-        notify(moi.id, `${u.firstName} ${u.lastName} loue désormais un logement de plus.`, '#/manage/tenants');
-        toast(`${u.firstName} retrouve ce logement dans son espace, avec les précédents.`);
-        return;
-      }
-      notify(moi.id, `Accès locataire créé pour ${u.firstName} ${u.lastName} : ${u.email}`, '#/manage/tenants');
-      if (!moi.member) toast(`${u.firstName} peut maintenant se connecter avec ${u.email} (mot de passe : demo123).`);
-    });
-  } catch (e) { /* une donnée incomplète ne doit pas bloquer l'écran */ }
-  _comptesEnCours = false;
+    const bien = (gProp(bail.propertyId) || {}).title || 'votre logement';
+    notify(u.id, `Bienvenue : votre espace locataire pour « ${bien} » est ouvert.`, '#/tenant/home');
+    if (!DB.findItem(DB.K.tmsgs, m => m.leaseId === bail.id)) {
+      DB.addItem(DB.K.tmsgs, {leaseId: bail.id, from: 'owner', read: false,
+        text: `Bienvenue ${u.firstName || ''}. Vous trouverez ici vos loyers et vos quittances, et vous pouvez me signaler tout problème dans le logement.`.replace('  ', ' ')});
+    }
+  } catch (e) {}
 }
 
-const _renderC = render;
-render = function () {
-  const r = _renderC.apply(this, arguments);
-  setTimeout(assurerComptes, 60);
-  return r;
-};
-setTimeout(assurerComptes, 1500);
+/* Ouvre l'accès du locataire d'un bail. Renvoie true si c'est fait. */
+async function ouvrirAccesLocataire(bail, email, compteId) {
+  const moi = Auth.current();
+  if (!moi || moi.member || !bail || bail.ownerId !== moi.id) { toast('Seul le titulaire du compte ouvre un accès locataire.', 'bad'); return false; }
+  email = String(email || '').trim().toLowerCase();
+  if (!compteId && !EMAIL_VALIDE.test(email)) { toast('Indiquez l\'adresse e-mail réelle du locataire.', 'bad'); return false; }
+  await DB.attendre();   // le bail doit être enregistré avant d'y rattacher un compte
+  const {data: etat, error} = await SB.rpc('rattacher_locataire', {bail: bail.id, compte: compteId || null, courriel: compteId ? null : email});
+  if (error) { toast(error.message || 'Rattachement impossible.', 'bad'); return false; }
+  if (etat === 'rattache') {
+    await DB.relire(DB.K.users);
+    const u = locataireDuBail(bail);
+    audit('Accès locataire', `${bail.tenant} · compte existant`);
+    if (u) accueillirLocataire(u, bail);
+    toast(`${bail.tenant} retrouve ce logement dans son espace DEUKSIL.`); render(); return true;
+  }
+  // Aucun compte avec cette adresse : création par la fonction serveur.
+  const mots = String(bail.tenant || '').trim().split(/\s+/), prenom = mots.shift() || '', nom = mots.join(' ');
+  const u = DB.addItem(DB.K.users, {role: 'tenant', email, firstName: prenom, lastName: nom, phone: bail.phone || '',
+    leaseId: bail.id, leaseIds: [bail.id], ownerRef: bail.ownerId, status: 'actif', mdpProvisoire: true});
+  await DB.attendre();
+  if (!DB.findItem(DB.K.users, u.id)) return false;   // refus du serveur : message déjà affiché
+  audit('Accès locataire créé', `${bail.tenant} · ${email}`);
+  accueillirLocataire(u, bail); render(); return true;
+}
 
-/* --- Les identifiants sont rappelés sur la fiche du locataire ----------- */
+/* --- Bloc « Accès à son espace » sur la fiche du locataire --------------- */
 function accesLocataire(bail) {
   const u = locataireDuBail(bail);
-  if (!u) return '';
+  if (!u) {
+    return `<form class="acces-loc" data-action="acces-loc" data-id="${bail.id}">
+      <span class="acces-ic">${icon('user', 16)}</span>
+      <div style="min-width:0;flex:1">
+        <b class="small">${esc(bail.tenant)} n'a pas encore accès à son espace</b>
+        <div class="row" style="gap:8px;margin-top:6px;flex-wrap:wrap">
+          <input class="input" type="email" name="email" required placeholder="Adresse e-mail du locataire" autocomplete="off" style="flex:1;min-width:200px">
+          <button class="btn sm">Ouvrir son accès</button>
+        </div>
+        <div class="small muted" style="margin-top:4px">S'il a déjà un compte DEUKSIL, le bail y est ajouté ; sinon un mot de passe provisoire vous est affiché une seule fois.</div>
+      </div>
+    </form>`;
+  }
   const autres = bauxActifs(u).filter(b => b.id !== bail.id);
   return `<div class="acces-loc">
     <span class="acces-ic">${icon('user', 16)}</span>
     <div style="min-width:0">
       <b class="small">Accès de ${esc(u.firstName)} à son espace</b>
-      <div class="small muted">${esc(u.email)} · mot de passe : demo123</div>
+      <div class="small muted">${esc(u.email || '')} · ${u.mdpProvisoire ? 'mot de passe provisoire, à changer à la 1re connexion' : 'mot de passe personnel'}</div>
       ${autres.length ? `<div class="small muted">Loue aussi ${autres.map(b =>
         esc((gProp(b.propertyId) || {}).title || 'un autre logement')).join(', ')}.</div>` : ''}
     </div>
   </div>`;
 }
+document.addEventListener('submit', async e => {
+  const f = e.target.closest && e.target.closest('form[data-action="acces-loc"]'); if (!f) return;
+  e.preventDefault(); e.stopImmediatePropagation();
+  const bail = DB.findItem(DB.K.leases, f.dataset.id), b = f.querySelector('button');
+  b.disabled = true;
+  try { await ouvrirAccesLocataire(bail, f.email.value); } finally { b.disabled = false; }
+}, true);
 
 retoucheGestion(['tenants'], function (h, u) {
-  if (typeof h !== 'string' || !h) return h;
+  if (typeof h !== 'string' || !h || u.member) return h;
   try {
     const baux = DB.filterItems(DB.K.leases, l => l.ownerId === u.id && l.status === 'actif');
     if (!baux.length) return h;
@@ -96,13 +93,13 @@ retoucheGestion(['tenants'], function (h, u) {
     const vus = new Set();
     const blocs = baux.map(b => {
       const loc = locataireDuBail(b);
-      if (!loc || vus.has(loc.id)) return '';
-      vus.add(loc.id);
+      if (loc && vus.has(loc.id)) return '';
+      if (loc) vus.add(loc.id);
       return accesLocataire(b);
     }).filter(Boolean).join('');
     if (!blocs) return h;
     return h + `<div class="card" style="margin-top:16px"><h4 style="margin-top:0">Accès des locataires</h4>
-      <p class="small muted">Communiquez ces identifiants à vos locataires : ils y consultent leurs loyers, leurs quittances et y signalent les pannes.</p>
+      <p class="small muted">Avec son accès, le locataire consulte ses loyers et ses quittances et signale les pannes.</p>
       <div class="stack" style="gap:10px;margin-top:12px">${blocs}</div></div>`;
   } catch (e) { return h; }
 });

@@ -1,7 +1,7 @@
 /* ==========================================================================
    VUE : fiche détaillée d'un bien
    ========================================================================== */
-route(/^\/property\/([\w]+)$/, id => {
+route(/^\/property\/([\w-]+)$/, id => {
   const p = DB.findItem(DB.K.properties, id);
   const u = Auth.current();
   if (!p) return shellPublic(`<div class="wrap section"><h2>Bien introuvable</h2><a class="btn" href="#/search">Retour à la recherche</a></div>`);

@@ -9,49 +9,53 @@
    les biens sous mandat portent déjà la référence du mandant.
    ========================================================================== */
 
-/* --- 1. Un compte pour chaque mandant ----------------------------------- */
-function compteMandant(fiche) {
-  if (!fiche || !fiche.name) return null;
-  if (DB.findItem(DB.K.users, u => u.ownerRec === fiche.id)) return null;
-  const mots = String(fiche.name).trim().split(/\s+/);
-  const prenom = mots.shift() || 'Mandant';
-  const nom = mots.join(' ');
-  const mail = (fiche.email && !DB.findItem(DB.K.users, u => u.email === fiche.email))
-    ? fiche.email
-    : emailLibre(sansAccent(prenom) + '.' + (sansAccent(nom) || 'mandant'));
-  const u = DB.addItem(DB.K.users, {
-    password: 'demo123', status: 'actif', registrationPaid: true,
-    firstName: prenom, lastName: nom, phone: fiche.phone || '',
-    role: 'owner', ownerRec: fiche.id, mandantOf: fiche.ownerId,
-    email: mail, cni: fiche.cni || '', agencyName: '', address: fiche.address || '', agencyDesc: ''
-  });
-  return DB.lastWriteOk === false ? null : u;
-}
-
-function assurerMandants() {
+/* --- 1. L'accès du mandant : ouvert par l'agence, avec son e-mail réel ---
+   Bouton « Ouvrir l'accès » sur la fiche du propriétaire (onglet Propriétaires).
+   Le compte est créé par la fonction serveur « gerer-acces » (mot de passe
+   provisoire affiché une fois). Si la personne a déjà un compte DEUKSIL, elle
+   confie elle-même ses biens depuis son espace (demande de gestion). */
+async function compteMandant(fiche, email) {
   const moi = Auth.current();
-  if (!moi || moi.role !== 'agency') return;
+  if (!fiche || !moi || moi.member || fiche.ownerId !== moi.id) return null;
+  if (DB.findItem(DB.K.users, u => u.ownerRec === fiche.id)) return null;
+  email = String(email || fiche.email || '').trim().toLowerCase();
+  if (!EMAIL_VALIDE.test(email)) { toast('Indiquez l\'adresse e-mail réelle du propriétaire.', 'bad'); return null; }
+  await DB.attendre();
+  const mots = String(fiche.name || '').trim().split(/\s+/), prenom = mots.shift() || '', nom = mots.join(' ');
   try {
-    DB.filterItems(DB.K.owners, o => o.ownerId === moi.id).forEach(fiche => {
-      const u = compteMandant(fiche);
-      if (!u) return;
-      notify(moi.id, `Accès créé pour ${u.firstName} ${u.lastName} : ${u.email}`, '#/manage/owners');
-      notify(u.id, 'Votre espace propriétaire est ouvert : suivez vos biens et vos relevés.', '#/owner/dashboard');
-      if (!moi.member) toast(`${u.firstName} peut suivre ses biens avec ${u.email} (mot de passe : demo123).`);
-    });
-  } catch (e) {}
+    const r = await appelerFonction('gerer-acces', {action: 'creer', role: 'owner', ownerRec: fiche.id, email,
+      firstName: prenom, lastName: nom, phone: fiche.phone || '', cni: fiche.cni || undefined});
+    await DB.relire(DB.K.users);
+    const u = DB.findItem(DB.K.users, r.id) || {id: r.id, firstName: prenom, lastName: nom, email};
+    if (!fiche.email) DB.updateItem(DB.K.owners, fiche.id, {email});
+    audit('Accès mandant créé', `${fiche.name} · ${email}`);
+    notify(u.id, 'Votre espace propriétaire est ouvert : suivez vos biens et vos relevés.', '#/owner/dashboard');
+    montrerMotDePasseProvisoire(u, r.motDePasse); render();
+    return u;
+  } catch (e) {
+    toast(/existe déjà/.test(e.message || '')
+      ? `${fiche.name} a déjà un compte DEUKSIL : il peut vous confier ses biens depuis son espace (Mes biens → Confier à une agence).`
+      : (e.message || 'Création de l\'accès impossible.'), 'bad');
+    return null;
+  }
 }
-/* L'amorçage ne passe pas par render() : on s'accroche aux changements de
-   l'écran, comme les autres greffes, pour être sûr de passer après le
-   chargement du jeu de données. */
-let _mandantsVus = 0;
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-action="acces-mandant"]'); if (!b) return;
+  e.preventDefault();
+  const fiche = DB.findItem(DB.K.owners, b.dataset.id); if (!fiche) return;
+  promptDialog({title: 'Ouvrir l\'accès de ' + fiche.name, label: 'Adresse e-mail du propriétaire', value: fiche.email || '',
+    onConfirm: v => { b.disabled = true; Promise.resolve(compteMandant(fiche, v)).finally(() => { b.disabled = false; }); }});
+});
+/* Bouton posé à côté de « Fiche » pour les propriétaires sans accès. */
 new MutationObserver(() => requestAnimationFrame(() => {
   const u = Auth.current();
-  if (!u || u.role !== 'agency') return;
-  const n = DB.filterItems(DB.K.owners, o => o.ownerId === u.id).length;
-  if (n === _mandantsVus) return;
-  _mandantsVus = n;
-  try { assurerMandants(); } catch (e) {}
+  if (!u || u.role !== 'agency' || u.member || !/^#\/manage\/owners/.test(location.hash)) return;
+  document.querySelectorAll('#app [data-action="g9-ofiche"][data-id]:not([data-acces])').forEach(b => {
+    b.dataset.acces = '1';
+    const fiche = DB.findItem(DB.K.owners, b.dataset.id);
+    if (!fiche || fiche.compteId || fiche.status === 'close' || DB.findItem(DB.K.users, x => x.ownerRec === fiche.id)) return;
+    b.insertAdjacentHTML('afterend', `<button class="btn ghost sm" data-action="acces-mandant" data-id="${fiche.id}">Ouvrir l'accès</button>`);
+  });
 })).observe(document.body, {childList: true, subtree: true});
 
 const estMandant = u => !!(u && u.ownerRec);
@@ -170,38 +174,8 @@ function nettoyerTableauMandant() {
   if (fab) fab.remove();
 }
 
-/* --- 7. De quoi voir fonctionner ses relevés ---------------------------- */
-const MANDANT_FLAG = 'deuksil_mandant_v1';
-function seedMandant() {
-  if (localStorage.getItem(MANDANT_FLAG)) return;
-  const fiche = DB.getData(DB.K.owners)[0];
-  if (!fiche) return;
-  const bien = DB.filterItems(DB.K.properties, p => p.clientOwnerId === fiche.id)[0];
-  if (!bien) return;
-  if (DB.findItem(DB.K.leases, l => l.propertyId === bien.id)) { localStorage.setItem(MANDANT_FLAG, '1'); return; }
-
-  const loyer = bien.price || 400000;
-  const bail = DB.addItem(DB.K.leases, {ownerId: fiche.ownerId, propertyId: bien.id,
-    tenant: 'Cheikh Mbaye', phone: '770002244', rent: loyer, deposit: loyer * 2,
-    start: addDays(now(), -150).slice(0, 10), months: 12, status: 'actif'});
-  const d = new Date(bail.start);
-  for (let i = 0; i < 5; i++) {
-    const m = new Date(d.getFullYear(), d.getMonth() + i, 1);
-    DB.addItem(DB.K.rents, {ownerId: fiche.ownerId, leaseId: bail.id, propertyId: bien.id,
-      month: `${m.getFullYear()}-${String(m.getMonth() + 1).padStart(2, '0')}`,
-      amount: loyer, paidAt: i < 4 ? addDays(bail.start, i * 30 + 3) : null});
-  }
-  const encaisse = loyer * 4, taux = +fiche.rate || 8;
-  DB.addItem(DB.K.transfers, {ownerId: fiche.ownerId, ownerId2: fiche.id,
-    ref: nref('REV', 'transfers'), month: new Date().toISOString().slice(0, 7),
-    amount: Math.round(encaisse * (100 - taux) / 100 / 2)});
-  DB.updateItem(DB.K.properties, bien.id, {status: 'loue'});
-  localStorage.setItem(MANDANT_FLAG, '1');
-}
-
-etapeAmorcage('accès mandant', seedMandant, true);
+/* --- 7. Nettoyage du tableau de bord du mandant (après chaque affichage) --- */
 
 new MutationObserver(() => requestAnimationFrame(() => {
-  try { seedMandant(); } catch (e) {}
   try { nettoyerTableauMandant(); } catch (e) {}
 })).observe(document.body, {childList: true, subtree: true});

@@ -47,26 +47,26 @@ function askVisit(pid) {
       <button class="btn block">Envoyer la demande</button></form>`);
 }
 
-/* ---- Inscription : création du compte puis paiements simulés ---- */
-function startRegistration(data) {
-  const exists = DB.findItem(DB.K.users, u => u.cni === data.cni);
-  if (exists) { toast('Un compte existe déjà avec cette CNI.', 'bad'); return; }
-  const user = DB.addItem(DB.K.users, {cni: data.cni, firstName: data.firstName, lastName: data.lastName, phone: data.phone,
-    email: String(data.email || '').trim().toLowerCase(), password: data.password, role: data.role,
-    agencyName: data.agencyName || '', address: data.address || '', agencyDesc: data.agencyDesc || '',
-    ninea: data.ninea || '', rccm: data.rccm || '', cguAccepteesLe: data.cgu ? now() : '', emailVerifie: false,
-    status: 'actif', registrationPaid: true});
-  if (!DB.lastWriteOk) return;
-  activate(user, 'Bienvenue sur DEUKSIL : votre compte est actif, gratuitement.');
-}
-
-function activate(user, msg) {
-  logActivity(`${displayName(user)} a créé un compte ${user.role}`);
-  notify(user.id, 'Bienvenue sur DEUKSIL. Votre compte est actif.', Auth.home(user));
-  notify('user_admin', `Nouveau compte ${user.role} : ${displayName(user)}`, '#/admin/users');
-  localStorage.setItem(DB.K.session, JSON.stringify({id: user.id, at: now()}));
-  toast(msg);
-  go(Auth.home(user));
+/* ---- Inscription : Supabase Auth crée le compte ; le profil est créé par la base
+   (déclencheur app.creer_profil, rôle limité à client / propriétaire / agence).
+   Un code de confirmation est envoyé par e-mail avant la première connexion. ---- */
+async function startRegistration(data) {
+  const email = String(data.email || '').trim().toLowerCase();
+  const {data: r, error} = await SB.auth.signUp({email, password: data.password, options: {
+    emailRedirectTo: (DEUKSIL_CONFIG.siteUrl || location.origin + location.pathname) + '#/verifier-email',
+    data: {role: data.role, first_name: (data.firstName || '').trim(), last_name: (data.lastName || '').trim(), phone: (data.phone || '').trim(),
+      cni: (data.cni || '').replace(/\s/g, ''), agency_name: (data.agencyName || '').trim(), address: (data.address || '').trim(),
+      ninea: (data.ninea || '').trim(), rccm: (data.rccm || '').trim(), cgu: !!data.cgu}}});
+  if (error) return {error: messageAuth(error)};
+  try { sessionStorage.setItem('deuksil_verif_email', JSON.stringify(email)); } catch (e) {}
+  if (r.session) {   // confirmation par e-mail désactivée dans Supabase : session ouverte tout de suite
+    await DB.charger(); const u = Auth.current();
+    if (u) { toast('Bienvenue sur DEUKSIL : votre compte est actif.'); go(Auth.home(u)); }
+    return {ok: true, session: true};
+  }
+  go('#/verifier-email');
+  toast('Compte créé : saisissez le code envoyé à ' + email + '.');
+  return {ok: true};
 }
 
 
@@ -295,29 +295,8 @@ document.addEventListener('click', e => {
     case 'user-toggle': { stop(); const x = DB.findItem(DB.K.users, id); DB.updateItem(DB.K.users, id, {status: x.status === 'suspendu' ? 'actif' : 'suspendu'}); toast('Statut du compte mis à jour.'); render(); break; }
     case 'user-del': stop(); confirmDialog({title:'Supprimer ce compte', message:'Le compte, ses biens, ses messages, ses documents, son abonnement et ses données associées seront supprimés définitivement.', confirmLabel:'Supprimer', danger:true, onConfirm: () => { cascadeDeleteUser(id); toast('Compte supprimé.'); render(); }}); break;
 
-    case 'add-agent': {
-      stop();
-      modal('Ajouter un agent', `<form data-action="create-agent">
-        <div class="form-grid"><div class="field"><label>Prénom</label><input class="input" name="firstName" required></div>
-        <div class="field"><label>Nom</label><input class="input" name="lastName" required></div></div>
-        <div class="field"><label>Téléphone</label><input class="input" name="phone" required></div>
-        <div class="field"><label>Numéro de CNI (fictif)</label><input class="input" name="cni" maxlength="13" required></div>
-        <div class="field"><label>Rôle</label><input class="input" name="role" value="Agent commercial"></div>
-        <button class="btn block">Ajouter l'agent</button></form>`);
-      break;
-    }
-    case 'agent-toggle': { stop(); const ag = ownsAgent(id, u); if (!ag) break; DB.updateItem(DB.K.agents, id, {status: ag.status === 'actif' ? 'inactif' : 'actif'}); render(); break; }
-    case 'agent-del': stop(); if (!ownsAgent(id, u)) break; DB.deleteItem(DB.K.agents, id); toast('Agent supprimé.'); render(); break;
 
     case 'remove-photo': stop(); formPhotos.splice(+el.dataset.i, 1); render(); break;
-    case 'export-data': {
-      stop();
-      const dump = Object.fromEntries(Object.entries(DB.K).map(([k, v]) => [k, localStorage.getItem(v)]));
-      modal('Export JSON', `<textarea style="min-height:260px;font-size:.75rem">${esc(JSON.stringify(dump, null, 1))}</textarea>
-        <p class="small muted">Copiez ce contenu pour le réinjecter dans un backend lors de la migration.</p>`);
-      break;
-    }
-    case 'reset-demo': stop(); confirmDialog({title:'Réinitialiser la démonstration', message:'Toutes les données créées seront remplacées par le jeu de démonstration initial. Cette action est irréversible.', confirmLabel:'Réinitialiser', danger:true, onConfirm: () => { seedIfNeeded(true); resetSessionUiState(); localStorage.removeItem(DB.K.session); toast('Données réinitialisées.'); go('#/'); render(); }}); break;
   }
 });
 
@@ -417,12 +396,18 @@ document.addEventListener('submit', e => {
   const a = form.dataset.action, d = formData(form), u = Auth.current();
 
   if (a === 'login') {
-    const res = Auth.login(d.cni, d.password);
-    if (res.error) { $('#login-err').innerHTML = `<p class="err">${esc(res.error)}</p>`; return; }
-    toast(`Bienvenue ${res.user.role === 'agency' ? res.user.agencyName : res.user.firstName}.`);
-    go(Auth.home(res.user));
+    const bouton = form.querySelector('button:not([type="button"])'); if (bouton) bouton.disabled = true;
+    Auth.login(d.cni, d.password).then(res => {
+      if (bouton) bouton.disabled = false;
+      if (res.error) {
+        const z = $('#login-err'); if (z) z.innerHTML = `<p class="err">${esc(res.error)}</p>`;
+        if (/non confirmée/.test(res.error)) { try { sessionStorage.setItem('deuksil_verif_email', JSON.stringify(String(d.cni).trim().toLowerCase())); } catch (e) {} }
+        return;
+      }
+      toast(`Bienvenue ${res.user.role === 'agency' ? res.user.agencyName : res.user.firstName}.`);
+      go(Auth.home(Auth.current() || res.user));
+    });
   }
-  if (a === 'register') startRegistration(d);
   if (a === 'quick-search') { searchState = {...searchState, transaction: d.transaction, region: d.region, type: d.type, city: '', quartier: '', page: 1}; go('#/search'); }
   if (a === 'ai-search') {
     const box = $('#ai-search-state');
@@ -447,20 +432,11 @@ document.addEventListener('submit', e => {
     clearFormError(form);
     const p = DB.findItem(DB.K.properties, form.dataset.id);
     DB.addItem(DB.K.visits, {clientId: u.id, ownerId: p.ownerId, propertyId: p.id, date: d.date, time: d.time, message: d.message, status: 'attente'});
-    if (!DB.lastWriteOk) return formError(form, 'La demande n\'a pas pu être enregistrée (stockage local saturé).');
+    if (!DB.lastWriteOk) return formError(form, 'La demande n\'a pas pu être enregistrée.');
     notify(p.ownerId, `Nouvelle demande de visite pour « ${p.title} » le ${dateFr(d.date)}.`, roleLink(p.ownerId, 'visits'));
     DB.updateItem(DB.K.properties, p.id, {contacts: (p.contacts || 0) + 1});
     logActivity(`Demande de visite envoyée pour ${p.title}`);
     closeModal(); toast('Demande envoyée au propriétaire.'); go('#/client/visits');
-  }
-  if (a === 'create-agent') {
-    if (!d.firstName.trim() || !d.lastName.trim()) return formError(form, 'Renseignez le prénom et le nom.');
-    if (!/^\d{13}$/.test(d.cni)) return formError(form, 'Le numéro de CNI doit comporter 13 chiffres (utilisez un numéro fictif).');
-    if (!d.phone.trim()) return formError(form, 'Renseignez un numéro de téléphone.');
-    clearFormError(form);
-    DB.addItem(DB.K.agents, {agencyId: u.id, firstName: d.firstName, lastName: d.lastName, phone: d.phone, cni: d.cni, role: d.role, status: 'actif'});
-    if (!DB.lastWriteOk) return formError(form, "L'agent n'a pas pu être enregistré (stockage local saturé).");
-    closeModal(); toast('Agent ajouté.'); render();
   }
   if (a === 'send-msg') {
     const t = DB.findItem(DB.K.messages, form.dataset.id);

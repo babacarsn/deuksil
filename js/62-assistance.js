@@ -132,27 +132,6 @@ document.addEventListener('change', e => {
   valeursParDefautBail(sel.closest('form'), true);
 });
 
-/* --- 3. Les annonces déjà soumises passent en ligne --------------------- */
-/* L'état « attente » n'a plus de raison d'être : il immobilisait des
-   annonces que personne n'allait valider. Celles qui existent sont mises
-   en ligne une fois pour toutes, et le bouton « Publier » reste offert si
-   l'une d'elles réapparaît. */
-const PUB_FLAG = 'deuksil_pub_directe_v1';
-function libererAnnonces() {
-  try {
-    const bloquees = DB.filterItems(DB.K.properties, p => p.listingStatus === 'attente');
-    if (!bloquees.length) { localStorage.setItem(PUB_FLAG, '1'); return; }
-    bloquees.forEach(p => DB.updateItem(DB.K.properties, p.id, {listingStatus: 'publiee'}));
-    if (!localStorage.getItem(PUB_FLAG)) {
-      localStorage.setItem(PUB_FLAG, '1');
-      const u = Auth.current();
-      if (u && ['owner', 'agency'].includes(u.role)) {
-        toast(`${bloquees.length} annonce${bloquees.length > 1 ? 's' : ''} en attente ${bloquees.length > 1 ? 'sont' : 'est'} maintenant en ligne.`);
-      }
-    }
-  } catch (e) {}
-}
-
 /* --- 4. Les écrans ne parlent plus de validation préalable -------------- */
 function motsPublication() {
   const c = document.querySelector('.main > .content');
@@ -167,7 +146,6 @@ function motsPublication() {
 }
 
 new MutationObserver(() => requestAnimationFrame(() => {
-  try { libererAnnonces(); } catch (e) {}
   try { barreFiltreLoyers(); } catch (e) {}
   try {
     const f = document.querySelector('.main form[data-action="g-lease"]');

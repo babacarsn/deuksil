@@ -63,7 +63,7 @@ vueGestion(['units', 'tenants', 'reports', 'tickets'], function (u, tab) {
       <div class="field"><label>Année</label><select class="input" data-action="g8-rep" name="year">${[0, 1, 2].map(i => new Date().getFullYear() - i).map(y => `<option ${y === REP.year ? 'selected' : ''}>${y}</option>`).join('')}</select></div></div>
       <div class="row" style="gap:8px"><button class="btn" data-action="g8-rpdf">Télécharger en PDF</button><button class="btn ghost" data-action="g8-rcsv">Exporter en CSV</button></div></div>` +
       gTable(d.head, rows.map((r, i) => `<tr${d.total && i === rows.length - 1 ? ' style="font-weight:700"' : ''}>${r.map(c => `<td class="small">${esc(c)}</td>`).join('')}</tr>`), ['Aucune donnée', 'Aucun élément pour cette période.']); }
-  const tks = gMine('tickets', u).filter(t => { if (!t.ref) { t.ref = nref('MNT', 'tickets'); DB.updateItem(DB.K.tickets, t.id, {ref: t.ref}); } return true; }).reverse(), provs = gMine('providers', u);
+  const tks = gMine('tickets', u).reverse(), provs = gMine('providers', u);
   return csvBtn('tickets') + `<form class="card" data-action="g8-ticket" style="margin-bottom:18px"><h4 style="margin-top:0">Nouvelle intervention</h4><div class="form-grid"><div class="field"><label>Bien</label><select class="input" name="propertyId" required>${gOpts(props)}</select></div>
     <div class="field"><label>Problème</label><input class="input" name="title" required></div>
     <div class="field"><label>Catégorie</label><select class="input" name="category">${MCAT.map(c => `<option>${c}</option>`).join('')}</select></div><div class="field"><label>Priorité</label><select class="input" name="priority">${Object.entries(PRIO).map(([k, v]) => `<option value="${k}" ${k === 'normale' ? 'selected' : ''}>${v[0]}</option>`).join('')}</select></div>
@@ -141,25 +141,12 @@ document.addEventListener('submit', async e => {
     audit('Maintenance créée', t.ref); toast(t.ref + ' créé.'); render(); }
 });
 
-/* ---------- Rappels automatiques (une fois par événement) ---------- */
-function autoNotifyTick() {
-  const u = Auth.current(); if (!u || !['owner', 'agency', 'tenant'].includes(u.role)) return;
-  const today = now().slice(0, 10), push = (k, uid, t, l) => { if (uid && !DB.findItem(DB.K.notifications, n => n.userId === uid && n.key === k)) DB.addItem(DB.K.notifications, {userId: uid, text: t, read: false, link: l || '', key: k}); };
-  const L = u.role === 'tenant' ? DB.findItem(DB.K.leases, u.leaseId) : null;
-  if (!L) syncContracts(u);
-  (L ? DB.filterItems(DB.K.rents, r => r.leaseId === L.id) : gMine('rents', u)).filter(r => !r.paidAt).forEach(r => {
-    const l = L || DB.findItem(DB.K.leases, r.leaseId); if (!l) return; const dd = daysBetween(today, r.month + '-05'), ten = L ? u.id : (tenantOf(l) || {}).id, ml = monthLabel(r.month);
-    const kinds = dd >= 0 && dd <= 3 ? ['rd', `Loyer de ${l.tenant} (${ml}) bientôt dû.`, `Votre loyer de ${ml} est dû le 5.`] : dd < 0 ? ['rl', `Loyer en retard : ${l.tenant}, ${ml}.`, `Votre loyer de ${ml} est en retard.`] : null;
-    if (!kinds) return; if (!L) push(`${kinds[0]}|${r.id}|O`, u.id, kinds[1], '#/manage/rents'); push(`${kinds[0]}|${r.id}|T`, ten, kinds[2], '#/tenant/rents');
-  });
-  if (!L) {
-    gMine('docs', u).filter(d => d.type === 'FAC' && dRest(d) > 0 && d.due < today).forEach(d => push('fl|' + d.id, u.id, `Facture ${d.ref} en retard de paiement.`, '#/manage/docs'));
-    gMine('contracts', u).filter(c => c.status === 'actif' && daysBetween(today, c.end) >= 0 && daysBetween(today, c.end) <= 30).forEach(c => push('ce|' + c.id, u.id, `Le contrat ${c.ref} expire dans ${daysBetween(today, c.end)} jours.`, '#/manage/contracts'));
-  }
-  DB.getData(DB.K.documents).filter(x => x.ownerId === u.id && x.expiry && daysTo(x.expiry) <= 30).forEach(x => push('de|' + x.id + '|' + (daysTo(x.expiry) < 0 ? 'x' : 'o'), u.id, `Document « ${x.name} » ${daysTo(x.expiry) < 0 ? 'expiré' : 'bientôt expiré'}.`, '#/coffre'));
-}
+/* ---------- Rappels automatiques ----------
+   Loyers, factures, contrats, documents et visites : les rappels sont créés par la
+   base une fois par jour (fonction app.generer_rappels, planifiée par pg_cron), pas
+   par le navigateur de chaque utilisateur. */
 window.addEventListener('hashchange', () => { const p = document.getElementById('upanel'), bk = document.querySelector('.upanel-back'), ch = document.querySelector('.mhead .muser');
-  if (p) p.classList.remove('open'); if (bk) bk.classList.remove('open'); if (ch) ch.classList.remove('on'); setTimeout(autoNotifyTick, 400); }); setTimeout(autoNotifyTick, 1500);
+  if (p) p.classList.remove('open'); if (bk) bk.classList.remove('open'); if (ch) ch.classList.remove('on'); });
 
 /* ---------- Tableaux : tri par colonne et pagination ---------- */
 function enhanceTable(t) {

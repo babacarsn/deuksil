@@ -1,32 +1,24 @@
 /* ==========================================================================
-   00-config.js — RÉGLAGES DU DÉPLOIEMENT (le seul fichier à modifier).
-   Chargé en tout premier. Tant qu'un réglage est vide, la fonction
-   correspondante reste en mode local : les formulaires s'affichent et se
-   remplissent normalement, mais ce qui exige un serveur (envoi d'un code par
-   e-mail ou SMS, connexion Google) l'indique à l'utilisateur au lieu de
-   faire semblant.
+   00-config.js — RÉGLAGES PUBLICS DU DÉPLOIEMENT (seul fichier à modifier).
+   Chargé en premier. Ne contient QUE des valeurs publiques : la clé « anon /
+   publishable » de Supabase est faite pour être visible dans le navigateur ;
+   ce sont les politiques RLS de la base qui protègent les données.
+   NE JAMAIS mettre ici la clé service_role (ni aucun autre secret).
+   Valeurs : Supabase → Project Settings → API (voir README_SUPABASE.md §3).
    ========================================================================== */
 const DEUKSIL_CONFIG = {
-  /* Adresse du serveur (API), sans « / » final. Ex. 'https://api.deuksil.sn'.
-     Vide : comptes enregistrés dans le navigateur, aucun envoi de code. */
-  apiBase: '',
-
-  /* Identifiant client OAuth 2.0 de Google (console Google Cloud →
-     Identifiants → « ID client OAuth », type Application Web).
-     Ex. '1234567890-abcdefg.apps.googleusercontent.com'.
-     Vide : le bouton « Continuer avec Google » annonce que ce mode de
-     connexion n'est pas encore activé. */
-  googleClientId: '',
-
-  /* Routes de l'API appelées par les formulaires (POST, corps JSON).
-     Réponse attendue : 2xx en cas de succès, sinon {message: '…'}. */
-  routes: {
-    inscription:        '/auth/register',          // {role, firstName, lastName, email, phone, cni, password, agencyName?, address?, ninea?, rccm?}
-    motDePasseOublie:   '/auth/password/forgot',   // {identifiant}
-    reinitialisation:   '/auth/password/reset',    // {identifiant, code, password}
-    verifierEmail:      '/auth/email/verify',      // {email, code}
-    renvoyerCode:       '/auth/email/resend',      // {email}
-    google:             '/auth/google',            // {credential}  → {user: {email, firstName, lastName}}
-    contact:            '/contact'                 // {name, email, phone, subject, message}
+  supabaseUrl: 'https://fqrmulupzaqmvjoybela.supabase.co',          // ex. 'https://abcdefghijklmno.supabase.co'
+  supabaseAnonKey: 'sb_publishable_wxCyWMCe_w50pBtSkb6CDQ_UayTczfE',      // clé « anon » (ou « publishable ») du projet
+  /* Connexion Google : true une fois le fournisseur Google activé dans
+     Supabase (Authentication → Providers → Google). */
+  googleActif: true,
+  /* Adresse publique du site (redirections après connexion Google ou lien e-mail). */
+  siteUrl: '',              // ex. 'https://www.deuksil.com' — vide : l'adresse où le site est ouvert
+  /* Éditeur du site (mentions légales, politique de confidentialité).
+     Un champ vide s'affiche « à compléter » : à renseigner avant l'ouverture. */
+  editeur: {
+    raisonSociale: '', formeJuridique: '', adresse: '', ninea: '', rccm: '',
+    directeurPublication: '', email: '', hebergeurSite: '',
+    regionDonnees: ''          // région du projet Supabase, ex. 'eu-west-3 (Paris)'
   }
 };
