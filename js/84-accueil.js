@@ -203,8 +203,8 @@ activityHtml = function (u) {
 /* Coordonnées et réseaux : renseignez-les ici. Une ligne vide n'est pas
    affichée — aucune coordonnée n'est inventée. */
 const DEUKSIL_CONTACT = {
-  email: '',          // ex. 'contact@deuksil.sn'
-  telephone: '',      // ex. '+221 77 000 00 00'
+  email: 'deuksilcontact@gmail.com',
+  telephone: '+221 77 534 30 75',
   whatsapp: '',       // numéro au format international, sans espaces : '221770000000'
   adresse: 'Dakar, Sénégal',
   facebook: '', instagram: '', linkedin: '', tiktok: ''

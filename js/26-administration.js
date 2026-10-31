@@ -12,7 +12,7 @@ route(/^\/admin\/dashboard$/, () => {
     return [label, users.filter(x => new Date(x.createdAt) <= d).length];
   });
   return shellApp(u, `
-    ${page('Administration DEUKSIL', 'Vue consolidée de la plateforme.', pending.length ? `<a class="btn" href="#/admin/listings">${pending.length} annonce(s) à valider</a>` : '')}
+    ${page('Administration DEUKSIL', 'Vue consolidée de la plateforme.', pending.length ? `<a class="btn" href="#/admin/listings">${pending.length} annonce(s) en attente</a>` : '')}
     <div class="kpis">
       ${kpiRich(users.length, 'Utilisateurs', 'users', 'brand', null)}
       ${kpiRich(users.filter(x => x.role === 'owner').length, 'Propriétaires', 'home', 'info', null)}
