@@ -282,7 +282,7 @@ route(/^\/contact$/, () => {
   const u = Auth.current(), moi = u ? (u.member || u) : {};
   const sujet = (typeof LIEN !== 'undefined' && LIEN && LIEN.path === '#/contact' && LIEN.p.get('sujet')) || 'question';
   const C = typeof DEUKSIL_CONTACT !== 'undefined' ? DEUKSIL_CONTACT : {};
-  const ligne = (ic, titre, val) => val ? `<div class="ct-l"><span class="itile sm">${icon(ic, 17)}</span><div><b>${titre}</b><span class="small">${esc(val)}</span></div></div>` : '';
+  const ligne = (ic, titre, val, href) => val ? `<div class="ct-l"><span class="itile sm">${icon(ic, 17)}</span><div><b>${titre}</b><span class="small">${href ? `<a class="lien-contact" href="${esc(href)}">${esc(val)}</a>` : esc(val)}</span></div></div>` : '';
   return shellPublic(`<section class="wrap" style="max-width:1040px;padding:34px 0 60px">${crumbHtml('#/', 'Accueil', 'Contact')}
     <div class="page-head"><div><h1>Contacter DEUKSIL</h1><p class="muted">Une question, un souci d'accès, une annonce à signaler : écrivez-nous, nous vous répondons par e-mail.</p></div></div>
     <div class="ct-grid">
@@ -296,7 +296,7 @@ route(/^\/contact$/, () => {
         <button class="btn">${icon('message', 16)} Envoyer le message</button>
       </form></div>
       <aside class="card ct-info"><h4 style="margin:0">Autres moyens de nous joindre</h4>
-        ${ligne('mail', 'E-mail', C.email)}${ligne('phone', 'Téléphone', C.telephone)}${ligne('message', 'WhatsApp', C.whatsapp ? '+' + C.whatsapp : '')}${ligne('pin', 'Adresse', C.adresse)}
+        ${ligne('mail', 'E-mail', C.email, C.email && 'mailto:' + C.email)}${ligne('phone', 'Téléphone', C.telephone, C.telephone && lienTel(C.telephone))}${ligne('message', 'WhatsApp', C.whatsapp ? '+' + C.whatsapp : '', C.whatsapp && 'https://wa.me/' + C.whatsapp)}${ligne('pin', 'Adresse', C.adresse)}
         ${ligne('clock', 'Délai de réponse', 'Sous 48 h ouvrées')}
         <p class="small muted" style="margin:0">Vous avez oublié votre mot de passe ? <a href="#/mot-de-passe-oublie">Recevoir un code</a>.</p></aside>
     </div></section>`);
@@ -341,7 +341,7 @@ route(/^\/admin\/contacts$/, () => {
   const L = DB.getData(DB.K.contacts).sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
   const nouveaux = L.filter(m => m.statut === 'nouveau').length;
   return shellApp(u, page('Messages de contact', `${pluriel(L.length, 'message')} · ${nouveaux} à traiter`) + (L.length ? gTable(['Reçu le', 'Expéditeur', 'Sujet', 'Message', 'État', ''],
-    L.map(m => `<tr><td class="small">${dateTimeFr(m.createdAt)}</td><td class="small"><b>${esc(m.name)}</b><br><span class="muted">${esc(m.email)}${m.phone ? ' · ' + esc(m.phone) : ''}</span></td>
+    L.map(m => `<tr><td class="small">${dateTimeFr(m.createdAt)}</td><td class="small"><b>${esc(m.name)}</b><br><a class="lien-contact" href="mailto:${esc(m.email)}?subject=${encodeURIComponent('DEUKSIL : votre message')}">${esc(m.email)}</a>${m.phone ? ` · <a class="lien-contact" href="${esc(lienTel(m.phone))}">${esc(m.phone)}</a>` : ''}</td>
       <td>${badge(LIB_SUJET[m.subject] || m.subject, m.subject === 'abus' ? 'bad' : 'info')}</td><td class="small" style="max-width:420px;white-space:pre-wrap">${esc(m.message)}</td>
       <td>${badge(m.statut === 'traite' ? 'Traité' : 'À traiter', m.statut === 'traite' ? 'ok' : 'warn')}</td>
       <td>${m.statut === 'traite' ? '' : `<button class="btn ghost sm" data-action="contact-traite" data-id="${m.id}">Marquer traité</button>`}</td></tr>`))

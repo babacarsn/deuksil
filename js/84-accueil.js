@@ -202,6 +202,8 @@ activityHtml = function (u) {
 /* --- 1 ter. Pied de page prêt pour la mise en ligne -------------------------- */
 /* Coordonnées et réseaux : renseignez-les ici. Une ligne vide n'est pas
    affichée — aucune coordonnée n'est inventée. */
+/* Liens cliquables : téléphone (préfixe +221 ajouté aux numéros sénégalais à 9 chiffres) et e-mail. */
+function lienTel(v) { const d = String(v || '').replace(/[^\d+]/g, ''); return 'tel:' + (/^[37]\d{8}$/.test(d) ? '+221' + d : d); }
 const DEUKSIL_CONTACT = {
   email: 'deuksilcontact@gmail.com',
   telephone: '+221 77 534 30 75',
@@ -226,8 +228,8 @@ function piedDePage() {
         <p>La plateforme immobilière du Sénégal : locations, ventes et terrains, et la gestion locative pour les propriétaires et les agences.</p>
         <ul class="ft-contact">
           ${C.adresse ? `<li>${icon('pin', 16)}<span>${esc(C.adresse)}</span></li>` : ''}
-          ${C.telephone ? `<li>${icon('phone', 16)}<span>${esc(C.telephone)}</span></li>` : ''}
-          ${C.email ? `<li>${icon('mail', 16)}<span>${esc(C.email)}</span></li>` : ''}
+          ${C.telephone ? `<li>${icon('phone', 16)}<a class="lien-contact" href="${esc(lienTel(C.telephone))}">${esc(C.telephone)}</a></li>` : ''}
+          ${C.email ? `<li>${icon('mail', 16)}<a class="lien-contact" href="mailto:${esc(C.email)}">${esc(C.email)}</a></li>` : ''}
         </ul>
         ${reseaux.length ? `<div class="ft-social">${reseaux.map(([k, l]) => `<a href="${esc(C[k])}" target="_blank" rel="noopener" aria-label="${l}">${icon(k, 18)}</a>`).join('')}</div>` : ''}
       </div>

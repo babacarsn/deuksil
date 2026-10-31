@@ -155,3 +155,12 @@
   .main .content .table-wrap.en-cartes td > .photo{width:100%!important;height:130px!important;border-radius:12px!important;overflow:hidden;display:block}
   .main .content .table-wrap.en-cartes td > .photo img{width:100%;height:100%;object-fit:cover;display:block}
 }
+
+/* Coordonnées cliquables (e-mail, téléphone) : en gras, sans soulignement. */
+a.lien-contact,a.lien-contact:visited{text-decoration:none!important;font-weight:700;color:inherit}
+a.lien-contact:hover,a.lien-contact:focus-visible{text-decoration:none!important;opacity:.85}
+a.lien-contact:focus-visible{outline:2px solid var(--logo-gold,#e3b93c);outline-offset:2px;border-radius:4px}
+
+/* Recherche dans la liste des conversations (Messages). */
+.msg-recherche{margin:0 0 12px}
+.threads .msg-aucun{padding:16px;margin:0;text-align:center}

@@ -158,12 +158,12 @@ window.addEventListener('submit', e => {
   const champ = f.querySelector('[data-gsearch]');
   if (champ) { filtrerListes(champ); champ.blur(); }
 }, true);
-/* Les dossiers de vente sont des cartes sans barre : on en ajoute une dès trois dossiers. */
+/* Les dossiers de vente sont des cartes sans barre : on en ajoute une dès le premier dossier. */
 new MutationObserver(() => requestAnimationFrame(() => {
   try {
     if (!/^#\/manage\/deals/.test(location.hash)) return;
     const g = document.querySelector('.main > .content .vgrid');
-    if (!g || g.dataset.sb || g.children.length < 3) return;
+    if (!g || g.dataset.sb || g.children.length < 1) return;   // dès le premier dossier (écran de gestion)
     g.dataset.sb = '1';
     const t = document.createElement('div');
     t.innerHTML = sBar('Rechercher un acquéreur, un bien…');
@@ -194,7 +194,8 @@ if (typeof bfAppliquer === 'function') {
 document.addEventListener('input', e => {
   const i = e.target.closest && e.target.closest('.tfilter input');
   if (!i || /^#\/(owner|agency)\/properties/.test(location.hash)) return;
-  const box = i.closest('.tfilter'), wrap = box && box.nextElementSibling;
+  const box = i.closest('.tfilter'); if (!box || box.__tables || box.classList.contains('msg-recherche')) return;   // listes multiples et Messages : gérés par 50-tfilter
+  const wrap = box.nextElementSibling;
   const t = wrap && (wrap.matches('table') ? wrap : wrap.querySelector('table'));
   if (!t || !t.tBodies[0]) return;
   const q = i.value.trim(); let n = 0;
