@@ -18,7 +18,7 @@ const DEUKSIL_CONFIG = {
      Un champ vide s'affiche « à compléter » : à renseigner avant l'ouverture. */
   editeur: {
     raisonSociale: '', formeJuridique: '', adresse: '', ninea: '', rccm: '',
-    directeurPublication: '', email: '', hebergeurSite: '',
+    directeurPublication: '', email: 'deuksilcontact@gmail.com', hebergeurSite: '',
     regionDonnees: ''          // région du projet Supabase, ex. 'eu-west-3 (Paris)'
   }
 };

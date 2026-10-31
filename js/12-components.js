@@ -25,7 +25,7 @@ const MENUS_RAW = {
            ['#/agency/agents','Agents','agent'],['#/agency/clients','Clients','users'],['#/agency/visits','Visites','calendar'],
            ['#/agency/messages','Messages','message'],['#/agency/commissions','Commissions','money'],['#/owner/documents','Documents','file'],
            ['#/agency/settings','Paramètres','settings'],['#/owner/profile','Profil agence','user']],
-  admin:  [['#/admin/dashboard','Tableau de bord','grid'],['#/admin/users','Utilisateurs','users'],['#/admin/listings','Validation des annonces','checkCircle'],
+  admin:  [['#/admin/dashboard','Tableau de bord','grid'],['#/admin/users','Utilisateurs','users'],['#/admin/listings','Modération des annonces','checkCircle'],
            ['#/admin/properties','Tous les biens','home'],
            ['#/admin/reports','Statistiques','chart'],['#/admin/settings','Paramètres','settings']]
 };

@@ -233,7 +233,7 @@ function tableauAdmin(u) {
 }
 remplacerRoute('^\\/admin\\/dashboard$', () => {
   const u = Auth.guard('admin'); if (!u) return false;
-  return shellApp(u, spaceHero(PHOTOS.bnAgency, 'Bonjour ' + u.firstName, 'Administration DEUKSIL', [['#/admin/listings', 'Annonces à valider', 'checkCircle'], ['#/admin/users', 'Utilisateurs', 'users']]) + tableauAdmin(u));
+  return shellApp(u, spaceHero(PHOTOS.bnAgency, 'Bonjour ' + u.firstName, 'Administration DEUKSIL', [['#/admin/listings', 'Modération des annonces', 'checkCircle'], ['#/admin/users', 'Utilisateurs', 'users']]) + tableauAdmin(u));
 });
 
 /* --- 5. Propriétaire mandant : ses biens sont gérés par une agence ---------- */
