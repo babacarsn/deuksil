@@ -63,7 +63,7 @@ route(/^\/completer-profil$/, () => {
         <div class="field"><label for="cp-adresse">Adresse de l'agence ${req}</label><input class="input" id="cp-adresse" name="address" value="${esc(u.address || '')}" autocomplete="street-address"></div></div>
       <div class="form-grid">
         <div class="field"><label for="cp-tel">Téléphone ${req}</label><input class="input" id="cp-tel" name="phone" type="tel" inputmode="tel" placeholder="77 123 45 67" value="${esc(u.phone || '')}" autocomplete="tel" required></div>
-        <div class="field"><label for="cp-cni">Numéro de CNI ${req}</label><input class="input" id="cp-cni" name="cni" inputmode="numeric" maxlength="13" placeholder="13 chiffres" value="${esc(u.cni || '')}" ${u.cni ? 'readonly' : ''} required></div></div>
+        <div class="field"><label for="cp-cni">Numéro de CNI (facultatif)</label><input class="input" id="cp-cni" name="cni" inputmode="numeric" maxlength="13" placeholder="13 chiffres" value="${esc(u.cni || '')}" ${u.cni ? 'readonly' : ''}></div></div>
       <div class="field"><label class="check" style="align-items:flex-start;font-weight:500"><input type="checkbox" name="cgu" value="oui" required style="margin-top:2px">
         <span>J'accepte les <a href="#/legal/cgu" target="_blank">conditions d'utilisation</a> et la <a href="#/legal/confidentialite" target="_blank">politique de confidentialité</a> de DEUKSIL. ${req}</span></label></div>
       <div class="f-zone-err"></div>
@@ -83,12 +83,13 @@ window.addEventListener('submit', async e => {
   if (d.role === 'agency' && t('agencyName').length < 2) return erreurIci(f, 'agencyName', 'Indiquez le nom de l\'agence.');
   if (d.role === 'agency' && t('address').length < 3) return erreurIci(f, 'address', 'Indiquez l\'adresse de l\'agence.');
   if (!telSenegal(d.phone)) return erreurIci(f, 'phone', 'Numéro de téléphone invalide : 9 chiffres, par exemple 77 123 45 67.');
-  if (!/^\d{13}$/.test(t('cni'))) return erreurIci(f, 'cni', 'Le numéro de CNI comporte 13 chiffres.');
+  const cniSaisie = t('cni').replace(/\s/g, '');
+  if (cniSaisie && !/^\d{13}$/.test(cniSaisie)) return erreurIci(f, 'cni', 'Le numéro de CNI comporte 13 chiffres (ou laissez le champ vide).');
   if (!d.cgu) return erreurIci(f, 'cgu', 'Acceptez les conditions d\'utilisation pour continuer.');
   const b = f.querySelector('button:not([type="button"])'); b.disabled = true;
   try {
     if (d.role !== u.role) { const {error} = await SB.rpc('changer_type_compte', {nouveau: d.role}); if (error) throw error; }
-    const patch = {phone: t('phone'), cgu_acceptees_le: new Date().toISOString(), ...(u.cni ? {} : {cni: t('cni')}),
+    const patch = {phone: t('phone'), cgu_acceptees_le: new Date().toISOString(), ...(u.cni || !cniSaisie ? {} : {cni: cniSaisie}),
       ...(d.role === 'agency' ? {agency_name: t('agencyName'), address: t('address')} : {})};
     const {error} = await SB.from('profiles').update(patch).eq('id', u.id); if (error) throw error;
   } catch (err) {

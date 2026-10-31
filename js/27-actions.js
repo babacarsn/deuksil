@@ -70,9 +70,18 @@ async function startRegistration(data) {
 }
 
 
+/* ---- CNI exigée avant de publier (rappel d'interface ; la base applique la règle) ---- */
+function cniManquantePourPublier(u) {
+  if (!u || u.role === 'admin' || /^\d{13}$/.test(u.cni || '')) return false;
+  const titulaire = u.member ? 'Le titulaire du compte de l\'agence doit' : 'Vous devez';
+  toast(`${titulaire} renseigner un numéro de CNI dans « Mon profil » avant de publier une annonce. Le brouillon reste possible.`, 'bad');
+  return true;
+}
+
 /* ---- Enregistrement d'un bien ---- */
 function saveProperty(form, id, intent) {
   const u = Auth.current();
+  if (intent === 'publish' && cniManquantePourPublier(u)) return;
   const d = formData(form);
   const amenities = $$('input[name="amenities"]:checked', form).map(i => i.value);
   if (!d.title.trim() || d.title.trim().length < 5) return formError(form, 'Le titre doit comporter au moins 5 caractères.');
@@ -252,7 +261,7 @@ document.addEventListener('click', e => {
 
     case 'publish': {
       stop();
-      if (!ownsProperty(id, u)) break;
+      if (!ownsProperty(id, u) || cniManquantePourPublier(u)) break;
       DB.updateItem(DB.K.properties, id, {listingStatus: 'publiee'});
       notify('user_admin', `Nouvelle annonce en ligne : ${DB.findItem(DB.K.properties, id).title}`, '#/admin/listings');
       toast('Annonce publiée : elle est visible dans la recherche.'); render(); break;
@@ -447,7 +456,9 @@ document.addEventListener('submit', e => {
     render();
   }
   if (a === 'save-profile') {
-    DB.updateItem(DB.K.users, u.id, {firstName: d.firstName, lastName: d.lastName, phone: d.phone,
+    const cniProfil = String(d.cni || '').replace(/\s/g, '');
+    if (cniProfil && !/^\d{13}$/.test(cniProfil)) { toast('Le numéro de CNI comporte 13 chiffres.', 'bad'); return; }
+    DB.updateItem(DB.K.users, u.id, {firstName: d.firstName, lastName: d.lastName, phone: d.phone, ...(!u.cni && cniProfil ? {cni: cniProfil} : {}),
       ...(u.role === 'agency' ? {agencyName: d.agencyName, agencyDesc: d.agencyDesc, address: d.address} : {})});
     toast('Profil mis à jour.'); render();
   }

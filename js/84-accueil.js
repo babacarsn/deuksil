@@ -135,7 +135,7 @@ document.addEventListener('click', e => {
 
 /* --- 1 bis. Les blocs du bas de la maquette -------------------------------- */
 function hxEtapes() {
-  const E = [['01', 'Créez votre compte', 'Inscription gratuite avec votre numéro de CNI. Aucun frais, aucun abonnement.'],
+  const E = [['01', 'Créez votre compte', 'Inscription gratuite avec votre e-mail et votre téléphone. Aucun frais, aucun abonnement.'],
     ['02', 'Cherchez et filtrez', 'Par ville, quartier, budget, type de bien et bien plus encore. Trouvez le bien qui correspond à vos besoins.'],
     ['03', 'Organisez vos visites', 'Contactez directement les propriétaires ou agences et planifiez vos visites en toute simplicité.']];
   return `<section class="hx-sec" id="comment"><p class="hx-kicker">Comment ça marche</p><h2 class="hx-h2">Trois étapes pour trouver le bon bien</h2>
@@ -174,7 +174,7 @@ ICONS.publier = '<path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 15v4a1 1 0 0 0 1 1h
 ICONS.labo = '<path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 1.8 3h10.4a2 2 0 0 0 1.8-3l-5-9V3"/><path d="M7.5 15h9"/>';
 const FAQ = [
   ['publier', 'Comment publier un bien sur DEUKSIL ?', 'Créez un compte propriétaire ou agence, puis touchez « Publier » : type de bien, adresse, prix, surface et photos. L\'annonce est en ligne dès que vous la validez.'],
-  ['money', 'DEUKSIL est-il payant ?', 'Non : l\'inscription et l\'utilisation sont gratuites, sans abonnement. Chaque profil reste rattaché à un numéro de CNI, ce qui limite les faux comptes.'],
+  ['money', 'DEUKSIL est-il payant ?', 'Non : l\'inscription et l\'utilisation sont gratuites, sans abonnement. Un numéro de CNI est demandé avant de publier une annonce, ce qui limite les faux annonceurs.'],
   ['checkCircle', 'Les annonces sont-elles à jour ?', 'Le statut de chaque bien suit ses baux et ses ventes : disponible, en discussion, loué ou vendu. Un bien loué ou vendu disparaît des résultats de recherche.'],
   ['calendar', 'Comment se passe une visite ?', 'Vous proposez une date et une heure depuis la fiche du bien. Le propriétaire accepte, refuse ou propose un autre créneau, et vous recevez une notification.'],
   ['pourcent', 'DEUKSIL prend-il une commission sur les loyers ?', 'Non. Aucune commission n\'est prélevée sur vos loyers ni sur vos ventes, et aucun paiement ne transite par DEUKSIL.']];

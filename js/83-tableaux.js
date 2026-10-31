@@ -225,7 +225,7 @@ function tableauAdmin(u) {
       ...(pending.length ? [[`${pluriel(pending.length, 'annonce')} à valider`, pending.map(p => p.title).slice(0, 2).join(', '), '#/admin/listings', 'home', 'warn']] : []),
       ...(reports.length ? [[`${pluriel(reports.length, 'signalement')} à examiner`, 'Annonces signalées par les utilisateurs', '#/admin/signalements', 'alert', 'bad']] : []),
       ...(suspendus.length ? [[`${pluriel(suspendus.length, 'compte')} suspendu${suspendus.length > 1 ? 's' : ''}`, suspendus.map(displayName).slice(0, 2).join(', '), '#/admin/users', 'user', 'info']] : [])]},
-    actions: [['#/admin/listings', 'Valider les annonces', 'checkCircle', 'ok'], ['#/admin/signalements', 'Signalements', 'alert', 'gold'],
+    actions: [['#/admin/listings', 'Modérer les annonces', 'checkCircle', 'ok'], ['#/admin/signalements', 'Signalements', 'alert', 'gold'],
       ['#/admin/users', 'Utilisateurs', 'users', 'brand'], ['#/admin/settings', 'Paramètres', 'settings', 'info']],
     apres: `<section class="pd-card pd-todo" data-tone="info" aria-label="Activité récente"><div class="pd-pat-head"><h3 class="pd-h">Activité récente</h3></div>
       ${DB.getData(DB.K.activity).slice(-6).reverse().map(a => `<div class="trow" style="cursor:default"><span class="itile sm">${icon('sparkle', 15)}</span>
