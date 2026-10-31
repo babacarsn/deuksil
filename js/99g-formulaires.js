@@ -118,7 +118,7 @@ function controleInscription(f, etape) {
     si(RE_EMAIL.test(em), 'email', 'Adresse e-mail invalide. Exemple : vous@exemple.com');   // unicité : vérifiée par Supabase Auth
     si(telSenegal(d.phone), 'phone', 'Numéro de téléphone invalide : 9 chiffres, par exemple 77 123 45 67.');
     const cni = t('cni').replace(/\s/g, '');
-    si(/^\d{13}$/.test(cni), 'cni', 'Le numéro de CNI comporte 13 chiffres.');                // unicité : index unique en base
+    si(!cni || /^\d{13}$/.test(cni), 'cni', 'Le numéro de CNI comporte 13 chiffres (ou laissez le champ vide).');   // facultatif ; unicité : index unique en base
   }
   if (!etape || etape === 3) {
     si(!motDePasseFaible(d.password), 'password', 'Mot de passe trop faible : 8 caractères minimum, avec au moins une lettre et un chiffre.');

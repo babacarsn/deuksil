@@ -158,7 +158,8 @@ route(/^\/client\/profile$|^\/owner\/profile$/, () => {
           <div class="field"><label>Nom</label><input class="input" name="lastName" value="${esc(u.lastName)}"></div></div>
         <div class="form-grid">
           <div class="field"><label>Téléphone</label><input class="input" name="phone" value="${esc(u.phone)}"></div>
-          <div class="field"><label>Numéro de CNI</label><input class="input" value="${esc(u.cni)}" disabled></div></div>
+          ${u.cni ? `<div class="field"><label>Numéro de CNI</label><input class="input" value="${esc(u.cni)}" disabled></div>`
+            : `<div class="field"><label>Numéro de CNI</label><input class="input" name="cni" inputmode="numeric" maxlength="13" placeholder="13 chiffres"><p class="small muted" style="margin:4px 0 0">Demandé avant de publier une annonce. Une fois enregistré, il n'est plus modifiable.</p></div>`}</div>
         <button class="btn">Enregistrer les modifications</button>
       </form>
       <div class="stack" style="gap:14px">

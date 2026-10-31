@@ -39,8 +39,8 @@ route(/^\/(?:#[\w-]+)?$/, () => {
   <section class="section" id="comment"><div class="wrap">
     <p class="kicker">Comment ça marche</p><h2>Trois étapes, pas dix visites inutiles</h2>
     <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr));margin-top:26px">
-      ${[['1','Créez votre compte','Inscription gratuite avec votre numéro de CNI. Aucun frais, aucun abonnement.'],
-         ['2','Cherchez et filtrez','Par ville, quartier, budget, nombre de chambres. Seules les annonces validées apparaissent.'],
+      ${[['1','Créez votre compte','Inscription gratuite avec votre e-mail et votre téléphone. Aucun frais, aucun abonnement.'],
+         ['2','Cherchez et filtrez','Par ville, quartier, budget, nombre de chambres. Les annonces sont en ligne dès leur publication ; chacune peut être signalée.'],
          ['3','Visitez et décidez','Vous contactez le propriétaire, vous proposez une date, il confirme dans son espace.']]
         .map(([n, t, d]) => `<div class="card"><div style="font-family:var(--display);font-size:2rem;font-weight:600;color:var(--gold)">${n}</div><h3 style="margin:6px 0">${t}</h3><p class="muted small" style="margin:0">${d}</p></div>`).join('')}
     </div>
@@ -95,7 +95,7 @@ route(/^\/(?:#[\w-]+)?$/, () => {
 
   <section class="section faq" id="faq"><div class="wrap" style="max-width:760px">
     <p class="kicker">Questions fréquentes</p><h2>Ce qu'on nous demande le plus</h2>
-    ${[["DEUKSIL est-il payant ?", "Non : l'inscription et l'utilisation sont gratuites, sans abonnement. Chaque profil reste rattaché à un numéro de CNI, ce qui limite les faux comptes."],
+    ${[["DEUKSIL est-il payant ?", "Non : l'inscription et l'utilisation sont gratuites, sans abonnement. Un numéro de CNI est demandé avant de publier une annonce, ce qui limite les faux annonceurs."],
        ["Les annonces sont-elles à jour ?", "Chaque propriétaire met à jour le statut de son bien : disponible, en discussion, loué ou vendu. Une annonce louée disparaît des résultats de recherche."],
        ["Comment se passe une visite ?", "Vous proposez une date et une heure depuis la fiche du bien. Le propriétaire accepte, refuse ou reporte, et vous recevez une notification."],
        ["DEUKSIL prend-il une commission sur les loyers ?", "Non. Aucune commission n'est prélevée sur vos loyers ni sur vos ventes."]]

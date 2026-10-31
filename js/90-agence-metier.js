@@ -445,7 +445,7 @@ const membresDe = u => DB.filterItems(DB.K.users, x => x.parentId === u.id);
         <td>${badge(m.status === 'actif' ? 'Actif' : 'Suspendu', m.status === 'actif' ? 'ok' : 'bad')}</td>
         <td><button class="btn ghost sm" data-action="ag-attribuer" data-id="${m.id}">Attribuer des biens</button></td></tr>`; });
     return shellApp(u, page('Équipe', 'Vos agents et gestionnaires : leurs biens, leurs visites et leur commission.', `<a class="btn" href="#/manage/team">${icon('plus', 16)} Ajouter un membre</a>`) +
-      `<p class="small muted" style="margin:0 0 14px">Chaque membre se connecte avec sa CNI. Ses droits se règlent dans <a href="#/manage/team">Gestion › Équipe & accès</a>. La commission (${regles(u).agentPct} % des honoraires HT, partagée à ${regles(u).partRentree} % pour l'agent qui a rentré le bien) est due une fois les honoraires encaissés.</p>` +
+      `<p class="small muted" style="margin:0 0 14px">Chaque membre se connecte avec son adresse e-mail. Ses droits se règlent dans <a href="#/manage/team">Gestion › Équipe & accès</a>. La commission (${regles(u).agentPct} % des honoraires HT, partagée à ${regles(u).partRentree} % pour l'agent qui a rentré le bien) est due une fois les honoraires encaissés.</p>` +
       gTable(['Membre', 'Biens', 'Visites', 'Honoraires générés', 'Commission due', 'Statut', ''], cartes, ['Aucun membre', 'Ajoutez un agent : il pourra se connecter et suivre ses biens.']));
   };
 })();

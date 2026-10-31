@@ -81,7 +81,7 @@ route(/^\/search/, () => {
       <div id="ai-search-state" style="margin-top:10px"></div>
     </form>`;
   const toggle = `<div class="row-between" style="margin-bottom:14px"></div>`;
-  const body = page('Rechercher un bien', 'Seules les annonces validées par DEUKSIL apparaissent ici.') + aiBox + searchFormHtml() + toggle +
+  const body = page('Rechercher un bien', 'Les annonces publiées sur DEUKSIL. Un doute sur une annonce ? Signalez-la depuis sa fiche.') + aiBox + searchFormHtml() + toggle +
     resultsHtml(u);
   return u && ['client', 'tenant'].includes(u.role) ? shellApp(u, body) : shellPublic(`<div class="wrap section" style="border:0">${body}</div>`);
 });

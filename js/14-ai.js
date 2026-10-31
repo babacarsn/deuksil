@@ -173,7 +173,7 @@ function renderAiChatInPlace() {
 function localAssistantReply(text) {
   const t = text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   if (/(abonnement|tarif|frais|gratuit|combien|prix des|cout|coute)/.test(t) && !/(f3|chambre|villa|appartement|studio|terrain)/.test(t))
-    return {reply: "DEUKSIL est gratuit : aucun frais d'inscription, aucun abonnement et aucune commission sur les loyers ou les ventes. Vous créez votre compte avec votre CNI et vous publiez librement."};
+    return {reply: "DEUKSIL est gratuit : aucun frais d'inscription, aucun abonnement et aucune commission sur les loyers ou les ventes. Vous créez votre compte avec votre e-mail ; un numéro de CNI est demandé avant de publier une annonce."};
   if (/(publier|ajouter un bien|mettre en ligne|proprietaire)/.test(t))
     return {reply: "Pour publier un bien : créez gratuitement un compte propriétaire ou agence, puis utilisez « Ajouter un bien ». L'annonce passe par une validation avant d'apparaître dans la recherche."};
   if (/visite/.test(t))

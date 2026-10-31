@@ -227,7 +227,7 @@ regRoute.fn = () => {
         ${champ('reg-nom', `Nom ${req}`, '<input class="input" id="reg-nom" name="lastName" autocomplete="family-name" required>')}</div>
       ${champ('reg-email', `Adresse e-mail ${req}`, '<input class="input" id="reg-email" name="email" type="email" placeholder="vous@exemple.com" autocomplete="email" required>', 'Elle vous servira à vous connecter et à recevoir vos codes de sécurité.')}
       ${champ('reg-tel', `Téléphone ${req}`, '<input class="input" id="reg-tel" name="phone" type="tel" inputmode="tel" placeholder="77 123 45 67" autocomplete="tel" required>')}
-      ${champ('reg-cni', `Numéro de CNI ${req}`, '<input class="input" id="reg-cni" name="cni" inputmode="numeric" maxlength="13" placeholder="13 chiffres" autocomplete="off" required>', 'Il sert à vérifier votre identité. Il n\'est jamais affiché publiquement.')}</div></div>
+      ${champ('reg-cni', 'Numéro de CNI (facultatif)', '<input class="input" id="reg-cni" name="cni" inputmode="numeric" maxlength="13" placeholder="13 chiffres" autocomplete="off">', 'Vous pourrez l\'ajouter plus tard dans « Mon profil ». Il sera demandé avant de publier une annonce. Il n\'est jamais affiché publiquement.')}</div></div>
     <div class="wstep" data-step="3"><div class="wiz-card"><h3>3. Sécurité</h3>
       <div class="form-grid">${champ('reg-mdp', `Mot de passe ${req}`, pw('password', 'reg-mdp', 'new-password'))}${champ('reg-mdp2', `Confirmation ${req}`, pw('password2', 'reg-mdp2', 'new-password'))}</div>
       <p class="small fhint" style="margin:-4px 0 14px">8 caractères minimum, avec au moins une lettre et un chiffre.</p>
