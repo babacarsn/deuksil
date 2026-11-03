@@ -15,8 +15,15 @@ function requireClient(action) {
   if (u.role === 'admin') { toast("L'administration ne peut pas " + action + '.', 'bad'); return null; }
   return u;
 }
+/* Favoris et demandes de visite sont personnels : un membre d'équipe agit au nom de son espace
+   (la base les refuserait). Il les fait depuis un compte client personnel. */
+function requireClientPerso(action) {
+  const u = requireClient(action); if (!u) return null;
+  if (u.member) { toast(`Avec un profil d'équipe, vous ne pouvez pas ${action} : utilisez un compte client personnel.`, 'warn'); return null; }
+  return u;
+}
 function toggleFav(pid) {
-  const u = requireClient('enregistrer un favori'); if (!u) return;
+  const u = requireClientPerso('enregistrer un favori'); if (!u) return;
   const ex = DB.findItem(DB.K.favorites, f => f.userId === u.id && f.propertyId === pid);
   if (ex) { DB.deleteItem(DB.K.favorites, ex.id); toast('Retiré de vos favoris.'); }
   else { DB.addItem(DB.K.favorites, {userId: u.id, propertyId: pid}); toast('Bien ajouté aux favoris.'); }
@@ -35,7 +42,7 @@ function startThread(u, otherId, propertyId) {
   go(`#/${u.role}/messages`);
 }
 function askVisit(pid) {
-  const u = requireClient('demander une visite'); if (!u) return;
+  const u = requireClientPerso('demander une visite'); if (!u) return;
   const p = DB.findItem(DB.K.properties, pid);
   modal('Demander une visite', `
     <p class="small muted">${esc(p.title)} — ${esc(p.quartier)}, ${esc(p.city)}</p>

@@ -160,7 +160,7 @@ function photoUploadHtml() {
 }
 
 /* --- Formulaire bien (création / édition) --- */
-route(/^\/owner\/property\/(new|[\w]+)$/, pid => {
+route(/^\/owner\/property\/(new|[\w-]+)$/, pid => {   // identifiants UUID : lettres, chiffres et tirets
   const u = Auth.current();
   if (!u || !['owner', 'agency'].includes(u.role)) { toast('Espace réservé aux propriétaires et agences.', 'bad'); go('#/login'); return false; }
   const p = pid === 'new' ? null : DB.findItem(DB.K.properties, pid);

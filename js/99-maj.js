@@ -17,7 +17,10 @@
     document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') reg.update().catch(() => {}); });
   }).catch(() => {});
 
-  const fichiers = () => [location.pathname.replace(/[^/]*$/, '') + 'index.html',
+  /* Fichiers versionnés (?v=empreinte) : toute modification change index.html, qui suffit
+     donc à détecter une nouvelle version (1 requête au lieu d'une centaine). */
+  const versionnes = () => [...document.querySelectorAll('script[src^="js/"], link[rel="stylesheet"][href^="css/"]')].every(e => /[?&]v=/.test(e.getAttribute('src') || e.getAttribute('href')));
+  const fichiers = () => versionnes() ? [location.pathname.replace(/[^/]*$/, '') + 'index.html'] : [location.pathname.replace(/[^/]*$/, '') + 'index.html',
     ...[...document.querySelectorAll('script[src], link[rel="stylesheet"][href]')].map(e => e.getAttribute('src') || e.getAttribute('href'))
       .filter(u => u && !/^https?:/.test(u))];
   async function signature() {

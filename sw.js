@@ -1,10 +1,11 @@
 /* DEUKSIL — service worker (application installée sur l'écran d'accueil)
-   Stratégie « réseau d'abord » : à chaque ouverture, en ligne, le téléphone
-   prend la dernière version des fichiers publiés ; la copie locale ne sert
-   que hors connexion. Les données (localStorage) ne sont jamais touchées.
-   Changer VERSION n'est pas obligatoire pour publier une mise à jour ; cela
-   force seulement le remplacement du service worker lui-même. */
-const VERSION = 'deuksil-sw-1';
+   - Fichiers versionnés (js/…?v=…, css/…?v=…, voir outils/versionner-site.js) : servis
+     depuis la copie locale dès qu'elle existe. Une nouvelle version a une autre adresse :
+     elle est téléchargée une fois, puis l'ancienne copie est effacée.
+   - Tout le reste (index.html, images, manifeste) : « réseau d'abord » ; la copie locale
+     ne sert que hors connexion. Les données (Supabase) ne passent jamais par ici.
+   VERSION est mise à jour par outils/versionner-site.js à chaque publication. */
+const VERSION = 'deuksil-sw-1503c2d10d';
 const CACHE = 'deuksil-fichiers';
 
 self.addEventListener('install', e => { self.skipWaiting(); });
@@ -15,9 +16,24 @@ self.addEventListener('activate', e => {
     await self.clients.claim();
   })());
 });
+const versionne = url => url.searchParams.has('v') && /^\/(js|css)\//.test(url.pathname);
 self.addEventListener('fetch', e => {
   const req = e.request, url = new URL(req.url);
   if (req.method !== 'GET' || url.origin !== self.location.origin) return;
+  if (versionne(url)) {
+    e.respondWith((async () => {
+      const c = await caches.open(CACHE), copie = await c.match(req);
+      if (copie) return copie;
+      const rep = await fetch(req);
+      if (rep && rep.ok) {
+        await c.put(req, rep.clone());
+        // anciennes versions du même fichier : effacées
+        for (const k of await c.keys()) { const u = new URL(k.url); if (u.pathname === url.pathname && u.search !== url.search) await c.delete(k); }
+      }
+      return rep;
+    })());
+    return;
+  }
   e.respondWith((async () => {
     try {
       const rep = await fetch(req, {cache: 'no-cache'});

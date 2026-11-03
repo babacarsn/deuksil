@@ -288,6 +288,8 @@ function ficheVente(u, d) {
   const dates = [['Promesse signée le', d.promiseAt], ["Acte à signer avant le", d.deadline],
                  ['Vente signée le', d.signedAt]].filter(x => x[1]);
 
+  // Facturer et encaisser demandent le droit « finances » (un membre sans ce droit voit l'état, pas les boutons).
+  const finances = (() => { const u = Auth.current(); return !u || !u.member || memberCan(u, 'finances'); })();
   const ligneHtml = l => {
     const f = factureDe(l);
     const etat = !f ? badge('À facturer', '')
@@ -296,7 +298,7 @@ function ficheVente(u, d) {
     return `<tr><td class="small"><b>${esc(l.label)}</b>${
         l.due ? `<br><span class="muted">échéance ${dateFr(l.due)}</span>` : ''}</td>
       <td>${money(l.amount)}</td><td>${etat}</td>
-      <td><div class="row" style="gap:6px">${f
+      <td><div class="row" style="gap:6px">${!finances ? `<span class="small muted">${f ? esc(f.ref) : '—'}</span>` : f
         ? `<a class="btn ghost sm" href="#/manage/docs">${esc(f.ref)}</a>`
           + (dRest(f) > 0 ? `<button class="btn sm" data-action="g2-pay" data-id="${f.id}">Encaisser</button>` : '')
         : `<button class="btn sm" data-action="v-facturer" data-id="${d.id}" data-n="${l.n}">Émettre la facture</button>`
@@ -444,6 +446,7 @@ document.addEventListener('click', e => {
   const fa = e.target.closest('[data-action="v-facturer"]');
   if (fa) {
     e.preventDefault();
+    { const u = Auth.current(); if (u && u.member && !memberCan(u, 'finances')) { toast('Votre profil d\'équipe n\'a pas accès aux factures.', 'bad'); return; } }
     const d = mien(fa.dataset.id); if (!d) return;
     const l = planDe(d).find(x => String(x.n) === fa.dataset.n); if (!l) return;
     const f = factureTranche(u, d, l);
