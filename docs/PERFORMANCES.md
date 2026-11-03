@@ -109,3 +109,53 @@ node supabase/tests-local/perf/mesurer.js apres
 node supabase/tests-local/perf/verifier-index.js
 psql -f supabase/tests-local/perf/cout-ecriture.sql
 ```
+
+---
+
+# Chargement de l'application (3 novembre 2026)
+
+Mesures **dans un navigateur réel** (Chromium), et non plus requête par requête. Script : `supabase/tests-local/perf/chargement.js`. Résultats bruts : `supabase/tests-local/perf/resultats/chargement-avant.json` et `chargement-apres.json`.
+
+## Méthode
+
+| | |
+|---|---|
+| **Données** | `donnees-synthetiques.sql` (≈ 1 million de lignes, 30 052 biens dont 24 051 publiés). Pour approcher de vraies annonces, chaque bien publié a reçu une description d'environ 540 caractères et 8 adresses de photos. Les fichiers photo n'existent pas : les images ne sont pas comptées. Les descriptions répétitives se compressent mieux que de vrais textes, donc les octets mesurés sont plutôt **optimistes**. |
+| **Serveur** | Réplique locale, passerelle en mode `HEBERGEMENT=1` : compression gzip comme Vercel et Supabase, en-têtes de cache de Vercel avec ETag / 304, règles de `vercel.json`. |
+| **Réseau** | « Mobile ralenti » : 1,6 Mbit/s en réception, 750 kbit/s en envoi, 150 ms de latence (émulation Chromium). « Local » : sans limite. |
+| **Écran** | 390 × 844. Premier écran : données prêtes et page dessinée (`#app` rempli, plus de squelette). Catalogue complet : toutes les annonces en mémoire. |
+| **Statistique** | Après : médiane de 3 passages. Avant : **1 passage**, car chaque passage durait plusieurs minutes et deux redémarrages du conteneur de test ont interrompu la série. |
+| **Limites** | Un seul poste, processeur de serveur et non de téléphone : les durées sur un téléphone d'entrée de gamme seront plus longues, dans les deux cas. |
+
+## Résultats
+
+| Scénario | Avant : premier écran | Après : premier écran | Après : catalogue complet | Octets transférés avant → après | Requêtes avant → après |
+|---|---:|---:|---:|---:|---:|
+| Visiteur, mobile ralenti, accueil | **246,6 s** | **7,8 s** | 10,2 s | 1 270 → 668 Ko | 263 → 157 |
+| Visiteur, mobile ralenti, lien direct vers une fiche ancienne | 26,6 s | 7,8 s | 9,9 s | 1 270 → 669 Ko | 258 → 153 |
+| Visiteur, visite répétée, mobile ralenti | non mesurable¹ | **1,5 s** | 4,1 s | — → 51 Ko | — → 157, dont 149 depuis le cache |
+| Propriétaire (local) | non mesuré² | 7,0 s | — | 65 Ko³ | 199 |
+| Agence (local) | non mesuré² | 6,6 s | — | 59 Ko³ | 187 |
+| Administrateur (local) | non mesurable⁴ | non mesurable⁴ | — | — | — |
+
+1. L'onglet restait bloqué par le rendu : la navigation suivante n'aboutissait pas en 30 s.
+2. Les profils CPU ci-dessous montrent l'effet des corrections sur ces écrans.
+3. Le navigateur a déjà les fichiers du site en cache, car la connexion a eu lieu juste avant : les octets sont surtout des données.
+4. **Non résolu.** L'administrateur charge toutes les tables (≈ 1 million de lignes avec ce jeu) ; l'écran ne s'affichait pas après 15 minutes, avant comme après. Il faudrait des écrans d'administration paginés côté serveur : lot à part.
+
+## Causes trouvées (profil CPU du navigateur) et corrections
+
+| Constat | Mesure | Correction |
+|---|---|---|
+| `DB.findItem` recopiait **chaque élément** avant de le tester ; `ownerSubscriptionActive` l'appelait pour chaque annonce (24 051 × jusqu'à 1 000 comptes) | 215 s sur 230 s de chargement de l'accueil visiteur dans ce seul code | le prédicat lit la mémoire, seul le résultat est copié (`js/03-storage.js`) ; `ownerSubscriptionActive` lit sans copie |
+| `published()` recopiait tout le catalogue à chaque appel, plusieurs fois par écran ; `listable` relisait toutes les unités et tous les baux pour chaque annonce | 6,5 s sur 14,4 s pour un propriétaire après la 1re correction | résultat gardé tant que biens, unités, baux et comptes n'ont pas changé ; lectures sans copie (`js/14-ai.js`) → 7,0 s |
+| L'annuaire public était tronqué par PostgREST à 1 000 lignes | 1 000 renvoyées sur 1 809 propriétaires et agences | lecture par pages |
+| Lecture des tables page après page | — | pages lues 4 par 4 en parallèle, tri complété par `id` |
+| Le visiteur attendait tout le catalogue avant le premier écran | — | catalogue progressif : 48 annonces, puis le reste en arrière-plan |
+| Fichiers du site revalidés à chaque ouverture (service worker en `no-cache`), et vérification des mises à jour sur une centaine de fichiers | 263 requêtes à la première visite | fichiers versionnés en cache un an, service worker adapté, détection par `index.html` seul |
+
+## Ce qui reste
+
+- **Administration** : pagination côté serveur des listes (journaux, loyers, messages, notifications) pour les gros volumes.
+- **Visiteur** : une recherche paginée côté serveur éviterait de télécharger tout le catalogue en arrière-plan (10 s sur mobile ralenti avec 24 000 annonces).
+- **Code** : 1,4 Mo de JavaScript non minifié, environ 306 Ko après compression brotli. La minification exigerait une étape de construction, qui n'a pas été introduite.

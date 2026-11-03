@@ -175,7 +175,7 @@ function localAssistantReply(text) {
   if (/(abonnement|tarif|frais|gratuit|combien|prix des|cout|coute)/.test(t) && !/(f3|chambre|villa|appartement|studio|terrain)/.test(t))
     return {reply: "DEUKSIL est gratuit : aucun frais d'inscription, aucun abonnement et aucune commission sur les loyers ou les ventes. Vous créez votre compte avec votre e-mail ; un numéro de CNI est demandé avant de publier une annonce."};
   if (/(publier|ajouter un bien|mettre en ligne|proprietaire)/.test(t))
-    return {reply: "Pour publier un bien : créez gratuitement un compte propriétaire ou agence, puis utilisez « Ajouter un bien ». L'annonce passe par une validation avant d'apparaître dans la recherche."};
+    return {reply: "Pour publier un bien : créez gratuitement un compte propriétaire ou agence, puis utilisez « Ajouter un bien ». L'annonce apparaît dans la recherche dès sa publication, tant que votre abonnement est actif."};
   if (/visite/.test(t))
     return {reply: "Depuis la fiche d'un bien, cliquez sur « Demander une visite », choisissez une date et une heure. Le propriétaire accepte, refuse ou reporte, et vous êtes notifié."};
   if (/(paiement|payer|wave|orange|free money|paydunya|carte)/.test(t))
@@ -246,7 +246,7 @@ function startVoiceInput(inputEl, micBtn) {
 /* L'application n'a qu'un thème, clair. */
 function isDarkTheme() { return false; }
 function ownerSubscriptionActive(ownerId) {
-  const owner = DB.findItem(DB.K.users, ownerId);
+  const owner = lireMem(DB.K.users).find(x => x.id === ownerId);   // lecture seule : pas de copie (appelée pour chaque annonce)
   if (!owner || !['owner', 'agency'].includes(owner.role)) return true;
   return true;   /* plateforme gratuite : aucune annonce n'est retirée pour non-paiement */
 }
@@ -254,9 +254,20 @@ function ownerSubscriptionActive(ownerId) {
    louer deux fois le même logement. Un immeuble reste visible tant qu'une unité est libre. */
 const listable = p => {
   if (p.listingStatus !== 'publiee') return false;
-  const us = DB.getData(DB.K.units).filter(x => x.propertyId === p.id && x.status !== 'archivee');
+  // lectures seules de la mémoire, sans copie : listable est appelée pour chaque annonce
+  const us = lireMem(DB.K.units).filter(x => x.propertyId === p.id && x.status !== 'archivee');
   if (us.length) return us.some(x => x.status === 'libre');
   if (['loue', 'vendu', 'archive', 'maintenance'].includes(p.status)) return false;
-  return !DB.getData(DB.K.leases).some(l => l.propertyId === p.id && !l.unitId && l.status === 'actif');
+  return !lireMem(DB.K.leases).some(l => l.propertyId === p.id && !l.unitId && l.status === 'actif');
 };
-const published = () => DB.filterItems(DB.K.properties, p => listable(p) && ownerSubscriptionActive(p.ownerId));
+/* Annonces visibles. Le résultat est gardé tant que biens, unités, baux et comptes n'ont pas
+   changé (chaque écriture remplace le tableau en mémoire) : un écran l'appelait plusieurs
+   fois, et chaque appel recopiait tout le catalogue (6,5 s sur 14 au chargement d'un
+   propriétaire avec 24 000 annonces, profil CPU du 3 novembre 2026). */
+let publiesCache = null;
+const published = () => {
+  const P = lireMem(DB.K.properties), U = lireMem(DB.K.units), L = lireMem(DB.K.leases), W = lireMem(DB.K.users), c = publiesCache;
+  if (!c || c.P !== P || c.U !== U || c.L !== L || c.W !== W)
+    publiesCache = {P, U, L, W, r: DB.filterItems(DB.K.properties, p => listable(p) && ownerSubscriptionActive(p.ownerId))};
+  return publiesCache.r.slice();
+};

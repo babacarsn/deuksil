@@ -1,0 +1,66 @@
+/* =============================================================================
+   04-photos.css — photos des biens (js/99k-photos.js) : sélecteur avec
+   progression, chargement des images, galerie et visionneuse de la fiche.
+   Couleurs, rayons et typographie : variables existantes du thème.
+   ============================================================================= */
+
+/* --- Sélecteur du formulaire ------------------------------------------------- */
+.upload-btn.ph-plein{cursor:default;opacity:.75}
+.ph-global{margin-top:12px;padding:10px 12px;border-radius:12px;background:var(--surface);border:1px solid var(--line)}
+.ph-ligne{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:.84rem;color:var(--ink-2)}
+.ph-ligne b{color:var(--ink)}
+.ph-ligne.ph-err{color:var(--bad);margin-top:6px}
+.ph-ligne.ph-err:first-child{margin-top:0}
+.ph-barre{display:block;height:6px;border-radius:99px;background:var(--surface-3);overflow:hidden}
+.ph-barre i{display:block;height:100%;background:var(--brand);border-radius:inherit;transition:width .25s ease}
+.ph-barre-g{margin-top:8px}
+.ph-grille{list-style:none;margin:14px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.ph-tuile{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+.ph-tuile.ph-couv{border-color:var(--brand)}
+.ph-tuile.ph-erreur,.ph-tuile.ph-refus{border-color:var(--bad)}
+.ph-vue{position:relative;aspect-ratio:4/3;background:var(--surface-3)}
+.ph-vue img{width:100%;height:100%;object-fit:cover;display:block}
+.ph-vue .cover-tag{position:absolute;left:6px;top:6px;font-style:normal;font-size:.66rem;font-weight:700;background:rgba(255,255,255,.94);color:var(--ink);padding:2px 7px;border-radius:99px}
+.ph-vue .rm{position:absolute;right:6px;top:6px;width:26px;height:26px;border-radius:50%;border:0;background:rgba(20,16,12,.65);color:#fff;display:grid;place-items:center;cursor:pointer}
+.ph-vue .rm:hover,.ph-vue .rm:focus-visible{background:var(--bad)}
+.ph-vue .ph-barre{position:absolute;left:8px;right:8px;bottom:8px;background:rgba(255,255,255,.7)}
+.ph-attente{position:absolute;inset:0;background:linear-gradient(100deg,var(--surface-3) 30%,var(--surface-2) 50%,var(--surface-3) 70%);background-size:300% 100%;animation:ph-lueur 1.4s linear infinite}
+.ph-refus .ph-attente{animation:none}
+.ph-info{padding:8px 10px 0;display:flex;flex-direction:column;gap:2px}
+.ph-etat{font-size:.78rem;color:var(--ink)}
+.ph-erreur .ph-etat,.ph-refus .ph-etat{color:var(--bad)}
+.ph-ok .ph-etat{color:var(--ok)}
+.ph-msg{font-size:.74rem;color:var(--muted);line-height:1.3}
+.ph-outils{display:flex;flex-wrap:wrap;align-items:center;gap:4px;padding:8px 8px 10px;margin-top:auto}
+.ph-outils .btn.sm{padding:5px 9px;font-size:.76rem}
+.ph-b{width:28px;height:28px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);display:inline-grid;place-items:center;cursor:pointer}
+.ph-b:hover:not([disabled]),.ph-b:focus-visible{border-color:var(--brand);color:var(--brand)}
+.ph-b[disabled]{opacity:.35;cursor:default}
+.ph-tuile[draggable="true"]{cursor:grab}
+@media (max-width:560px){.ph-grille{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.ph-outils{gap:3px;padding:6px 6px 8px}.ph-b{width:26px;height:26px;border-radius:8px}.ph-info{padding:7px 8px 0}}
+
+/* --- Chargement des photos de biens ------------------------------------------- */
+img.ph-img:not(.ph-charge){background:linear-gradient(100deg,var(--surface-3) 30%,var(--surface-2) 50%,var(--surface-3) 70%);background-size:300% 100%;animation:ph-lueur 1.4s linear infinite}
+@keyframes ph-lueur{from{background-position:100% 0}to{background-position:0 0}}
+@media (prefers-reduced-motion:reduce){img.ph-img:not(.ph-charge),.ph-attente{animation:none}}
+
+/* --- Galerie de la fiche ---------------------------------------------------- */
+.gallery [data-ph-ouvrir]{cursor:zoom-in}
+.gallery .photo{position:relative}
+.gallery .ph-sup{display:none}
+.ph-toutes{position:absolute;right:12px;bottom:12px;display:inline-flex;align-items:center;gap:6px;border:0;border-radius:99px;padding:7px 12px;background:rgba(255,255,255,.94);color:var(--ink);font:600 .8rem var(--font,inherit);box-shadow:var(--sh-1);cursor:pointer}
+@media (max-width:760px){.gallery .ph-sup{display:block}.ph-toutes{right:10px;bottom:10px}}
+
+/* --- Visionneuse --------------------------------------------------------------- */
+html.ph-visio-ouverte{overflow:hidden}
+.ph-visio{position:fixed;inset:0;z-index:1000;background:rgba(8,14,24,.94);display:flex;flex-direction:column;color:#fff}
+.ph-visio-haut{display:flex;align-items:center;justify-content:space-between;padding:12px 14px}
+.ph-visio-n{font-weight:600;font-size:.92rem}
+.ph-visio-x,.ph-visio-nav{border:0;background:rgba(255,255,255,.12);color:#fff;border-radius:50%;display:grid;place-items:center;cursor:pointer}
+.ph-visio-x{width:42px;height:42px}
+.ph-visio-x:hover,.ph-visio-nav:hover,.ph-visio-x:focus-visible,.ph-visio-nav:focus-visible{background:rgba(255,255,255,.24)}
+.ph-visio-corps{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;gap:12px;padding:0 12px 24px;touch-action:pan-y}
+.ph-visio-img{max-width:min(100%,1600px);max-height:100%;object-fit:contain;border-radius:8px;user-select:none}
+.ph-visio-img:not(.ph-charge){min-width:40vw;min-height:30vh;border-radius:12px}
+.ph-visio-nav{flex:0 0 auto;width:48px;height:48px}
+@media (max-width:760px){.ph-visio-nav{position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px}.ph-visio-nav[data-ph-v="prec"]{left:8px}.ph-visio-nav[data-ph-v="suiv"]{right:8px}.ph-visio-corps{padding:0 0 24px}}

@@ -54,8 +54,9 @@ Ensuite, toutes les commandes de ce document fonctionnent **telles quelles**, sa
 
 | Dossier / fichier | Contenu | Utilisé quand | Qui |
 |---|---|---|---|
-| `supabase/migrations/` | 8 scripts SQL : toute la base | une fois par projet, puis à chaque évolution | backend |
+| `supabase/migrations/` | 10 scripts SQL : toute la base | une fois par projet, puis à chaque évolution | backend |
 | `supabase/functions/gerer-acces/` | fonction serveur de création de comptes | une fois par projet, puis si elle change | backend |
+| `supabase/functions/nettoyer-fichiers/` | suppression des fichiers devenus inutiles (photos retirées, biens supprimés) | planifiée toutes les heures | backend |
 | `supabase/templates/` | 2 modèles d'e-mails | une fois par projet (copier-coller) | backend |
 | `supabase/config.toml` | réglages de référence | base locale ; référence pour le tableau de bord | backend |
 | `supabase/outils/` | 2 outils : schéma pour le site ; import du jeu de test | à chaque changement de schéma ; projet de test | backend |
@@ -63,7 +64,10 @@ Ensuite, toutes les commandes de ce document fonctionnent **telles quelles**, sa
 | `supabase/sauvegarde/` | sauvegarde et restauration | chaque jour/semaine ; essai trimestriel | backend / exploitation |
 | `tests/` | tests navigateur + fiche de recette | projet de test | QA |
 | `js/00-config.js` | réglages publics du site | une fois par projet (test, prod) | frontend / backend |
-| `docs/` | rapports (sécurité, performances, index) | lecture | tous |
+| `docs/` | architecture, frontend, backend, base, stockage, sécurité, contrat, tests, déploiement, performances | lecture | tous |
+| `outils/versionner-site.js` | empreintes `?v=` des fichiers du site | avant chaque publication | frontend |
+| `vercel.json` | cache des fichiers versionnés, en-têtes de sécurité | publié avec le site | frontend |
+| `DEMO/` | démonstration du système de photos (n'est pas publiée avec le site) | présentation, recette | tous |
 
 ---
 

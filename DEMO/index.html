@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<!-- Démonstration indépendante de l'application : aucune connexion à Supabase. Ouvrir ce fichier dans un navigateur. -->
+<title>Atelier photos DEUKSIL</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Mise en page : une colonne de travail (étapes du parcours d'une photo), du choix des fichiers à l'annonce affichée. */
+:root {
+  --bg: #F4F6F9; --surface: #FFFFFF; --surface-2: #EDF1F5; --line: #DCE3EA;
+  --ink: #0E1A2B; --ink-2: #3C4858; --muted: #687587;
+  --brand: #0C2745; --brand-ink: #FFFFFF; --accent: #FFC700; --accent-ink: #0C2745;
+  --ok: #2E7D53; --ok-soft: #E5F1E9; --warn: #8A600B; --warn-soft: #F7EEDA; --bad: #A93B2E; --bad-soft: #F8E7E4;
+  --shim-a: #E3E9EE; --shim-b: #F1F4F7;
+  --sans: 'Outfit', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --r: 14px;
+  color-scheme: only light;   /* DEUKSIL : mode clair uniquement */
+}
+
+* { box-sizing: border-box }
+[hidden] { display: none !important }
+body { background: var(--bg); color: var(--ink); font: 400 15px/1.55 var(--sans); margin: 0 }
+.page { max-width: 1120px; margin: 0 auto; padding-block: 28px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 22px }
+h1, h2, h3 { text-wrap: balance; margin: 0; line-height: 1.2 }
+h1 { font-size: clamp(1.6rem, 4vw, 2.2rem); font-weight: 700; letter-spacing: -.01em }
+h2 { font-size: 1.18rem; font-weight: 650 }
+h3 { font-size: 1rem; font-weight: 600 }
+p { margin: 0 }
+.muted { color: var(--muted) }
+.small { font-size: .86rem }
+.num, td.n, .mono { font-variant-numeric: tabular-nums }
+.mono { font-family: var(--mono); font-size: .84em }
+button, select, input { font: inherit; color: inherit }
+:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px }
+
+.tete { display: grid; gap: 10px }
+.marque { display: inline-flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; font-size: .78rem; color: var(--muted) }
+.marque i { width: 22px; height: 22px; border-radius: 6px; background: var(--brand); display: grid; place-items: center; color: var(--brand-ink); font-style: normal; font-size: .8rem }
+.tete p { max-width: 68ch; color: var(--ink-2) }
+.verite { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 6px }
+.verite div { border: 1px solid var(--line); background: var(--surface); border-radius: 12px; padding: 10px 12px; font-size: .86rem; color: var(--ink-2) }
+.verite b { display: block; color: var(--ink); font-size: .8rem; letter-spacing: .05em; text-transform: uppercase; margin-bottom: 2px }
+.verite .reel b { color: var(--ok) } .verite .simule b { color: var(--warn) }
+
+.bloc { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; display: grid; gap: 14px; min-width: 0 }
+.bloc > header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 14px }
+.etape { font: 500 .74rem var(--mono); color: var(--muted); letter-spacing: .04em }
+
+.depot { border: 1.5px dashed var(--line); border-radius: 12px; padding: 22px 14px; text-align: center; background: var(--surface-2); display: grid; gap: 8px; justify-items: center; transition: border-color .15s }
+.depot.survol { border-color: var(--brand) }
+.boutons { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center }
+.btn { border: 1px solid transparent; background: var(--brand); color: var(--brand-ink); border-radius: 10px; padding: 9px 14px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px }
+.btn.ghost { background: transparent; color: var(--ink); border-color: var(--line) }
+.btn.jaune { background: var(--accent); color: var(--accent-ink) }
+.btn:disabled { opacity: .45; cursor: default }
+.btn.sm { padding: 5px 10px; font-size: .84rem }
+.compteur { font-weight: 600 }
+.alerte { border-radius: 10px; padding: 8px 12px; font-size: .88rem; background: var(--warn-soft); color: var(--warn) }
+
+.chiffres { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px }
+.chiffre { border: 1px solid var(--line); border-radius: 12px; padding: 12px; display: grid; gap: 2px; background: var(--surface-2) }
+.chiffre span { font-size: .78rem; color: var(--muted); letter-spacing: .03em }
+.chiffre b { font-size: 1.35rem; font-weight: 650; font-variant-numeric: tabular-nums }
+.chiffre.fort { background: var(--brand); border-color: var(--brand) } .chiffre.fort span, .chiffre.fort b { color: var(--brand-ink) }
+.tableau { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px }
+table { border-collapse: collapse; width: 100%; min-width: 760px; font-size: .86rem }
+th, td { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap }
+th { font-size: .74rem; color: var(--muted); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; background: var(--surface-2) }
+td.n, th.n { text-align: right }
+tr:last-child td { border-bottom: 0 }
+.pastille { display: inline-block; border-radius: 99px; padding: 1px 8px; font-size: .76rem; font-weight: 600 }
+.p-ok { background: var(--ok-soft); color: var(--ok) } .p-bad { background: var(--bad-soft); color: var(--bad) } .p-cours { background: var(--surface-2); color: var(--ink-2) } .p-warn { background: var(--warn-soft); color: var(--warn) }
+.vig { width: 44px; height: 33px; border-radius: 6px; object-fit: cover; display: block; background: var(--surface-2) }
+
+.variantes { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px }
+.variante { display: grid; gap: 6px; min-width: 0 }
+.variante .cadre { aspect-ratio: 4 / 3; border-radius: 10px; overflow: hidden; background: var(--surface-2); border: 1px solid var(--line) }
+.variante img { width: 100%; height: 100%; object-fit: contain; display: block }
+.zoom { display: grid; gap: 8px }
+.zoom .vue { position: relative; height: 260px; border-radius: 10px; overflow: hidden; border: 1px solid var(--line); background: var(--surface-2) }
+.zoom canvas { position: absolute; inset: 0; width: 100%; height: 100% }
+.bascule { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden }
+.bascule button { border: 0; background: transparent; padding: 6px 12px; cursor: pointer; font-weight: 500 }
+.bascule button[aria-pressed="true"] { background: var(--brand); color: var(--brand-ink) }
+.choix { display: flex; flex-wrap: wrap; gap: 10px; align-items: center }
+.choix label { display: inline-flex; gap: 6px; align-items: center; font-size: .9rem }
+select { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 6px 8px }
+
+.barre { height: 7px; border-radius: 99px; background: var(--surface-2); overflow: hidden }
+.barre i { display: block; height: 100%; width: 0; background: var(--brand); transition: width .2s linear }
+.envoi-ligne { display: flex; justify-content: space-between; gap: 10px; font-size: .9rem }
+
+.grille { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px }
+.tuile { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--surface); display: flex; flex-direction: column }
+.tuile.couv { border-color: var(--brand) } .tuile.erreur, .tuile.refus { border-color: var(--bad) }
+.tuile .vue { position: relative; aspect-ratio: 4 / 3; background: var(--surface-2) }
+.tuile .vue img { width: 100%; height: 100%; object-fit: cover; display: block }
+.tuile .etiq { position: absolute; left: 6px; top: 6px; background: var(--accent); color: var(--accent-ink); font-size: .68rem; font-weight: 700; border-radius: 99px; padding: 2px 7px }
+.tuile .vue .barre { position: absolute; left: 8px; right: 8px; bottom: 8px }
+.tuile .info { padding: 7px 9px 0; display: grid; gap: 1px; font-size: .78rem }
+.tuile .info b { font-size: .8rem }
+.tuile.ok .info b { color: var(--ok) } .tuile.erreur .info b, .tuile.refus .info b { color: var(--bad) }
+.outils { display: flex; flex-wrap: wrap; gap: 4px; padding: 7px 8px 9px; margin-top: auto }
+.ob { width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); display: inline-grid; place-items: center; cursor: pointer; font-size: .86rem; line-height: 1 }
+.ob:disabled { opacity: .35; cursor: default }
+.attente { position: absolute; inset: 0; background: linear-gradient(100deg, var(--shim-a) 30%, var(--shim-b) 50%, var(--shim-a) 70%); background-size: 300% 100%; animation: lueur 1.4s linear infinite }
+@keyframes lueur { from { background-position: 100% 0 } to { background-position: 0 0 } }
+
+.annonce { display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: 18px; align-items: start }
+.carte { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: var(--surface) }
+.carte .ph { position: relative; aspect-ratio: 4 / 3; background: var(--surface-2) }
+.carte .ph img { width: 100%; height: 100%; object-fit: cover; display: block }
+.carte .ph span { position: absolute; right: 10px; bottom: 10px; background: rgba(12, 39, 69, .82); color: #fff; font-size: .76rem; border-radius: 99px; padding: 2px 8px }
+.carte .corps { padding: 12px 14px; display: grid; gap: 4px }
+.prix { font-weight: 700; font-size: 1.15rem }
+.bande { display: flex; gap: 8px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 6px }
+.bande button { flex: 0 0 78%; max-width: 360px; aspect-ratio: 16 / 11; border: 0; padding: 0; border-radius: 12px; overflow: hidden; scroll-snap-align: start; cursor: zoom-in; background: var(--surface-2) }
+.bande img { width: 100%; height: 100%; object-fit: cover; display: block }
+
+.visio { position: fixed; inset: 0; z-index: 50; background: rgba(6, 12, 20, .94); display: flex; flex-direction: column; color: #fff; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px) }
+.visio .haut { display: flex; justify-content: space-between; align-items: center; padding: 12px max(14px, env(safe-area-inset-right, 0px)) 12px max(14px, env(safe-area-inset-left, 0px)) }
+.visio .corps { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 0 12px 20px }
+.visio img { max-width: min(100%, 1600px); max-height: 100%; object-fit: contain; border-radius: 8px }
+.visio button { border: 0; background: rgba(255, 255, 255, .14); color: #fff; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; font-size: 1.2rem; flex: 0 0 auto }
+.calcul { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px }
+.calcul .chiffre b small { font-size: .72rem; font-weight: 500; color: var(--muted) }
+.journal { font: .8rem/1.5 var(--mono); color: var(--ink-2); background: var(--surface-2); border-radius: 10px; padding: 10px 12px; max-height: 180px; overflow: auto; white-space: pre-wrap }
+
+@media (max-width: 720px) { .annonce { grid-template-columns: 1fr } .grille { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px } }
+@media (prefers-reduced-motion: reduce) { .attente { animation: none } .barre i { transition: none } }
+</style>
+
+</head>
+<body>
+<div class="page">
+  <header class="tete">
+    <span class="marque"><i>D</i>DEUKSIL · atelier photos</span>
+    <h1>Ce qu'il advient d'une photo d'annonce</h1>
+    <p>Choisissez des photos : elles passent par le même code que le formulaire « Ajouter un bien » de DEUKSIL (contrôle, optimisation, trois tailles). Les chiffres affichés sont calculés sur vos fichiers, dans votre navigateur.</p>
+    <div class="verite">
+      <div class="reel"><b>Réel</b>Contrôle des fichiers, compression, variantes, poids et dimensions, ancienne méthode recalculée pour comparaison.</div>
+      <div class="simule"><b>Simulé</b>L'envoi : aucune donnée ne quitte votre appareil. Sa durée est calculée d'après le débit choisi et la taille réelle des fichiers.</div>
+      <div><b>Non connecté</b>Aucune base, aucun compte, aucune écriture dans Supabase : cette page est indépendante de l'application.</div>
+    </div>
+  </header>
+
+  <section class="bloc" aria-labelledby="t1">
+    <header><h2 id="t1">Choisir les photos</h2><span class="etape">étape 1 · sélection</span></header>
+    <div class="depot" id="depot">
+      <p><b>Glissez des photos ici</b> ou</p>
+      <div class="boutons">
+        <label class="btn" for="fichiers">Choisir sur mon appareil</label>
+        <input type="file" id="fichiers" accept="image/*" multiple hidden>
+        <button type="button" class="btn ghost" id="exemples">Recharger les exemples</button>
+        <button type="button" class="btn ghost" id="vingt">Tester 21 photos</button>
+        <button type="button" class="btn ghost" id="pieges">Ajouter des fichiers invalides</button>
+        <button type="button" class="btn ghost" id="vider">Tout retirer</button>
+      </div>
+      <p class="small muted"><span class="compteur" id="compteur">0/20 photos</span> · JPG, PNG, WebP ou HEIC · 30 Mo au plus par fichier</p>
+    </div>
+    <p class="alerte" id="alerte" hidden></p>
+    <p class="small muted" id="note-exemples">Chargées à l'ouverture : 6 photos d'exemple de DEUKSIL (760 × 570) et 1 grande image générée dans votre navigateur (4 032 × 3 024, comme un téléphone). Remplacez-les par les vôtres.</p>
+  </section>
+
+  <section class="bloc" aria-labelledby="t2">
+    <header><h2 id="t2">Poids et dimensions</h2><span class="etape">étape 2 · optimisation</span></header>
+    <div class="chiffres" id="totaux"></div>
+    <div class="tableau"><table>
+      <thead><tr><th></th><th>Fichier</th><th>Format d'origine</th><th class="n">Dimensions</th><th class="n">Poids</th><th>État</th><th class="n">s (listes)</th><th class="n">m (cartes)</th><th class="n">l (galerie)</th><th class="n">Stockés</th><th class="n">Ancienne méthode</th><th class="n">Temps</th></tr></thead>
+      <tbody id="lignes"></tbody>
+    </table></div>
+    <p class="small muted">« Ancienne méthode » : ce que faisait DEUKSIL avant cette version (une seule image JPEG de 1 080 px, qualité 0,7, utilisée partout), recalculée ici sur le même fichier. Format de sortie de ce navigateur : <b id="format-sortie">…</b>.</p>
+  </section>
+
+  <section class="bloc" aria-labelledby="t3">
+    <header><h2 id="t3">Les trois tailles d'une photo</h2><span class="etape">étape 3 · variantes</span></header>
+    <div class="choix"><label for="choix-photo">Photo</label><select id="choix-photo"></select></div>
+    <div class="variantes" id="variantes"></div>
+    <div class="zoom">
+      <div class="choix"><h3>Qualité au pixel près</h3>
+        <div class="bascule" role="group" aria-label="Image comparée">
+          <button type="button" id="z-orig" aria-pressed="false">Original</button>
+          <button type="button" id="z-opt" aria-pressed="true">Optimisée (l)</button>
+        </div>
+        <span class="small muted" id="z-legende"></span></div>
+      <div class="vue"><canvas id="zoom" width="800" height="260" aria-label="Agrandissement du centre de la photo"></canvas></div>
+      <p class="small muted">Centre de la photo à taille réelle de la variante l. L'original est réduit à la même taille par le navigateur, pour comparer à l'identique.</p>
+    </div>
+  </section>
+
+  <section class="bloc" aria-labelledby="t4">
+    <header><h2 id="t4">Envoi</h2><span class="etape">étape 4 · simulation</span></header>
+    <div class="choix">
+      <label for="debit">Débit</label>
+      <select id="debit"><option value="400000">Réseau lent (400 kbit/s)</option><option value="1600000" selected>Mobile moyen (1,6 Mbit/s)</option><option value="8000000">4G (8 Mbit/s)</option><option value="30000000">Fibre (30 Mbit/s)</option></select>
+      <label for="panne">Incident</label>
+      <select id="panne"><option value="0">Aucun</option><option value="2" selected>Couper la connexion pendant la 2e photo</option><option value="hasard">Coupures au hasard (25 %)</option></select>
+      <button type="button" class="btn jaune" id="envoyer">Envoyer les photos</button>
+      <button type="button" class="btn ghost" id="reprendre" hidden>Réessayer les photos en échec</button>
+    </div>
+    <div class="envoi-ligne"><span id="envoi-texte">Prêt : choisissez un débit puis « Envoyer les photos ».</span><b id="envoi-pct" class="num"></b></div>
+    <div class="barre" role="progressbar" aria-label="Envoi des photos" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="envoi-barre"></i></div>
+    <p class="small muted">Comme dans l'application : deux photos à la fois, une reprise automatique après une coupure, puis « Réessayer » ne renvoie que les photos en échec. L'ancienne méthode envoyait tout d'un bloc après avoir quitté le formulaire.</p>
+    <div class="journal" id="journal" aria-live="polite"></div>
+  </section>
+
+  <section class="bloc" aria-labelledby="t5">
+    <header><h2 id="t5">Ordre, couverture, suppression</h2><span class="etape">étape 5 · organisation</span></header>
+    <ol class="grille" id="grille"></ol>
+  </section>
+
+  <section class="bloc" aria-labelledby="t6">
+    <header><h2 id="t6">L'annonce telle qu'un visiteur la voit</h2><span class="etape">étape 6 · affichage</span></header>
+    <div class="annonce">
+      <article class="carte" id="carte"></article>
+      <div style="display:grid;gap:10px;min-width:0"><h3>Fiche du bien : toutes les photos</h3><div class="bande" id="bande"></div><p class="small muted">Touchez une photo pour l'ouvrir en grand (flèches du clavier, glissement sur téléphone).</p></div>
+    </div>
+    <div class="choix"><label for="densite">Écran du visiteur</label>
+      <select id="densite"><option value="1">ordinateur (densité 1)</option><option value="2">téléphone courant (densité 2)</option><option value="3" selected>téléphone récent (densité 3)</option></select></div>
+    <div class="calcul" id="calcul"></div>
+  </section>
+</div>
+<div class="visio" id="visio" hidden role="dialog" aria-modal="true" aria-label="Photos du bien">
+  <div class="haut"><span id="visio-n" class="num"></span><button type="button" id="visio-x" aria-label="Fermer">✕</button></div>
+  <div class="corps"><button type="button" id="visio-p" aria-label="Photo précédente">‹</button><img id="visio-img" alt=""><button type="button" id="visio-s" aria-label="Photo suivante">›</button></div>
+</div>
+
+<script src="../js/00-photos-traitement.js"></script>
+<script src="exemples.js"></script>
+<script>
+(() => {
+  const I = DEUKSIL_IMAGES, $ = s => document.querySelector(s);   // js/00-photos-traitement.js
+  const MAX = 20, items = [];
+  const ko = n => n == null ? '—' : n < 1024 ? n + ' o' : n < 1048576 ? (n / 1024).toFixed(0) + ' Ko' : (n / 1048576).toFixed(2).replace('.', ',') + ' Mo';
+  const mo = n => (n / 1048576).toFixed(2).replace('.', ',') + ' Mo';
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+  const actifs = () => items.filter(x => x.etat !== 'refus');
+  const journal = m => { const j = $('#journal'); j.textContent += (j.textContent ? '\n' : '') + new Date().toLocaleTimeString('fr-FR') + '  ' + m; j.scrollTop = j.scrollHeight; };
+
+  /* Ancienne méthode de DEUKSIL (24-espace-proprietaire.js avant ce changement) : 1 080 px, JPEG 0,7. */
+  async function ancienne(f) {
+    const img = await I.decoder(f), W = img.width || img.naturalWidth, H = img.height || img.naturalHeight;
+    const k = Math.min(1, 1080 / Math.max(W, H)), c = document.createElement('canvas');
+    c.width = Math.round(W * k); c.height = Math.round(H * k); c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    const b = await I.versBlob(c, 'image/jpeg', .7); return {o: b.size, w: c.width, h: c.height};
+  }
+  const url = (x, k) => x.urls[(x.v[k] && x.v[k].fichier) || k];
+
+  async function ajouter(fichiers, exemple) {
+    $('#alerte').hidden = true;
+    const place = MAX - actifs().length, pris = fichiers.slice(0, Math.max(0, place));
+    if (fichiers.length > pris.length) { $('#alerte').textContent = `Limite de ${MAX} photos atteinte : ${pris.length} ajoutée${pris.length > 1 ? 's' : ''} sur ${fichiers.length}. La même limite est vérifiée par la base de données.`; $('#alerte').hidden = false; }
+    const nouveaux = pris.map(f => ({id: Math.random().toString(36).slice(2), nom: f.name || 'photo', fichier: f, exemple, etat: 'traitement', envoi: {etat: 'attente', envoye: 0, faits: new Set(), essais: 0}}));
+    items.push(...nouveaux); tout();
+    for (const x of nouveaux) {
+      if (!items.includes(x)) continue;
+      const t0 = performance.now();
+      try {
+        const r = await I.optimiser(x.fichier);
+        Object.assign(x, r, {etat: 'pret', temps: performance.now() - t0, total: Object.values(r.blobs).reduce((s, b) => s + b.size, 0)});
+        x.urls = Object.fromEntries(Object.entries(r.blobs).map(([k, b]) => [k, URL.createObjectURL(b)]));
+        x.ancien = await ancienne(x.fichier);
+      } catch (e) { x.etat = 'refus'; x.message = e instanceof I.Refus ? e.message : 'Photo illisible ou endommagée.'; x.src = x.src || {o: x.fichier.size}; }
+      tout();
+    }
+  }
+
+  /* ----- Affichage ----- */
+  function totaux() {
+    const L = items.filter(x => x.etat === 'pret'), orig = L.reduce((s, x) => s + x.src.o, 0), sto = L.reduce((s, x) => s + x.total, 0);
+    const anc = L.reduce((s, x) => s + x.ancien.o, 0), formats = [...new Set(L.map(x => x.src.type.toUpperCase()))].join(', ') || '—';
+    const pct = orig ? 100 * (1 - sto / orig) : 0;
+    $('#totaux').innerHTML = [
+      ['Photos traitées', `${L.length}${items.length - L.length ? ` <small class="muted">+ ${items.length - L.length} refusée${items.length - L.length > 1 ? 's' : ''} ou en cours</small>` : ''}`],
+      ['Poids d\'origine', mo(orig)], ['Après optimisation (3 tailles)', mo(sto)], ['Économie', mo(Math.max(0, orig - sto))],
+      ['Réduction', pct.toFixed(1).replace('.', ',') + ' %', 'fort'], ['Formats reçus', formats]
+    ].map(([l, v, c]) => `<div class="chiffre ${c || ''}"><span>${l}</span><b>${v}</b></div>`).join('');
+  }
+  function lignes() {
+    $('#lignes').innerHTML = items.map(x => {
+      const st = x.etat === 'pret' ? '<span class="pastille p-ok">Optimisée</span>' : x.etat === 'refus' ? `<span class="pastille p-bad" title="${esc(x.message)}">Refusée</span>` : '<span class="pastille p-cours">Traitement…</span>';
+      const v = k => x.v ? `${x.v[k].w}×${x.v[k].h}<br><span class="muted">${x.v[k].fichier ? '= ' + x.v[k].fichier : ko(x.v[k].o)}</span>` : '—';
+      return `<tr><td>${x.urls ? `<img class="vig" src="${x.urls.s}" alt="">` : '<span class="vig"></span>'}</td>
+        <td>${esc(x.nom.slice(0, 28))}${x.exemple ? ' <span class="pastille p-cours">exemple</span>' : ''}${x.etat === 'refus' ? `<div class="small" style="color:var(--bad);white-space:normal;max-width:240px">${esc(x.message)}</div>` : ''}</td>
+        <td>${x.src && x.src.type ? x.src.type.toUpperCase() : '—'}</td><td class="n">${x.src && x.src.w ? x.src.w + '×' + x.src.h : '—'}</td><td class="n">${ko(x.src ? x.src.o : x.fichier && x.fichier.size)}</td>
+        <td>${st}</td><td class="n">${v('s')}</td><td class="n">${v('m')}</td><td class="n">${v('l')}</td><td class="n">${x.total ? ko(x.total) : '—'}</td>
+        <td class="n">${x.ancien ? `${x.ancien.w}×${x.ancien.h}<br><span class="muted">${ko(x.ancien.o)}</span>` : '—'}</td><td class="n">${x.temps ? Math.round(x.temps) + ' ms' : '—'}</td></tr>`;
+    }).join('') || '<tr><td colspan="12" class="muted">Aucune photo : choisissez-en ou rechargez les exemples.</td></tr>';
+  }
+  let choisi = null, choixManuel = false;
+  function variantes() {
+    const L = items.filter(x => x.etat === 'pret'), sel = $('#choix-photo');
+    if (!choixManuel || !L.find(x => x.id === choisi)) choisi = (L.slice().sort((a, b) => b.src.w * b.src.h - a.src.w * a.src.h)[0] || {}).id;   // par défaut : la plus grande
+    sel.innerHTML = L.map(x => `<option value="${x.id}" ${x.id === choisi ? 'selected' : ''}>${esc(x.nom.slice(0, 40))} (${x.src.w}×${x.src.h})</option>`).join('');
+    const x = L.find(y => y.id === choisi);
+    $('#variantes').innerHTML = x ? [['s', 'listes et tableaux'], ['m', 'cartes de recherche'], ['l', 'galerie en grand']].map(([k, u]) =>
+      `<figure class="variante" style="margin:0"><div class="cadre"><img src="${url(x, k)}" alt="Variante ${k}"></div>
+        <figcaption class="small"><b>${k}</b> · ${x.v[k].w}×${x.v[k].h} · ${x.v[k].fichier ? `même fichier que ${x.v[k].fichier} (photo plus petite)` : ko(x.v[k].o)}<br><span class="muted">${u}</span></figcaption></figure>`).join('') : '<p class="muted">Aucune photo optimisée.</p>';
+    zoom();
+  }
+  let montrerOrig = false;
+  async function zoom() {
+    const c = $('#zoom'), g = c.getContext('2d'), x = items.find(y => y.id === choisi && y.etat === 'pret');
+    const r = c.getBoundingClientRect(); c.width = Math.round(r.width * devicePixelRatio); c.height = Math.round(r.height * devicePixelRatio);
+    g.fillStyle = getComputedStyle(document.body).getPropertyValue('--surface-2'); g.fillRect(0, 0, c.width, c.height);
+    if (!x) return;
+    const L = x.v.l, src = montrerOrig ? await I.decoder(x.fichier) : await createImageBitmap(x.blobs[L.fichier || 'l']);
+    const w = c.width, h = c.height, sx = (L.w - w) / 2, sy = (L.h - h) / 2;   // centre, 1 pixel de l = 1 pixel d'écran
+    const kx = (src.width || src.naturalWidth) / L.w;
+    g.imageSmoothingQuality = 'high';
+    g.drawImage(src, Math.max(0, sx) * kx, Math.max(0, sy) * kx, Math.min(w, L.w) * kx, Math.min(h, L.h) * kx, Math.max(0, -sx), Math.max(0, -sy), Math.min(w, L.w), Math.min(h, L.h));
+    $('#z-legende').textContent = montrerOrig ? `original ${x.src.w}×${x.src.h} · ${ko(x.src.o)}` : `variante l ${L.w}×${L.h} · ${ko(L.o)} (${x.ext === 'webp' ? 'WebP' : 'JPEG'})`;
+  }
+  $('#z-orig').onclick = () => { montrerOrig = true; $('#z-orig').setAttribute('aria-pressed', 'true'); $('#z-opt').setAttribute('aria-pressed', 'false'); zoom(); };
+  $('#z-opt').onclick = () => { montrerOrig = false; $('#z-opt').setAttribute('aria-pressed', 'true'); $('#z-orig').setAttribute('aria-pressed', 'false'); zoom(); };
+  $('#choix-photo').onchange = e => { choisi = e.target.value; choixManuel = true; variantes(); };
+
+  function grille() {
+    const L = items;
+    $('#grille').innerHTML = L.map((x, i) => {
+      const n = actifs().length, refus = x.etat === 'refus', e = x.envoi, pct = x.total ? Math.round(100 * e.envoye / x.total) : 0;
+      const etat = refus ? 'Refusée' : x.etat === 'traitement' ? 'Optimisation…' : e.etat === 'ok' ? 'Envoyée' : e.etat === 'erreur' ? 'Échec de l\'envoi' : e.etat === 'envoi' ? `Envoi ${pct} %` : 'Prête à envoyer';
+      const cls = refus ? 'refus' : e.etat === 'erreur' ? 'erreur' : e.etat === 'ok' ? 'ok' : '';
+      return `<li class="tuile ${cls}${i === 0 && !refus ? ' couv' : ''}" data-id="${x.id}">
+        <div class="vue">${x.urls ? `<img src="${x.urls.s}" alt="Photo ${i + 1}">` : '<span class="attente"></span>'}${i === 0 && !refus ? '<span class="etiq">Couverture</span>' : ''}
+          ${e.etat === 'envoi' ? `<span class="barre"><i style="width:${pct}%"></i></span>` : ''}</div>
+        <div class="info"><b>${etat}</b><span class="muted">${esc(refus ? x.message : e.message || x.nom.slice(0, 22))}</span></div>
+        <div class="outils">${!refus && i > 0 ? `<button class="ob" data-a="couv" title="Définir comme couverture" aria-label="Définir la photo ${i + 1} comme couverture">★</button>` : ''}
+          ${!refus ? `<button class="ob" data-a="g" ${i === 0 ? 'disabled' : ''} aria-label="Déplacer la photo ${i + 1} vers la gauche">‹</button><button class="ob" data-a="d" ${i >= n - 1 ? 'disabled' : ''} aria-label="Déplacer la photo ${i + 1} vers la droite">›</button>` : ''}
+          ${e.etat === 'erreur' ? `<button class="ob" data-a="re" title="Réessayer" aria-label="Réessayer l'envoi de la photo ${i + 1}">↻</button>` : ''}
+          <button class="ob" data-a="x" aria-label="Retirer la photo ${i + 1}">✕</button></div></li>`;
+    }).join('');
+  }
+  $('#grille').addEventListener('click', ev => {
+    const b = ev.target.closest('[data-a]'); if (!b) return;
+    const i = items.findIndex(x => x.id === b.closest('[data-id]').dataset.id); if (i < 0) return;
+    const x = items[i], a = b.dataset.a;
+    if (a === 'x') { items.splice(i, 1); Object.values(x.urls || {}).forEach(u => URL.revokeObjectURL(u)); x.retiree = true; journal(`« ${x.nom} » retirée`); }
+    if (a === 'couv') { items.splice(i, 1); items.unshift(x); journal(`« ${x.nom} » définie comme couverture`); }
+    if (a === 'g' && i > 0) { items.splice(i, 1); items.splice(i - 1, 0, x); }
+    if (a === 'd' && i < items.length - 1) { items.splice(i, 1); items.splice(i + 1, 0, x); }
+    if (a === 're') reprendre([x]);
+    tout();
+  });
+
+  function annonce() {
+    const L = items.filter(x => x.etat === 'pret'), c = L[0], dpr = +$('#densite').value;
+    const ss = x => ['s', 'm', 'l'].filter((k, j, t) => !x.v[k].fichier).map(k => `${url(x, k)} ${x.v[k].w}w`).join(', ');
+    $('#carte').innerHTML = `<div class="ph">${c ? `<img src="${url(c, 'm')}" srcset="${ss(c)}" sizes="340px" alt="Couverture">` : '<span class="attente"></span>'}<span>1/${L.length || 1}</span></div>
+      <div class="corps"><span class="small muted">Almadies, Dakar</span><span class="prix num">450 000 FCFA <small class="muted">/ mois</small></span><span>Appartement F4 avec terrasse (exemple)</span></div>`;
+    $('#bande').innerHTML = L.map((x, i) => `<button type="button" data-i="${i}" aria-label="Voir la photo ${i + 1} sur ${L.length}"><img src="${url(x, 'm')}" srcset="${ss(x)}" sizes="78vw" alt="" loading="${i ? 'lazy' : 'eager'}"></button>`).join('') || '<p class="muted">Aucune photo.</p>';
+    // Ce que télécharge le visiteur : la plus petite variante assez grande pour l'affichage (règle du navigateur pour srcset).
+    const pour = (x, px) => { for (const k of ['s', 'm', 'l']) if (x.v[k].w >= px * dpr) return x.v[x.v[k].fichier || k].o; return x.v[x.v.l.fichier || 'l'].o; };
+    const page = 12, carte = 172, galerie = 380;
+    const nouv = L.length ? L.reduce((s, x) => s + pour(x, carte), 0) / L.length * page : 0, anc = L.length ? L.reduce((s, x) => s + x.ancien.o, 0) / L.length * page : 0;
+    const gN = L.reduce((s, x) => s + pour(x, galerie), 0), gA = L.reduce((s, x) => s + x.ancien.o, 0);
+    $('#calcul').innerHTML = L.length ? `
+      <div class="chiffre"><span>Page de 12 résultats (cartes de ${carte} px)</span><b>${ko(nouv)} <small>au lieu de ${ko(anc)}</small></b><span>${anc ? Math.round(100 * (1 - nouv / anc)) : 0} % de moins à télécharger</span></div>
+      <div class="chiffre"><span>Fiche : bande de ${L.length} photo${L.length > 1 ? 's' : ''} (${galerie} px)</span><b>${ko(gN)} <small>au lieu de ${ko(gA)}</small></b><span>${gA ? Math.round(100 * (1 - gN / gA)) : 0} % ${gN > gA ? 'de plus' : 'de moins'} ; visionneuse plus nette (1 600 px au lieu de 1 080)</span></div>
+      <div class="chiffre"><span>Avant : photos visibles sur la fiche</span><b>${Math.min(3, L.length)} <small>sur ${L.length}</small></b><span>Maintenant : toutes</span></div>` : '';
+  }
+  $('#densite').onchange = annonce;
+  $('#carte').addEventListener('click', () => ouvrir(0));
+
+  /* ----- Visionneuse ----- */
+  let vi = 0;
+  function ouvrir(i) { const L = items.filter(x => x.etat === 'pret'); if (!L.length) return; vi = (i + L.length) % L.length; const x = L[vi], im = $('#visio-img');
+    im.src = url(x, 'l'); im.alt = `Photo ${vi + 1} sur ${L.length}`; $('#visio-n').textContent = `${vi + 1} / ${L.length}`; $('#visio').hidden = false; $('#visio-x').focus(); }
+  const fermer = () => { $('#visio').hidden = true; };
+  $('#bande').addEventListener('click', e => { const b = e.target.closest('[data-i]'); if (b) ouvrir(+b.dataset.i); });
+  $('#visio-x').onclick = fermer; $('#visio-p').onclick = () => ouvrir(vi - 1); $('#visio-s').onclick = () => ouvrir(vi + 1);
+  document.addEventListener('keydown', e => { if ($('#visio').hidden) return; if (e.key === 'Escape') fermer(); if (e.key === 'ArrowRight') ouvrir(vi + 1); if (e.key === 'ArrowLeft') ouvrir(vi - 1); });
+  let x0 = null; $('#visio').addEventListener('pointerdown', e => { x0 = e.clientX; }); $('#visio').addEventListener('pointerup', e => { if (x0 !== null && Math.abs(e.clientX - x0) > 50) ouvrir(vi + (e.clientX < x0 ? 1 : -1)); x0 = null; });
+
+  /* ----- Envoi simulé : chronologie calculée d'après les vrais octets ----- */
+  let ordre = 0;
+  function progression() {
+    const L = actifs().filter(x => x.etat === 'pret'), tot = L.reduce((s, x) => s + x.total, 0), env = L.reduce((s, x) => s + (x.envoi.etat === 'ok' ? x.total : x.envoi.envoye), 0);
+    const ok = L.filter(x => x.envoi.etat === 'ok').length, err = L.filter(x => x.envoi.etat === 'erreur').length, pct = tot ? Math.round(100 * env / tot) : 0;
+    $('#envoi-barre').style.width = pct + '%'; document.querySelector('[role=progressbar]').setAttribute('aria-valuenow', pct);
+    $('#envoi-pct').textContent = L.length ? pct + ' %' : '';
+    $('#envoi-texte').textContent = L.length ? `${ok}/${L.length} photo${L.length > 1 ? 's' : ''} envoyée${ok > 1 ? 's' : ''} · ${L.length - ok - err} restante${L.length - ok - err > 1 ? 's' : ''}${err ? ` · ${err} en échec` : ''}` : 'Aucune photo prête.';
+    $('#reprendre').hidden = !err;
+  }
+  async function envoyerUne(x) {
+    const debit = +$('#debit').value, panne = $('#panne').value, e = x.envoi;
+    e.etat = 'envoi'; e.message = 'Envoi en cours…'; x.rang = x.rang || ++ordre;
+    const variantes = Object.keys(x.blobs).filter(k => !e.faits.has(k));
+    for (const k of variantes) {
+      const taille = x.blobs[k].size, duree = 150 + taille * 8 / debit * 1000, t0 = performance.now();
+      const coupe = e.essais < 2 && ((panne === '2' && x.rang === 2 && k === variantes[variantes.length - 1]) || (panne === 'hasard' && Math.random() < .25));
+      await new Promise((ok, ko) => {
+        const pas = () => {
+          if (x.retiree) return ko(new Error('retirée'));
+          const f = Math.min(1, (performance.now() - t0) / duree);
+          e.envoye = [...e.faits].reduce((s, j) => s + x.blobs[j].size, 0) + taille * f; tout(true);
+          if (coupe && f > .55) return ko(new Error('Connexion interrompue pendant l\'envoi.'));
+          f < 1 ? requestAnimationFrame(pas) : ok();
+        };
+        requestAnimationFrame(pas);
+      }).then(() => { e.faits.add(k); }, err => { throw err; });
+    }
+    e.etat = 'ok'; e.message = 'Envoyée'; journal(`« ${x.nom} » envoyée (${ko(x.total)}, simulation)`);
+  }
+  async function file(L) {
+    const q = L.slice(); let actif = 0;
+    $('#envoyer').disabled = true;
+    await new Promise(fin => {
+      const pomper = () => {
+        if (!q.length && !actif) return fin();
+        while (actif < 2 && q.length) {
+          const x = q.shift(); actif++;
+          envoyerUne(x).catch(err => {
+            if (x.retiree) return;
+            x.envoi.essais++;
+            if (x.envoi.essais === 1) { journal(`« ${x.nom} » : ${err.message} Nouvelle tentative automatique dans 2 s.`); x.envoi.etat = 'attente'; x.envoi.message = 'Nouvelle tentative…'; return new Promise(r => setTimeout(r, 2000)).then(() => { q.unshift(x); }); }
+            x.envoi.etat = 'erreur'; x.envoi.message = err.message; journal(`« ${x.nom} » : échec de l'envoi. Les autres photos continuent.`);
+          }).finally(() => { actif--; tout(); pomper(); });
+        }
+      };
+      pomper();
+    });
+    $('#envoyer').disabled = false; tout();
+    const err = actifs().filter(x => x.envoi.etat === 'erreur').length;
+    journal(err ? `${err} photo${err > 1 ? 's' : ''} en échec : « Réessayer » ne renverra qu'elle${err > 1 ? 's' : ''}.` : 'Toutes les photos sont envoyées : l\'annonce peut être enregistrée.');
+  }
+  function reprendre(L) { L.forEach(x => { x.envoi.etat = 'attente'; x.envoi.essais = 2; x.envoi.message = 'Nouvelle tentative…'; }); journal(`Nouvelle tentative : ${L.length} photo${L.length > 1 ? 's' : ''}.`); file(L); }
+  $('#envoyer').onclick = () => {
+    const L = actifs().filter(x => x.etat === 'pret' && x.envoi.etat !== 'ok');
+    if (!L.length) { journal('Rien à envoyer : toutes les photos prêtes sont déjà envoyées.'); return; }
+    ordre = 0; L.forEach(x => { x.rang = 0; x.envoi.essais = 0; }); journal(`Envoi de ${L.length} photo${L.length > 1 ? 's' : ''} à ${(+$('#debit').value / 1e6).toLocaleString('fr-FR')} Mbit/s (simulation).`); file(L);
+  };
+  $('#reprendre').onclick = () => reprendre(actifs().filter(x => x.envoi.etat === 'erreur'));
+
+  /* ----- Rafraîchissement ----- */
+  let prevu = false;
+  function tout(leger) {
+    if (leger) { if (prevu) return; prevu = true; requestAnimationFrame(() => { prevu = false; grille(); progression(); }); return; }
+    $('#compteur').textContent = `${actifs().length}/${MAX} photos`; totaux(); lignes(); variantes(); grille(); annonce(); progression();
+  }
+
+  /* ----- Sources de fichiers ----- */
+  $('#fichiers').onchange = e => { const L = [...e.target.files]; e.target.value = ''; if (L.length) ajouter(L, false); };
+  const depot = $('#depot');
+  depot.addEventListener('dragover', e => { e.preventDefault(); depot.classList.add('survol'); });
+  depot.addEventListener('dragleave', () => depot.classList.remove('survol'));
+  depot.addEventListener('drop', e => { e.preventDefault(); depot.classList.remove('survol'); const L = [...e.dataTransfer.files].filter(f => f.size); if (L.length) ajouter(L, false); });
+  const EXEMPLES = window.DEUKSIL_EXEMPLES || [];
+  const versFichier = (d, nom) => fetch(d).then(r => r.blob()).then(b => new File([b], nom, {type: b.type}));
+  async function grande() {   // image de téléphone générée ici (4 032 × 3 024) : aucune photo réelle n'est nécessaire
+    const c = document.createElement('canvas'); c.width = 4032; c.height = 3024; const g = c.getContext('2d');
+    const img = await I.decoder(await versFichier(EXEMPLES[0][1], 'x.jpg')); g.drawImage(img, 0, 0, 4032, 3024);
+    const d = g.getImageData(0, 0, 4032, 3024), p = d.data; let s = 7;
+    for (let i = 0; i < p.length; i += 4) { s = (s * 1103515245 + 12345) & 0x7fffffff; const n = (s % 13) - 6; p[i] += n; p[i + 1] += n; p[i + 2] += n; }   // grain de capteur
+    g.putImageData(d, 0, 0);
+    return new File([await I.versBlob(c, 'image/jpeg', .92)], 'telephone_4032x3024.jpg', {type: 'image/jpeg'});
+  }
+  async function exemples() {
+    const L = await Promise.all(EXEMPLES.map(([n, d]) => versFichier(d, n)));
+    await ajouter([...L, await grande()], true);
+  }
+  $('#exemples').onclick = async () => { vider(); await exemples(); };
+  $('#vingt').onclick = async () => { const L = await Promise.all(Array.from({length: 21}, (_, i) => versFichier(EXEMPLES[i % EXEMPLES.length][1], `lot-${i + 1}.jpg`))); vider(); ajouter(L, true); };
+  $('#pieges').onclick = async () => {
+    const texte = new File(['ceci est un texte'], 'pas-une-photo.jpg', {type: 'image/jpeg'});
+    const b = await (await versFichier(EXEMPLES[1][1], 'x.jpg')).arrayBuffer(), coupee = new File([b.slice(0, Math.floor(b.byteLength / 2))], 'photo-coupee.jpg', {type: 'image/jpeg'});
+    const c = document.createElement('canvas'); c.width = c.height = 120; c.getContext('2d').fillRect(0, 0, 120, 120);
+    const mini = new File([await I.versBlob(c, 'image/png')], 'icone-120px.png', {type: 'image/png'});
+    ajouter([texte, coupee, mini], true);
+  };
+  function vider() { items.splice(0).forEach(x => { x.retiree = true; Object.values(x.urls || {}).forEach(u => URL.revokeObjectURL(u)); }); $('#journal').textContent = ''; tout(); }
+  $('#vider').onclick = vider;
+
+  I.choisirFormat().then(f => { $('#format-sortie').textContent = f === 'webp' ? 'WebP' : 'JPEG (ce navigateur ne sait pas encoder le WebP)'; });
+  addEventListener('resize', () => zoom());
+  tout(); exemples();
+})();
+</script>
+
+</body>
+</html>

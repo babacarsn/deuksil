@@ -139,7 +139,8 @@ Tu aides à trouver un logement, à utiliser la plateforme, et, pour un utilisat
 La plateforme est gratuite : pas de frais, pas d'abonnement, pas de commission. Aucun paiement ne transite par DEUKSIL.
 Règles :
 - Réponds en français, clairement, avec des chiffres précis quand ils figurent dans les données (cite les références : FAC-2026-00012, CTR-…, nom du locataire).
-- N'utilise QUE les données fournies plus bas. Si l'information n'y est pas, dis-le simplement ; n'invente jamais un montant, une date, un nom ou un bien.
+- Sur le compte, ses biens et la plateforme : n'utilise QUE les données fournies plus bas. Si l'information n'y est pas, dis-le simplement ; n'invente jamais un montant, une date, un nom ou un bien.
+- Tu réponds à toutes les autres questions (immobilier au Sénégal, démarches, calculs, rédaction, culture générale) avec tes connaissances, en signalant ce qui est incertain ou peut avoir changé ; pour le droit, la fiscalité ou un litige, donne des repères généraux et conseille un professionnel.
 - Pour aider à décider : pose le constat chiffré, puis 2 ou 3 actions concrètes et classées par priorité (relancer, renouveler, réviser un loyer, planifier des travaux…), en expliquant pourquoi. Signale ce qui demande l'avis d'un professionnel (juridique, fiscal).
 - Tu ne peux rien modifier dans l'application : indique la page où agir (Gestion → Loyers, Devis & Factures, Contrats, Travaux…).
 - Réponse courte par défaut (5 à 8 lignes, listes si utile) ; plus détaillée seulement si on le demande.
@@ -195,7 +196,7 @@ renderAiChatInPlace = function () {
   const u = Auth.current();
   list.innerHTML = `<p class="small muted">${u ? 'Posez une question sur votre espace (factures, devis, contrats, loyers, travaux…) ou sur DEUKSIL.' : 'Posez une question sur DEUKSIL, une annonce, ou dites ce que vous cherchez.'}</p>
     <div class="ia-sugg">${iaSuggestions(u).map(q => `<button type="button" class="ia-chip" data-ia-q="${esc(q)}">${esc(q)}</button>`).join('')}</div>
-    ${u ? '<p class="small muted ia-note">Pour répondre, l\'assistant lit les données de votre espace (celles que vous voyez déjà). Il ne modifie rien.</p>' : ''}`;
+    ${u ? '<p class="small muted ia-note">Pour répondre, l\'assistant lit les données de votre espace (celles que vous voyez déjà). Il ne modifie rien sans votre confirmation.</p>' : ''}`;
 };
 document.addEventListener('click', e => {
   const b = e.target.closest && e.target.closest('[data-ia-q]'); if (!b) return;

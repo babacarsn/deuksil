@@ -164,7 +164,7 @@ route(/^\/client\/profile$|^\/owner\/profile$/, () => {
       </form>
       <div class="stack" style="gap:14px">
         <div class="card"><h3>Compte</h3>
-          <div class="row-between small"><span>Type</span><b>${{client:'Client', owner:'Propriétaire', agency:'Agence'}[u.role]}</b></div>
+          <div class="row-between small"><span>Type</span><b>${{client:'Client', tenant:'Client', owner:'Propriétaire', agency:'Agence', admin:'Administration'}[u.role] || u.role}</b></div>
           <div class="row-between small"><span>Statut</span>${badge(u.status, u.status === 'actif' ? 'ok' : 'warn')}</div>
           <div class="row-between small"><span>Inscription</span><b>${dateFr(u.createdAt)}</b></div></div>
         <div class="card"><h3>Mes paiements</h3>

@@ -7,6 +7,7 @@
 #   supabase db push          # applique les migrations au projet lié
 #   supabase functions deploy gerer-acces
 #   supabase functions deploy assistant-ia --no-verify-jwt   (secret : GEMINI_API_KEY)
+#   supabase functions deploy nettoyer-fichiers --no-verify-jwt   (secret : DEUKSIL_CLE_NETTOYAGE)
 # Les réglages [auth] ci-dessous s'appliquent au local ; sur le projet hébergé,
 # les reporter dans le tableau de bord (README_SUPABASE.md §3) ou via
 # « supabase config push » si votre version de la CLI le propose.
@@ -95,4 +96,10 @@ verify_jwt = true
 # serveur (supabase secrets set GEMINI_API_KEY=…) ; limiter DEUKSIL_ORIGINES au
 # domaine du site et surveiller le quota Gemini (README_SUPABASE.md §11).
 [functions.assistant-ia]
+verify_jwt = false
+
+# Nettoyage des fichiers devenus inutiles (photos retirées, biens supprimés, dépôts
+# jamais enregistrés). Appelée par la planification avec l'en-tête x-deuksil-cle
+# (secret DEUKSIL_CLE_NETTOYAGE) : pas de jeton utilisateur, d'où verify_jwt = false.
+[functions.nettoyer-fichiers]
 verify_jwt = false

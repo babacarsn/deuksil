@@ -164,7 +164,7 @@ async function envoyer(o) {
       // la base attribue le numéro définitif (PREFIXE-AAAA-NNNNN) : on reprend le sien
       const {data, error} = await SB.from(o.table).insert(ligne).select(o.table === 'billing_payments' ? 'ref, rec' : 'ref').maybeSingle(); if (error) throw error;
       const m = data && lireMem(o.k).find(x => x.id === o.id);
-      if (m && (m.ref !== data.ref || (data.rec && m.rec !== data.rec))) { m.ref = data.ref; if (data.rec) m.rec = data.rec; delete MEM_JSON[o.k]; if (typeof render === 'function' && DB.pret) render(); }
+      if (m && (m.ref !== data.ref || (data.rec && m.rec !== data.rec))) { m.ref = data.ref; if (data.rec) m.rec = data.rec; ecrireMem(o.k, lireMem(o.k).slice()); if (typeof render === 'function' && DB.pret) render(); }
       return;
     }
     const {error} = await SB.from(o.table).insert(ligne); if (error) throw error;
@@ -196,7 +196,10 @@ function dataUrlVersBlob(d) {
 const nomPropre = n => String(n || 'fichier').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\w.-]+/g, '-').slice(-80);
 async function deposer(bucket, chemin, dataUrl) {
   const blob = dataUrlVersBlob(dataUrl);
-  const {error} = await SB.storage.from(bucket).upload(chemin, blob, {contentType: blob.type, upsert: true});
+  // photos / avatars : noms uniques, jamais de remplacement (un remplacement exige une lecture
+  // SELECT que ces compartiments publics n'ouvrent pas) ; documents : chemins parfois réutilisés.
+  const unique = bucket !== 'documents';
+  const {error} = await SB.storage.from(bucket).upload(chemin, blob, {contentType: blob.type, upsert: !unique, ...(unique ? {cacheControl: '31536000'} : {})});
   if (error) { error.code = error.code || '42501'; throw error; }
   return bucket === 'documents' ? 'sb://documents/' + chemin : SB.storage.from(bucket).getPublicUrl(chemin).data.publicUrl;
 }
@@ -205,11 +208,11 @@ async function preparerFichiers(table, obj, k) {
   const o = {...obj};
   if (table === 'properties' && Array.isArray(o.photos) && o.photos.some(estDataUrl)) {
     o.photos = await Promise.all(o.photos.map((p, i) => estDataUrl(p) ? deposer('photos', `${o.ownerId}/${o.id}/${uid()}.jpg`, p) : p));
-    const m = lireMem(k).find(x => x.id === o.id); if (m) { m.photos = o.photos; delete MEM_JSON[k]; }
+    const m = lireMem(k).find(x => x.id === o.id); if (m) { m.photos = o.photos; ecrireMem(k, lireMem(k).slice()); }   // nouveau tableau : les caches (published) voient le changement
   }
   if (table === 'profiles' && estDataUrl(o.avatarPhoto)) {
     o.avatarPhoto = await deposer('avatars', `${o.id}/${uid()}.jpg`, o.avatarPhoto);
-    const m = lireMem(k).find(x => x.id === o.id); if (m) { m.avatarPhoto = o.avatarPhoto; delete MEM_JSON[k]; }
+    const m = lireMem(k).find(x => x.id === o.id); if (m) { m.avatarPhoto = o.avatarPhoto; ecrireMem(k, lireMem(k).slice()); }
   }
   if (table === 'documents' && estDataUrl(obj.dataUrl)) {
     o.storagePath = (await deposer('documents', `${o.ownerId}/${o.id}/${nomPropre(o.name)}`, obj.dataUrl)).replace('sb://documents/', '');
@@ -330,21 +333,26 @@ async function envoyerMessages(k, conv, anciens) {
 }
 
 /* --- Lecture ------------------------------------------------------------------------ */
+/* Lecture complète d'une table par pages de 1 000 lignes. La première page dit s'il en
+   faut d'autres ; les suivantes sont demandées 4 par 4 en parallèle (au lieu d'une à la
+   fois). L'identifiant sert de second critère de tri : deux lignes de même date ne
+   peuvent ni manquer ni apparaître deux fois d'une page à l'autre. */
 async function toutesLesLignes(table, requete) {
-  const PAGE = 1000, out = [];
-  for (let de = 0; ; de += PAGE) {
-    const {data, error} = await requete().range(de, de + PAGE - 1);
-    if (error) throw error;
-    out.push(...data); if (data.length < PAGE) break;
+  const PAGE = 1000, PARALLELE = 4;
+  const lire = de => requete().order('id').range(de, de + PAGE - 1).then(({data, error}) => { if (error) throw error; return data || []; });
+  const out = await lire(0);
+  if (out.length < PAGE) return out;
+  for (let de = PAGE; ; de += PAGE * PARALLELE) {
+    const lots = await Promise.all(Array.from({length: PARALLELE}, (_, i) => lire(de + i * PAGE)));
+    for (const l of lots) { out.push(...l); if (l.length < PAGE) return out; }
   }
-  return out;
 }
 const COLONNES_LUES = t => Object.keys(DEUKSIL_SCHEMA[t] || {}).map(c => c === 'end' || c === 'from' ? `"${c}"` : c).join(',');
 const LECTEURS = {
   async profiles(k) {
     const [moi, annu] = await Promise.all([
       moiId() ? toutesLesLignes('profiles', () => SB.from('profiles').select(COLONNES_LUES('profiles')).order('created_at')) : [],
-      SB.rpc('annuaire').then(r => { if (r.error) throw r.error; return r.data || []; })
+      toutesLesLignes('annuaire', () => SB.rpc('annuaire'))   // > 1 000 propriétaires et agences : plusieurs pages
     ]);
     const vus = new Set(moi.map(x => x.id));
     return [...moi, ...annu.filter(x => !vus.has(x.id))].map(r => versInterface('profiles', r));
@@ -394,6 +402,45 @@ async function lireTable(table) {
   return L.map(r => versInterface(table, r));
 }
 
+/* --- Catalogue progressif ------------------------------------------------------------
+   Un visiteur (ou un client, un locataire) n'attend plus le téléchargement de TOUTES les
+   annonces publiées pour voir l'accueil : les 48 plus récentes (et la fiche demandée par
+   un lien direct) suffisent au premier écran ; le reste arrive ensuite, en arrière-plan.
+   Les écrans qui ont besoin du catalogue entier (recherche, carte, favoris, espaces…)
+   attendent qu'il soit complet : DB.pret reste faux pour eux jusque-là (voir DB.pret). */
+const PREMIERES_ANNONCES = 48;
+const CATALOGUE_PROGRESSIF = role => !role || role === 'client' || role === 'tenant';
+/* Écrans justes avec les premières annonces : accueil, fiche ouverte par son lien, pages
+   de compte, d'aide et pages légales. */
+const ECRANS_SANS_CATALOGUE = /^#?\/?(|property\/[\w-]+|login|register.*|verifier-email.*|mot-de-passe.*|reinitialiser.*|legal\/.*|contact.*|aide.*|a-propos.*)$/;
+const sansCatalogue = () => ECRANS_SANS_CATALOGUE.test((location.hash || '#/').split('?')[0]);
+async function premieresAnnonces() {
+  const cols = COLONNES_LUES('properties'), lien = ((location.hash || '').match(/^#\/property\/([0-9a-f-]{36})/i) || [])[1];
+  const [r1, r2] = await Promise.all([
+    SB.from('properties').select(cols).order('created_at', {ascending: false}).order('id').limit(PREMIERES_ANNONCES),
+    lien ? SB.from('properties').select(cols).eq('id', lien).maybeSingle() : Promise.resolve({data: null})]);
+  if (r1.error) throw r1.error;
+  const L = (r1.data || []).slice().reverse();   // même ordre que la lecture complète (plus anciennes d'abord)
+  if (r2.data && !L.some(x => x.id === r2.data.id)) L.unshift(r2.data);
+  return L.map(r => versInterface('properties', r));
+}
+let generationCatalogue = 0;
+function completerCatalogue() {
+  const g = ++generationCatalogue;
+  DB.catalogueComplet = false;
+  DB.catalogue = lireTable('properties').then(v => {
+    if (g !== generationCatalogue) return;   // un rechargement plus récent a pris le relais
+    // les écritures faites entre-temps (compteur de vues…) restent celles de la mémoire
+    const locales = new Map(lireMem(DB.K.properties).map(x => [x.id, x]));
+    ecrireMem(DB.K.properties, v.map(x => FILE.some(o => o.table === 'properties' && o.id === x.id) && locales.get(x.id) ? locales.get(x.id) : x));
+  }, e => console.warn('[DEUKSIL] catalogue', e)).then(() => {
+    if (g !== generationCatalogue) return;
+    DB.catalogueComplet = true;
+    window.dispatchEvent(new Event('deuksil:catalogue'));
+    if (typeof render === 'function' && DB.pret && !sansCatalogue()) render();
+  });
+}
+
 /* --- API historique ------------------------------------------------------------------ */
 const DB = {
   K: {
@@ -402,7 +449,12 @@ const DB = {
     agents: 'deuksil_agents', searches: 'deuksil_searches', activity: 'deuksil_activity', documents: 'deuksil_documents',
     session: 'deuksil_current_user', seed: 'deuksil_seed_version', contacts: 'deuksil_contacts', demandesLien: 'deuksil_demandes_lien'
   },
-  pret: false, session: null, erreurs: [], lastWriteOk: true,
+  /* Prêt = données chargées. Tant que le catalogue progressif n'est pas complet, seuls les
+     écrans qui n'en ont pas besoin sont prêts (les autres attendent, voir plus haut). */
+  _pret: false, catalogueComplet: true, catalogue: Promise.resolve(),
+  get pret() { return this._pret && (this.catalogueComplet !== false || sansCatalogue()); },
+  set pret(v) { this._pret = !!v; },
+  session: null, erreurs: [], lastWriteOk: true,
   getData(k) {
     if (!(k in MEM_JSON)) MEM_JSON[k] = JSON.stringify(lireMem(k));
     return JSON.parse(MEM_JSON[k]);
@@ -444,8 +496,11 @@ const DB = {
     ecrireMem(k, lireMem(k).filter(x => x.id !== id));
     const table = cleTable(k); if (table) planifier({op: 'delete', k, table, id, avant});
   },
-  findItem(k, fn) { const L = lireMem(k), f = typeof fn === 'function' ? fn : x => x.id === fn; const r = L.find(x => f(JSON.parse(JSON.stringify(x)))); return r ? JSON.parse(JSON.stringify(r)) : null; },
-  filterItems(k, fn) { return this.getData(k).filter(fn); },
+  /* Le prédicat lit la mémoire telle quelle ; seul le résultat est recopié (l'appelant peut
+     le modifier sans toucher la mémoire). Avant : chaque élément était recopié AVANT d'être
+     testé — 93 % du temps de chargement de l'accueil avec 24 000 annonces (profil CPU). */
+  findItem(k, fn) { const L = lireMem(k), r = typeof fn === 'function' ? L.find(x => fn(x)) : L.find(x => x.id === fn); return r ? JSON.parse(JSON.stringify(r)) : null; },
+  filterItems(k, fn) { return JSON.parse(JSON.stringify(lireMem(k).filter((x, i, t) => fn(x, i, t)))); },
   reset() { Object.keys(MEM).forEach(k => ecrireMem(k, [])); },
 
   /* Identifiant de l'espace (compte titulaire) de l'utilisateur connecté. */
@@ -463,9 +518,11 @@ const DB = {
     await DB.attendre();
     const {data} = await SB.auth.getSession(); DB.session = data.session;
     const role = DB.session ? ((await SB.from('profiles').select('role').eq('id', DB.session.user.id).maybeSingle()).data || {}).role : null;
-    const tables = tablesALire(role);
+    const tables = tablesALire(role), progressif = CATALOGUE_PROGRESSIF(role);
+    if (!progressif) { generationCatalogue++; DB.catalogueComplet = true; }
+    const lire = t => t === 'properties' && progressif ? premieresAnnonces() : lireTable(t);
     const [resultats] = await Promise.all([
-      Promise.all(tables.map(t => lireTable(t).then(v => [t, v], e => { console.warn('[DEUKSIL] lecture', t, e); return [t, null]; }))),
+      Promise.all(tables.map(t => lire(t).then(v => [t, v], e => { console.warn('[DEUKSIL] lecture', t, e); return [t, null]; }))),
       SB.rpc('chiffres_publics').then(r => { if (!r.error && r.data && r.data[0]) DB.chiffres = r.data[0]; }, () => {})
     ]);
     Object.entries(TABLE_DE).forEach(([nom, t]) => { if (!tables.includes(t)) ecrireMem(DB.K[nom], []); });
@@ -475,6 +532,7 @@ const DB = {
       else if (!MEM[DB.K[nom]]) ecrireMem(DB.K[nom], []);
     }
     DB.chargeLe = Date.now();
+    if (progressif) completerCatalogue();
     return resultats.filter(r => !r[1]).map(r => r[0]);   // tables illisibles (erreur réseau)
   }
 };

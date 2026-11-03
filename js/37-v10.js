@@ -19,8 +19,9 @@ EXP.audit = u => [['Date', 'Utilisateur', 'Action', 'Détail', 'Changements'], g
 const AUD_COLL = {docs:'Document', contracts:'Contrat', leases:'Bail', rents:'Loyer', expenses:'Dépense', properties:'Bien', owners:'Propriétaire'}, _upd = DB.updateItem.bind(DB);
 DB.updateItem = function (k, id, patch) {
   const coll = Object.keys(DB.K).find(n => DB.K[n] === k), before = AUD_COLL[coll] ? DB.findItem(k, id) : null, after = _upd(k, id, patch), u = Auth.current();
-  if (before && after && u) { const ch = Object.keys(patch).filter(f => !['updatedAt', 'views', 'contacts'].includes(f) && JSON.stringify(before[f]) !== JSON.stringify(after[f])).map(f => ({f, o: fv(before[f]), n: fv(after[f])}));
-    if (ch.length) DB.addItem(DB.K.audit, {ownerId: after.ownerId || u.id, who: u.firstName, action: 'Modification', detail: `${AUD_COLL[coll]} ${after.ref || after.title || after.name || ''}`.trim(), changes: ch}); }
+  // Le journal appartient à l'espace : une modification faite dans un autre espace (modération de l'administration…) n'y est pas écrite (la base la refuserait).
+  if (before && after && u && (!after.ownerId || after.ownerId === u.id)) { const ch = Object.keys(patch).filter(f => !['updatedAt', 'views', 'contacts'].includes(f) && JSON.stringify(before[f]) !== JSON.stringify(after[f])).map(f => ({f, o: fv(before[f]), n: fv(after[f])}));
+    if (ch.length) DB.addItem(DB.K.audit, {ownerId: u.id, who: u.firstName, action: 'Modification', detail: `${AUD_COLL[coll]} ${after.ref || after.title || after.name || ''}`.trim(), changes: ch}); }
   return after;
 };
 vueGestion(['audit', 'owners', 'tmsgs'], function (u, tab) {

@@ -83,7 +83,10 @@ retoucheGestion(['expenses', 'leases', 'rents', 'contracts', 'providers', 'tenan
 function tkAdvance(u, t, cost) {
   const s = tkSt(t), next = TKS[TKS.indexOf(s) + 1]; if (!next) return; const patch = {status: next};
   if (next === 'terminée') { if (cost !== null && cost >= 0) patch.cost = cost; const c = patch.cost ?? t.cost;
-    if (c > 0 && !t.expenseId) { const x = DB.addItem(DB.K.expenses, {ownerId: u.id, ref: nref('DEP', 'expenses'), propertyId: t.propertyId, supplier: provName(t.providerId) || (t.enRegie ? 'Réalisé par le propriétaire' : 'Prestataire'), cat: 'maintenance', amount: c, method: 'Espèces', date: now().slice(0, 10), ticketId: t.id}); patch.expenseId = x.id; } }
+    // La dépense liée demande le droit « finances » : sans lui, l'intervention est clôturée avec son coût, et la dépense reste à saisir.
+    const finances = !u.member || memberCan(u, 'finances');
+    if (c > 0 && !t.expenseId && !finances) toast('Intervention clôturée. La dépense correspondante sera à saisir par une personne ayant accès aux finances.', 'warn');
+    if (c > 0 && !t.expenseId && finances) { const x = DB.addItem(DB.K.expenses, {ownerId: u.id, ref: nref('DEP', 'expenses'), propertyId: t.propertyId, supplier: provName(t.providerId) || (t.enRegie ? 'Réalisé par le propriétaire' : 'Prestataire'), cat: 'maintenance', amount: c, method: 'Espèces', date: now().slice(0, 10), ticketId: t.id}); patch.expenseId = x.id; } }
   DB.updateItem(DB.K.tickets, t.id, patch); audit('Maintenance ' + t.ref, TICKET_LABEL[next]); if (t.tenantId) notify(t.tenantId, `Votre demande ${t.ref} est maintenant : ${TICKET_LABEL[next]}.`, '#/tenant/tickets'); render();
 }
 document.addEventListener('click', async e => {
