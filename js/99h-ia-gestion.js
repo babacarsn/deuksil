@@ -134,21 +134,20 @@ function iaContexte(u) {
 /* --- Consignes ------------------------------------------------------------- */
 aiChatRules = function () {
   const u = Auth.current();
-  return `Tu es l'assistant DEUKSIL, une plateforme immobilière et un logiciel de gestion locative au Sénégal (location, vente, terrains).
-Tu aides à trouver un logement, à utiliser la plateforme, et, pour un utilisateur connecté, à suivre et piloter sa gestion : biens, baux, loyers, impayés, devis, proformas, factures, avoirs, paiements, dépenses, contrats, travaux, ventes, honoraires, reversements aux propriétaires.
+  return `Tu es l'assistant DEUKSIL, une plateforme immobilière au Sénégal (location, vente, terrains) avec un espace de gestion locative.
+Tu aides à trouver un logement, à comprendre une annonce, à utiliser la plateforme (inscription, publication d'un bien, visites, messagerie, baux, loyers, devis et factures) et à répondre aux questions sur l'immobilier au Sénégal.
 La plateforme est gratuite : pas de frais, pas d'abonnement, pas de commission. Aucun paiement ne transite par DEUKSIL.
 Règles :
-- Réponds en français, clairement, avec des chiffres précis quand ils figurent dans les données (cite les références : FAC-2026-00012, CTR-…, nom du locataire).
-- Sur le compte, ses biens et la plateforme : n'utilise QUE les données fournies plus bas. Si l'information n'y est pas, dis-le simplement ; n'invente jamais un montant, une date, un nom ou un bien.
-- Tu réponds à toutes les autres questions (immobilier au Sénégal, démarches, calculs, rédaction, culture générale) avec tes connaissances, en signalant ce qui est incertain ou peut avoir changé ; pour le droit, la fiscalité ou un litige, donne des repères généraux et conseille un professionnel.
-- Pour aider à décider : pose le constat chiffré, puis 2 ou 3 actions concrètes et classées par priorité (relancer, renouveler, réviser un loyer, planifier des travaux…), en expliquant pourquoi. Signale ce qui demande l'avis d'un professionnel (juridique, fiscal).
-- Tu ne peux rien modifier dans l'application : indique la page où agir (Gestion → Loyers, Devis & Factures, Contrats, Travaux…).
-- Réponse courte par défaut (5 à 8 lignes, listes si utile) ; plus détaillée seulement si on le demande.
+- Réponds toujours en français, clairement, de façon chaleureuse. Réponse courte par défaut (4 à 8 lignes, listes si utile) ; plus détaillée seulement si on le demande.
+- Tu n'as PAS accès aux données du compte de l'utilisateur (biens, loyers, factures, contrats…) : si on te les demande, explique simplement où les consulter dans l'application (Gestion → Loyers, Devis & Factures, Contrats, Travaux…).
+- N'invente jamais un prix, un bien, un montant ou une date propres à DEUKSIL ; reste général et renvoie vers la recherche d'annonces si besoin.
+- Tu réponds aussi aux autres questions (immobilier au Sénégal, démarches, calculs, rédaction, culture générale) avec tes connaissances, en signalant ce qui est incertain ou peut avoir changé ; pour le droit, la fiscalité ou un litige, donne des repères généraux et conseille un professionnel (notaire, avocat, impôts).
+- Tu ne peux rien modifier dans l'application.
 Utilisateur actuel : ${iaRole(u)}.`;
 };
 
 /* --- Envoi d'une question -------------------------------------------------- */
-let iaGestionCoupee = false;               // le serveur a refusé le mode gestion : questions générales seulement
+let iaGestionCoupee = true;               // le serveur a refusé le mode gestion : questions générales seulement
 async function iaAppeler(corps) {
   const {data, error} = await SB.functions.invoke('assistant-ia', {body: corps});
   if (!error && data && typeof data.text === 'string') return data.text;
@@ -184,19 +183,17 @@ sendAiChat = async function (text) {
 /* --- Questions toutes prêtes selon le profil ------------------------------ */
 function iaSuggestions(u) {
   if (!u) return ['Comment publier un bien ?', 'DEUKSIL est-il payant ?', 'Comment se passe une visite ?'];
-  if (u.role === 'admin') return ['Combien d\'annonces attendent une validation ?', 'Résume l\'activité de la plateforme', 'Que dois-je traiter en priorité ?'];
-  if (u.role === 'tenant') return ['Ai-je des loyers en retard ?', 'Quand finit mon bail ?', 'Où sont mes quittances ?'];
-  if (u.role === 'client') return ['Où en sont mes demandes de visite ?', 'Aide-moi à préciser ma recherche', 'Comment contacter un propriétaire ?'];
-  return ['Quelles factures sont impayées ?', 'Résume mon mois : loyers, factures, dépenses', 'Quels contrats ou baux arrivent à échéance ?', 'Que dois-je faire en priorité cette semaine ?'];
+  if (u.role === 'tenant') return ['Comment payer mon loyer ?', 'Comment signaler un problème au bailleur ?', 'Où trouver mes quittances ?'];
+  if (u.role === 'client') return ['Comment demander une visite ?', 'Aide-moi à préciser ma recherche', 'Comment contacter un propriétaire ?'];
+  return ['Comment publier un bien ?', 'Comment créer un bail ?', 'Comment faire une facture ?', 'Quels documents pour louer un bien au Sénégal ?'];
 }
 const _renderAiChatInPlace = renderAiChatInPlace;
 renderAiChatInPlace = function () {
   _renderAiChatInPlace();
   const list = $('#ai-chat-list'); if (!list || aiChatHistory.length) return;
   const u = Auth.current();
-  list.innerHTML = `<p class="small muted">${u ? 'Posez une question sur votre espace (factures, devis, contrats, loyers, travaux…) ou sur DEUKSIL.' : 'Posez une question sur DEUKSIL, une annonce, ou dites ce que vous cherchez.'}</p>
-    <div class="ia-sugg">${iaSuggestions(u).map(q => `<button type="button" class="ia-chip" data-ia-q="${esc(q)}">${esc(q)}</button>`).join('')}</div>
-    ${u ? '<p class="small muted ia-note">Pour répondre, l\'assistant lit les données de votre espace (celles que vous voyez déjà). Il ne modifie rien sans votre confirmation.</p>' : ''}`;
+  list.innerHTML = `<p class="small muted">${'Posez une question sur DEUKSIL, l\'immobilier au Sénégal, ou dites ce que vous cherchez.'}</p>
+    <div class="ia-sugg">${iaSuggestions(u).map(q => `<button type="button" class="ia-chip" data-ia-q="${esc(q)}">${esc(q)}</button>`).join('')}</div>`;
 };
 document.addEventListener('click', e => {
   const b = e.target.closest && e.target.closest('[data-ia-q]'); if (!b) return;
@@ -212,7 +209,7 @@ document.head.insertAdjacentHTML('beforeend', '<style>.ia-sugg{display:flex;flex
   const _logout = Auth.logout;
   Auth.logout = async function (...a) {
     try { localStorage.removeItem(aiCle()); } catch (e) {}
-    aiChatHistory = []; iaGestionCoupee = false;
+    aiChatHistory = []; iaGestionCoupee = true;
     return _logout.apply(this, a);
   };
 })();

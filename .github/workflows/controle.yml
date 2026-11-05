@@ -1,0 +1,22 @@
+# Contrôle automatique de chaque Pull Request vers main.
+name: Controle
+on:
+  pull_request:
+    branches: [main]
+jobs:
+  verifier:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Empreintes des fichiers du site à jour (sinon lancer node outils/versionner-site.js)
+        run: node outils/versionner-site.js --verifier
+      - name: Syntaxe des fichiers JavaScript
+        run: for f in js/*.js; do node --check "$f" || exit 1; done
+      - name: Aucune clé secrète dans le code
+        run: |
+          if git grep -lE "AIza[0-9A-Za-z_-]{20,}|sb_secret_|eyJhbGciOi[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}" -- . ':!.github' ':!README_DEPLOIEMENT.md'; then
+            echo "Clé secrète détectée dans les fichiers ci-dessus"; exit 1
+          fi

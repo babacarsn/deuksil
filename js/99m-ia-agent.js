@@ -400,7 +400,7 @@
      --------------------------------------------------------------------------- */
   const PAS_MAX = 8;
   let contenus = [];        // historique au format Gemini (parties du modèle renvoyées telles quelles)
-  let agentCoupe = false;   // le serveur n'offre pas le mode agent : ancien fonctionnement
+  let agentCoupe = true;    // le serveur n'offre pas le mode agent : ancien fonctionnement
   const attentes = new Map(); // action proposée → résolution (confirmer / annuler)
 
   async function appelerServeur(corps) {
@@ -501,7 +501,7 @@
   /* Nouvelle conversation, déconnexion : l'historique agent repart de zéro. */
   document.addEventListener('click', e => { if (e.target.closest && e.target.closest('[data-iap="nouveau"]')) arreter(); }, true);
   const _logout = Auth.logout;
-  Auth.logout = async function (...a) { arreter(); agentCoupe = false; return _logout.apply(this, a); };
+  Auth.logout = async function (...a) { arreter(); agentCoupe = true; return _logout.apply(this, a); };
 
   /* ---------------------------------------------------------------------------
      5. Affichage : traces d'outils et cartes de confirmation

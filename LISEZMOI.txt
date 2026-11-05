@@ -1,0 +1,27 @@
+DEUKSIL — Plateforme immobilière et logiciel de gestion (Sénégal)
+Version Supabase · octobre 2026
+
+-----------------------------------------------------------------
+MISE EN SERVICE
+-----------------------------------------------------------------
+L'application a besoin d'un projet Supabase (comptes, base de
+données, fichiers). Suivre README_SUPABASE.md :
+  1. créer le projet, appliquer les migrations (supabase/migrations) ;
+  2. déployer les fonctions « gerer-acces » et « assistant-ia » ;
+  3. renseigner js/00-config.js (adresse + clé publique « anon ») ;
+  4. publier les fichiers sur un hébergement HTTPS.
+
+Ouvrir index.html sans configuration affiche « Configuration
+incomplète » : il n'y a plus ni données ni comptes de démonstration.
+
+-----------------------------------------------------------------
+SÉCURITÉ
+-----------------------------------------------------------------
+  Ne jamais placer la clé service_role dans js/ ni dans Git.
+  Les droits sont vérifiés par la base (RLS), pas par le navigateur.
+  Détails : docs/AUDIT_SECURITE.md.
+
+-----------------------------------------------------------------
+TESTS
+-----------------------------------------------------------------
+Uniquement sur une base de TEST : README_SUPABASE.md, section 14.

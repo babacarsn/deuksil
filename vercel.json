@@ -1,4 +1,6 @@
 {
+  "buildCommand": "rm -rf public && mkdir public && cp -r index.html css js img manifest.webmanifest sw.js vercel.json public/",
+  "outputDirectory": "public",
   "headers": [
     {
       "source": "/js/(.*)",
