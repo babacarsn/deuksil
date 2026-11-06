@@ -229,18 +229,36 @@ function openAiChat() {
   renderAiChatInPlace();
   setTimeout(() => $('#ai-chat-text')?.focus(), 30);
 }
+let aiRec = null;
 function startVoiceInput(inputEl, micBtn) {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) { toast("La dictée vocale n'est pas prise en charge par ce navigateur.", 'warn'); return; }
+  if (!SR) { toast("La dictée vocale n'est pas disponible sur ce navigateur. Utilisez Chrome ou Edge.", 'warn'); return; }
+  if (aiRec) { try { aiRec.stop(); } catch (e) {} return; }
+  const base = inputEl ? inputEl.value : '';
+  const sep = base && !/\s$/.test(base) ? ' ' : '';
   try {
     const rec = new SR();
-    rec.lang = 'fr-FR'; rec.interimResults = false; rec.maxAlternatives = 1;
+    aiRec = rec;
+    rec.lang = 'fr-FR'; rec.interimResults = true; rec.continuous = false; rec.maxAlternatives = 1;
     micBtn.classList.add('listening');
-    rec.onresult = e => { if (inputEl) inputEl.value = e.results[0][0].transcript; };
-    rec.onerror = () => toast('Dictée vocale interrompue.', 'bad');
-    rec.onend = () => micBtn.classList.remove('listening');
+    rec.onresult = e => {
+      let t = '';
+      for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript;
+      if (inputEl) { inputEl.value = base + sep + t; inputEl.dispatchEvent(new Event('input', {bubbles: true})); }
+    };
+    rec.onerror = e => {
+      const refus = "Micro refusé : autorisez-le avec le cadenas à côté de l'adresse du site, puis réessayez.";
+      const m = {
+        'not-allowed': refus, 'service-not-allowed': refus,
+        'no-speech': "Je n'ai rien entendu. Parlez juste après avoir appuyé sur le micro.",
+        'audio-capture': 'Aucun micro détecté sur cet appareil.',
+        'network': "La dictée a besoin d'une connexion internet."
+      }[e.error];
+      if (e.error !== 'aborted') toast(m || 'Dictée vocale interrompue (' + e.error + ').', 'bad');
+    };
+    rec.onend = () => { micBtn.classList.remove('listening'); aiRec = null; if (inputEl) inputEl.focus(); };
     rec.start();
-  } catch (e) { toast('Impossible de démarrer la dictée vocale.', 'bad'); }
+  } catch (e) { aiRec = null; micBtn.classList.remove('listening'); toast('Impossible de démarrer la dictée vocale.', 'bad'); }
 }
 
 /* L'application n'a qu'un thème, clair. */
