@@ -9,7 +9,9 @@ const fs = require('fs'), path = require('path'), crypto = require('crypto');
 const RACINE = path.resolve(process.argv.find(a => a.startsWith('--racine='))?.slice(9) || path.join(__dirname, '..'));
 const verifier = process.argv.includes('--verifier');
 const index = path.join(RACINE, 'index.html');
-const empreinte = f => crypto.createHash('sha256').update(fs.readFileSync(path.join(RACINE, f))).digest('hex').slice(0, 10);
+// Empreinte calculée sur le texte avec des fins de ligne Unix : Windows (CRLF) et Linux/Vercel (LF)
+// donnent la même valeur, sinon chaque poste « périme » toutes les empreintes des autres.
+const empreinte = f => crypto.createHash('sha256').update(fs.readFileSync(path.join(RACINE, f), 'utf8').replace(/\r\n/g, '\n')).digest('hex').slice(0, 10);
 
 let html = fs.readFileSync(index, 'utf8'), perimes = [], n = 0;
 html = html.replace(/(src|href)="((?:js|css)\/[^"?#]+\.(?:js|css))(?:\?v=([0-9a-f]+))?"/g, (m, attr, f, v) => {
@@ -20,7 +22,7 @@ html = html.replace(/(src|href)="((?:js|css)\/[^"?#]+\.(?:js|css))(?:\?v=([0-9a-
 });
 // Le service worker change de version quand l'ensemble change : il est alors réinstallé.
 const sw = path.join(RACINE, 'sw.js');
-const ensemble = crypto.createHash('sha256').update(html).digest('hex').slice(0, 10);
+const ensemble = crypto.createHash('sha256').update(html.replace(/\r\n/g, '\n')).digest('hex').slice(0, 10);
 let swTexte = fs.readFileSync(sw, 'utf8');
 const swNouveau = swTexte.replace(/const VERSION = '[^']*';/, `const VERSION = 'deuksil-sw-${ensemble}';`);
 

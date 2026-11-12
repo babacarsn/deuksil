@@ -15,6 +15,8 @@ jobs:
         run: node outils/versionner-site.js --verifier
       - name: Syntaxe des fichiers JavaScript
         run: for f in js/*.js; do node --check "$f" || exit 1; done
+      - name: Menus et formulaire CNI (banc d'essai)
+        run: node tests/test-menus-cni.js
       - name: Aucune clé secrète dans le code
         run: |
           if git grep -lE "AIza[0-9A-Za-z_-]{20,}|sb_secret_|eyJhbGciOi[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}" -- . ':!.github' ':!README_DEPLOIEMENT.md'; then

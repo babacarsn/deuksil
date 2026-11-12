@@ -1,5 +1,14 @@
 # DEUKSIL — Historique des modifications
 
+## 11 novembre 2026 — Correctifs de la recette (UAT Agence)
+
+- **CNI** : au clic sur « Publier », si la CNI du compte manque, un formulaire s'ouvre (13 chiffres, refus clair d'un numéro invalide ou déjà utilisé) ; la publication reprend toute seule après enregistrement. Un agent est informé que le titulaire du compte doit la renseigner. La CNI se renseigne aussi dans **Paramètres de l'agence** (nouvelle carte, avec lien vers « Mes informations » : NINEA, RCCM). Avant : le message renvoyait vers « Mon profil », page absente du menu de l'agence. Règle côté base inchangée (migration 20261028000100).
+- **Menus** : tout ce que la barre du bas montre sur téléphone figure aussi dans le menu latéral de l'ordinateur (Publier un bien, Gestion, Messages…), pour propriétaire, agence, agent, gestionnaire et mandant. Calcul automatique à partir des barres (`js/99n-menus-cni.js`).
+- **Agence** : « Visites » et « Équipe » reviennent dans le menu latéral (création des agents introuvable).
+- **CNI affichée mais refusée par le serveur** : le site se resynchronise (le formulaire de CNI réapparaît) et affiche la vraie raison d'un refus (CNI déjà utilisée, écriture refusée…). Diagnostic : `docs/CORRECTIFS_UAT_AGENCE.md` §5.
+- Aucune migration SQL. Voir `docs/CORRECTIFS_UAT_AGENCE.md` pour les contrôles Supabase.
+- Outil de versionnage : empreintes indépendantes des fins de ligne (Windows/Linux) ; `.gitattributes` impose LF dans le dépôt.
+
 ## 3 novembre 2026 — Assistant qui consulte et agit ; mode clair seul
 
 ### Assistant de l'espace (docs/ASSISTANT_IA.md)
