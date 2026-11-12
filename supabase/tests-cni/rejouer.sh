@@ -13,3 +13,4 @@ for f in $(ls "$M"/*.sql | sort); do
     | psql -h /tmp -p 54399 -U postgres -d dk -q -v ON_ERROR_STOP=1 >/dev/null && echo "migration OK  $(basename "$f")"
 done
 bash "$D/scenarios.sh"
+bash "$D/relations.sh"

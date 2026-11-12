@@ -1,5 +1,15 @@
 # DEUKSIL — Historique des modifications
 
+## 12 novembre 2026 (2) — Menu ordinateur, comptes et relations
+
+Détail : `docs/COMPTES_ET_RELATIONS.md`.
+- **Menu latéral (ordinateur seulement)** : reprend tout ce que la barre du bas du téléphone affiche, lu dans la barre elle-même. Le téléphone (barre du bas et tiroir) n'est plus modifié.
+- **Mandant** : sa fiche est enfin reliée à son compte à l'ouverture de l'accès (il voyait un espace vide). Migration `20261112000200_relations_comptes.sql`, avec réparation des mandants existants.
+- **Identifiants** : fenêtre « Accès créé : identifiants à transmettre » (adresse, identifiant, mot de passe provisoire ; Copier, WhatsApp, e-mail) pour agent, gestionnaire, mandant, locataire.
+- **Équipe** : bouton « Nouveau mot de passe » pour les agents et gestionnaires qui ne se sont pas encore connectés.
+- Message clair si la fonction serveur `gerer-acces` n'est pas déployée ou est injoignable.
+- Tests : 34 scénarios de relations en base (agent, gestionnaire, mandant, locataire, isolement entre agences, sécurité de la liaison), 43 cas côté site.
+
 ## 12 novembre 2026 — Audit de la CNI (tous les comptes)
 
 Détail : `docs/AUDIT_CNI.md`.

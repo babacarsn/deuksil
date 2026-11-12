@@ -1,11 +1,10 @@
 /* ==========================================================================
    MODULE : menus-cni.js — correctifs issus de la recette (UAT Agence)
 
-   1. Parité barre du bas / menu latéral : tout ce que la barre du bas montre
-      sur téléphone (Publier, Gestion, Messages…) figure aussi dans le menu
-      latéral de l'ordinateur. Calculé à partir des barres elles-mêmes
-      (BARRE_PRO, BARRE_AGENT, BARRE_MANDANT, PILL) : si une barre change,
-      le menu suit sans autre modification.
+   1. Parité barre du bas / menu latéral : sur ORDINATEUR, le menu latéral
+      reprend tout ce que la barre du bas du téléphone affiche (Publier,
+      Gestion, Messages…), lu dans la barre elle-même. Le téléphone (barre du
+      bas et tiroir) reste tel quel.
    2. Agence : « Visites » et « Équipe » reviennent dans le menu latéral
       (l'agence ne trouvait pas où créer ses agents).
    3. CNI : au moment de publier, si la CNI du compte manque, un formulaire
@@ -15,59 +14,92 @@
    Ce module se charge en dernier : il complète, il ne remplace rien.
    ========================================================================== */
 
-/* --- 1. Parité barre du bas / menu latéral ------------------------------- */
+/* --- 1. Parité barre du bas / menu latéral (ORDINATEUR SEULEMENT) ----------
+   Sur ordinateur, le menu latéral reprend tout ce que la barre du bas du téléphone
+   affiche (Publier, Gestion, Messages…). La liste des entrées est LUE dans la barre
+   elle-même (tabBarHtml) : si une barre change, le menu suit tout seul.
+   Le téléphone n'est pas touché : MENUS (qui alimente aussi le tiroir du téléphone)
+   n'est pas modifié ; on complète seulement le HTML du menu latéral, que la feuille
+   de style cache sous 760 px. */
 const ENTREES_BARRE = {
   '#/owner/property/new': ['Publier un bien', 'plus'],
   '#/manage': ['Gestion', 'briefcase']
 };
 const ENTREE_PARAMETRES = /\/(owner\/profile|agent\/profil|agency\/settings|client\/profile|admin\/settings)$/;
 
+/* Icônes connues des barres (BARRE_PRO, BARRE_AGENT, BARRE_MANDANT, PILL). */
 function entreesBarre(u) {
   if (!u) return [];
   if (typeof estAgent === 'function' && estAgent(u)) return BARRE_AGENT;
   if (typeof estMandant === 'function' && estMandant(u)) return BARRE_MANDANT;
-  if (!u.member && BARRE_PRO[u.role]) return BARRE_PRO[u.role];
-  const c = PILL[u.role];                 /* seul le bouton central est affiché sans condition */
+  if (!u.member && typeof BARRE_PRO !== 'undefined' && BARRE_PRO[u.role]) return BARRE_PRO[u.role];
+  const c = typeof PILL !== 'undefined' && PILL[u.role];
   return c && c[1] ? [c[1]] : [];
 }
-
-function completerMenu(m, u) {
-  if (!Array.isArray(m) || !u) return m;
-  let out = null;
-  const liste = () => out || m;
-  const copie = () => out || (out = m.slice());
-  const finDeMenu = () => { const i = liste().findIndex(x => ENTREE_PARAMETRES.test(x[0])); return i < 0 ? liste().length : i; };
-  const absent = h => !liste().some(x => x[0] === h);
-
-  entreesBarre(u).forEach(([h, libelle, ico]) => {
-    if (!absent(h)) return;
-    const [lib, ic] = ENTREES_BARRE[h] || [libelle, ico];
-    if (!lib) return;
-    const L = copie();
-    const biens = h === '#/owner/property/new' ? L.findIndex(x => /\/properties$/.test(x[0])) : -1;
-    L.splice(biens >= 0 ? biens + 1 : finDeMenu(), 0, [h, lib, ic || 'grid']);
-  });
-
-  /* Agence (titulaire) : Visites puis Équipe, juste après Clients. */
-  if (u.role === 'agency' && !u.member) {
-    [['#/agency/visits', 'Visites', 'calendar', '#/agency/clients'], ['#/agency/agents', 'Équipe', 'briefcase', '#/agency/visits']].forEach(([h, lib, ic, apres]) => {
-      if (!absent(h)) return;
-      const L = copie(), i = L.findIndex(x => x[0] === apres);
-      L.splice(i >= 0 ? i + 1 : finDeMenu(), 0, [h, lib, ic]);
-    });
+/* Ce que la barre du bas affiche réellement pour ce compte : [{h, lib, ic}]. */
+function entreesAfficheesBarre(u, path) {
+  let html = '';
+  try { html = tabBarHtml(u, path) || ''; } catch (e) { return []; }
+  const connues = {}; entreesBarre(u).forEach(([h, l, ic]) => { connues[h] = ic; });
+  const out = [], vus = new Set();
+  for (const m of html.matchAll(/<a\b[^>]*\bhref="([^"]+)"[^>]*>([\s\S]*?)<\/a>/g)) {
+    const h = m[1]; if (vus.has(h) || !h.startsWith('#/')) continue; vus.add(h);
+    const span = (m[2].match(/<span>([\s\S]*?)<\/span>/) || [])[1] || '';
+    const [lib, ic] = ENTREES_BARRE[h] || [span.replace(/<[^>]+>/g, '').trim(), connues[h] || 'grid'];
+    if (lib) out.push({h, lib, ic: ic || 'grid'});
   }
-  return out || m;
+  return out;
 }
+function completerMenuLateral(html, u) {
+  const a = html.indexOf('<aside class="side"'); if (a < 0) return html;
+  const n0 = html.indexOf('<nav>', a), n1 = n0 < 0 ? -1 : html.indexOf('</nav>', n0);
+  if (n0 < 0 || n1 < 0) return html;
+  let nav = html.slice(n0 + 5, n1);
+  const presents = new Set([...nav.matchAll(/href="([^"]+)"/g)].map(m => m[1]));
+  const path = (location.hash || '#/').replace('#', '').split('?')[0];
+  const manquants = entreesAfficheesBarre(u, path).filter(x => !presents.has(x.h)
+    && (!u.member || typeof memberCan !== 'function' || memberCan(u, permFor(x.h.slice(1)))));
+  if (!manquants.length) return html;
+  const liens = [...nav.matchAll(/<a\b[^>]*href="([^"]+)"[\s\S]*?<\/a>/g)].map(m => ({h: m[1], fin: m.index + m[0].length, debut: m.index}));
+  const lien = x => `<a href="${x.h}" class="${path === x.h.slice(1) ? 'active' : ''}" data-barre="1"><span class="ico">${icon(x.ic, 17)}</span>${x.lib}</a>`;
+  /* Positions : « Publier un bien » juste après les biens ; le reste avant Paramètres. */
+  const inserts = manquants.map(x => {
+    const biens = x.h === '#/owner/property/new' ? liens.find(l => /\/properties$/.test(l.h)) : null;
+    const param = liens.find(l => ENTREE_PARAMETRES.test(l.h));
+    return {pos: biens ? biens.fin : (param ? param.debut : nav.length), html: lien(x)};
+  }).sort((p, q) => q.pos - p.pos);
+  for (const i of inserts) nav = nav.slice(0, i.pos) + i.html + nav.slice(i.pos);
+  return html.slice(0, n0 + 5) + nav + html.slice(n1);
+}
+(() => {
+  const _shellAppBarre = shellApp;
+  shellApp = function (u, content) {
+    const html = _shellAppBarre(u, content);
+    try { return u ? completerMenuLateral(html, u) : html; } catch (e) { return html; }
+  };
+})();
 
-['owner', 'agency'].forEach(role => {
-  const d = Object.getOwnPropertyDescriptor(MENUS_RAW, role); if (!d) return;
+/* Agence (titulaire) : « Visites » et « Équipe » avaient été retirés du menu ; on ne
+   trouvait plus où créer les agents. Ils reviennent, sur ordinateur comme sur téléphone. */
+(() => {
+  const d = Object.getOwnPropertyDescriptor(MENUS_RAW, 'agency'); if (!d) return;
   const lire = () => d.get ? d.get.call(MENUS_RAW) : d.value;
-  Object.defineProperty(MENUS_RAW, role, {
+  Object.defineProperty(MENUS_RAW, 'agency', {
     configurable: true, enumerable: true,
-    get() { let u = null; try { u = Auth.current(); } catch (e) {} return completerMenu(lire(), u); },
+    get() {
+      const m = lire(); let u = null; try { u = Auth.current(); } catch (e) {}
+      if (!Array.isArray(m) || !u || u.role !== 'agency' || u.member) return m;
+      const L = m.slice();
+      [['#/agency/visits', 'Visites', 'calendar', '#/agency/clients'], ['#/agency/agents', 'Équipe', 'briefcase', '#/agency/visits']].forEach(([h, lib, ic, apres]) => {
+        if (L.some(x => x[0] === h)) return;
+        const i = L.findIndex(x => x[0] === apres), fin = L.findIndex(x => ENTREE_PARAMETRES.test(x[0]));
+        L.splice(i >= 0 ? i + 1 : (fin < 0 ? L.length : fin), 0, [h, lib, ic]);
+      });
+      return L;
+    },
     set(v) { if (d.set) d.set.call(MENUS_RAW, v); else d.value = v; }
   });
-});
+})();
 
 /* --- 2. CNI : formulaire au moment de publier ---------------------------- */
 let repriseApresCni = null;
@@ -245,3 +277,96 @@ document.addEventListener('submit', e => {
        <div class="row" style="justify-content:flex-end"><button class="btn" data-action="close-modal">Compris</button></div>`);
   }, 0);
 }, true);
+
+/* --- 6. Comptes ouverts par un tiers : identifiants clairs, fluides ----------
+   Agent, gestionnaire, propriétaire mandant, locataire : chacun reçoit SES
+   identifiants dès la création (e-mail + mot de passe provisoire, changé à la
+   première connexion). Ici : fiche d'identifiants prête à transmettre, mot de
+   passe provisoire régénérable pour l'équipe, message clair si la fonction
+   serveur manque, fiche du mandant actualisée après l'ouverture de son accès. */
+const ROLE_ACCES = c => !c ? 'utilisateur' : c.role === 'agent' ? 'agent' : c.role === 'manager' ? 'gestionnaire'
+  : c.role === 'tenant' ? 'locataire' : (c.ownerRec || c.mandantOf) ? 'propriétaire' : c.role === 'agency' ? 'agence' : 'utilisateur';
+const adresseConnexion = () => ((typeof DEUKSIL_CONFIG !== 'undefined' && DEUKSIL_CONFIG.siteUrl) || (typeof location !== 'undefined' ? location.origin : '')).replace(/\/+$/, '') + '/#/login';
+function numeroWhatsApp(tel) {
+  const d = String(tel || '').replace(/\D/g, '');
+  if (d.length === 9) return '221' + d;
+  if (d.length === 12 && d.startsWith('221')) return d;
+  return '';
+}
+function messageIdentifiants(c, mdp) {
+  const prenom = (c.firstName || '').trim();
+  return `Bonjour${prenom ? ' ' + prenom : ''}, votre accès DEUKSIL (${ROLE_ACCES(c)}) est prêt.\n`
+    + `Adresse : ${adresseConnexion()}\nIdentifiant : ${c.email || ''}\nMot de passe provisoire : ${mdp}\n`
+    + `À la première connexion, vous choisirez votre propre mot de passe.`;
+}
+let identifiantsCourants = null;
+montrerMotDePasseProvisoire = function (compte, mdp) {
+  const c = compte || {}, nom = `${c.firstName || ''} ${c.lastName || ''}`.trim() || 'Cette personne';
+  const texte = messageIdentifiants(c, mdp), wa = numeroWhatsApp(c.phone);
+  const afficher = () => {
+    if (document.querySelector('.modal')) return setTimeout(afficher, 600);
+    identifiantsCourants = texte;
+    modal('Accès créé : identifiants à transmettre', `<p style="margin-top:0">${esc(nom)} (${esc(ROLE_ACCES(c))}) peut se connecter dès maintenant :</p>
+      <div class="fin-l"><span>Adresse</span><b>${esc(adresseConnexion())}</b></div>
+      <div class="fin-l"><span>Identifiant</span><b>${esc(c.email || '')}</b></div>
+      <div class="fin-l"><span>Mot de passe provisoire</span><b class="mdp-prov" style="font-family:monospace;font-size:1.1rem">${esc(mdp)}</b></div>
+      <p class="small muted" style="margin:12px 0 0">Il ne sera plus affiché : DEUKSIL ne le conserve pas. À sa première connexion, ${esc(nom.split(' ')[0])} choisira son propre mot de passe. Perdu ? Un nouveau mot de passe provisoire se génère depuis la liste (bouton « Nouveau mot de passe »).</p>
+      <div class="row" style="gap:10px;margin-top:14px;flex-wrap:wrap">
+        <button class="btn ghost" type="button" data-action="ident-copier">${icon('file', 15)} Copier les identifiants</button>
+        <a class="btn ghost" target="_blank" rel="noopener" href="https://wa.me/${wa}?text=${encodeURIComponent(texte)}">${icon('message', 15)} Envoyer par WhatsApp</a>
+        ${c.email ? `<a class="btn ghost" href="mailto:${encodeURIComponent(c.email)}?subject=${encodeURIComponent('Votre accès DEUKSIL')}&body=${encodeURIComponent(texte)}">${icon('message', 15)} Envoyer par e-mail</a>` : ''}
+        <button class="btn" data-action="close-modal">J'ai transmis les identifiants</button></div>`);
+  };
+  afficher();
+};
+document.addEventListener('click', e => {
+  const b = e.target.closest && e.target.closest('[data-action="ident-copier"]'); if (!b || !identifiantsCourants) return;
+  e.preventDefault();
+  const fini = () => toast('Identifiants copiés : collez-les dans un SMS ou un message.');
+  try { navigator.clipboard.writeText(identifiantsCourants).then(fini, () => toast('Copie impossible : sélectionnez le texte à la main.', 'warn')); }
+  catch (x) { toast('Copie impossible : sélectionnez le texte à la main.', 'warn'); }
+});
+
+/* Fonction serveur absente ou injoignable : un message que l'on comprend. */
+(() => {
+  if (typeof fonction !== 'function') return;
+  const _fonction = fonction;
+  fonction = async function (nom, corps) {
+    try { return await _fonction(nom, corps); }
+    catch (e) {
+      const m = String((e && e.message) || '');
+      let clair = '';
+      if (/Requested function was not found|NOT_FOUND|404/i.test(m)) clair = `La fonction serveur « ${nom} » n'est pas déployée sur Supabase : création d'accès impossible pour l'instant. Prévenez la personne qui gère Supabase (supabase functions deploy ${nom}).`;
+      else if (/Failed to send a request|Failed to fetch|NetworkError|Load failed/i.test(m)) clair = `La fonction serveur « ${nom} » est injoignable (connexion, ou adresse du site non autorisée dans DEUKSIL_ORIGINES). Réessayez ; si cela continue, prévenez la personne qui gère Supabase.`;
+      if (!clair) throw e;
+      const err = new Error(clair); err.code = 'P0001'; throw err;
+    }
+  };
+})();
+
+/* Mandant : après l'ouverture de son accès, la fiche affiche « Compte rattaché ». */
+(() => {
+  if (typeof compteMandant !== 'function') return;
+  const _compteMandant = compteMandant;
+  compteMandant = async function (...a) {
+    const r = await _compteMandant(...a);
+    if (r) { try { await DB.relire(DB.K.owners); } catch (x) {} render(); }
+    return r;
+  };
+})();
+
+/* Équipe (agents, gestionnaires) : « Nouveau mot de passe » tant que la personne
+   n'a pas choisi le sien (existait déjà pour les mandants et les locataires). */
+function boutonsMdpEquipe() {
+  let u = null; try { u = Auth.current(); } catch (e) {}
+  if (!u || u.member || !['owner', 'agency'].includes(u.role)) return;
+  document.querySelectorAll('#app [data-action="g4-toggle"][data-id]:not([data-mdp]), #app [data-action="ag-attribuer"][data-id]:not([data-mdp])').forEach(b => {
+    b.dataset.mdp = '1';
+    const m = DB.findItem(DB.K.users, b.dataset.id);
+    if (!m || m.parentId !== u.id || !m.mdpProvisoire) return;
+    b.insertAdjacentHTML('afterend', `<button class="btn ghost sm" data-action="mdp-regenerer" data-id="${m.id}" title="${esc(m.firstName || '')} ne s'est pas encore connecté(e) : générer un nouveau mot de passe provisoire">${icon('key', 14)} Nouveau mot de passe</button>`);
+  });
+}
+if (typeof MutationObserver === 'function' && document.body) {
+  new MutationObserver(() => requestAnimationFrame(() => { try { boutonsMdpEquipe(); } catch (e) {} })).observe(document.body, {childList: true, subtree: true});
+}

@@ -27,19 +27,40 @@ function monde(u, opts = {}) {
   const BARRE_MANDANT = [['#/owner/dashboard','Accueil','grid'],['#/owner/properties','Biens confiés','home'],['#/mandant/releves','Relevés','money'],['#/coffre','Documents','file'],['#/owner/messages','Messages','message']];
   const PILL = {owner: [['#/owner/dashboard','#/owner/properties'],['#/owner/property/new','Publier','plus'],['#/manage','#/owner/messages']], agency: [['#/agency/dashboard','#/agency/properties'],['#/owner/property/new','Publier','plus'],['#/manage','#/agency/messages']]};
   const Auth = {current: () => U};
-  const esc = s => String(s), badge = t => '[' + t + ']', icon = () => '';
+  const location = {hash: '#/owner/dashboard'};
+  const permFor = h => /property|properties/.test(h) ? 'biens' : /manage/.test(h) ? 'gestion' : /messages/.test(h) ? 'messages' : null;
+  const memberCan = (u, p) => !p || (u.member.perms || []).includes(p);
+  const MENUS = new Proxy(MENUS_RAW, {get(t, k) { const m = t[k]; const u = Auth.current(); return u && u.member && Array.isArray(m) ? m.filter(([h]) => memberCan(u, permFor(h.slice(1)))) : m; }});
+  /* Barre du bas : même aiguillage que l'application (91-agent, 94 mandant, 75 BARRE_PRO, 38 PILL). */
+  function tabBarHtml(u) {
+    const lien = ([h, l, ic, fab]) => fab ? '<a class="tab-fab" href="' + h + '"><i>svg</i><span>' + l + '</span></a>' : '<a href="' + h + '" class="tab-item">svg<span>' + l + '</span></a>';
+    if (estAgent(u)) return '<nav class="tabbar">' + BARRE_AGENT.filter(([h]) => memberCan(u, permFor(h.slice(1)))).map(lien).join('') + '</nav>';
+    if (estMandant(u)) return '<nav class="tabbar">' + BARRE_MANDANT.map(lien).join('') + '</nav>';
+    if (!u.member && BARRE_PRO[u.role]) return '<nav class="tabbar">' + BARRE_PRO[u.role].map(lien).join('') + '</nav>';
+    const menu = MENUS[u.role], cfg = PILL[u.role], has = h => menu.find(m => m[0] === h);
+    const item = h => { const m = has(h); return m ? lien([h, m[1], m[2]]) : ''; };
+    return '<nav class="tabbar">' + cfg[0].map(item).join('') + lien([cfg[1][0], cfg[1][1], cfg[1][2], 'fab']) + cfg[2].map(item).join('') + '</nav>';
+  }
+  let shellApp = function (u, content) {
+    return '<div class="app"><aside class="side" id="sidebar"><a class="logo"></a><nav>' + MENUS[u.role].map(([h, l, i]) => '<a href="' + h + '" class=""><span class="ico">' + i + '</span>' + l + '</a>').join('') + '</nav><div class="side-user"></div></aside><div class="main">' + content + '</div></div>';
+  };
+  const esc = s => String(s), badge = t => '[' + t + ']', icon = (n) => '<svg data-i="' + n + '"></svg>';
   const render = () => journal.push('render'), toast = (m, t) => journal.push('toast:' + m);
   let modaleOuverte = null;
-  const modal = (t) => { modaleOuverte = t; journal.push('modal:' + t); }, closeModal = () => { modaleOuverte = null; journal.push('closeModal'); };
+  let dernierHtml = '';
+  const modal = (t, h) => { modaleOuverte = t; dernierHtml = h || ''; journal.push('modal:' + t); }, closeModal = () => { modaleOuverte = null; journal.push('closeModal'); };
+  const DEUKSIL_CONFIG = {siteUrl: 'https://deuksil.vercel.app'};
+  let fonction = async function (nom) { const e = ${JSON.stringify(opts.erreurFonction || '')}; if (e) throw new Error(e); return {ok: 1}; };
+  let compteMandant = async function () { return {id: 'mandant1'}; };
   const H = {};
-  const document = {addEventListener: (t, f) => { (H[t] = H[t] || []).push(f); }, getElementById: () => null};
+  const document = {addEventListener: (t, f) => { (H[t] = H[t] || []).push(f); }, getElementById: () => null, querySelector: () => null, querySelectorAll: () => []};
   const routes = [{re: /^\\/agency\\/settings$/, fn: () => '<div class="stack" style="gap:18px"><form class="card" data-action="save-agency-settings"></form></div>'}];
   let signalerErreur = function (e, c) { DB.erreurs.push({t: Date.now(), contexte: c, code: e && e.code, message: e && e.message}); journal.push('ORIGINAL:' + c + ':' + (e && e.message)); };   /* comme js/03-storage.js */
   let messageErreur = e => e.message || 'erreur';
   const notify = (id, t) => journal.push('notify:' + id);
   const ownsProperty = (id, u) => !!DB.biens[id];
   /* Serveur simulé : cniServeur = la CNI est-elle acceptée ? publication = refusée si pas de CNI côté serveur. */
-  const DB = {K: {users: 'users', properties: 'properties'}, erreurs: [], relu: 0, biens: {p1: {id: 'p1', title: 'Villa', listingStatus: 'brouillon'}},
+  const DB = {K: {users: 'users', properties: 'properties', owners: 'owners'}, erreurs: [], relu: 0, biens: {p1: {id: 'p1', title: 'Villa', listingStatus: 'brouillon'}},
     serveurCni: ${JSON.stringify(opts.serveurCni === undefined ? null : opts.serveurCni)}, cniAccepte: ${opts.cniAccepte === false ? 'false' : 'true'}, codeRefus: ${JSON.stringify(opts.codeRefus || '23505')},
     file: [],
     updateItem(k, id, p) {
@@ -48,7 +69,7 @@ function monde(u, opts = {}) {
     },
     findItem(k, id) { return this.biens[id]; },
     async attendre() { while (this.file.length) this.file.shift()(); },
-    async relire(k) { this.relu++; if (k === 'users') U.cni = this.serveurCni || undefined; }};
+    async relire(k) { this.relu++; this.relus = (this.relus || []).concat(k); if (k === 'users') U.cni = this.serveurCni || undefined; }};
   /* Chaîne de publication réelle : 27 (vérifie la CNI) <- 63 (récapitulatif, puis ferme les fenêtres). */
   let cniManquantePourPublier = function () { return false; };
   let saveProperty = function (form, id, intent) { journal.push('saveProperty27:' + intent + ':' + (cniManquantePourPublier(Auth.current()) ? 'BLOQUE' : 'OK')); };
@@ -58,7 +79,7 @@ function monde(u, opts = {}) {
     if (${opts.confirmerRecap === false ? 'false' : 'true'}) { _27(form, id, 'publish'); closeModal(); }
   }; })();
   ${src}
-  this.exp = {MENUS_RAW, entreesBarre, H, routes, DB, flush, journal, modale: () => modaleOuverte,
+  this.exp = {montrer: () => montrerMotDePasseProvisoire, fonction: () => fonction, compteMandant: () => compteMandant, html: () => dernierHtml, MENUS_RAW, MENUS, shellApp: () => shellApp, tabBarHtml, entreesBarre, H, routes, DB, flush, journal, modale: () => modaleOuverte,
     saveProperty: () => saveProperty, cni: () => cniManquantePourPublier, signaler: () => signalerErreur};
   `;
   vm.createContext(ctx);
@@ -73,15 +94,30 @@ async function soumettre(x, f) { for (const h of x.H.submit) await h({target: {c
 function cliquerPublier(x, id) { let stop = false; const ev = {target: {closest: s => (s.includes('publish') ? {dataset: {id}} : null)}, preventDefault() {}, stopImmediatePropagation() { stop = true; }}; for (const h of x.H.click) { h(ev); if (stop) break; } return stop; }
 
 (async () => {
-  /* ---------- 1. Menus : la barre du bas figure dans le menu latéral ---------- */
-  for (const [nom, role, u] of [['Propriétaire (titulaire)', 'owner', {role: 'owner'}], ['Propriétaire (gestionnaire membre)', 'owner', {role: 'owner', member: {role: 'manager'}}],
-    ['Propriétaire sous mandat', 'owner', {role: 'owner', ownerRec: 'r1'}], ['Agence (titulaire)', 'agency', {role: 'agency'}], ['Agent', 'agency', {role: 'agency', member: {role: 'agent'}}]]) {
-    const x = monde(u), menu = x.MENUS_RAW[role].map(m => m[0]), barre = x.entreesBarre(u).map(b => b[0]);
-    const manque = barre.filter(h => !menu.includes(h)), doublons = menu.filter((h, i) => menu.indexOf(h) !== i);
-    ok(!manque.length && !doublons.length, 'Menu ' + nom + ' contient toute la barre du bas', 'manque : ' + manque + ' doublons : ' + doublons);
+  /* ---------- 1. Menus : sur ordinateur, le menu latéral contient toute la barre du bas ; le téléphone ne change pas ---------- */
+  const COMPTES = [['Propriétaire (titulaire)', 'owner', {role: 'owner'}], ['Propriétaire (gestionnaire, droits biens+messages)', 'owner', {role: 'owner', member: {role: 'manager', perms: ['biens', 'messages']}}],
+    ['Propriétaire (gestionnaire, sans droit biens)', 'owner', {role: 'owner', member: {role: 'manager', perms: ['messages']}}],
+    ['Propriétaire sous mandat', 'owner', {role: 'owner', ownerRec: 'r1'}], ['Agence (titulaire)', 'agency', {role: 'agency'}], ['Agent', 'agency', {role: 'agency', member: {role: 'agent', perms: ['biens', 'visites', 'messages']}}]];
+  const AVANT = {owner: ['#/owner/dashboard','#/owner/properties','#/manage/leases','#/manage/rents','#/manage/deals','#/manage/tickets','#/manage/finance','#/coffre','#/owner/messages','#/owner/profile']};
+  for (const [nom, role, u] of COMPTES) {
+    const x = monde(u);
+    const html = x.shellApp()(u, 'contenu'), nav = html.slice(html.indexOf('<nav>'), html.indexOf('</nav>'));
+    const lateral = [...nav.matchAll(/href="([^"]+)"/g)].map(m => m[1]);
+    const barre = [...x.tabBarHtml(u).matchAll(/href="([^"]+)"/g)].map(m => m[1]);
+    const manque = barre.filter(h => !lateral.includes(h) && !(u.member && !(u.member.perms || []).includes('biens') && /property/.test(h)));
+    const doublons = lateral.filter((h, i) => lateral.indexOf(h) !== i);
+    ok(!manque.length && !doublons.length, 'Ordinateur - ' + nom + ' : la barre du bas est dans le menu latéral', 'manque : ' + manque + ' | doublons : ' + doublons + ' | menu : ' + lateral.join(' '));
+    /* Téléphone : la liste du tiroir (MENUS) ne reçoit pas les entrées de la barre. */
+    const tiroir = x.MENUS[role].map(m => m[0]);
+    ok(!tiroir.includes('#/owner/property/new') && (role !== 'owner' || u.member || u.ownerRec || JSON.stringify(tiroir) === JSON.stringify(AVANT.owner)), 'Téléphone - ' + nom + ' : tiroir inchangé (pas de doublon de la barre)', tiroir.join(' '));
   }
-  { const x = monde({role: 'agency'}), m = x.MENUS_RAW.agency.map(e => e[1]);
-    ok(m.includes('Équipe') && m.includes('Visites') && m.includes('Publier un bien'), 'Agence : Équipe, Visites et Publier un bien dans le menu'); }
+  { const u = {role: 'owner', member: {role: 'manager', perms: ['messages']}}, x = monde(u), html = x.shellApp()(u, '');
+    ok(!/href="#\/owner\/property\/new"[^>]*data-barre/.test(html), 'Ordinateur - gestionnaire sans droit « biens » : pas de « Publier un bien » ajouté'); }
+  { const u = {role: 'owner'}, x = monde(u), html = x.shellApp()(u, ''), nav = html.slice(html.indexOf('<nav>'), html.indexOf('</nav>'));
+    const ordre = [...nav.matchAll(/href="([^"]+)"/g)].map(m => m[1]);
+    ok(ordre.indexOf('#/owner/property/new') === ordre.indexOf('#/owner/properties') + 1 && ordre.indexOf('#/manage') === ordre.indexOf('#/owner/profile') - 1 && /Publier un bien/.test(nav) && /data-i="plus"/.test(nav), 'Ordinateur - « Publier un bien » après Mes biens, « Gestion » avant Paramètres, avec icônes', ordre.join(' ')); }
+  { const x = monde({role: 'agency'}), m = x.MENUS.agency.map(e => e[1]);
+    ok(m.includes('Équipe') && m.includes('Visites') && !m.includes('Publier un bien'), 'Agence : Équipe et Visites dans le menu (ordinateur et téléphone), sans doublon de la barre'); }
 
   /* ---------- 2. Formulaire du bien : la CNI est demandée AVANT le récapitulatif ---------- */
   { const x = monde({role: 'owner'}), form = {isConnected: true};
@@ -147,6 +183,28 @@ function cliquerPublier(x, id) { let stop = false; const ev = {target: {closest:
     for (const h of x.H.submit) await h({target: {closest: s => f.closest(s)}, preventDefault() {}, stopImmediatePropagation() {}});
     await x.flush();
     ok(x.modale() === null, 'Mon profil : CNI acceptée -> aucune fenêtre'); }
+
+  /* ---------- 6. Comptes ouverts par un tiers ---------- */
+  { const x = monde({role: 'agency'});
+    x.montrer()({firstName: 'Moussa', lastName: 'Ndiaye', email: 'moussa@agence.sn', phone: '77 123 45 67', role: 'agent'}, 'Abcd-Efgh-Ij7');
+    const h = x.html();
+    ok(x.modale() === 'Accès créé : identifiants à transmettre' && h.includes('moussa@agence.sn') && h.includes('Abcd-Efgh-Ij7') && h.includes('https://deuksil.vercel.app/#/login')
+      && h.includes('https://wa.me/221771234567?text=') && h.includes('mailto:moussa%40agence.sn') && h.includes('(agent)'), 'Agent créé : fiche d\'identifiants (adresse, identifiant, mot de passe, WhatsApp, e-mail)', h.slice(0, 300)); }
+  { const x = monde({role: 'agency'});
+    x.montrer()({firstName: 'Awa', email: 'awa@mail.sn', phone: '', ownerRec: 'f1', mandantOf: 'a1', role: 'owner'}, 'Zz12-Yy34-Xx7');
+    ok(x.html().includes('(propriétaire)') && x.html().includes('https://wa.me/?text='), 'Mandant créé : rôle « propriétaire », WhatsApp sans numéro'); }
+  { const x = monde({role: 'owner'}); x.montrer()({firstName: 'Fall', email: 'fall@mail.sn', role: 'tenant', phone: '221781112233'}, 'Pp99-Qq88-Rr7');
+    ok(x.html().includes('(locataire)') && x.html().includes('wa.me/221781112233'), 'Locataire créé : rôle « locataire », numéro déjà au format 221'); }
+  for (const [nom, err, motif] of [['non déployée', 'Requested function was not found', /n'est pas déployée.*supabase functions deploy gerer-acces/], ['injoignable', 'Failed to send a request to the Edge Function', /injoignable.*DEUKSIL_ORIGINES/]]) {
+    const x = monde({role: 'agency'}, {erreurFonction: err}); let m = '';
+    try { await x.fonction()('gerer-acces', {}); } catch (e) { m = e.message + '|' + e.code; }
+    ok(motif.test(m) && /\|P0001$/.test(m), 'Fonction serveur ' + nom + ' : message clair', m);
+  }
+  { const x = monde({role: 'agency'}, {erreurFonction: 'Un compte existe déjà avec cette adresse e-mail.'}); let m = '';
+    try { await x.fonction()('gerer-acces', {}); } catch (e) { m = e.message; }
+    ok(m === 'Un compte existe déjà avec cette adresse e-mail.', 'Refus métier de la fonction (e-mail déjà utilisé) : message d\'origine conservé', m); }
+  { const x = monde({role: 'agency'}); const r = await x.compteMandant()({id: 'f1'}, 'a@b.sn');
+    ok(r && JSON.stringify(x.DB.relus) === '["owners"]' && x.journal.includes('render'), 'Mandant : fiche relue et écran actualisé après l\'ouverture de l\'accès', JSON.stringify(x.DB.relus)); }
 
   console.log(echecs ? `\n${echecs} ÉCHEC(S)` : '\nTOUS LES TESTS PASSENT');
   process.exit(echecs ? 1 : 0);
