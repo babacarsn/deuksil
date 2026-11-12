@@ -17,6 +17,7 @@ Sans configuration, l'application affiche « Configuration incomplète » : elle
 
 | | |
 |---|---|
+| [README_CONFIGURATION_SUPABASE.md](README_CONFIGURATION_SUPABASE.md) | **Supabase : ce qu'il faut configurer pour les modifications des 11 et 12 novembre (migrations, gerer-acces, adresse de test, contrôles)** |
 | [README_DEPLOIEMENT.md](README_DEPLOIEMENT.md) | **déploiement, collaboration à deux et toutes les vérifications (à lire en premier pour l'équipe)** |
 | [README_SUPABASE_GEMINI.md](README_SUPABASE_GEMINI.md) | **mise en ligne : réglages Supabase et Gemini, assistant IA, premier administrateur** |
 | [README_CONFIGURATION.md](README_CONFIGURATION.md) | **configuration complète de bout en bout : le seul fichier nécessaire** |

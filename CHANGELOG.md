@@ -5,6 +5,7 @@
 - Branche `test` : version à tester avant publication ; adresse Vercel stable https://deuksil-git-test-babacarsns-projects.vercel.app
 - Recette utilisateur mise à jour (`tests/uat/`) : 9 fichiers (dont un nouveau pour le propriétaire mandant) + `00_Comptes_de_test.xlsx` (comptes à créer, prérequis Supabase). 270 tests, chemins d'accès ordinateur et téléphone.
 - Menu ordinateur : les entrées de la barre du bas gardent l'ordre de la barre (Gestion puis Messages).
+- Recette rangée dans l'ordre de test, étape par étape (colonne « Étape »), et `README_CONFIGURATION_SUPABASE.md` : ce qu'il faut configurer dans Supabase pour les modifications des 11 et 12 novembre.
 
 ## 12 novembre 2026 (2) — Menu ordinateur, comptes et relations
 

@@ -4,9 +4,9 @@
 https://deuksil-git-test-babacarsns-projects.vercel.app
 
 ## Ordre
-1. **Personne Supabase** : faire les prérequis de `00_Comptes_de_test.xlsx` (déployer `gerer-acces` et `assistant-ia`, appliquer les migrations du 12 novembre, autoriser l'adresse de test).
+1. **Personne Supabase** : suivre `README_CONFIGURATION_SUPABASE.md` (à la racine du dépôt) : migrations du 12 novembre, `gerer-acces`, adresse de test autorisée.
 2. **Créer les comptes de test** dans l'ordre du fichier `00` : chacun son e-mail et sa CNI (13 chiffres, différente).
-3. **Tester** avec les fichiers `01` à `09` (un par type de compte), sur ordinateur ET téléphone. Chaque ligne indique où aller, quoi faire et le résultat attendu.
+3. **Tester** avec les fichiers `01` à `09` (un par type de compte), sur ordinateur ET téléphone, **dans l'ordre des numéros** : les tests sont rangés par étape (01, 02…) et certains préparent les suivants (la CNI avant de publier, le bail avant l'accès du locataire, l'agent créé avant sa connexion). Ordre conseillé des fichiers : 01 → 04 → 05 → 06 → 09 → 03 → 02 → 07 → 08.
 4. **Corrections** : l'équipe technique corrige sur la branche `test` (l'adresse de test se met à jour) et remplit la colonne « Réponse équipe technique ».
 5. **Publication** : quand l'onglet « Synthèse » de chaque fichier affiche « PRÊT », on fusionne `test` dans `main` (Pull Request) : le site en ligne est mis à jour.
 
