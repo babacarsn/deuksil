@@ -1,5 +1,16 @@
 # DEUKSIL — Historique des modifications
 
+## 12 novembre 2026 — Audit de la CNI (tous les comptes)
+
+Détail : `docs/AUDIT_CNI.md`.
+- **Doublon de CNI** (cause la plus fréquente de « CNI non renseignée alors qu'on l'a saisie ») : message clair « déjà utilisé par un autre compte », côté site et côté base ; fenêtre « CNI non enregistrée » après la réponse du serveur au lieu de « Profil mis à jour ».
+- **Formulaire du bien** : la CNI est demandée avant le récapitulatif « Publier cette annonce ? », qui refermait aussitôt le formulaire de CNI.
+- **Bouton Publier d'une carte** : succès annoncé seulement après confirmation du serveur.
+- Message d'échec d'enregistrement d'une annonce selon la vraie cause (plus de « vérifiez la connexion » à tort).
+- Formulaire d'équipe : la CNI d'un membre est sans effet sur la publication (précision affichée).
+- **Migration `20261112000100_cni_fiabilite.sql`** : message de refus juste (titulaire / membre, « Paramètres »), refus clair d'une CNI déjà utilisée, fonction `public.cni_espace_renseignee()`. Aucune suppression. Option désactivée : une CNI par type de compte.
+- Tests : 22 scénarios SQL (`supabase/tests-cni/`), 27 cas côté site (`tests/test-menus-cni.js`).
+
 ## 11 novembre 2026 — Correctifs de la recette (UAT Agence)
 
 - **CNI** : au clic sur « Publier », si la CNI du compte manque, un formulaire s'ouvre (13 chiffres, refus clair d'un numéro invalide ou déjà utilisé) ; la publication reprend toute seule après enregistrement. Un agent est informé que le titulaire du compte doit la renseigner. La CNI se renseigne aussi dans **Paramètres de l'agence** (nouvelle carte, avec lien vers « Mes informations » : NINEA, RCCM). Avant : le message renvoyait vers « Mon profil », page absente du menu de l'agence. Règle côté base inchangée (migration 20261028000100).

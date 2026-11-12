@@ -1,12 +1,16 @@
+/* Banc d'essai de js/99n-menus-cni.js (menus alignés sur la barre du bas, CNI).
+   Simule l'application autour du module : menus, barres, minuteries, mémoire des
+   biens et des comptes, réponses du serveur, récapitulatif de publication qui ferme
+   les fenêtres (js/63-publication.js). Usage : node tests/test-menus-cni.js */
 const vm = require('vm'), fs = require('fs');
-const src = fs.readFileSync((process.argv[2] || 'js/99n-menus-cni.js'), 'utf8');
+const src = fs.readFileSync(process.argv[2] || 'js/99n-menus-cni.js', 'utf8');
 
-function monde() {
-  const handlers = {submit: [], click: []};
-  const ctx = {console, setTimeout: (f) => { f(); return 0; }, FormData: class { constructor(f) { this.f = f; } get(n) { return this.f.valeurs[n]; } }};
-  ctx.U = null;
-  ctx.journal = [];
+function monde(u, opts = {}) {
+  const ctx = {console, U: u, journal: [], FormData: class { constructor(f) { this.f = f; } get(n) { return this.f.valeurs[n]; } }};
   const code = `
+  const minuteries = [];
+  const setTimeout = (f) => { minuteries.push(f); return minuteries.length; };
+  async function flush() { for (let i = 0; i < 50 && minuteries.length; i++) { const f = minuteries.shift(); await f(); } }
   const MENU_PRO = [['#/owner/dashboard','Tableau de bord','grid'],['#/owner/properties','Mes biens','home'],['#/manage/leases','Locataires','users'],['#/manage/rents','Loyers','money'],['#/manage/deals','Ventes','trendUp'],['#/manage/tickets','Travaux','settings'],['#/manage/finance','Finances','chart'],['#/coffre','Documents','file'],['#/owner/messages','Messages','message'],['#/owner/profile','Paramètres','user']];
   const MENU_OWNER_MEMBRE = [['#/owner/dashboard','Tableau de bord','grid'],['#/owner/properties','Mes biens','home'],['#/manage','Gestion','briefcase'],['#/owner/messages','Messages','message'],['#/owner/profile','Paramètres','user']];
   const MENU_MANDANT = [['#/owner/dashboard','Tableau de bord','grid'],['#/owner/properties','Mes biens confiés','home'],['#/mandant/releves','Mes relevés','money'],['#/coffre','Documents','file'],['#/owner/profile','Mon profil','user']];
@@ -23,108 +27,127 @@ function monde() {
   const BARRE_MANDANT = [['#/owner/dashboard','Accueil','grid'],['#/owner/properties','Biens confiés','home'],['#/mandant/releves','Relevés','money'],['#/coffre','Documents','file'],['#/owner/messages','Messages','message']];
   const PILL = {owner: [['#/owner/dashboard','#/owner/properties'],['#/owner/property/new','Publier','plus'],['#/manage','#/owner/messages']], agency: [['#/agency/dashboard','#/agency/properties'],['#/owner/property/new','Publier','plus'],['#/manage','#/agency/messages']]};
   const Auth = {current: () => U};
-  const esc = s => String(s), badge = (t) => '[' + t + ']', icon = () => '', render = () => journal.push('render'), toast = (m, t) => journal.push('toast:' + m);
-  const modal = (t, h) => journal.push('modal:' + t), closeModal = () => journal.push('closeModal');
-  const document = {addEventListener: (t, f) => { H[t] = H[t] || []; H[t].push(f); }, getElementById: () => null};
+  const esc = s => String(s), badge = t => '[' + t + ']', icon = () => '';
+  const render = () => journal.push('render'), toast = (m, t) => journal.push('toast:' + m);
+  let modaleOuverte = null;
+  const modal = (t) => { modaleOuverte = t; journal.push('modal:' + t); }, closeModal = () => { modaleOuverte = null; journal.push('closeModal'); };
   const H = {};
+  const document = {addEventListener: (t, f) => { (H[t] = H[t] || []).push(f); }, getElementById: () => null};
   const routes = [{re: /^\\/agency\\/settings$/, fn: () => '<div class="stack" style="gap:18px"><form class="card" data-action="save-agency-settings"></form></div>'}];
-  let signalerErreur = function (e, c) { journal.push('ORIGINAL:' + c); };
+  let signalerErreur = function (e, c) { DB.erreurs.push({t: Date.now(), contexte: c, code: e && e.code, message: e && e.message}); journal.push('ORIGINAL:' + c + ':' + (e && e.message)); };   /* comme js/03-storage.js */
   let messageErreur = e => e.message || 'erreur';
-  let saveProperty = function (form, id, intent) { journal.push('saveProperty:' + intent + ':' + (cniManquantePourPublier(Auth.current()) ? 'BLOQUE' : 'OK')); };
+  const notify = (id, t) => journal.push('notify:' + id);
+  const ownsProperty = (id, u) => !!DB.biens[id];
+  /* Serveur simulé : cniServeur = la CNI est-elle acceptée ? publication = refusée si pas de CNI côté serveur. */
+  const DB = {K: {users: 'users', properties: 'properties'}, erreurs: [], relu: 0, biens: {p1: {id: 'p1', title: 'Villa', listingStatus: 'brouillon'}},
+    serveurCni: ${JSON.stringify(opts.serveurCni === undefined ? null : opts.serveurCni)}, cniAccepte: ${opts.cniAccepte === false ? 'false' : 'true'}, codeRefus: ${JSON.stringify(opts.codeRefus || '23505')},
+    file: [],
+    updateItem(k, id, p) {
+      if (k === 'users') { const avant = U.cni; U.cni = p.cni; this.file.push(() => { if (!this.cniAccepte) { U.cni = avant; signalerErreur({code: this.codeRefus, message: 'duplicate key value'}, 'profiles update'); } else this.serveurCni = p.cni; }); }
+      if (k === 'properties') { const b = this.biens[id], avant = b.listingStatus; Object.assign(b, p); this.file.push(() => { if (p.listingStatus === 'publiee' && !this.serveurCni) { b.listingStatus = avant; signalerErreur({code: '42501', message: 'CNI manquante : renseignez votre numéro de CNI (13 chiffres) dans Paramètres avant de publier une annonce.'}, 'properties update'); } }); }
+    },
+    findItem(k, id) { return this.biens[id]; },
+    async attendre() { while (this.file.length) this.file.shift()(); },
+    async relire(k) { this.relu++; if (k === 'users') U.cni = this.serveurCni || undefined; }};
+  /* Chaîne de publication réelle : 27 (vérifie la CNI) <- 63 (récapitulatif, puis ferme les fenêtres). */
   let cniManquantePourPublier = function () { return false; };
-  const DB = {K: {users: 'users'}, erreurs: [], relu: 0, relire: async () => { DB.relu++; }, cniServeur: true, updateItem(k, id, p) { if (DB.cniServeur) U.cni = p.cni; }, attendre: async () => {}};
+  let saveProperty = function (form, id, intent) { journal.push('saveProperty27:' + intent + ':' + (cniManquantePourPublier(Auth.current()) ? 'BLOQUE' : 'OK')); };
+  (() => { const _27 = saveProperty; saveProperty = function (form, id, intent) {
+    if (intent !== 'publish') return _27(form, id, intent);
+    modal('Publier cette annonce ?'); journal.push('recap');
+    if (${opts.confirmerRecap === false ? 'false' : 'true'}) { _27(form, id, 'publish'); closeModal(); }
+  }; })();
   ${src}
+  this.exp = {MENUS_RAW, entreesBarre, H, routes, DB, flush, journal, modale: () => modaleOuverte,
+    saveProperty: () => saveProperty, cni: () => cniManquantePourPublier, signaler: () => signalerErreur};
   `;
   vm.createContext(ctx);
-  vm.runInContext(code + '\nthis.exp = {signaler: () => signalerErreur, MENUS_RAW, BARRE_PRO, BARRE_AGENT, BARRE_MANDANT, PILL, estAgent, estMandant, entreesBarre, H, routes, DB, saveProperty:()=>saveProperty, cni:()=>cniManquantePourPublier, journal};', ctx);
-  return ctx;
+  vm.runInContext(code, ctx);
+  return ctx.exp;
 }
 
 let echecs = 0;
-function verifier(nom, role, u) {
-  const c = monde(); c.U = u; const x = c.exp;
-  const menu = x.MENUS_RAW[role], hrefs = menu.map(m => m[0]);
-  const barre = x.entreesBarre(u).map(b => b[0]);
-  const manque = barre.filter(h => !hrefs.includes(h));
-  const ok = manque.length === 0;
-  if (!ok) echecs++;
-  console.log((ok ? 'OK  ' : 'ECHEC') + ' ' + nom + '\n     barre   : ' + barre.join('  ') + '\n     menu    : ' + menu.map(m => m[1]).join(' | ') + (ok ? '' : '\n     MANQUE  : ' + manque.join(', ')));
-  const doublons = hrefs.filter((h, i) => hrefs.indexOf(h) !== i); if (doublons.length) { echecs++; console.log('     DOUBLONS', doublons); }
-}
-verifier('Propriétaire (titulaire)', 'owner', {role: 'owner'});
-verifier('Propriétaire (gestionnaire membre)', 'owner', {role: 'owner', member: {role: 'manager'}});
-verifier('Propriétaire sous mandat (mandant)', 'owner', {role: 'owner', ownerRec: 'r1'});
-verifier('Agence (titulaire)', 'agency', {role: 'agency'});
-verifier('Agent de l\'agence', 'agency', {role: 'agency', member: {role: 'agent'}});
+const ok = (cond, nom, detail) => { if (!cond) echecs++; console.log((cond ? 'OK   ' : 'ECHEC') + ' ' + nom + (detail && !cond ? '\n      ' + detail : '')); };
+const formCni = (valeurs) => { const f = {valeurs, err: {textContent: ''}, btn: {disabled: false}}; f.closest = s => (s.includes('modal') ? {} : (s.includes('cni-form') ? f : null)); f.querySelector = s => (s === '.err' ? f.err : f.btn); return f; };
+async function soumettre(x, f) { for (const h of x.H.submit) await h({target: {closest: s => f.closest(s)}, preventDefault() {}, stopImmediatePropagation() {}}); }
+function cliquerPublier(x, id) { let stop = false; const ev = {target: {closest: s => (s.includes('publish') ? {dataset: {id}} : null)}, preventDefault() {}, stopImmediatePropagation() { stop = true; }}; for (const h of x.H.click) { h(ev); if (stop) break; } return stop; }
 
-/* --- CNI --- */
-function cni(nom, u, valeurs, serveurAccepte, attendu) {
-  const c = monde(); c.U = u; const x = c.exp; x.DB.cniServeur = serveurAccepte;
-  const blocage = x.cni()(u);
-  const form = {valeurs, dataset: {action: 'cni-form'}, closest: s => s.includes('modal') ? {} : form, querySelector: s => s === '.err' ? (form.err = form.err || {textContent: ''}) : (form.btn = form.btn || {disabled: false})};
-  const ev = {target: {closest: s => s.includes('cni-form') ? form : null}, preventDefault() {}, stopImmediatePropagation() {}};
-  const h = x.H.submit; return Promise.all(h.map(f => f(ev))).then(() => {
-    const j = x.journal.join(' / ');
-    const sortie = `blocage=${blocage} cni=${u.cni || '-'} erreur="${(form.err && form.err.textContent) || ''}" journal=[${j}]`;
-    const ok = attendu(u, form, j); if (!ok) echecs++;
-    console.log((ok ? 'OK  ' : 'ECHEC') + ' CNI : ' + nom + '\n     ' + sortie);
-  });
-}
 (async () => {
-  await cni('12 chiffres refusés', {role: 'agency'}, {cni: '123456789012'}, true, (u, f) => !u.cni && /13 chiffres/.test(f.err.textContent));
-  await cni('lettres refusées', {role: 'agency'}, {cni: '12345678901ab'}, true, (u, f) => !u.cni && /13 chiffres/.test(f.err.textContent));
-  await cni('13 chiffres avec espaces acceptés', {role: 'agency'}, {cni: '1 234 567 890 123'}, true, (u, f, j) => u.cni === '1234567890123' && /closeModal/.test(j) && /toast:CNI enregistrée/.test(j));
-  await cni('refus du serveur (déjà utilisée)', {role: 'agency'}, {cni: '1234567890123'}, false, (u, f, j) => !u.cni && /pas pu être enregistré/.test(f.err.textContent) && f.btn.disabled === false);
-  // ouverture du formulaire à la publication
-  const c = monde(); c.U = {role: 'agency'}; const x = c.exp;
-  const r1 = x.cni()(c.U), r2 = x.cni()({role: 'agency', cni: '1234567890123'}), r3 = x.cni()({role: 'agency', member: {role: 'agent'}}), r4 = x.cni()({role: 'admin'});
-  console.log((r1 && !r2 && r3 && !r4 && /modal:Renseignez votre CNI/.test(x.journal.join('|')) && /modal:CNI du titulaire/.test(x.journal.join('|')) ? 'OK  ' : 'ECHEC') + ' CNI : formulaire (titulaire) / message (agent) / aucun blocage (CNI présente, admin)\n     ' + x.journal.join(' | '));
-  if (!(r1 && !r2 && r3 && !r4)) echecs++;
-  // reprise de la publication
-  const c2 = monde(); const u2 = {role: 'agency'}; c2.U = u2; const x2 = c2.exp;
-  const form = {isConnected: true, valeurs: {}, dataset: {}};
-  x2.saveProperty()(form, 'p1', 'publish');   // bloqué : modale ouverte
-  const f2 = {valeurs: {cni: '1234567890123'}, closest: s => s.includes('modal') ? {} : f2, querySelector: s => s === '.err' ? {textContent: ''} : {disabled: false}};
-  await Promise.all(x2.H.submit.map(f => f({target: {closest: s => s.includes('cni-form') ? f2 : null}, preventDefault() {}, stopImmediatePropagation() {}})));
-  const j2 = x2.journal.join(' / ');
-  const reprise = /saveProperty:publish:BLOQUE.*saveProperty:publish:OK/.test(j2);
-  if (!reprise) echecs++;
-  console.log((reprise ? 'OK  ' : 'ECHEC') + ' CNI : la publication reprend toute seule après enregistrement\n     ' + j2);
-  // page Paramètres de l'agence
-  const c3 = monde(); c3.U = {role: 'agency'}; const html = c3.exp.routes[0].fn();
-  const okP = html.includes('data-action="cni-form"') && html.includes('#/manage/identity') && !html.includes('Plus tard') && html.indexOf('cni-form') < html.indexOf('save-agency-settings');
-  const c4 = monde(); c4.U = {role: 'agency', cni: '1234567890123'}; const html4 = c4.exp.routes[0].fn();
-  const okQ = html4.includes('Renseignée') && html4.includes('0123') && !html4.includes('cni-form');
-  if (!okP || !okQ) echecs++;
-  console.log((okP ? 'OK  ' : 'ECHEC') + ' Paramètres agence sans CNI : formulaire + lien identité\n' + (okQ ? 'OK  ' : 'ECHEC') + ' Paramètres agence avec CNI : « Renseignée » masquée (4 derniers chiffres)');
+  /* ---------- 1. Menus : la barre du bas figure dans le menu latéral ---------- */
+  for (const [nom, role, u] of [['Propriétaire (titulaire)', 'owner', {role: 'owner'}], ['Propriétaire (gestionnaire membre)', 'owner', {role: 'owner', member: {role: 'manager'}}],
+    ['Propriétaire sous mandat', 'owner', {role: 'owner', ownerRec: 'r1'}], ['Agence (titulaire)', 'agency', {role: 'agency'}], ['Agent', 'agency', {role: 'agency', member: {role: 'agent'}}]]) {
+    const x = monde(u), menu = x.MENUS_RAW[role].map(m => m[0]), barre = x.entreesBarre(u).map(b => b[0]);
+    const manque = barre.filter(h => !menu.includes(h)), doublons = menu.filter((h, i) => menu.indexOf(h) !== i);
+    ok(!manque.length && !doublons.length, 'Menu ' + nom + ' contient toute la barre du bas', 'manque : ' + manque + ' doublons : ' + doublons);
+  }
+  { const x = monde({role: 'agency'}), m = x.MENUS_RAW.agency.map(e => e[1]);
+    ok(m.includes('Équipe') && m.includes('Visites') && m.includes('Publier un bien'), 'Agence : Équipe, Visites et Publier un bien dans le menu'); }
 
-  // refus serveur avec doublon (23505) : message explicite
-  const c5 = monde(); const u5 = {role: 'agency'}; c5.U = u5; const x5 = c5.exp; x5.DB.cniServeur = false;
-  x5.cni()(u5); x5.DB.erreurs.push({t: Date.now(), contexte: 'profiles update', code: '23505', message: 'duplicate key'});
-  const f5 = {valeurs: {cni: '1234567890123'}, closest: s => s.includes('modal') ? {} : f5, querySelector: s => s === '.err' ? (f5.err = f5.err || {textContent: ''}) : {disabled: false}};
-  await Promise.all(x5.H.submit.map(f => f({target: {closest: s => s.includes('cni-form') ? f5 : null}, preventDefault() {}, stopImmediatePropagation() {}})));
-  const ok5 = /déjà utilisé par un autre compte/.test(f5.err.textContent); if (!ok5) echecs++;
-  console.log((ok5 ? 'OK  ' : 'ECHEC') + ' CNI : refus 23505 -> "' + f5.err.textContent + '"');
-  // refus serveur d'une autre nature : la raison est affichée
-  const c6 = monde(); const u6 = {role: 'agency'}; c6.U = u6; const x6 = c6.exp; x6.DB.cniServeur = false;
-  x6.cni()(u6); x6.DB.erreurs.push({t: Date.now(), contexte: 'profiles update', code: '42501', message: 'Champs non modifiables : perms'});
-  const f6 = {valeurs: {cni: '1234567890123'}, closest: s => s.includes('modal') ? {} : f6, querySelector: s => s === '.err' ? (f6.err = f6.err || {textContent: ''}) : {disabled: false}};
-  await Promise.all(x6.H.submit.map(f => f({target: {closest: s => s.includes('cni-form') ? f6 : null}, preventDefault() {}, stopImmediatePropagation() {}})));
-  const ok6 = /Champs non modifiables/.test(f6.err.textContent); if (!ok6) echecs++;
-  console.log((ok6 ? 'OK  ' : 'ECHEC') + ' CNI : autre refus -> "' + f6.err.textContent + '"');
-  // auto-correction : le site croit la CNI présente, la base refuse la publication
-  const c7 = monde(); c7.U = {role: 'owner', cni: '1234567890123'}; const x7 = c7.exp;
-  x7.signaler()({code: '42501', message: 'Renseignez un numéro de CNI dans « Mon profil » avant de publier une annonce.'}, 'properties insert');
-  await new Promise(r => setImmediate(r));
-  const j7 = x7.journal.join(' | ');
-  const ok7 = x7.DB.relu === 1 && /toast:Votre CNI n'était pas enregistrée/.test(j7) && !/ORIGINAL/.test(j7);
-  if (!ok7) echecs++;
-  console.log((ok7 ? 'OK  ' : 'ECHEC') + ' CNI : affichée mais absente du serveur -> resynchronisation (relire=' + x7.DB.relu + ')\n     ' + j7);
-  // autres erreurs : inchangées
-  const c8 = monde(); c8.U = {role: 'owner', cni: '1234567890123'}; const x8 = c8.exp;
-  x8.signaler()({code: '23505', message: 'doublon'}, 'properties insert'); x8.signaler()({code: '42501', message: 'Renseignez un numéro de CNI'}, 'visits insert');
-  const ok8 = x8.DB.relu === 0 && (x8.journal.join('|').match(/ORIGINAL/g) || []).length === 2; if (!ok8) echecs++;
-  console.log((ok8 ? 'OK  ' : 'ECHEC') + ' Erreurs non liées à la CNI : traitement habituel conservé');
+  /* ---------- 2. Formulaire du bien : la CNI est demandée AVANT le récapitulatif ---------- */
+  { const x = monde({role: 'owner'}), form = {isConnected: true};
+    x.saveProperty()(form, null, 'publish'); await x.flush();
+    ok(x.modale() === 'Renseignez votre CNI pour publier' && !x.journal.includes('recap'), 'Publier sans CNI : formulaire CNI ouvert, pas de récapitulatif', x.journal.join(' | '));
+    await soumettre(x, formCni({cni: '1234567890123'})); await x.flush();
+    const j = x.journal.join(' | ');
+    ok(/toast:CNI enregistrée.*recap.*saveProperty27:publish:OK/.test(j) && !/BLOQUE/.test(j), 'Après la CNI : récapitulatif puis publication', j); }
+  { /* Garde-fou : si la vérification arrive tout de même dans 27 (appel direct), la fenêtre survit au closeModal du récapitulatif. */
+    const x = monde({role: 'owner'});
+    x.cni()(x.journal && {role: 'owner'}); x.journal.push('closeModal-par-63'); await x.flush();
+    ok(x.modale() === 'Renseignez votre CNI pour publier', 'La fenêtre CNI n\'est pas refermée par un appelant qui ferme les fenêtres'); }
+  { const x = monde({role: 'owner', cni: '1234567890123'}, {serveurCni: '1234567890123'});
+    x.saveProperty()({isConnected: true}, null, 'publish'); await x.flush();
+    ok(/recap.*saveProperty27:publish:OK/.test(x.journal.join('|')) && !x.journal.some(l => l.startsWith('modal:Renseignez')), 'Avec CNI : publication directe (récapitulatif seulement)'); }
+  { const x = monde({role: 'agency', member: {role: 'agent'}});
+    x.saveProperty()({isConnected: true}, null, 'publish'); await x.flush();
+    ok(x.modale() === 'CNI du titulaire à renseigner' && !x.journal.includes('recap'), 'Agent, agence sans CNI : message pour le titulaire'); }
+  { const x = monde({role: 'admin'}); ok(x.cni()({role: 'admin'}) === false, 'Administrateur : jamais bloqué'); }
+
+  /* ---------- 3. Saisie de la CNI : contrôles et refus du serveur ---------- */
+  for (const [nom, val, cond] of [['12 chiffres refusés', '123456789012', f => /13 chiffres/.test(f.err.textContent)], ['Lettres refusées', '12345678901ab', f => /13 chiffres/.test(f.err.textContent)]]) {
+    const x = monde({role: 'agency'}), f = formCni({cni: val}); await soumettre(x, f); ok(cond(f) && !x.DB.serveurCni, 'CNI : ' + nom, f.err.textContent);
+  }
+  { const x = monde({role: 'agency'}), f = formCni({cni: '1 234 567 890 123'}); await soumettre(x, f); await x.flush();
+    ok(x.DB.serveurCni === '1234567890123' && x.journal.includes('toast:CNI enregistrée.'), 'CNI : 13 chiffres avec espaces acceptés'); }
+  { const x = monde({role: 'agency'}, {cniAccepte: false, codeRefus: '23505'}), f = formCni({cni: '1234567890123'}); await soumettre(x, f);
+    ok(/déjà utilisé par un autre compte/.test(f.err.textContent) && f.btn.disabled === false && !x.journal.includes('toast:CNI enregistrée.'), 'CNI déjà utilisée : message clair, bouton réactivé', f.err.textContent); }
+  { const x = monde({role: 'agency'}, {cniAccepte: false, codeRefus: '42501'}), f = formCni({cni: '1234567890123'}); await soumettre(x, f);
+    ok(/pas pu être enregistré/.test(f.err.textContent), 'Autre refus du serveur : raison affichée', f.err.textContent); }
+
+  /* ---------- 4. Bouton « Publier » d'une carte : succès annoncé après le serveur ---------- */
+  { const x = monde({role: 'owner'}); const stop = cliquerPublier(x, 'p1'); await x.flush();
+    ok(stop && x.DB.biens.p1.listingStatus === 'brouillon' && x.modale() === 'Renseignez votre CNI pour publier', 'Carte, sans CNI : formulaire, rien n\'est envoyé'); }
+  { const x = monde({role: 'owner', cni: '1234567890123'}, {serveurCni: '1234567890123'}); cliquerPublier(x, 'p1'); await x.flush();
+    ok(x.DB.biens.p1.listingStatus === 'publiee' && x.journal.includes('toast:Annonce publiée : elle est visible dans la recherche.') && x.journal.includes('notify:user_admin'), 'Carte, avec CNI acceptée : publiée, puis succès annoncé'); }
+  { const x = monde({role: 'owner', cni: '1234567890123'}, {serveurCni: null}); cliquerPublier(x, 'p1'); await x.flush();
+    const j = x.journal.join(' | ');
+    ok(x.DB.biens.p1.listingStatus === 'brouillon' && !/Annonce publiée/.test(j) && x.DB.relu === 1 && /n'était pas enregistrée sur le serveur/.test(j), 'Carte, CNI affichée mais absente du serveur : aucun faux succès, resynchronisation', j); }
+  { const x = monde({role: 'owner'}); cliquerPublier(x, 'p1'); await x.flush();
+    x.DB.serveurCni = null; await soumettre(x, formCni({cni: '1234567890123'})); await x.flush();
+    ok(x.DB.biens.p1.listingStatus === 'publiee', 'Carte : la publication reprend après la saisie de la CNI', x.journal.join(' | ')); }
+
+  /* ---------- 5. Erreurs et Paramètres ---------- */
+  { const x = monde({role: 'owner'}); x.signaler()({code: '23505', message: 'duplicate key'}, 'profiles update');
+    ok(/ORIGINAL:profiles update:Ce numéro de CNI est déjà utilisé/.test(x.journal.join('|')), 'Doublon sur le profil : message clair (même sans migration)'); }
+  { const x = monde({role: 'owner'}); x.signaler()({code: '23505', message: 'doublon'}, 'properties insert'); x.signaler()({code: '42501', message: 'CNI manquante'}, 'visits insert');
+    ok(x.DB.relu === 0 && (x.journal.join('|').match(/ORIGINAL/g) || []).length === 2, 'Erreurs sans rapport : traitement habituel conservé'); }
+  { const x = monde({role: 'agency'}), h = x.routes[0].fn();
+    ok(h.includes('data-action="cni-form"') && h.includes('#/manage/identity') && !h.includes('Plus tard'), 'Paramètres agence sans CNI : formulaire et lien « Mes informations »'); }
+  { const x = monde({role: 'agency', cni: '1234567890123'}), h = x.routes[0].fn();
+    ok(h.includes('Renseignée') && h.includes('0123') && !h.includes('cni-form') && !h.includes('1234567890123'), 'Paramètres agence avec CNI : masquée (4 derniers chiffres)'); }
+  { /* « Mon profil » : CNI refusée par le serveur -> fenêtre d'explication. */
+    const x = monde({role: 'owner'}, {cniAccepte: false});
+    const champ = {value: '1234567890123'}, f = {closest: s => (s.includes('save-profile') ? f : null), querySelector: () => champ};
+    x.DB.updateItem('users', 'moi', {cni: '1234567890123'});
+    for (const h of x.H.submit) await h({target: {closest: s => f.closest(s)}, preventDefault() {}, stopImmediatePropagation() {}});
+    await x.flush();
+    ok(x.modale() === 'CNI non enregistrée' && /déjà utilisé/.test(x.journal.join('|')), 'Mon profil : CNI refusée -> fenêtre « CNI non enregistrée »', x.journal.join(' | ')); }
+  { const x = monde({role: 'owner'}, {cniAccepte: true});
+    const champ = {value: '1234567890123'}, f = {closest: s => (s.includes('save-profile') ? f : null), querySelector: () => champ};
+    x.DB.updateItem('users', 'moi', {cni: '1234567890123'});
+    for (const h of x.H.submit) await h({target: {closest: s => f.closest(s)}, preventDefault() {}, stopImmediatePropagation() {}});
+    await x.flush();
+    ok(x.modale() === null, 'Mon profil : CNI acceptée -> aucune fenêtre'); }
+
   console.log(echecs ? `\n${echecs} ÉCHEC(S)` : '\nTOUS LES TESTS PASSENT');
   process.exit(echecs ? 1 : 0);
 })();

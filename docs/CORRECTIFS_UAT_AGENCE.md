@@ -1,6 +1,6 @@
 # Correctifs UAT Agence — ce qu'il faut faire côté Supabase
 
-**Bonne nouvelle : aucune nouvelle migration SQL.** La règle « CNI avant de publier » existe déjà (migration `20261028000100_cni_avant_publication.sql`). Il reste à vérifier trois choses, par la personne Supabase.
+**Mise à jour du 12 novembre : une migration est ajoutée, `20261112000100_cni_fiabilite.sql` (messages clairs, doublon de CNI). Voir `docs/AUDIT_CNI.md` §3.** La règle « CNI avant de publier » existe déjà (migration `20261028000100_cni_avant_publication.sql`). Il reste à vérifier trois choses, par la personne Supabase.
 
 ## 1. La règle CNI est bien en place (SQL Editor)
 

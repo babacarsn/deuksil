@@ -73,17 +73,45 @@ function completerMenu(m, u) {
 let repriseApresCni = null;
 
 (function () {
-  /* On garde de quoi relancer la publication une fois la CNI enregistrée. */
+  /* Formulaire du bien : la CNI est vérifiée AVANT le récapitulatif « Publier cette
+     annonce ? » (js/63-publication.js), qui ferme toutes les fenêtres après coup et
+     aurait refermé aussitôt le formulaire de CNI. On garde de quoi reprendre ensuite. */
   const _saveProperty = saveProperty;
   saveProperty = function (form, id, intent) {
-    if (intent === 'publish') repriseApresCni = () => { if (form && form.isConnected) _saveProperty(form, id, intent); };
+    if (intent === 'publish') {
+      repriseApresCni = () => { if (form && form.isConnected) saveProperty(form, id, intent); };
+      if (cniManquantePourPublier(Auth.current())) return;
+    }
     return _saveProperty(form, id, intent);
   };
-  document.addEventListener('click', e => {
-    const b = e.target.closest && e.target.closest('[data-action="publish"]');
-    if (b) repriseApresCni = () => { if (b.isConnected) b.click(); };
-  }, true);
 })();
+
+/* Bouton « Publier » / « Republier » d'une carte de bien : on n'annonce le succès
+   qu'après la réponse du serveur (avant : « Annonce publiée » s'affichait, puis la
+   base refusait). Remplace le traitement de js/27-actions.js pour cette action. */
+async function publierCarte(id) {
+  const u = Auth.current();
+  if (!u || !ownsProperty(id, u) || cniManquantePourPublier(u)) return;
+  const n = (DB.erreurs || []).length;
+  DB.updateItem(DB.K.properties, id, {listingStatus: 'publiee'});
+  render();
+  await DB.attendre();
+  const p = DB.findItem(DB.K.properties, id);
+  const refus = (DB.erreurs || []).slice(n).some(x => /^properties/.test(x.contexte || ''));
+  if (p && p.listingStatus === 'publiee' && !refus) {
+    try { notify('user_admin', `Nouvelle annonce en ligne : ${p.title}`, '#/admin/listings'); } catch (x) {}
+    toast('Annonce publiée : elle est visible dans la recherche.');
+  }
+  render();
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest && e.target.closest('[data-action="publish"]');
+  if (!b || !b.dataset.id || !Auth.current()) return;
+  e.preventDefault(); e.stopImmediatePropagation();
+  const id = b.dataset.id;
+  repriseApresCni = () => publierCarte(id);
+  publierCarte(id);
+}, true);
 
 function formulaireCni(compact) {
   return `<form data-action="cni-form">
@@ -99,17 +127,22 @@ function formulaireCni(compact) {
 
 cniManquantePourPublier = function (u) {
   if (!u || u.role === 'admin' || /^\d{13}$/.test(u.cni || '')) return false;
+  /* Fenêtre ouverte au tour suivant : un appelant qui ferme les fenêtres juste après
+     (récapitulatif de publication) ne la refermera pas. */
+  setTimeout(() => ouvrirFenetreCni(u), 0);
+  return true;
+};
+function ouvrirFenetreCni(u) {
   if (u.member) {
     modal('CNI du titulaire à renseigner',
       `<p>Pour publier une annonce, le titulaire du compte de l'agence doit d'abord renseigner son numéro de CNI.</p>
        <p class="small muted">Il se connecte, ouvre <b>Paramètres</b> et remplit « Pièce d'identité (CNI) ». Votre brouillon est conservé.</p>
        <div class="row" style="justify-content:flex-end"><button class="btn" data-action="close-modal">J'ai compris</button></div>`);
-    return true;
+    return;
   }
   modal('Renseignez votre CNI pour publier', formulaireCni(false));
   setTimeout(() => { const c = document.getElementById('cni-champ'); if (c) c.focus(); }, 40);
-  return true;
-};
+}
 
 document.addEventListener('submit', async e => {
   const f = e.target.closest && e.target.closest('form[data-action="cni-form"]'); if (!f) return;
@@ -129,6 +162,7 @@ document.addEventListener('submit', async e => {
     const d = (DB.erreurs || []).slice(-1)[0];
     const recent = d && Date.now() - d.t < 15000 && /profiles/.test(d.contexte || '');
     if (recent && d.code === '23505') return erreur('Ce numéro de CNI est déjà utilisé par un autre compte. Vérifiez-le : il ne peut servir qu\'à un seul compte.');
+    if (recent && d.code === 'P0001' && d.message) return erreur(d.message);   /* message clair du serveur (migration 20261112000100) */
     const detail = recent && typeof messageErreur === 'function' ? messageErreur({code: d.code, message: d.message}) : '';
     return erreur('Ce numéro n\'a pas pu être enregistré' + (detail ? ' : ' + detail.replace(/[.\s]+$/, '') : '') + '. Réessayez ; si le problème continue, contactez DEUKSIL.');
   }
@@ -170,6 +204,11 @@ function cartesParametresAgence(u) {
   if (typeof signalerErreur !== 'function') return;
   const _signaler = signalerErreur;
   signalerErreur = function (e, contexte) {
+    /* Profil refusé pour doublon : c'est la CNI (l'e-mail ne se modifie pas ici). Message
+       clair même si la migration 20261112000100 n'est pas encore appliquée. */
+    if (e && e.code === '23505' && /^profiles/.test(contexte || '')) {
+      return _signaler({code: 'P0001', message: 'Ce numéro de CNI est déjà utilisé par un autre compte DEUKSIL. Vérifiez-le ; si c\'est bien le vôtre, contactez DEUKSIL.', details: e.details}, contexte);
+    }
     const u = (() => { try { return Auth.current(); } catch (x) { return null; } })();
     if (e && /CNI/.test(e.message || '') && /properties/.test(contexte || '') && u && /^\d{13}$/.test(u.cni || '')) {
       console.warn('[DEUKSIL] CNI affichée mais absente côté serveur : resynchronisation.', contexte, e);
@@ -183,3 +222,26 @@ function cartesParametresAgence(u) {
     return _signaler(e, contexte);
   };
 })();
+
+/* --- 5. « Mon profil » / « Paramètres » : la CNI saisie a-t-elle été enregistrée ? --
+   Avant : « Profil mis à jour » s'affichait tout de suite ; si le serveur refusait
+   (CNI déjà utilisée…), la CNI disparaissait sans explication. On vérifie après la
+   réponse du serveur et on explique dans une fenêtre qui reste à l'écran. */
+document.addEventListener('submit', e => {
+  const f = e.target.closest && e.target.closest('form[data-action="save-profile"]'); if (!f) return;
+  const champ = f.querySelector('input[name="cni"]');
+  const cni = champ ? String(champ.value || '').replace(/\s/g, '') : '';
+  if (!/^\d{13}$/.test(cni)) return;
+  const n = (DB.erreurs || []).length;
+  setTimeout(async () => {
+    await DB.attendre();
+    const u = Auth.current();
+    if (!u || u.cni === cni) return;
+    const d = (DB.erreurs || []).slice(n).filter(x => /^profiles/.test(x.contexte || '')).slice(-1)[0];
+    const raison = d && typeof messageErreur === 'function' ? messageErreur({code: d.code, message: d.message}).replace(/[.\s]+$/, '') : '';
+    modal('CNI non enregistrée',
+      `<p>Votre numéro de CNI <b>n'a pas été enregistré</b>${raison ? ' : ' + esc(raison) : ''}.</p>
+       <p class="small muted">Rien n'a été modifié sur votre profil. Corrigez le numéro (ou laissez-le vide) puis enregistrez de nouveau.</p>
+       <div class="row" style="justify-content:flex-end"><button class="btn" data-action="close-modal">Compris</button></div>`);
+  }, 0);
+}, true);

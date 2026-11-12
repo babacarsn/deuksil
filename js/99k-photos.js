@@ -332,7 +332,7 @@
       } else {
         // la saisie reste : photos déposées, formulaire à l'écran ; l'erreur précise a déjà été affichée
         P.items = formulaire; P.pour = pour; P.bienId = bienId; P.enregistre = null; formPhotosFor = pour; synchroniser(); dessiner();
-        toast('L\'annonce n\'a pas été enregistrée. Votre saisie et vos photos sont conservées : vérifiez la connexion puis réessayez.', 'bad');
+        toast('L\'annonce n\'a pas été enregistrée. Votre saisie et vos photos sont conservées : ' + (DB.erreurs.slice(r.erreurs).some(x => /connexion|fetch|network/i.test(x.message || '')) ? 'vérifiez la connexion puis réessayez.' : 'corrigez le point signalé puis réessayez.'), 'bad');
       }
     }, 0);
   }
