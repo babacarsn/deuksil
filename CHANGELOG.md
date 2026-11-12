@@ -1,5 +1,11 @@
 # DEUKSIL — Historique des modifications
 
+## 12 novembre 2026 (3) — Branche « test » et nouvelle recette
+
+- Branche `test` : version à tester avant publication ; adresse Vercel stable https://deuksil-git-test-babacarsns-projects.vercel.app
+- Recette utilisateur mise à jour (`tests/uat/`) : 9 fichiers (dont un nouveau pour le propriétaire mandant) + `00_Comptes_de_test.xlsx` (comptes à créer, prérequis Supabase). 270 tests, chemins d'accès ordinateur et téléphone.
+- Menu ordinateur : les entrées de la barre du bas gardent l'ordre de la barre (Gestion puis Messages).
+
 ## 12 novembre 2026 (2) — Menu ordinateur, comptes et relations
 
 Détail : `docs/COMPTES_ET_RELATIONS.md`.

@@ -63,11 +63,12 @@ function completerMenuLateral(html, u) {
   const liens = [...nav.matchAll(/<a\b[^>]*href="([^"]+)"[\s\S]*?<\/a>/g)].map(m => ({h: m[1], fin: m.index + m[0].length, debut: m.index}));
   const lien = x => `<a href="${x.h}" class="${path === x.h.slice(1) ? 'active' : ''}" data-barre="1"><span class="ico">${icon(x.ic, 17)}</span>${x.lib}</a>`;
   /* Positions : « Publier un bien » juste après les biens ; le reste avant Paramètres. */
-  const inserts = manquants.map(x => {
+  /* Insertion de la fin vers le début ; à position égale, les derniers d'abord : l'ordre de la barre est gardé. */
+  const inserts = manquants.map((x, rang) => {
     const biens = x.h === '#/owner/property/new' ? liens.find(l => /\/properties$/.test(l.h)) : null;
     const param = liens.find(l => ENTREE_PARAMETRES.test(l.h));
-    return {pos: biens ? biens.fin : (param ? param.debut : nav.length), html: lien(x)};
-  }).sort((p, q) => q.pos - p.pos);
+    return {pos: biens ? biens.fin : (param ? param.debut : nav.length), rang, html: lien(x)};
+  }).sort((p, q) => q.pos - p.pos || q.rang - p.rang);
   for (const i of inserts) nav = nav.slice(0, i.pos) + i.html + nav.slice(i.pos);
   return html.slice(0, n0 + 5) + nav + html.slice(n1);
 }

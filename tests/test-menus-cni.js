@@ -116,6 +116,9 @@ function cliquerPublier(x, id) { let stop = false; const ev = {target: {closest:
   { const u = {role: 'owner'}, x = monde(u), html = x.shellApp()(u, ''), nav = html.slice(html.indexOf('<nav>'), html.indexOf('</nav>'));
     const ordre = [...nav.matchAll(/href="([^"]+)"/g)].map(m => m[1]);
     ok(ordre.indexOf('#/owner/property/new') === ordre.indexOf('#/owner/properties') + 1 && ordre.indexOf('#/manage') === ordre.indexOf('#/owner/profile') - 1 && /Publier un bien/.test(nav) && /data-i="plus"/.test(nav), 'Ordinateur - « Publier un bien » après Mes biens, « Gestion » avant Paramètres, avec icônes', ordre.join(' ')); }
+  { const u = {role: 'agency'}, x = monde(u), html = x.shellApp()(u, ''), nav = html.slice(html.indexOf('<nav>'), html.indexOf('</nav>'));
+    const libs = [...nav.matchAll(/<\/span>([^<]+)<\/a>/g)].map(m => m[1]).join(' | ');
+    ok(/Biens \| Publier un bien \| Clients \| Visites \| Équipe/.test(libs) && /Documents \| Gestion \| Messages \| Paramètres$/.test(libs), 'Ordinateur - agence : ordre du menu (Publier après Biens ; Gestion puis Messages avant Paramètres, comme la barre)', libs); }
   { const x = monde({role: 'agency'}), m = x.MENUS.agency.map(e => e[1]);
     ok(m.includes('Équipe') && m.includes('Visites') && !m.includes('Publier un bien'), 'Agence : Équipe et Visites dans le menu (ordinateur et téléphone), sans doublon de la barre'); }
 

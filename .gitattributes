@@ -8,3 +8,6 @@
 *.ico binary
 *.woff binary
 *.woff2 binary
+*.xlsx binary
+*.docx binary
+*.zip binary
