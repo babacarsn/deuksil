@@ -48,10 +48,18 @@ supabase link --project-ref fqrmulupzaqmvjoybela      # si ce n'est pas déjà f
 | `20261112000100_cni_fiabilite.sql` | Message de refus juste (« CNI manquante… Paramètres », différent pour un agent) ; une CNI déjà utilisée est refusée avec un message clair ; fonction `public.cni_espace_renseignee()` |
 | `20261112000200_relations_comptes.sql` | Relie automatiquement la fiche du propriétaire mandant à son compte quand l'agence ouvre son accès ; **répare** les mandants déjà créés |
 
+**D'abord, vérifier ce que Supabase croit déjà appliqué** (important si d'anciennes migrations ont été collées à la main dans le SQL Editor) :
 ```bash
-supabase db push
+supabase migration list
 ```
-Sans la CLI : SQL Editor → coller `20261112000100_cni_fiabilite.sql` → Run ; puis `20261112000200_relations_comptes.sql` → Run (dans cet ordre). Les deux peuvent être rejouées sans risque.
+- Si **seules les deux migrations du 12 novembre** apparaissent sans date côté « Remote » : `supabase db push` (il n'applique que celles-là).
+- Si **d'anciennes migrations** (22 octobre → 2 novembre) apparaissent aussi sans date côté « Remote » alors qu'elles sont déjà en place dans la base : **ne pas lancer `db push`** (il les rejouerait et échouerait). Utiliser le SQL Editor ci-dessous, puis, une fois, pour remettre la liste à jour :
+  ```bash
+  supabase migration repair --status applied 20261022000100 20261022000200 20261022000300 20261022000400 20261022000500 20261022000600 20261022000700 20261022000800 20261028000100 20261102000100 20261112000100 20261112000200
+  ```
+  (ne mettre dans cette liste que les migrations réellement présentes dans la base.)
+
+**Avec le SQL Editor** (toujours possible) : coller tout `20261112000100_cni_fiabilite.sql` → Run ; puis tout `20261112000200_relations_comptes.sql` → Run (dans cet ordre). Les deux peuvent être rejouées sans risque.
 
 ✅ Contrôles (SQL Editor) :
 ```sql
