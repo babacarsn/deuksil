@@ -66,7 +66,7 @@ vueGestion(['team'], function (u, tab) {
   return `<form class="card" data-action="g4-member" style="margin-bottom:18px"><h4 style="margin-top:0">Ajouter un membre d'équipe</h4><div class="form-grid">
     <div class="field"><label>Prénom</label><input class="input" name="firstName" required></div><div class="field"><label>Nom</label><input class="input" name="lastName" required></div>
     <div class="field"><label>Adresse e-mail (identifiant de connexion)</label><input class="input" type="email" name="email" required autocomplete="off"></div><div class="field"><label>Téléphone</label><input class="input" name="phone"></div>
-    <div class="field"><label>CNI (13 chiffres, facultatif)</label><input class="input" name="cni" pattern="\\d{13}" inputmode="numeric"></div>
+    <div class="field"><label>CNI du membre (13 chiffres, facultatif)</label><p class="small muted" style="margin:2px 0 6px">Sans effet sur la publication : c\'est la CNI du titulaire du compte qui compte.</p><input class="input" name="cni" pattern="\\d{13}" inputmode="numeric"></div>
     <div class="field"><label>Rôle</label><select class="input" name="role"><option value="manager">Gestionnaire</option><option value="agent">Agent</option></select></div></div>
     <p class="small"><b>Permissions</b> (l'administration du compte, l'abonnement et l'équipe ne sont jamais délégables)</p>
     <div class="row" style="gap:14px;flex-wrap:wrap;margin-bottom:12px">${Object.entries(PERMS).map(([k, v]) => `<label class="small"><input type="checkbox" name="perm_${k}" ${MEMBER_DEFAULT.agent.includes(k) ? 'checked' : ''}> ${v}</label>`).join('')}</div>

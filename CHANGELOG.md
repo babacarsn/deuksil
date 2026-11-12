@@ -1,5 +1,42 @@
 # DEUKSIL — Historique des modifications
 
+## 12 novembre 2026 (3) — Branche « test » et nouvelle recette
+
+- Branche `test` : version à tester avant publication ; adresse Vercel stable https://deuksil-git-test-babacarsns-projects.vercel.app
+- Recette utilisateur mise à jour (`tests/uat/`) : 9 fichiers (dont un nouveau pour le propriétaire mandant) + `00_Comptes_de_test.xlsx` (comptes à créer, prérequis Supabase). 270 tests, chemins d'accès ordinateur et téléphone.
+- Menu ordinateur : les entrées de la barre du bas gardent l'ordre de la barre (Gestion puis Messages).
+- Recette rangée dans l'ordre de test, étape par étape (colonne « Étape »), et `README_CONFIGURATION_SUPABASE.md` : ce qu'il faut configurer dans Supabase pour les modifications des 11 et 12 novembre.
+
+## 12 novembre 2026 (2) — Menu ordinateur, comptes et relations
+
+Détail : `docs/COMPTES_ET_RELATIONS.md`.
+- **Menu latéral (ordinateur seulement)** : reprend tout ce que la barre du bas du téléphone affiche, lu dans la barre elle-même. Le téléphone (barre du bas et tiroir) n'est plus modifié.
+- **Mandant** : sa fiche est enfin reliée à son compte à l'ouverture de l'accès (il voyait un espace vide). Migration `20261112000200_relations_comptes.sql`, avec réparation des mandants existants.
+- **Identifiants** : fenêtre « Accès créé : identifiants à transmettre » (adresse, identifiant, mot de passe provisoire ; Copier, WhatsApp, e-mail) pour agent, gestionnaire, mandant, locataire.
+- **Équipe** : bouton « Nouveau mot de passe » pour les agents et gestionnaires qui ne se sont pas encore connectés.
+- Message clair si la fonction serveur `gerer-acces` n'est pas déployée ou est injoignable.
+- Tests : 34 scénarios de relations en base (agent, gestionnaire, mandant, locataire, isolement entre agences, sécurité de la liaison), 43 cas côté site.
+
+## 12 novembre 2026 — Audit de la CNI (tous les comptes)
+
+Détail : `docs/AUDIT_CNI.md`.
+- **Doublon de CNI** (cause la plus fréquente de « CNI non renseignée alors qu'on l'a saisie ») : message clair « déjà utilisé par un autre compte », côté site et côté base ; fenêtre « CNI non enregistrée » après la réponse du serveur au lieu de « Profil mis à jour ».
+- **Formulaire du bien** : la CNI est demandée avant le récapitulatif « Publier cette annonce ? », qui refermait aussitôt le formulaire de CNI.
+- **Bouton Publier d'une carte** : succès annoncé seulement après confirmation du serveur.
+- Message d'échec d'enregistrement d'une annonce selon la vraie cause (plus de « vérifiez la connexion » à tort).
+- Formulaire d'équipe : la CNI d'un membre est sans effet sur la publication (précision affichée).
+- **Migration `20261112000100_cni_fiabilite.sql`** : message de refus juste (titulaire / membre, « Paramètres »), refus clair d'une CNI déjà utilisée, fonction `public.cni_espace_renseignee()`. Aucune suppression. Option désactivée : une CNI par type de compte.
+- Tests : 22 scénarios SQL (`supabase/tests-cni/`), 27 cas côté site (`tests/test-menus-cni.js`).
+
+## 11 novembre 2026 — Correctifs de la recette (UAT Agence)
+
+- **CNI** : au clic sur « Publier », si la CNI du compte manque, un formulaire s'ouvre (13 chiffres, refus clair d'un numéro invalide ou déjà utilisé) ; la publication reprend toute seule après enregistrement. Un agent est informé que le titulaire du compte doit la renseigner. La CNI se renseigne aussi dans **Paramètres de l'agence** (nouvelle carte, avec lien vers « Mes informations » : NINEA, RCCM). Avant : le message renvoyait vers « Mon profil », page absente du menu de l'agence. Règle côté base inchangée (migration 20261028000100).
+- **Menus** : tout ce que la barre du bas montre sur téléphone figure aussi dans le menu latéral de l'ordinateur (Publier un bien, Gestion, Messages…), pour propriétaire, agence, agent, gestionnaire et mandant. Calcul automatique à partir des barres (`js/99n-menus-cni.js`).
+- **Agence** : « Visites » et « Équipe » reviennent dans le menu latéral (création des agents introuvable).
+- **CNI affichée mais refusée par le serveur** : le site se resynchronise (le formulaire de CNI réapparaît) et affiche la vraie raison d'un refus (CNI déjà utilisée, écriture refusée…). Diagnostic : `docs/CORRECTIFS_UAT_AGENCE.md` §5.
+- Aucune migration SQL. Voir `docs/CORRECTIFS_UAT_AGENCE.md` pour les contrôles Supabase.
+- Outil de versionnage : empreintes indépendantes des fins de ligne (Windows/Linux) ; `.gitattributes` impose LF dans le dépôt.
+
 ## 3 novembre 2026 — Assistant qui consulte et agit ; mode clair seul
 
 ### Assistant de l'espace (docs/ASSISTANT_IA.md)

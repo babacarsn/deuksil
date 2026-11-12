@@ -183,6 +183,8 @@ Ce qui peut être dans le code : l'adresse du projet et la clé **publique** dan
 
 ## 6. Déployer Supabase (personne Supabase)
 
+> Modifications des 11 et 12 novembre, étape par étape : **`README_CONFIGURATION_SUPABASE.md`**.
+
 Prérequis : Supabase CLI connectée (`supabase login`), puis dans le dossier du dépôt :
 
 ```bash
