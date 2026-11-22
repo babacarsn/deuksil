@@ -45,6 +45,19 @@ function erreurIci(f, nom, msg) {
   }
   return false;
 }
+/* Toutes les erreurs d'un formulaire à la fois, chacune sous son champ (la première reçoit le focus). */
+function erreursIci(f, fautes) {
+  if (!fautes || !fautes.length) return false;
+  erreurIci(f, fautes[0][0], fautes[0][1]);
+  const vus = new Set([fautes[0][0]]);
+  fautes.slice(1).forEach(([nom, msg]) => {
+    if (vus.has(nom)) return; vus.add(nom);
+    const i = nom ? f.querySelector(`[name="${nom}"]`) : null; if (!i) return;
+    const bloc = document.createElement('div'); bloc.className = 'champ-err'; bloc.setAttribute('role', 'alert'); bloc.textContent = msg;
+    i.classList.add('champ-ko'); i.setAttribute('aria-invalid', 'true'); (i.closest('.field') || i.parentElement).appendChild(bloc);
+  });
+  return false;
+}
 function occupe(f, oui, texte = 'Envoi en cours…') {
   const b = f.querySelector('button:not([type="button"])'); if (!b) return;
   if (oui) { b.dataset.texte = b.innerHTML; b.disabled = true; b.innerHTML = `<span class="spinner" style="width:16px;height:16px;border-width:2px;margin:0"></span> ${texte}`; }
@@ -126,7 +139,8 @@ function controleInscription(f, etape) {
     si(d.password === d.password2, 'password2', 'Les deux mots de passe ne correspondent pas.');
     si(!!d.cgu, 'cgu', 'Acceptez les conditions d\'utilisation pour créer votre compte.');
   }
-  return fautes[0] || null;
+  const r = fautes[0] || null; if (r) r.toutes = fautes;
+  return r;
 }
 /* Champs de l'agence : actifs et obligatoires seulement pour une agence. */
 function appliquerRole(f) {
@@ -141,7 +155,7 @@ window.addEventListener('click', e => {
   const b = e.target.closest && e.target.closest('[data-action="wiz-next"]'), f = b && b.closest('form[data-action="register"]'); if (!f) return;
   appliquerRole(f);
   const faute = controleInscription(f, +(f.dataset.cur || 1));
-  if (faute) { e.preventDefault(); e.stopImmediatePropagation(); erreurIci(f, faute[0], faute[1]); }
+  if (faute) { e.preventDefault(); e.stopImmediatePropagation(); erreursIci(f, faute.toutes || [faute]); }
   else try { effacerErreursChamps(f); } catch (err) {}
 }, true);
 /* Envoi : tout est contrôlé ici pour guider la saisie, puis Supabase Auth crée le
@@ -153,7 +167,7 @@ window.addEventListener('submit', async e => {
   if (f.dataset.envoi) return;                         // pas de double envoi
   appliquerRole(f);
   const faute = controleInscription(f, 0);
-  if (faute) return erreurIci(f, faute[0], faute[1]);
+  if (faute) return erreursIci(f, faute.toutes || [faute]);
   try { effacerErreursChamps(f); } catch (err) {}
   f.dataset.envoi = '1'; occupe(f, true, 'Création du compte…');
   let r;
@@ -305,20 +319,23 @@ window.addEventListener('submit', async e => {
   const f = e.target.closest && e.target.closest('form[data-action="contact-form"]'); if (!f) return;
   e.preventDefault(); e.stopImmediatePropagation();
   if (f.dataset.envoi) return;
-  const d = formData(f), t = k => String(d[k] || '').trim();
-  if (t('name').length < 2) return erreurIci(f, 'name', 'Indiquez votre nom.');
-  if (!RE_EMAIL.test(t('email'))) return erreurIci(f, 'email', 'Adresse e-mail invalide : nous en avons besoin pour vous répondre.');
-  if (t('phone') && !telSenegal(t('phone')) && !/^\+\d{8,15}$/.test(t('phone').replace(/\s/g, ''))) return erreurIci(f, 'phone', 'Numéro de téléphone invalide.');
-  if (!SUJETS.some(x => x[0] === t('subject'))) return erreurIci(f, 'subject', 'Choisissez un sujet.');
-  if (t('message').length < 10) return erreurIci(f, 'message', 'Votre message est trop court (10 caractères minimum).');
+  const d = formData(f), t = k => String(d[k] || '').trim(), fautes = [], si = (c, n, m) => { if (!c) fautes.push([n, m]); };
+  si(t('name').length >= 2, 'name', 'Indiquez votre nom.');
+  si(RE_EMAIL.test(t('email')), 'email', 'Adresse e-mail invalide : nous en avons besoin pour vous répondre.');
+  si(!t('phone') || telSenegal(t('phone')) || /^\+\d{8,15}$/.test(t('phone').replace(/\s/g, '')), 'phone', 'Numéro de téléphone invalide.');
+  si(SUJETS.some(x => x[0] === t('subject')), 'subject', 'Choisissez un sujet.');
+  si(t('message').length >= 10, 'message', 'Votre message est trop court (10 caractères minimum).');
+  if (fautes.length) return erreursIci(f, fautes);
   try { effacerErreursChamps(f); } catch (err) {}
-  const u = Auth.current(), moi = DB.session && DB.session.user ? DB.session.user.id : null;
+  const moi = DB.session && DB.session.user ? DB.session.user.id : null;
   const msg = {name: t('name').slice(0, 120), email: t('email').toLowerCase(), phone: t('phone') || null, subject: t('subject'), message: t('message').slice(0, 3000), user_id: moi};
   f.dataset.envoi = '1'; occupe(f, true);
-  /* Insertion directe (le visiteur peut écrire, jamais relire) ; l'administration est prévenue par la base. */
-  const {error} = await SB.from('contact_messages').insert(msg);
+  /* Enregistrement avec accusé (public.envoyer_contact renvoie l'identifiant du message) ;
+     repli sur l'insertion directe si la fonction n'est pas encore installée. */
+  let {data: accuse, error} = await SB.rpc('envoyer_contact', {p_nom: msg.name, p_email: msg.email, p_tel: msg.phone, p_sujet: msg.subject, p_message: msg.message});
+  if (error && /envoyer_contact|PGRST202|Could not find the function/i.test(String(error.message || '') + (error.code || ''))) ({error} = await SB.from('contact_messages').insert(msg)), accuse = !error;
   delete f.dataset.envoi; occupe(f, false);
-  if (error) return etatForm(f, 'bad', 'Envoi impossible', esc(messageErreur(error)));
+  if (error || !accuse) return etatForm(f, 'bad', 'Envoi impossible', esc(error ? messageErreur(error) : 'Le message n\'a pas été enregistré. Réessayez ou écrivez-nous par e-mail.'));
   f.reset();
   etatForm(f, 'ok', 'Message envoyé', `Merci ${esc(msg.name.split(' ')[0])}. Nous vous répondrons à <b>${esc(msg.email)}</b> sous 48 h ouvrées.`);
 }, true);
@@ -338,6 +355,10 @@ const LIB_SUJET = Object.fromEntries(SUJETS);
 if (MENUS_RAW.admin && !MENUS_RAW.admin.some(m => m[0] === '#/admin/contacts')) MENUS_RAW.admin.splice(MENUS_RAW.admin.length - 1, 0, ['#/admin/contacts', 'Messages de contact', 'message']);
 route(/^\/admin\/contacts$/, () => {
   const u = Auth.guard('admin'); if (!u) return false;
+  if (!DB.contactsRelus) { DB.contactsRelus = true; SB.from('contact_messages').select('id', {count: 'exact', head: true}).then(({error, count}) => {
+    DB.contactsLecture = error ? (messageErreur(error) || 'lecture refusée') : null;
+    if (!error && count !== DB.getData(DB.K.contacts).length) DB.relire(DB.K.contacts).then(() => render()); else if (error) render(); }); }
+  if (DB.contactsLecture) return shellApp(u, page('Messages de contact', '') + `<div class="empty"><b>Lecture des messages refusée par le serveur</b><p class="small">${esc(DB.contactsLecture)}<br>Votre compte doit être administrateur actif ; si la double authentification des administrateurs est exigée (réglage admin_mfa_obligatoire), connectez-vous avec elle.</p></div>`);
   const L = DB.getData(DB.K.contacts).sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
   const nouveaux = L.filter(m => m.statut === 'nouveau').length;
   return shellApp(u, page('Messages de contact', `${pluriel(L.length, 'message')} · ${nouveaux} à traiter`) + (L.length ? gTable(['Reçu le', 'Expéditeur', 'Sujet', 'Message', 'État', ''],

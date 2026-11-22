@@ -9,7 +9,8 @@
 //   * l'appelant est connecté (son jeton est contrôlé par Supabase Auth) ;
 //   * il est titulaire actif de son espace ;
 //   * le compte demandé lui est bien rattaché (son équipe, ses baux, ses fiches).
-// Actions : creer, mot-de-passe (mot de passe provisoire perdu), supprimer
+// Actions : creer, mot-de-passe (provisoire perdu ; toujours possible pour un membre de
+// l'équipe), supprimer
 // (un compte rattaché, ou son propre compte).
 // =============================================================================
 import { createClient } from 'npm:@supabase/supabase-js@2.45.4';
@@ -128,7 +129,11 @@ Deno.serve(async (req) => {
   if (action === 'mot-de-passe') {
     const c = await compteRattache(String(b.id || ''));
     if (!c) return refus(req, 403, 'Ce compte n\'est pas rattaché au vôtre.');
-    if (!c.mdp_provisoire && !estAdmin) return refus(req, 403, 'Cette personne a choisi son mot de passe : elle seule peut le changer (« Mot de passe oublié »).');
+    // Un membre de l'équipe (agent, gestionnaire) dépend du titulaire : nouveau mot de passe
+    // possible à tout moment. Un locataire ou un mandant est une personne indépendante :
+    // seulement tant qu'il n'a pas choisi le sien.
+    const equipe = c.parent_id === moi.id;
+    if (!c.mdp_provisoire && !estAdmin && !equipe) return refus(req, 403, 'Cette personne a choisi son mot de passe : elle seule peut le changer (« Mot de passe oublié »).');
     const motDePasse = assezFort(b.password) ? (b.password as string) : motDePasseAleatoire();
     const { error } = await admin.auth.admin.updateUserById(c.id, { password: motDePasse, app_metadata: { mdp_provisoire: true } });
     if (error) return refus(req, 400, 'Changement impossible : ' + error.message);

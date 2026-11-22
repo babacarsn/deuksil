@@ -160,7 +160,8 @@ document.addEventListener('submit', e => {
     const m = DB.addItem(DB.K.mandates, {ownerId: u.id, ownerId2: o.id, ref: nref('MDT', 'mandates'), rate: Math.min(50, Math.max(0, +d.rate || 0)),
       start: d.start, end: d.end, properties: props, services, status: 'actif'});
     props.forEach(pid => DB.updateItem(DB.K.properties, pid, {clientOwnerId: o.id}));
-    DB.updateItem(DB.K.owners, o.id, {rate: m.rate});
+    /* Le taux vaut pour la période du mandat ; la fiche du propriétaire n'est complétée que si elle n'en avait pas. */
+    if (!(+o.rate)) DB.updateItem(DB.K.owners, o.id, {rate: m.rate});
     audit('Mandat créé', `${m.ref} · ${o.name}`); render(); autoFileThen('mandate', m, m.ref + ' créé');
   }
   if (f.dataset.action === 't-save') {

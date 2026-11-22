@@ -1,8 +1,8 @@
 /* ==========================================================================
    MODULE : pdf.js — documents PDF (devis, proforma, facture, avoir, reçu,
-   quittance, contrat) avec le logo DEUKSIL. jsPDF chargé à la demande (cdnjs).
+   quittance, contrat) avec le logo DEUKSIL. jsPDF chargé à la demande (copie locale js/vendor : la CSP interdit les CDN).
    ========================================================================== */
-const PDF_URL = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+const PDF_URL = 'js/vendor/jspdf-2.5.1.umd.min.js';
 let _pdfLoad = null;
 const loadJsPdf = () => window.jspdf ? Promise.resolve() : (_pdfLoad = _pdfLoad || new Promise((ok, ko) => {
   const s = document.createElement('script'); s.src = PDF_URL; s.onload = ok; s.onerror = () => { _pdfLoad = null; ko(new Error('pdf')); }; document.head.appendChild(s);
@@ -166,7 +166,7 @@ document.addEventListener('click', async e => {
   if (u.member && !u.perms.includes(hit[0])) { toast('Action non autorisée pour votre profil.', 'bad'); return; }
   el.disabled = true; const label = el.innerHTML; el.textContent = 'Génération…';
   try { await loadPdf(); const f = hit[1](hit[2], hit[3] || u); await saveFile(f.name, f.blob); audit('PDF généré', f.name); }
-  catch (err) { toast('PDF indisponible : une connexion Internet est nécessaire.', 'bad'); }
+  catch (err) { console.error('PDF', err); toast(err && err.message === 'pdf' ? 'Impossible de charger le générateur PDF. Rechargez la page puis réessayez.' : 'Le PDF n\'a pas pu être généré. Réessayez ; si le problème continue, signalez-le.', 'bad'); }
   el.disabled = false; el.innerHTML = label;
 });
 function showCreated(kind, key) {

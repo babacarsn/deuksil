@@ -169,7 +169,7 @@ propRoute.fn = pid => {
   if (!u || !['owner', 'agency'].includes(u.role)) { toast('Espace réservé aux propriétaires et agences.', 'bad'); go('#/login'); return false; }
   const p = pid === 'new' ? null : DB.findItem(DB.K.properties, pid);
   if (p && p.ownerId !== u.id) { toast('Ce bien ne vous appartient pas.', 'bad'); go('#/owner/properties'); return false; }
-  const v = p || {transaction: 'location', type: 'appartement', region: 'Dakar', city: 'Dakar', commune: 'Dakar', quartier: 'Almadies', amenities: []}, cities = Object.keys(LOCATIONS[v.region] || {});
+  const v = p || {transaction: 'location', type: 'appartement', region: 'Dakar', city: 'Dakar', commune: '', quartier: '', amenities: []}, cities = Object.keys(LOCATIONS[v.region] || {});
   resetFormPhotosIfNeeded(pid, v.photos);
   const f = (n, l, val, extra = '') => `<div class="field"><label>${l}</label><input class="input" name="${n}" value="${esc(val ?? '')}" ${extra}></div>`;
   return shellApp(u, crumbHtml('#/owner/properties', 'Mes biens', p ? 'Modifier le bien' : 'Ajouter un bien') + `<form data-action="save-property" data-id="${p ? p.id : ''}" id="wiz" style="max-width:820px">${stepsHtml(3, 1)}
@@ -182,8 +182,8 @@ propRoute.fn = pid => {
       <div class="form-grid">${f('price', 'Prix (FCFA)', v.price, 'type="number" required')}${f('surface', 'Surface (m²)', v.surface, 'type="number" required')}</div>
       <div class="form-grid"><div class="field"><label>Région</label><select name="region" data-action="region-change">${Object.keys(LOCATIONS).map(r => `<option ${v.region === r ? 'selected' : ''}>${r}</option>`).join('')}</select></div>
         <div class="field"><label>Ville</label><select name="city">${cities.map(c => `<option ${v.city === c ? 'selected' : ''}>${c}</option>`).join('')}</select></div></div>
-      <div class="form-grid">${f('commune', 'Commune', v.commune)}${f('quartier', 'Quartier', v.quartier)}</div>
-      <div class="form-grid">${f('rooms', 'Chambres', v.rooms || 0, 'type="number"')}${f('baths', 'Salles de bain', v.baths || 0, 'type="number"')}</div>
+      <div class="form-grid">${f('commune', 'Commune', v.commune, 'placeholder="Ex. Ngor"')}${f('quartier', 'Quartier', v.quartier, 'placeholder="Ex. Almadies" required')}</div>
+      <div class="form-grid">${f('rooms', 'Chambres', p ? v.rooms : '', 'type="number" min="0" placeholder="Ex. 3"')}${f('baths', 'Salles de bain', p ? v.baths : '', 'type="number" min="0" placeholder="Ex. 2"')}</div>
       <div class="field"><label>Équipements</label><div class="row" style="flex-wrap:wrap;gap:10px">${AMENITIES.map(a => `<label class="check"><input type="checkbox" name="amenities" value="${a}" ${(v.amenities || []).includes(a) ? 'checked' : ''}>${a}</label>`).join('')}</div></div>
       <div class="field" style="max-width:260px"><label>Disponible à partir du</label><input class="input" name="availableFrom" type="date" value="${(v.availableFrom || now()).slice(0, 10)}"></div></div></div>
     <div class="wstep" data-step="3"><div class="wiz-card"><h3>3. Photos et publication</h3>${photoUploadHtml()}

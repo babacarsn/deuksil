@@ -1,5 +1,20 @@
 # DEUKSIL — Historique des modifications
 
+## 22 novembre 2026 — corrections de la recette (6 fichiers UAT testés)
+
+- **PDF** : jsPDF est servi par le site (`js/vendor/`), la CSP bloquait la copie cdnjs ; message clair si la génération échoue. Tous les PDF (quittances, devis, factures, reçus, mandats, rapports, contrat de bail) fonctionnent.
+- **Relevé du mandant** : les loyers portent désormais leur bien (migration `20261122000100`) ; le mandant voit les mêmes montants que l'agence. Une facture de l'agence n'est plus comptée dans l'argent du mandant (case « pour le compte du propriétaire »).
+- **Espace mandant** : « Mes biens confiés » en lecture seule, fiche de chaque bien avec bail, loyers et dépenses ; plus de Modifier / Pause / Ajouter.
+- **Session expirée** : renouvellement automatique puis message « reconnectez-vous » (gerer-acces, assistant) ; « Se déconnecter » vide la session même si le serveur répond 403 et ramène à l'accueil ; plus de faux « Membre créé » au journal.
+- **Documents** : HT / TVA / TTC, la TVA suit le devis jusqu'à la facture, « Devis → Facture » direct, NINEA / RCCM / adresse sur les aperçus et PDF, quittance « pour le compte de » ; total affiché dans le formulaire.
+- **Finances** : revenus par mois avec les acomptes ; résultat de l'agence = commissions + factures + honoraires (pas les loyers des mandants) ; honoraires créés à chaque bail d'agence ; caution « attendue » jusqu'à sa réception ; compteurs justes dans l'accueil Gestion.
+- **Comptes** : « Nouveau mot de passe » sur chaque compte ouvert (agent, gestionnaire, locataire, mandant), droits d'un membre modifiables, adresse de connexion = site utilisé.
+- **Locataire** : arrivée sur « Mon logement », libellé « Locataire », bloc « Mon bail » (caution, bailleur), contrat de bail PDF, « Mes paiements » au menu, bandeau de retard juste (acomptes déduits), maintenance avec urgence, description, photo et confirmation.
+- **Public** : contact enregistré avec accusé, toutes les erreurs affichées d'un coup ; inscription avec une adresse déjà utilisée signalée ; message adapté à chaque action d'un visiteur (affiché sur la page de connexion) ; signalement sans compte ; fiche d'un bien : adresse sans répétition, « Voir sur une carte », partager (WhatsApp, lien), référence lisible, badges cohérents, pas de « 0 chambre », vues des visiteurs comptées, actions de propriétaire sur sa propre annonce, barre d'action fixe sur téléphone ; recherche : « Créer une alerte » et case « Comparer ».
+- **Formulaires** : astérisques sur les champs obligatoires, message en français sous le champ, plus de quartier « Almadies » ni de « 0 chambre » pré-remplis, CNI invraisemblable refusée, photos en trop signalées, la page ne remonte plus en haut après une mise à jour.
+- **Divers** : relance d'impayé confirmée (une par jour), mandat sans modification cachée de la commission de la fiche (pré-remplie), visite acceptée sur un bien loué sans changer son statut, fin de bail « remettre en location » cochée, nom de l'agence et de l'agent affichés, titre d'onglet sans doublon, bulle de l'assistant plus discrète sur téléphone.
+- Fonction `gerer-acces` : nouveau mot de passe toujours possible pour un membre de l'équipe.
+
 ## 12 novembre 2026 (3) — Branche « test » et nouvelle recette
 
 - Branche `test` : version à tester avant publication ; adresse Vercel stable https://deuksil-git-test-babacarsns-projects.vercel.app

@@ -14,3 +14,4 @@ for f in $(ls "$M"/*.sql | sort); do
 done
 bash "$D/scenarios.sh"
 bash "$D/relations.sh"
+bash "$D/recette.sh"

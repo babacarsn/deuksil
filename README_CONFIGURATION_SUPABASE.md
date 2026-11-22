@@ -1,6 +1,6 @@
-# DEUKSIL — Supabase : ce qu'il faut configurer pour les modifications des 11 et 12 novembre 2026
+# DEUKSIL — Supabase : ce qu'il faut configurer pour les modifications récentes (11, 12 et 22 novembre 2026)
 
-**Pour la personne qui gère Supabase.** Ce document ne reprend PAS l'installation d'origine (déjà faite) : il liste seulement ce que les modifications d'hier et d'aujourd'hui demandent côté Supabase, **dans l'ordre**, avec un contrôle (✅) après chaque étape.
+**Pour la personne qui gère Supabase.** Ce document ne reprend PAS l'installation d'origine (déjà faite) : il liste seulement ce que les modifications récentes demandent côté Supabase, **dans l'ordre**, avec un contrôle (✅) après chaque étape.
 
 | | |
 |---|---|
@@ -12,7 +12,47 @@
 
 ---
 
-## Ce qui a changé et ce que cela demande à Supabase
+## 22 novembre 2026 — corrections de la recette (à faire en premier si les étapes 0 à 8 sont déjà faites)
+
+| Modification (site) | Ce qu'il faut côté Supabase |
+|---|---|
+| Le relevé du mandant affichait « Encaissé 0 FCFA » (bloquant) | **Migration `20261122000100_recette_loyers_contact.sql`** |
+| Message de contact « envoyé » mais introuvable | même migration (fonction `envoyer_contact`) + contrôle C ci-dessous |
+| « Nouveau mot de passe » pour un agent ou un gestionnaire, à tout moment | **Redéployer `gerer-acces`** |
+| PDF, session expirée, TVA, comptes, fiche d'un bien, recherche… | Rien (site uniquement) |
+
+**A. Appliquer la migration** (après une sauvegarde, étape 0) : SQL Editor → coller tout `supabase/migrations/20261122000100_recette_loyers_contact.sql` → Run. (Ou `supabase db push` si `supabase migration list` ne montre que celle-ci en attente.) Rejouable sans risque.
+
+✅ Contrôles :
+```sql
+-- 2 lignes : loyer_suit_bail, loyers_suivent_bail
+select tgname from pg_trigger where tgname in ('loyer_suit_bail', 'loyers_suivent_bail');
+-- 0 : plus aucun loyer sans bien
+select count(*) from public.rents where property_id is null;
+-- 1 ligne
+select proname from pg_proc where proname = 'envoyer_contact';
+```
+
+**B. Redéployer la fonction** : `supabase functions deploy gerer-acces` (SANS `--no-verify-jwt`).
+
+**C. Messages de contact : vérifier la lecture par l'administrateur**
+```sql
+-- Les messages sont-ils enregistrés ?
+select count(*), max(created_at) from public.contact_messages;
+-- Si 'oui', l'administrateur doit se connecter avec la double authentification pour les lire
+select valeur from app.reglages where cle = 'admin_mfa_obligatoire';
+-- Le compte administrateur est-il bien 'admin' et 'actif' ?
+select email, role, status from public.profiles where role = 'admin';
+```
+Si des messages existent mais que la page Admin › Messages de contact en affiche 0, elle indique maintenant pourquoi (lecture refusée).
+
+✅ Sur le site de test : Contact → envoyer → le message apparaît dans Admin › Messages de contact ; compte mandant → Mes relevés = mêmes montants que Reversements côté agence.
+
+Tests automatiques (base locale de test, jamais la production) : `supabase/tests-cni/recette.sh` (lancé par `rejouer.sh`).
+
+---
+
+## 11 et 12 novembre 2026 — ce qui a changé et ce que cela demande à Supabase
 
 | Date | Modification (site) | Ce qu'il faut côté Supabase |
 |---|---|---|

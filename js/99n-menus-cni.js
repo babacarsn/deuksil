@@ -287,7 +287,8 @@ document.addEventListener('submit', e => {
    serveur manque, fiche du mandant actualisée après l'ouverture de son accès. */
 const ROLE_ACCES = c => !c ? 'utilisateur' : c.role === 'agent' ? 'agent' : c.role === 'manager' ? 'gestionnaire'
   : c.role === 'tenant' ? 'locataire' : (c.ownerRec || c.mandantOf) ? 'propriétaire' : c.role === 'agency' ? 'agence' : 'utilisateur';
-const adresseConnexion = () => ((typeof DEUKSIL_CONFIG !== 'undefined' && DEUKSIL_CONFIG.siteUrl) || (typeof location !== 'undefined' ? location.origin : '')).replace(/\/+$/, '') + '/#/login';
+/* Adresse du site réellement utilisé (site de test ou site en ligne) ; l'adresse configurée en secours. */
+const adresseConnexion = () => ((typeof location !== 'undefined' && /^https?:/.test(location.origin) ? location.origin : '') || (typeof DEUKSIL_CONFIG !== 'undefined' && DEUKSIL_CONFIG.siteUrl) || '').replace(/\/+$/, '') + '/#/login';
 function numeroWhatsApp(tel) {
   const d = String(tel || '').replace(/\D/g, '');
   if (d.length === 9) return '221' + d;

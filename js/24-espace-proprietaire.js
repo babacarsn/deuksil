@@ -165,7 +165,7 @@ route(/^\/owner\/property\/(new|[\w-]+)$/, pid => {   // identifiants UUID : let
   if (!u || !['owner', 'agency'].includes(u.role)) { toast('Espace réservé aux propriétaires et agences.', 'bad'); go('#/login'); return false; }
   const p = pid === 'new' ? null : DB.findItem(DB.K.properties, pid);
   if (p && p.ownerId !== u.id) { toast("Ce bien ne vous appartient pas.", 'bad'); go('#/owner/properties'); return false; }
-  const v = p || {transaction:'location', type:'appartement', region:'Dakar', city:'Dakar', commune:'Dakar', quartier:'Almadies', amenities:[]};
+  const v = p || {transaction:'location', type:'appartement', region:'Dakar', city:'Dakar', commune:'', quartier:'', amenities:[]};
   const cities = Object.keys(LOCATIONS[v.region] || {});
   resetFormPhotosIfNeeded(pid, v.photos);
   return shellApp(u, page(p ? 'Modifier le bien' : 'Ajouter un bien', 'Les annonces sont vérifiées par DEUKSIL avant publication.') + `

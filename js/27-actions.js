@@ -294,7 +294,7 @@ document.addEventListener('click', e => {
       }
       const v = DB.updateItem(DB.K.visits, id, {status: s});
       notify(v.clientId, `Votre demande de visite est : ${VISIT_LABEL[s].toLowerCase()}.`, '#/client/visits');
-      if (s === 'acceptee') DB.updateItem(DB.K.properties, v.propertyId, {status: 'discussion'});
+      if (s === 'acceptee' && (gProp(v.propertyId) || {}).status === 'disponible') DB.updateItem(DB.K.properties, v.propertyId, {status: 'discussion'});   // un bien loué ou vendu garde son statut
       toast(`Demande ${VISIT_LABEL[s].toLowerCase()}.`); render(); break;
     }
     case 'validate': {
