@@ -1,0 +1,59 @@
+/* 07-simple.css — menu regroupé et blocs « À faire aujourd'hui » / « Bien démarrer ».
+   Reprend les styles existants (.side a, .pd-card, .pd-ic) : seul le rangement change. */
+
+/* --- Menu latéral regroupé --- */
+.side .nav-simple{display:flex;flex-direction:column;gap:2px;flex:1}
+.side .ng-t{display:flex;align-items:center;gap:11px;width:100%;border:0;background:none;cursor:pointer;text-align:left;
+  border-radius:12px;padding:11px 13px;margin-bottom:3px;font:inherit;font-size:.91rem;font-weight:500;color:var(--nav-text);transition:background .14s,color .14s}
+.side .ng-t:hover{background:rgba(255,255,255,.06);color:#fff}
+.side .ng-t:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+.side .ng-t .ico{opacity:.8;display:inline-flex}
+.side .ng.contient-actif > .ng-t{color:#fff;font-weight:600}
+.side .ng.contient-actif > .ng-t .ico{opacity:1;color:var(--yellow,var(--gold))}
+.side .ng-lib{flex:1;min-width:0}
+.side .ng-pt{width:8px;height:8px;border-radius:50%;background:var(--gold);flex:0 0 8px}
+.side .ng.ouvert .ng-pt{display:none}
+.side .ng-chev{display:inline-flex;opacity:.6;transition:transform .2s}
+.side .ng.ouvert .ng-chev{transform:rotate(90deg)}
+.side .ng-l{display:none;flex-direction:column;margin:0 0 6px 21px;padding-left:10px;border-left:1px solid rgba(255,255,255,.12)}
+.side .ng.ouvert .ng-l{display:flex}
+.side .ng-l a{padding:8px 11px;font-size:.87rem;margin-bottom:1px}
+.side .ng-l a .ico{display:none}
+.side .ng-bas{margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.1);display:flex;flex-direction:column;gap:2px}
+
+/* --- Accueil : en-tête commun des deux blocs --- */
+.sd-tete{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.sd-tete > div:first-child{flex:1 1 220px;min-width:0}
+.sd-nb{display:grid;place-items:center;min-width:38px;height:38px;padding:0 10px;border-radius:12px;background:var(--bad-soft);color:var(--bad);font-weight:700;font-size:1.05rem}
+.pd-ic.bad{background:var(--bad-soft);color:var(--bad)}
+.pd-ic.gold{background:var(--gold-soft);color:var(--gold)}
+.pd-ic.info{background:color-mix(in srgb,#6B5BD2 14%,var(--surface));color:#6B5BD2}
+
+/* « À faire aujourd'hui » */
+.sd-liste{list-style:none;margin:14px 0 0;padding:0;display:flex;flex-direction:column}
+.sd-liste li{display:flex;align-items:center;gap:14px;padding:12px 0;border-top:1px solid var(--line)}
+.sd-liste li:first-child{border-top:0}
+.sd-liste .pd-ic{margin:0;flex:0 0 40px}
+.sd-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.sd-txt b{font-size:1rem;color:var(--ink)}
+.sd-txt span{font-size:.9rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sd-liste .btn{flex:0 0 auto;white-space:nowrap}
+
+/* « Bien démarrer » */
+.sd-barre{height:8px;border-radius:99px;background:var(--line);margin:16px 0 14px;overflow:hidden}
+.sd-barre i{display:block;height:100%;border-radius:99px;background:var(--gold);transition:width .6s}
+.sd-etapes{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+.sd-etapes a{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface);
+  color:var(--ink);text-decoration:none;font-weight:600;font-size:.93rem;transition:border-color .15s,transform .15s}
+.sd-etapes a:hover{border-color:var(--gold);transform:translateY(-1px)}
+.sd-coche{display:grid;place-items:center;width:24px;height:24px;flex:0 0 24px;border-radius:50%;border:2px solid var(--line);color:#fff}
+.sd-etapes .fait a{color:var(--muted);font-weight:500}
+.sd-etapes .fait .sd-coche{background:var(--ok);border-color:var(--ok)}
+
+/* Téléphone : boutons pleine largeur, faciles à toucher */
+@media (max-width:640px){
+  .sd-liste li{flex-wrap:wrap}
+  .sd-liste .btn{flex:1 1 100%;min-height:44px;display:flex;align-items:center;justify-content:center}
+  .sd-txt span{white-space:normal}
+  .sd-tete .btn{flex:1 1 100%;min-height:44px}
+}

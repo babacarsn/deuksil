@@ -1,5 +1,13 @@
 # DEUKSIL — Historique des modifications
 
+## 26 novembre 2026 — Plus simple à utiliser (design inchangé)
+
+- **Menu regroupé** sur ordinateur : agence 20 entrées → 7 rubriques, propriétaire 15 → 5, locataire 14 → 6, client 9 → 6 (+ Paramètres et Aide sous un trait). Les rubriques s'ouvrent d'un clic ; celle de l'écran ouvert est dépliée d'office ; un point doré signale une rubrique qui contient quelque chose à traiter. Aucun écran n'est retiré. Agents, gestionnaires et mandants gardent leur menu (déjà court).
+- Libellés plus parlants : « Accueil », « Signaler un problème » (locataire), « Loyer & paiements », « Vue d'ensemble ».
+- **« À faire aujourd'hui »** sur l'accueil de l'agence et du propriétaire, sous la bannière photo : loyers en retard, visites à confirmer, problèmes signalés, factures impayées après échéance, mandats qui expirent dans 30 jours — chaque ligne avec son bouton qui ouvre le bon écran déjà filtré.
+- **« Bien démarrer »** pour un compte neuf (CNI, premier bien, premier propriétaire pour l'agence, premier locataire) : barre de progression, la carte disparaît quand tout est fait.
+- Même style que le reste du tableau de bord (cartes, icônes, couleurs) ; boutons pleine largeur sur téléphone.
+
 ## 26 novembre 2026 — Aide : tutoriels vidéo
 
 - **Chargement à la demande** : les pages ne chargent que 3 Ko pour l'aide ; le code de la page Aide (19 Ko) et les vignettes ne sont téléchargés qu'à la première visite de « Aide », et une vidéo seulement quand on ouvre son tutoriel. Vignettes réduites à 640 px (1,3 Mo → 330 Ko).
