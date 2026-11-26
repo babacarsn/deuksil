@@ -72,3 +72,11 @@ a.pd-mini[href*="leases"] .pd-ic{background:#FFF6E5!important;color:#B54708!impo
   background:transparent;color:rgba(255,255,255,.72);border:1px solid rgba(255,255,255,.16);transition:background .15s,color .15s,border-color .15s}
 .side-user .su-sortir:hover{background:rgba(240,68,56,.16);color:#FDA29B;border-color:rgba(240,68,56,.45)}
 .side-user .su-sortir:focus-visible{outline:2px solid #F5B83D;outline-offset:2px}
+
+/* --- 4. Locataire : le bandeau rouge « loyers en retard » devient un bloc blanc --- */
+.retard-bandeau{background:#FFFFFF!important;background-image:none!important;color:#0C2745!important;border:1px solid #E6EAF0!important;border-radius:16px!important;
+  box-shadow:0 1px 2px rgba(12,39,69,.05),0 6px 16px -8px rgba(12,39,69,.16)!important;padding:14px 16px!important}
+.retard-bandeau .rb-ic{background:#FEF3F2!important;color:#B42318!important;border-radius:10px!important;box-shadow:none!important;border:0!important}
+.retard-bandeau b{color:#0C2745!important}
+.retard-bandeau .rb-montant{color:#B42318}
+.retard-bandeau .small{color:#475467!important;opacity:1!important}

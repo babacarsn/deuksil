@@ -414,7 +414,7 @@ bandeauRetard = function () {
   const dus = DB.filterItems(DB.K.rents, r => r.leaseId === u.leaseId && !r.paidAt).filter(r => rentState(r)[1] === 'bad'); if (!dus.length) return;
   const total = dus.reduce((s, r) => s + rRest(r), 0), relance = dus.find(r => r.remindedAt);
   const d = document.createElement('div'); d.className = 'retard-bandeau';
-  d.innerHTML = `<span class="rb-ic">${icon('alert', 18)}</span><div style="min-width:0"><b>${dus.length} loyer${dus.length > 1 ? 's' : ''} en retard · ${money(total)} à régler</b>
+  d.innerHTML = `<span class="rb-ic">${icon('alert', 18)}</span><div style="min-width:0"><b>${dus.length} loyer${dus.length > 1 ? 's' : ''} en retard · <span class="rb-montant">${money(total)}</span> à régler</b>
     <div class="small">${relance ? `Votre bailleur vous a relancé le ${dateFr(relance.remindedAt)}.` : 'Réglez auprès de votre bailleur, qui enregistrera le paiement.'}</div></div><a class="btn sm" href="#/tenant/messages" style="margin-left:auto">Le contacter</a>`;
   c.prepend(d);
 };
