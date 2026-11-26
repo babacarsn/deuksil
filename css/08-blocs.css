@@ -1,0 +1,30 @@
+/* 08-blocs.css — blocs des tableaux de bord : sobres et lisibles (validé sur la démo du 26 novembre).
+   Le menu bleu, les bannières photo et la mise en page ne changent pas. Chargé en dernier :
+   il ne fait que remplacer le décor des blocs. */
+
+/* --- 1. Blocs : fond blanc, trait fin, ombre douce ; plus de dégradés ni de ronds décoratifs --- */
+.pd .pd-card,.pd-duo .pd-card,.pd-card[data-tone],.qa-grid .quick-card,.pd-qa,.lg-carte,.sd-etapes a{
+  background:#FFFFFF!important;background-image:none!important;border:1px solid #E6EAF0!important;
+  box-shadow:0 1px 2px rgba(12,39,69,.05),0 6px 16px -8px rgba(12,39,69,.16)!important}
+.pd .pd-card,.pd-duo .pd-card,.pd-card[data-tone]{border-radius:16px!important}
+.qa-grid .quick-card,.pd-qa{border-radius:14px!important}
+.pd-card::before,.pd-card::after,.quick-card::before,.quick-card::after,.kpi-rich::before,.kpi-rich::after{display:none!important}
+.pd-ic.warn::after{display:none!important}
+
+/* Au survol (souris) : le bloc cliquable se soulève un peu pour montrer qu'on peut cliquer */
+.pd .pd-card,.qa-grid .quick-card,.lg-carte{transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+a.pd-card:hover,a.pd-mini:hover,.qa-grid .quick-card:hover,.pd-qa:hover,.lg-carte:hover{
+  transform:translateY(-2px)!important;border-color:#CBD3DE!important;
+  box-shadow:0 2px 4px rgba(12,39,69,.06),0 16px 32px -12px rgba(12,39,69,.28)!important}
+.quick-card:hover .ic-bubble,.pd-card:hover .pd-ic{transform:none!important}
+@media (prefers-reduced-motion:reduce){a.pd-card:hover,a.pd-mini:hover,.qa-grid .quick-card:hover,.pd-qa:hover,.lg-carte:hover{transform:none!important}}
+
+/* Textes des blocs : noir pour les montants, gris pour les détails ; le rouge reste réservé aux impayés */
+.pd-card .pd-lab,.pd-card .pd-sub,.pd-card .pd-foot,.pd-card .pd-note{color:#5E6978}
+.pd-card .pd-val:not(.bad),.pd-card .pd-big{color:#0F1A2A}
+
+/* Actions rapides : icône carrée à gauche du libellé, comme dans la démo */
+.qa-grid .quick-card{display:flex!important;align-items:center;gap:12px;padding:14px!important;min-height:0!important}
+.qa-grid .quick-card .ic-bubble{width:38px!important;height:38px!important;border-radius:10px!important;margin:0!important;flex:0 0 38px}
+.qa-grid .quick-card .ic-bubble svg{width:18px;height:18px}
+.qa-grid .quick-card b{font-weight:600;font-size:.95rem;line-height:1.25}
