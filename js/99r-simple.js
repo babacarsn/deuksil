@@ -210,7 +210,9 @@ function nettoyerAccueil(c, u) {
         if (nb) nb.textContent = n; else if (n) { const ok = d.querySelector('.sd-afaire .sd-tete .pd-ic'); if (ok) ok.outerHTML = `<span class="sd-nb">${n}</span>`; }
       }
     }
-    ote('.pd-todo'); ote('.pd-pat');
+    ote('.pd-todo'); ote('.pd-pat'); ote('.pd-evo');   /* « Évolution des revenus / encaissements » retirée */
+    const top = d.querySelector('.pd > .pd-top'), gauche = top && top.children[0], duo = gauche && gauche.querySelector(':scope > .pd-duo');
+    if (top && top.children.length === 1 && duo) top.appendChild(duo);   /* les compteurs passent à droite */
     ote('.pd-duo a.pd-mini[href="#/manage/fpay"]');
   }
   if (loc) {

@@ -2,6 +2,8 @@
 
 ## 26 novembre 2026 — Plus simple à utiliser (design inchangé)
 
+- **Loyers regroupés par personne** (agence et propriétaire) : une carte par locataire avec le total dû, le retard en jours, le bien, et Relancer / Encaisser en gros boutons (sur le plus ancien impayé) ; « détail par mois » déplie les mois impayés ; sections À encaisser / À jour. L'onglet « Par mois » rend le tableau habituel et ses filtres.
+- Graphiques **« Évolution des revenus » / « Évolution des encaissements »** retirés des accueils ; les compteurs passent à côté de la carte principale.
 - **Menu du téléphone (☰)** rangé dans les mêmes rubriques que sur ordinateur (agence : 8 lignes au lieu de 17).
 - **Listes en cartes sur téléphone** plus faciles : l'action principale (Encaisser, Ouvrir…) en gros bouton pleine largeur, les autres deux par ligne, boutons de 44 px ; les états longs passent à la ligne.
 - **Formulaires en étapes** : bail (2), mandat de gestion (3), mandat de vente (2), devis / facture (3). « Suivant » vérifie l'étape ; l'enregistrement d'origine n'apparaît qu'à la dernière étape (`js/99s-facile.js`). Pré-remplissages existants conservés.

@@ -139,3 +139,86 @@ function mettreEnEtapes(form) {
 new MutationObserver(() => {
   document.querySelectorAll('form[data-action]:not([data-etapes])').forEach(f => { if (ETAPES_FORM[f.dataset.action]) try { mettreEnEtapes(f); } catch (e) {} });
 }).observe(document.body, {childList: true, subtree: true});
+
+
+/* --- 3. Loyers regroupés par personne -----------------------------------------
+   Sur « Loyers » (agence et propriétaire) : une carte par locataire au lieu d'une
+   ligne par mois. Le total dû, le retard en jours, le bien, et deux gros boutons
+   (Relancer, Encaisser) qui agissent sur le plus ancien loyer impayé — ce sont les
+   boutons d'origine (mêmes data-action / data-id). « Détail par mois » montre les
+   mois impayés de la personne ; l'onglet « Par mois » rend le tableau habituel. */
+let vueLoyers = 'personne';
+try { if (localStorage.getItem('deuksil-vue-loyers') === 'mois') vueLoyers = 'mois'; } catch (e) {}
+const ouvertsLoyers = new Set();
+
+function groupesLoyers(u) {
+  const rents = (() => { try { return gMine('rents', u); } catch (e) { return []; } })();
+  const leases = (() => { try { return gMine('leases', u); } catch (e) { return []; } })();
+  const auj = new Date(), mc = auj.getFullYear() + '-' + String(auj.getMonth() + 1).padStart(2, '0');
+  const g = new Map();
+  rents.forEach(r => { const k = r.leaseId || ('x' + r.id); if (!g.has(k)) g.set(k, []); g.get(k).push(r); });
+  return [...g.entries()].map(([k, rs]) => {
+    const l = leases.find(x => x.id === k) || {}, p = DB.findItem(DB.K.properties, l.propertyId || (rs[0] || {}).propertyId) || {};
+    const du = +l.dueDay || 5;
+    const impayes = rs.filter(r => rRest(r) > 0 && r.month && r.month <= mc).sort((a, b) => a.month < b.month ? -1 : 1);
+    const reste = impayes.reduce((s, r) => s + rRest(r), 0), vieux = impayes[0];
+    let ton = 'ok', etat = 'À jour', jours = 0;
+    if (vieux) {
+      const [ya, mo] = vieux.month.split('-').map(Number), ech = new Date(ya, mo - 1, Math.min(du, new Date(ya, mo, 0).getDate()));
+      jours = Math.floor((auj - ech) / 864e5);
+      if (jours > 0) { ton = 'bad'; etat = `En retard de ${jours} jour${jours > 1 ? 's' : ''}`; }
+      else { ton = 'warn'; etat = 'À payer avant le ' + ech.toLocaleDateString('fr-FR', {day: 'numeric', month: 'short'}); }
+    }
+    const dernier = rs.filter(r => r.paidAt).sort((a, b) => a.paidAt < b.paidAt ? 1 : -1)[0];
+    return {k, nom: l.tenant || 'Locataire', bien: [p.title, p.quartier].filter(Boolean).join(' · '), reste, impayes, vieux, ton, etat, jours, dernier, actif: l.status !== 'termine'};
+  }).filter(x => x.impayes.length || x.actif);
+}
+
+function carteLoyer(x) {
+  const btns = x.vieux ? `<div class="lg-btns"><button type="button" class="btn ghost" data-action="relance-interne" data-id="${x.vieux.id}">Relancer</button><button type="button" class="btn" data-action="g-pay" data-id="${x.vieux.id}">Encaisser</button></div>` : '';
+  const plus = x.impayes.length > 1 ? `<button type="button" class="lg-detail" data-lg="${esc(x.k)}" aria-expanded="${ouvertsLoyers.has(x.k)}">${x.impayes.length} mois impayés · détail par mois</button>
+    <ul class="lg-mois"${ouvertsLoyers.has(x.k) ? '' : ' hidden'}>${x.impayes.map(r => `<li><span>${monthLabel(r.month)}</span><b>${money(rRest(r))}</b><button type="button" class="btn sm" data-action="g-pay" data-id="${r.id}">Encaisser</button></li>`).join('')}</ul>` : '';
+  return `<article class="lg-carte" data-ton="${x.ton}">
+    <div class="lg-haut"><b class="lg-nom">${esc(x.nom)}</b><b class="lg-montant">${x.reste ? money(x.reste) : ''}</b></div>
+    <div class="lg-etat">${x.ton === 'ok' ? (x.dernier ? 'À jour · dernier paiement ' + monthLabel(x.dernier.month) : 'À jour') : esc(x.etat)}</div>
+    ${x.bien ? `<div class="lg-bien">${esc(x.bien)}</div>` : ''}${btns}${plus}</article>`;
+}
+
+function vuePersonnes(u) {
+  const G = groupesLoyers(u); if (!G.length) return '';
+  const du = G.filter(x => x.impayes.length).sort((a, b) => b.jours - a.jours || b.reste - a.reste), ok = G.filter(x => !x.impayes.length);
+  return `<div class="lg-vue">
+    ${du.length ? `<h3 class="lg-titre">À encaisser <span>${du.length}</span></h3><div class="lg-liste">${du.map(carteLoyer).join('')}</div>` : '<p class="lg-vide">Tous les loyers sont encaissés.</p>'}
+    ${ok.length ? `<h3 class="lg-titre ok">À jour <span>${ok.length}</span></h3><div class="lg-liste">${ok.map(carteLoyer).join('')}</div>` : ''}
+  </div>`;
+}
+
+function poserVueLoyers() {
+  if (!/^#\/manage\/rents(\?|$)/.test(location.hash)) return;
+  const u = Auth.current(); if (!u || !['agency', 'owner'].includes(u.role)) return;
+  const c = document.querySelector('.main > .content'); if (!c) return;
+  const wrap = c.querySelector('.table-wrap'); if (!wrap || c.querySelector('.lg-bascule')) return;
+  const html = vuePersonnes(u); if (!html) return;
+  const bascule = document.createElement('div'); bascule.className = 'lg-bascule'; bascule.setAttribute('role', 'group'); bascule.setAttribute('aria-label', 'Affichage des loyers');
+  bascule.innerHTML = `<button type="button" data-vue-loyers="personne" aria-pressed="${vueLoyers === 'personne'}">Par personne</button><button type="button" data-vue-loyers="mois" aria-pressed="${vueLoyers === 'mois'}">Par mois</button>`;
+  const ancre = c.querySelector('.rfiltre') || c.querySelector('.kpis') || wrap;
+  ancre.before(bascule);
+  const vue = document.createElement('div'); vue.innerHTML = html; const el = vue.firstElementChild;
+  wrap.before(el);
+  appliquerVueLoyers();
+}
+function appliquerVueLoyers() {
+  const c = document.querySelector('.main > .content'); if (!c) return;
+  const pers = vueLoyers === 'personne';
+  c.classList.toggle('lg-mode-personne', pers);
+  c.querySelectorAll('[data-vue-loyers]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.vueLoyers === vueLoyers)));
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-vue-loyers]');
+  if (b) { vueLoyers = b.dataset.vueLoyers; try { localStorage.setItem('deuksil-vue-loyers', vueLoyers); } catch (err) {} appliquerVueLoyers(); return; }
+  const d = e.target.closest('.lg-detail');
+  if (d) { const ul = d.nextElementSibling, o = ul.hidden; ul.hidden = !o; d.setAttribute('aria-expanded', String(o)); if (o) ouvertsLoyers.add(d.dataset.lg); else ouvertsLoyers.delete(d.dataset.lg); }
+});
+/* Un lien « loyers en retard » (?f=retard) ouvre la vue par personne ; « encaissés » la vue par mois. */
+window.addEventListener('hashchange', () => { if (/^#\/manage\/rents\?.*f=(paye|avenir)/.test(location.hash)) vueLoyers = 'mois'; });
+new MutationObserver(() => { try { poserVueLoyers(); } catch (e) {} }).observe(document.body, {childList: true, subtree: true});
