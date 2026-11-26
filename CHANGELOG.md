@@ -2,6 +2,7 @@
 
 ## 26 novembre 2026 — Plus simple à utiliser (design inchangé)
 
+- **Contrôle avant déploiement (comparaison avec `main`)** : deux écrans n'étaient plus atteignables après le nettoyage des accueils. Agence : « Baux » (création et suivi des baux, auparavant via « Mon portefeuille ») ajouté dans Locations ; propriétaire : « Paiements reçus » (auparavant via « Total encaissé ce mois ») ajouté dans Argent & documents. Vérifié pour les 6 profils : rien de ce qui était atteignable dans `main` ne manque, et tout ce qui est sur ordinateur est aussi sur téléphone.
 - **Prévu pour beaucoup de données** (testé avec 60 locataires, 34 retards, 7 problèmes, 4 factures) :
   - « À faire aujourd'hui » : 5 lignes au plus puis « Voir les N autres » ; au-delà de 2 retards, une seule ligne « N locataires en retard · total » ; les listes de noms sont résumées (« A, B et 32 autres »). Pas de doublon mandat / facture avec « À traiter ».
   - Loyers par personne : résumé (total à encaisser, nombre de locataires), recherche par nom ou bien, filtres avec compteurs (À encaisser, En retard, À payer, À jour, Tous), 12 cartes puis « Afficher 12 de plus », détail limité à 6 mois puis « Voir les autres ».

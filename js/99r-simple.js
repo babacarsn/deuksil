@@ -27,16 +27,16 @@ const MENU_SIMPLE = {
       {g: 'argent', lib: 'Argent & documents', ic: 'card', liens: ['#/manage/docs', '#/agency/commissions', '#/manage/expenses', '#/manage/finance', '#/manage/reports', '#/coffre']},
       '#/agency/agents', '#/agency/messages'],
     bas: ['#/agency/settings', '#/owner/profile', '#/aide'],
-    noms: {'#/agency/dashboard': 'Accueil', '#/manage': 'Vue d\'ensemble'}
+    noms: {'#/agency/dashboard': 'Accueil', '#/manage': 'Vue d\'ensemble', '#/manage/leases': 'Baux'}
   },
   owner: {
     plan: ['#/owner/dashboard',
       {g: 'biens', lib: 'Mes biens', ic: 'home', liens: ['#/owner/properties', '#/owner/property/new', '#/owner/visits', '#/manage/deals', '#/owner/statistics']},
       {g: 'locations', lib: 'Locataires & loyers', ic: 'key', liens: ['#/manage/leases', '#/manage/tenants', '#/manage/rents', '#/manage/tickets', '#/manage']},
-      {g: 'argent', lib: 'Argent & documents', ic: 'money', liens: ['#/manage/finance', '#/manage/expenses', '#/manage/reports', '#/coffre']},
+      {g: 'argent', lib: 'Argent & documents', ic: 'money', liens: ['#/manage/finance', '#/manage/fpay', '#/manage/expenses', '#/manage/reports', '#/coffre']},
       '#/owner/messages'],
     bas: ['#/owner/profile', '#/aide'],
-    noms: {'#/owner/dashboard': 'Accueil', '#/owner/properties': 'Tous mes biens', '#/manage': 'Vue d\'ensemble'}
+    noms: {'#/owner/dashboard': 'Accueil', '#/owner/properties': 'Tous mes biens', '#/manage': 'Vue d\'ensemble', '#/manage/fpay': 'Paiements reçus'}
   },
   tenant: {
     plan: ['#/tenant/home',
@@ -54,6 +54,17 @@ const MENU_SIMPLE = {
     noms: {'#/client/dashboard': 'Accueil'}
   }
 };
+/* Écrans qui n'étaient atteignables que par un bloc retiré de l'accueil : on les met dans le menu.
+   Agence : « Baux » (création et suivi des baux) ; propriétaire : « Paiements reçus ». */
+(() => {
+  const AJOUTS = {agency: [['#/manage/leases', 'Baux', 'file']], owner: [['#/manage/fpay', 'Paiements reçus', 'card']]};
+  Object.keys(AJOUTS).forEach(k => {
+    const d = Object.getOwnPropertyDescriptor(MENUS_RAW, k); if (!d) return;
+    const plus = m => Array.isArray(m) ? m.concat(AJOUTS[k].filter(a => !m.some(x => x[0] === a[0]))) : m;
+    if (d.get) Object.defineProperty(MENUS_RAW, k, {configurable: true, enumerable: true, set: d.set, get() { return plus(d.get.call(MENUS_RAW)); }});
+    else { let v = d.value; Object.defineProperty(MENUS_RAW, k, {configurable: true, enumerable: true, get() { return plus(v); }, set(x) { v = x; }}); }
+  });
+})();
 const menuOuverts = new Set();
 try { JSON.parse(localStorage.getItem('deuksil-menu-ouvert') || '[]').forEach(g => menuOuverts.add(g)); } catch (e) {}
 
