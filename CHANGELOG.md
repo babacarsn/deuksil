@@ -1,5 +1,14 @@
 # DEUKSIL — Historique des modifications
 
+## 26 novembre 2026 — Aide : tutoriels vidéo
+
+- Bouton **« Aide »** à la fin du menu de chaque espace (ordinateur et téléphone) et dans l'en-tête du site public.
+- Page **`#/aide`** : les tutoriels de l'espace de la personne en premier, onglets pour les autres espaces, recherche (« facture », « visite »…), lecteur vidéo avec les étapes écrites et un bouton « Ouvrir cet écran » ; lien direct `#/aide?video=<id>`.
+- **18 vidéos** (`videos/guides/`) tournées sur l'application avec des données fictives : rechercher, favoris et alertes, demander une visite, créer son compte, publier un bien, visites, bail, encaisser un loyer et quittance, devis puis facture, dépense, équipe, propriétaire mandant, mandat, reversement, espace locataire, maintenance, relevés du mandant, profil et CNI.
+- Outils de tournage : `tests/videos/` (studio et scénarios, à rejouer quand un écran change) ; le banc d'essai sert les photos déposées et charge en 2 s.
+- Le site publie désormais le dossier `videos/` (vercel.json) ; le service worker ne met pas les vidéos en cache.
+- « Bonjour, <nom de l'agence> » sur le tableau de bord de l'agence.
+
 ## 22 novembre 2026 — corrections de la recette (6 fichiers UAT testés)
 
 - **PDF** : jsPDF est servi par le site (`js/vendor/`), la CSP bloquait la copie cdnjs ; message clair si la génération échoue. Tous les PDF (quittances, devis, factures, reçus, mandats, rapports, contrat de bail) fonctionnent.

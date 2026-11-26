@@ -101,15 +101,16 @@ async function ouvrir(o = {}) {
   await demarrerServeur();
   const D = o.donnees || donnees(); if (o.preparer) o.preparer(D, ID);
   const uid = o.qui ? ID[o.qui] : null;
-  const journal = [], fonctions = o.fonctions || {};
-  const navig = o.navigateur || await chromium.launch();
-  const ctx = await navig.newContext({viewport: o.mobile ? {width: 375, height: 760} : {width: 1360, height: 900}, deviceScaleFactor: 1, serviceWorkers: 'block'});
+  const journal = [], fonctions = o.fonctions || {}, fichiers = new Map();
+  const navig = o.navigateur || await chromium.launch({args: ['--lang=fr-FR'], env: {...process.env, LANG: 'fr_FR.UTF-8', LANGUAGE: 'fr_FR:fr', LC_ALL: 'fr_FR.UTF-8'}});   // champs de date au format français
+  const ctx = await navig.newContext({viewport: o.viewport || (o.mobile ? {width: 375, height: 760} : {width: 1360, height: 900}), deviceScaleFactor: 1, serviceWorkers: 'block', locale: 'fr-FR', timezoneId: 'Africa/Dakar'});
   if (uid) {
     const u = D.profiles.find(p => p.id === uid);
     const session = {access_token: jwt(uid), refresh_token: 'rt-' + uid, token_type: 'bearer', expires_in: 36000, expires_at: Math.floor(Date.now() / 1000) + 36000,
       user: {id: uid, aud: 'authenticated', role: 'authenticated', email: u.email, app_metadata: {}, user_metadata: {}, created_at: T0}};
     await ctx.addInitScript(s => { try { localStorage.setItem('deuksil-auth', s); } catch (e) {} }, JSON.stringify(session));
   }
+  await ctx.route(/fonts\.(googleapis|gstatic)\.com/, r => r.abort());   // polices externes : inutiles hors ligne, et lentes à échouer
   await ctx.route(/supabase\.co\//, async route => {
     const req = route.request(), url = new URL(req.url()), p = url.pathname, meth = req.method();
     const corps = () => { try { return JSON.parse(req.postData() || 'null'); } catch (e) { return null; } };
@@ -129,7 +130,13 @@ async function ouvrir(o = {}) {
       return rep(200, nom === 'assistant-ia' ? {text: 'Réponse de test de l\'assistant.'} : {id: (corps() || {}).id, motDePasse: 'Abcd-Efgh-Jk7'});
     }
     if (p.startsWith('/storage/v1/')) {
-      if (p.includes('/object/sign/')) return rep(200, (corps() && corps().paths || []).map(x => ({path: x, signedURL: '/img/logo-d-bleu.png'})));
+      /* Fichiers déposés gardés en mémoire et resservis (photos, avatars, documents). */
+      const m2 = /^\/storage\/v1\/object\/(?:(public|authenticated|sign)\/)?([^/]+)\/(.+)$/.exec(p);
+      if (p.includes('/object/sign/') && meth === 'POST' && !m2) return rep(200, (corps() && corps().paths || []).map(x => ({path: x, signedURL: `/object/public/documents/${x}`})));
+      if (m2 && m2[1] === 'sign' && meth === 'POST') return rep(200, {signedURL: `/object/public/${m2[2]}/${m2[3]}`});
+      if (m2 && (meth === 'POST' || meth === 'PUT') && !m2[1]) { fichiers.set(m2[2] + '/' + decodeURIComponent(m2[3]), {corps: req.postDataBuffer(), type: req.headers()['content-type'] || 'image/jpeg'}); return rep(200, {Key: m2[2] + '/' + m2[3]}); }
+      if (m2 && (meth === 'GET' || meth === 'HEAD')) { const f = fichiers.get(m2[2] + '/' + decodeURIComponent(m2[3])); if (f) return route.fulfill({status: 200, contentType: f.type, headers: {'access-control-allow-origin': '*'}, body: f.corps}); return route.fulfill({status: 404, body: ''}); }
+      if (meth === 'DELETE') return rep(200, []);
       return rep(200, {Key: 'ok'});
     }
     const m = /\/rest\/v1\/(rpc\/)?([\w]+)/.exec(p); if (!m) return rep(404, {});
@@ -149,8 +156,12 @@ async function ouvrir(o = {}) {
     }
     const b = corps();
     if (meth === 'POST') {
-      const L = Array.isArray(b) ? b : [b]; L.forEach(x => { x.id = x.id || 'n' + Math.random().toString(16).slice(2, 10) + '-0000-4000-8000-000000000000'; x.created_at = x.created_at || new Date().toISOString(); const i = (D[t] = D[t] || []).findIndex(y => y.id === x.id); if (i >= 0) D[t][i] = {...D[t][i], ...x}; else D[t].push(x); });
-      return rep(201, L);
+      const PREF = {mandates: 'MDT', expenses: 'DEP', fees: 'HON', contracts: 'CTR', owner_transfers: 'REV', sale_mandates: 'MDV'};
+      const L = Array.isArray(b) ? b : [b];
+      // Numéros attribués par la base (comme app.numeroter) : DEV-2026-00002, MDT-2026-00002…
+      L.forEach(x => { const pf = t === 'billing_docs' ? x.type : PREF[t]; if (pf && !x.ref) x.ref = `${pf}-2026-${String((D[t] || []).filter(y => String(y.ref || '').startsWith(pf + '-')).length + 1).padStart(5, '0')}`; });
+      L.forEach(x => { x.id = x.id || 'n' + Math.random().toString(16).slice(2, 10) + '-0000-4000-8000-000000000000'; x.created_at = x.created_at || new Date().toISOString(); const i = (D[t] = D[t] || []).findIndex(y => y.id === x.id); if (i >= 0) D[t][i] = {...D[t][i], ...x}; else D[t].push(x); });
+      return rep(201, /vnd\.pgrst\.object/.test(req.headers()['accept'] || '') ? L[0] : L);
     }
     if (meth === 'PATCH') { const rows = filtrer(D[t] || [], url.searchParams); rows.forEach(r => Object.assign(r, b)); return rep(200, rows); }
     if (meth === 'DELETE') { const rows = filtrer(D[t] || [], url.searchParams); D[t] = (D[t] || []).filter(r => !rows.includes(r)); return rep(200, rows); }
@@ -161,7 +172,7 @@ async function ouvrir(o = {}) {
   page.on('pageerror', e => erreurs.push('pageerror: ' + e.message));
   page.on('console', m => { if (m.type() === 'error') erreurs.push('console: ' + m.text().slice(0, 300)); });
   await page.goto(`http://localhost:${port}/${o.hash || '#/'}`);
-  await page.waitForFunction(() => window.DB && DB.pret, null, {timeout: 20000}).catch(() => erreurs.push('DB.pret jamais vrai'));
+  await page.waitForFunction(() => typeof DB !== 'undefined' && DB.pret, null, {timeout: 20000}).catch(() => erreurs.push('DB.pret jamais vrai'));
   await page.waitForTimeout(o.attente || 900);
   return {page, ctx, navig, D, ID, journal, erreurs, fermer: async () => { await ctx.close(); if (!o.navigateur) await navig.close(); }};
 }

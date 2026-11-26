@@ -1,0 +1,24 @@
+/* Aide : tutoriels vidéo (js/99q-aide.js) */
+.aide-public{padding:34px 0 60px}
+.aide-outils{display:flex;flex-direction:column;gap:12px;margin:4px 0 18px}
+.aide-cherche{position:relative;display:block;max-width:560px}
+.aide-cherche svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted,#748496);pointer-events:none}
+.aide-cherche .input{padding-left:38px}
+.aide-espaces{display:flex;gap:8px;flex-wrap:wrap}
+.aide-espaces .chip{cursor:pointer}
+.aide-espaces .chip.on{background:var(--brand,#0F3057);color:#fff;border-color:transparent}
+.aide-grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
+.aide-carte{display:flex;flex-direction:column;text-align:left;padding:0;border:1px solid var(--line,#E2E7EE);border-radius:14px;background:var(--surface,#fff);overflow:hidden;cursor:pointer;font:inherit;color:inherit;transition:box-shadow .15s,transform .15s}
+.aide-carte:hover,.aide-carte:focus-visible{box-shadow:0 10px 26px -12px rgba(12,39,69,.35);transform:translateY(-2px)}
+.aide-affiche{position:relative;display:block;aspect-ratio:16/9;background:linear-gradient(135deg,#0C2745,#1D4E89)}
+.aide-affiche img{width:100%;height:100%;object-fit:cover;display:block}
+.aide-play{position:absolute;inset:0;margin:auto;width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.92);color:var(--brand,#0F3057);box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.aide-play svg{margin-left:3px}
+.aide-duree{position:absolute;right:8px;bottom:8px;background:rgba(0,0,0,.72);color:#fff;font-size:.75rem;padding:2px 7px;border-radius:6px}
+.aide-txt{display:flex;flex-direction:column;gap:4px;padding:12px 14px 14px}
+.aide-contact{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-top:24px}
+.aide-lecteur video{width:100%;border-radius:10px;background:#000;display:block;aspect-ratio:16/9}
+.aide-etapes{margin:0;padding-left:20px;display:grid;gap:6px;line-height:1.45}
+.aide-suite{display:flex;gap:8px;flex-wrap:wrap}
+.aide-suite .chip{cursor:pointer}
+.modal:has(.aide-lecteur){max-width:860px;width:calc(100vw - 32px)}

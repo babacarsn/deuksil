@@ -227,8 +227,9 @@ function barreComparaison() {
   let b = document.querySelector('.cf-cmp-barre');
   if (!/^#\/search/.test(location.hash) || compareIds.length === 0) { if (b) b.remove(); return; }
   if (!b) { b = document.createElement('div'); b.className = 'cf-cmp-barre'; document.body.appendChild(b); }
-  b.innerHTML = `<span>${compareIds.length} bien${compareIds.length > 1 ? 's' : ''} à comparer${compareIds.length < 2 ? ' · cochez-en un autre' : ''}</span>
+  const h = `<span>${compareIds.length} bien${compareIds.length > 1 ? 's' : ''} à comparer${compareIds.length < 2 ? ' · cochez-en un autre' : ''}</span>
     <button class="btn ghost sm" data-action="clear-compare">Vider</button>${compareIds.length >= 2 ? `<a class="btn sm" href="#/compare">Comparer</a>` : ''}`;
+  if (b.dataset.h !== h) { b.dataset.h = h; b.innerHTML = h; }   // pas de redessin inutile (le bouton ne clignote plus)
 }
 window.addEventListener('click', e => { if (e.target.closest && e.target.closest('.cf-cmp')) e.stopPropagation(); }, true);
 /* Retour à la recherche depuis le menu : les filtres oubliés ne cachent plus tout. */
@@ -242,7 +243,7 @@ function espacesConfort() {
   const u = Auth.current(); if (!u) return;
   const T = u.member ? DB.findItem(DB.K.users, u.member.parentId) || {} : u;
   /* Le bon nom : l'agence par son nom ; un membre par le sien. */
-  if (u.role === 'agency' && !u.member) document.querySelectorAll('.main > .content h1, .main > .content .hero h2').forEach(h => { if (/^Bonjour/.test(h.textContent) && T.agencyName && !h.dataset.cf) { h.dataset.cf = '1'; h.textContent = `Bonjour, ${T.agencyName}`; } });
+  if (u.role === 'agency' && !u.member) document.querySelectorAll('.main > .content h1, .main > .content .hero h2, .main > .content .wave').forEach(h => { if (/^Bonjour/.test(h.textContent) && T.agencyName && !h.dataset.cf) { h.dataset.cf = '1'; h.textContent = `Bonjour, ${T.agencyName}`; } });
   if (u.member) { const s = document.querySelector('.side-user:not([data-cf])'); if (s) { s.dataset.cf = '1'; const n = s.querySelector('div[style*="font-weight:600"]'), r = s.querySelector('.small.muted');
     if (n) n.textContent = `${u.firstName || ''} ${u.lastName || ''}`.trim() || n.textContent; if (r) r.textContent = `${r.textContent} · ${T.agencyName || displayName(T)}`; } }
   /* Agent : « Ajouter un bien » parmi les raccourcis. */

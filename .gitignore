@@ -30,3 +30,6 @@ test-results/
 # Sauvegardes (données personnelles) : jamais dans Git
 supabase/sauvegarde/sauvegardes/
 supabase/sauvegarde/node_modules/
+tests/videos/erreur-*.png
+videos/guides/.images-*/
+videos/guides/*.tmp.mp4

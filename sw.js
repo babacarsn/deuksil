@@ -5,7 +5,7 @@
    - Tout le reste (index.html, images, manifeste) : « réseau d'abord » ; la copie locale
      ne sert que hors connexion. Les données (Supabase) ne passent jamais par ici.
    VERSION est mise à jour par outils/versionner-site.js à chaque publication. */
-const VERSION = 'deuksil-sw-3a5ef2d2a9';
+const VERSION = 'deuksil-sw-42bf11cefe';
 const CACHE = 'deuksil-fichiers';
 
 self.addEventListener('install', e => { self.skipWaiting(); });
@@ -20,6 +20,8 @@ const versionne = url => url.searchParams.has('v') && /^\/(js|css)\//.test(url.p
 self.addEventListener('fetch', e => {
   const req = e.request, url = new URL(req.url);
   if (req.method !== 'GET' || url.origin !== self.location.origin) return;
+  // Vidéos d'aide : lues par morceaux (requêtes « Range ») ; ni cache, ni interception.
+  if (/^\/videos\//.test(url.pathname)) return;
   if (versionne(url)) {
     e.respondWith((async () => {
       const c = await caches.open(CACHE), copie = await c.match(req);
