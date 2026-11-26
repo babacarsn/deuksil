@@ -149,15 +149,15 @@ function tachesDuJour(u) {
   }
   /* Travaux signalés et pas encore pris en charge */
   const tk = lireListe('tickets', u).filter(x => x.status === 'ouvert');
-  if (tk.length) t.push({ton: 'info', ic: 'settings', titre: tk.length > 1 ? `${tk.length} problèmes signalés à traiter` : 'Un problème signalé à traiter',
+  if (tk.length) t.push({ton: 'violet', ic: 'settings', titre: tk.length > 1 ? `${tk.length} problèmes signalés à traiter` : 'Un problème signalé à traiter',
     detail: resumeNoms(tk.map(x => x.title).filter(Boolean), 2, ' · '), btn: 'Voir les travaux', lien: '#/manage/tickets?f=encours'});
   /* Factures échues non payées */
   const fac = lireListe('docs', u).filter(d => d.type === 'FAC' && !/pay|annul/i.test(d.status || '') && d.due && d.due < auj.toISOString().slice(0, 10));
-  if (fac.length) t.push({ton: 'gold', ic: 'card', titre: fac.length > 1 ? `${fac.length} factures impayées après échéance` : `Facture ${fac[0].ref || ''} impayée après échéance`,
+  if (fac.length) t.push({ton: 'teal', ic: 'card', titre: fac.length > 1 ? `${fac.length} factures impayées après échéance` : `Facture ${fac[0].ref || ''} impayée après échéance`,
     detail: resumeNoms(fac.map(d => d.client).filter(Boolean), 2), btn: 'Voir les factures', lien: '#/manage/docs?f=impayee'});
   /* Mandats qui expirent dans les 30 jours */
   const mdt = lireListe('mandates', u).filter(m => m.status === 'actif' && m.end && m.end <= dansJours(30));
-  if (mdt.length) t.push({ton: 'gold', ic: 'file', titre: mdt.length > 1 ? `${mdt.length} mandats expirent bientôt` : `Le mandat ${mdt[0].ref || ''} expire le ${dateFr(mdt[0].end)}`,
+  if (mdt.length) t.push({ton: 'teal', ic: 'file', titre: mdt.length > 1 ? `${mdt.length} mandats expirent bientôt` : `Le mandat ${mdt[0].ref || ''} expire le ${dateFr(mdt[0].end)}`,
     detail: 'À renouveler avec le propriétaire', btn: 'Voir les mandats', lien: '#/manage/mandates'});
   return t;
 }
@@ -172,7 +172,7 @@ function etapesDemarrage(u) {
   return e;
 }
 
-const icTache = {bad: 'bad', warn: 'warn', info: 'info', gold: 'gold'};
+const icTache = {bad: 'bad', warn: 'warn', info: 'violet', violet: 'violet', gold: 'teal', teal: 'teal', blue: 'blue'};
 function blocAccueil(u) {
   const etapes = etapesDemarrage(u), faites = etapes.filter(x => x.ok).length, taches = tachesDuJour(u);
   let h = '';
@@ -229,7 +229,7 @@ function nettoyerAccueil(c, u) {
           const sous = parts.length > 3 ? resumeNoms(parts, 2) : brut;
           const ic = /revers/i.test(titre) ? 'repeat' : /devis|factur/i.test(titre) ? 'card' : /bail|contrat|préavis|caution/i.test(titre) ? 'file' : 'checkCircle';
           const li = document.createElement('li');
-          li.innerHTML = `<span class="pd-ic gold">${icon(ic, 20)}</span><div class="sd-txt"><b>${esc(titre)}</b>${sous ? `<span>${esc(sous)}</span>` : ''}</div><a class="btn sm" href="${esc(a.getAttribute('href') || '#')}">${/revers/i.test(titre) ? 'Reverser' : /devis/i.test(titre) ? 'Relancer le client' : 'Voir'}</a>`;
+          li.innerHTML = `<span class="pd-ic ${/revers/i.test(titre) ? 'blue' : 'teal'}">${icon(ic, 20)}</span><div class="sd-txt"><b>${esc(titre)}</b>${sous ? `<span>${esc(sous)}</span>` : ''}</div><a class="btn sm" href="${esc(a.getAttribute('href') || '#')}">${/revers/i.test(titre) ? 'Reverser' : /devis/i.test(titre) ? 'Relancer le client' : 'Voir'}</a>`;
           ul.appendChild(li);
         });
         const nb = d.querySelector('.sd-afaire .sd-nb'), n = ul ? ul.children.length : 0;

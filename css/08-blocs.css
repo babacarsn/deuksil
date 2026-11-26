@@ -28,3 +28,33 @@ a.pd-card:hover,a.pd-mini:hover,.qa-grid .quick-card:hover,.pd-qa:hover,.lg-cart
 .qa-grid .quick-card .ic-bubble{width:38px!important;height:38px!important;border-radius:10px!important;margin:0!important;flex:0 0 38px}
 .qa-grid .quick-card .ic-bubble svg{width:18px;height:18px}
 .qa-grid .quick-card b{font-weight:600;font-size:.95rem;line-height:1.25}
+
+/* --- 2. Icônes en couleur selon leur sens, sur un petit carré teinté ---
+   rouge : retard, impayé · orange : visite, date · violet : travaux · bleu : reversement, messages
+   vert : encaissé, payé · turquoise : documents, factures, mandats · indigo : personnes · bleu nuit : ajouter */
+.pd-ic,.qa-grid .quick-card .ic-bubble{border-radius:10px!important}
+.pd-ic.bad{background:#FEF3F2!important;color:#B42318!important}
+.pd-ic.warn{background:#FFF6E5!important;color:#B54708!important}
+.pd-ic.info,.pd-ic.violet{background:#F4F3FF!important;color:#6941C6!important}
+.pd-ic.blue{background:#EFF6FF!important;color:#175CD3!important}
+.pd-ic.ok{background:#ECFDF3!important;color:#067647!important}
+.pd-ic.teal,.pd-ic.gold{background:#ECFAFD!important;color:#0E7090!important}
+.pd-mini[data-tone="bad"] .pd-ic{background:#FEF3F2!important;color:#B42318!important}
+a.pd-mini[href*="transfers"] .pd-ic{background:#EFF6FF!important;color:#175CD3!important}
+a.pd-mini[href*="mandates"] .pd-ic,a.pd-mini[href*="quittances"] .pd-ic{background:#ECFAFD!important;color:#0E7090!important}
+a.pd-mini[href*="leases"] .pd-ic{background:#FFF6E5!important;color:#B54708!important}
+/* Actions rapides : la couleur suit ce que fait le bouton */
+.qa-grid .quick-card .ic-bubble{background:#EEF1F5!important;color:#0C2745!important}
+.qa-grid .quick-card[href*="owners"] .ic-bubble,.qa-grid .quick-card[href*="tenants"] .ic-bubble,.qa-grid .quick-card[href*="leases"] .ic-bubble,.qa-grid .quick-card[href*="agents"] .ic-bubble,.qa-grid .quick-card[href*="clients"] .ic-bubble{background:#EEF2FF!important;color:#3538CD!important}
+.qa-grid .quick-card[href*="rents"] .ic-bubble,.qa-grid .quick-card[href*="fpay"] .ic-bubble,.qa-grid .quick-card[href*="payments"] .ic-bubble{background:#ECFDF3!important;color:#067647!important}
+.qa-grid .quick-card[href*="docs"] .ic-bubble,.qa-grid .quick-card[href*="quittances"] .ic-bubble,.qa-grid .quick-card[href*="coffre"] .ic-bubble,.qa-grid .quick-card[href*="mandates"] .ic-bubble{background:#ECFAFD!important;color:#0E7090!important}
+.qa-grid .quick-card[href*="tickets"] .ic-bubble{background:#F4F3FF!important;color:#6941C6!important}
+.qa-grid .quick-card[href*="messages"] .ic-bubble,.qa-grid .quick-card[href*="deals"] .ic-bubble,.qa-grid .quick-card[href*="transfers"] .ic-bubble{background:#EFF6FF!important;color:#175CD3!important}
+.qa-grid .quick-card[href*="visits"] .ic-bubble{background:#FFF6E5!important;color:#B54708!important}
+/* « À faire aujourd'hui » : le premier bouton en plein, les suivants en contour, pour ne pas tout crier */
+.sd-liste li:not(:first-child) .btn{background:#FFFFFF!important;color:#0C2745!important;border:1px solid #D5DAE1!important;box-shadow:none!important}
+.sd-liste li:not(:first-child) .btn:hover{background:#F5F7FA!important}
+.sd-nb{background:#FEF3F2!important;color:#B42318!important;border-radius:10px!important}
+/* Petites flèches : gris neutre partout, la couleur reste réservée à l'icône */
+.ds-go{background:#F2F4F7!important;color:#475467!important;box-shadow:none!important}
+.qa-grid .quick-card[href*="property/new"] .ic-bubble,.qa-grid .quick-card[href*="/new"]:not([href*="tickets"]) .ic-bubble{background:#EEF1F5!important;color:#0C2745!important}
