@@ -2,6 +2,10 @@
 
 ## 26 novembre 2026 — Plus simple à utiliser (design inchangé)
 
+- **Menu du téléphone (☰)** rangé dans les mêmes rubriques que sur ordinateur (agence : 8 lignes au lieu de 17).
+- **Listes en cartes sur téléphone** plus faciles : l'action principale (Encaisser, Ouvrir…) en gros bouton pleine largeur, les autres deux par ligne, boutons de 44 px ; les états longs passent à la ligne.
+- **Formulaires en étapes** : bail (2), mandat de gestion (3), mandat de vente (2), devis / facture (3). « Suivant » vérifie l'étape ; l'enregistrement d'origine n'apparaît qu'à la dernière étape (`js/99s-facile.js`). Pré-remplissages existants conservés.
+- Locataire : le graphique « Mes paiements » retiré de l'accueil (détail dans Loyer & paiements) ; les deux petites cartes passent à droite de « Mon loyer ».
 - **Menu regroupé** sur ordinateur : agence 20 entrées → 7 rubriques, propriétaire 15 → 5, locataire 14 → 6, client 9 → 6 (+ Paramètres et Aide sous un trait). Les rubriques s'ouvrent d'un clic ; celle de l'écran ouvert est dépliée d'office ; un point doré signale une rubrique qui contient quelque chose à traiter. Aucun écran n'est retiré. Agents, gestionnaires et mandants gardent leur menu (déjà court).
 - Libellés plus parlants : « Accueil », « Signaler un problème » (locataire), « Loyer & paiements », « Vue d'ensemble ».
 - **« À faire aujourd'hui »** sur l'accueil de l'agence et du propriétaire, sous la bannière photo : loyers en retard, visites à confirmer, problèmes signalés, factures impayées après échéance, mandats qui expirent dans 30 jours — chaque ligne avec son bouton qui ouvre le bon écran déjà filtré.

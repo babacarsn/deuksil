@@ -214,7 +214,10 @@ function nettoyerAccueil(c, u) {
     ote('.pd-duo a.pd-mini[href="#/manage/fpay"]');
   }
   if (loc) {
-    ote('.pd-todo'); ote('.pd-pat');
+    ote('.pd-todo'); ote('.pd-pat'); ote('.pd-evo');   /* « Mes paiements » : le détail est dans Loyer & paiements */
+    /* Sans le graphique, les deux petites cartes passent à droite de « Mon loyer ». */
+    const top = d.querySelector('.pd > .pd-top'), gauche = top && top.children[0], duo = gauche && gauche.querySelector(':scope > .pd-duo');
+    if (top && top.children.length === 1 && duo) top.appendChild(duo);
     ote('.pd-duo a.pd-mini[href^="#/tenant/rents?f=retard"]'); ote('.pd-duo a.pd-mini[href="#/tenant/rents"]');
   }
   if (cli) {

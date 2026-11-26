@@ -61,3 +61,43 @@
 /* Accueils épurés : rangées de petites cartes à 1 ou 2 éléments */
 .pd-duo.sd-duo-1{grid-template-columns:1fr!important}
 .pd-duo.sd-duo-2{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+
+/* --- Menu du téléphone (☰) regroupé --- */
+.sdrawer .ng-t{display:flex;align-items:center;gap:13px;width:100%;padding:13px 14px;border:0;border-radius:14px;background:none;color:var(--nav-text);font:inherit;font-weight:500;text-align:left;cursor:pointer}
+.sdrawer .ng.contient-actif > .ng-t{color:#fff;font-weight:600}
+.sdrawer .ng.contient-actif > .ng-t svg:first-child{color:var(--yellow,var(--gold))}
+.sdrawer .ng-lib{flex:1}
+.sdrawer .ng-chev{display:inline-flex;opacity:.6;transition:transform .2s}
+.sdrawer .ng.ouvert .ng-chev{transform:rotate(90deg)}
+.sdrawer .ng-l{display:none;flex-direction:column;margin:0 0 6px 24px;padding-left:10px;border-left:1px solid rgba(255,255,255,.14)}
+.sdrawer .ng.ouvert .ng-l{display:flex}
+.sdrawer .ng-l a{padding:11px 12px}
+.sdrawer .ng-l a svg{display:none}
+.sdrawer .ng-bas{margin:10px 0;padding-top:10px;border-top:1px solid rgba(255,255,255,.12);display:flex;flex-direction:column}
+
+/* --- Formulaires en étapes --- */
+form[data-etapes] .field[hidden],form[data-etapes] [hidden]{display:none!important}
+.et-tete{display:flex;flex-direction:column;gap:4px;margin:0 0 16px;padding:14px 16px;border-radius:14px;background:var(--surface-2,#F3F6FA);border:1px solid var(--line)}
+.et-num{font-size:.8rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.et-titre{font-size:1.08rem;font-weight:700;color:var(--ink)}
+.et-points{display:flex;gap:6px;margin-top:6px}
+.et-points i{flex:1;height:6px;border-radius:99px;background:var(--line)}
+.et-points i.fait{background:var(--ok)}
+.et-points i.ici{background:var(--gold)}
+.et-pied{display:flex;gap:10px;margin:6px 0 10px}
+.et-pied .btn{flex:1;min-height:46px;justify-content:center}
+.et-pied .btn[hidden]{display:none}
+
+/* --- Listes en cartes sur téléphone : plus compactes, gros boutons --- */
+@media (max-width:760px){
+  .table-wrap tbody tr{padding:12px 14px 14px;margin-bottom:12px;border-radius:20px}
+  .table-wrap td{padding:6px 0;font-size:.97rem}
+  .table-wrap td::before{font-size:.86rem;font-weight:500}
+  .table-wrap td .badge{white-space:normal;text-align:left;max-width:64%;line-height:1.3}
+  .table-wrap td:last-child .row,.table-wrap td:last-child{gap:8px!important}
+  .table-wrap td:last-child .btn{flex:1 1 calc(50% - 8px);min-height:44px;justify-content:center}
+  .table-wrap td:last-child .btn:not(.ghost):first-child,.table-wrap td:last-child .row > .btn:not(.ghost):first-child{flex-basis:100%}
+  .table-wrap td:last-child .row{width:100%;display:flex;flex-wrap:wrap}
+  .table-wrap td:last-child select{min-height:44px}
+}
+@media (min-width:901px){.pd-col-b > .pd-duo.sd-duo-2:only-child{grid-template-columns:1fr!important}}
