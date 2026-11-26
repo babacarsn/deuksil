@@ -80,3 +80,16 @@ a.pd-mini[href*="leases"] .pd-ic{background:#FFF6E5!important;color:#B54708!impo
 .retard-bandeau b{color:#0C2745!important}
 .retard-bandeau .rb-montant{color:#B42318}
 .retard-bandeau .small{color:#475467!important;opacity:1!important}
+
+
+/* --- 5. Icônes en « 3D doux », sur toutes les pages ---
+   Chaque icône garde sa couleur de sens ; on ajoute seulement un léger bombé blanc en haut,
+   un reflet et une petite ombre de sa propre couleur (currentColor). Les blocs restent blancs et à plat. */
+.pd-ic.pd-ic.pd-ic.pd-ic.pd-ic,.ic-bubble.ic-bubble.ic-bubble.ic-bubble.ic-bubble,.kpi-icon.kpi-icon.kpi-icon.kpi-icon.kpi-icon,.fhead-ic.fhead-ic.fhead-ic.fhead-ic.fhead-ic,.acces-ic.acces-ic.acces-ic.acces-ic.acces-ic,.rb-ic.rb-ic.rb-ic.rb-ic.rb-ic,.hx-act-ic.hx-act-ic.hx-act-ic.hx-act-ic.hx-act-ic,.suivi-ic.suivi-ic.suivi-ic.suivi-ic.suivi-ic,.pd-thumb-ic.pd-thumb-ic.pd-thumb-ic.pd-thumb-ic.pd-thumb-ic{background-image:linear-gradient(160deg,#FFFFFF 0%,rgba(255,255,255,0) 72%)!important;
+  box-shadow:inset 0 1px 0 #FFFFFF,inset 0 -2px 3px rgba(12,39,69,.08),0 4px 10px -5px,0 0 0 1px rgba(12,39,69,.05)!important}
+.pd-ic.pd-ic.pd-ic.pd-ic.pd-ic,.ic-bubble.ic-bubble.ic-bubble.ic-bubble.ic-bubble,.kpi-icon.kpi-icon.kpi-icon.kpi-icon.kpi-icon,.fhead-ic.fhead-ic.fhead-ic.fhead-ic.fhead-ic,.acces-ic.acces-ic.acces-ic.acces-ic.acces-ic,.rb-ic.rb-ic.rb-ic.rb-ic.rb-ic{border-radius:12px!important}
+.pd-ic.pd-ic.pd-ic.pd-ic.pd-ic svg,.ic-bubble.ic-bubble.ic-bubble.ic-bubble.ic-bubble svg,.kpi-icon.kpi-icon.kpi-icon.kpi-icon.kpi-icon svg,.fhead-ic.fhead-ic.fhead-ic.fhead-ic.fhead-ic svg,.acces-ic.acces-ic.acces-ic.acces-ic.acces-ic svg,.rb-ic.rb-ic.rb-ic.rb-ic.rb-ic svg,.hx-act-ic.hx-act-ic.hx-act-ic.hx-act-ic.hx-act-ic svg,.suivi-ic.suivi-ic.suivi-ic.suivi-ic.suivi-ic svg,.pd-thumb-ic.pd-thumb-ic.pd-thumb-ic.pd-thumb-ic.pd-thumb-ic svg{filter:drop-shadow(0 1px 0 rgba(255,255,255,.9))}
+/* Au survol d'un bloc, l'icône se soulève d'un rien */
+a.pd-card:hover .pd-ic,a.pd-mini:hover .pd-ic,.qa-grid .quick-card:hover .ic-bubble,.kpi:hover .kpi-icon{transform:translateY(-1px)!important}
+/* Les icônes posées sur fond sombre (bannières) ne prennent pas l'effet */
+.hero-banner .pd-ic,.hero-banner .ic-bubble,.hx-hero .hx-act-ic{background-image:none!important;box-shadow:none!important}
