@@ -2,6 +2,9 @@
 
 ## 26 novembre 2026 — Plus simple à utiliser (design inchangé)
 
+- **Prévu pour beaucoup de données** (testé avec 60 locataires, 34 retards, 7 problèmes, 4 factures) :
+  - « À faire aujourd'hui » : 5 lignes au plus puis « Voir les N autres » ; au-delà de 2 retards, une seule ligne « N locataires en retard · total » ; les listes de noms sont résumées (« A, B et 32 autres »). Pas de doublon mandat / facture avec « À traiter ».
+  - Loyers par personne : résumé (total à encaisser, nombre de locataires), recherche par nom ou bien, filtres avec compteurs (À encaisser, En retard, À payer, À jour, Tous), 12 cartes puis « Afficher 12 de plus », détail limité à 6 mois puis « Voir les autres ».
 - **Loyers regroupés par personne** (agence et propriétaire) : une carte par locataire avec le total dû, le retard en jours, le bien, et Relancer / Encaisser en gros boutons (sur le plus ancien impayé) ; « détail par mois » déplie les mois impayés ; sections À encaisser / À jour. L'onglet « Par mois » rend le tableau habituel et ses filtres.
 - Graphiques **« Évolution des revenus » / « Évolution des encaissements »** retirés des accueils ; les compteurs passent à côté de la carte principale.
 - **Menu du téléphone (☰)** rangé dans les mêmes rubriques que sur ordinateur (agence : 8 lignes au lieu de 17).

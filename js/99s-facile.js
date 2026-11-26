@@ -170,15 +170,24 @@ function groupesLoyers(u) {
       else { ton = 'warn'; etat = 'À payer avant le ' + ech.toLocaleDateString('fr-FR', {day: 'numeric', month: 'short'}); }
     }
     const dernier = rs.filter(r => r.paidAt).sort((a, b) => a.paidAt < b.paidAt ? 1 : -1)[0];
-    return {k, nom: l.tenant || 'Locataire', bien: [p.title, p.quartier].filter(Boolean).join(' · '), reste, impayes, vieux, ton, etat, jours, dernier, actif: l.status !== 'termine'};
+    return {k, nom: l.tenant || 'Locataire', bien: [p.title, p.quartier && !sansAccent(p.title).includes(sansAccent(p.quartier)) ? p.quartier : ''].filter(Boolean).join(' · '), reste, impayes, vieux, ton, etat, jours, dernier, actif: l.status !== 'termine'};
   }).filter(x => x.impayes.length || x.actif);
 }
 
+/* Beaucoup de locataires : recherche, filtres avec compteurs, 12 cartes puis
+   « Afficher plus » ; « À jour » replié par défaut ; détail limité à 6 mois. */
+const LG_PAGE = 12, LG_MOIS = 6;
+const etatLoyers = {filtre: '', q: '', vus: LG_PAGE};
+const sansAccent = t => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+
 function carteLoyer(x) {
   const btns = x.vieux ? `<div class="lg-btns"><button type="button" class="btn ghost" data-action="relance-interne" data-id="${x.vieux.id}">Relancer</button><button type="button" class="btn" data-action="g-pay" data-id="${x.vieux.id}">Encaisser</button></div>` : '';
-  const plus = x.impayes.length > 1 ? `<button type="button" class="lg-detail" data-lg="${esc(x.k)}" aria-expanded="${ouvertsLoyers.has(x.k)}">${x.impayes.length} mois impayés · détail par mois</button>
-    <ul class="lg-mois"${ouvertsLoyers.has(x.k) ? '' : ' hidden'}>${x.impayes.map(r => `<li><span>${monthLabel(r.month)}</span><b>${money(rRest(r))}</b><button type="button" class="btn sm" data-action="g-pay" data-id="${r.id}">Encaisser</button></li>`).join('')}</ul>` : '';
-  return `<article class="lg-carte" data-ton="${x.ton}">
+  const ligne = r => `<li><span>${monthLabel(r.month)}</span><b>${money(rRest(r))}</b><button type="button" class="btn sm" data-action="g-pay" data-id="${r.id}">Encaisser</button></li>`;
+  const ouvert = ouvertsLoyers.has(x.k), trop = x.impayes.length > LG_MOIS;
+  const plus = x.impayes.length > 1 ? `<button type="button" class="lg-detail" data-lg="${esc(x.k)}" aria-expanded="${ouvert}">${x.impayes.length} mois impayés · détail par mois</button>
+    <ul class="lg-mois"${ouvert ? '' : ' hidden'}>${x.impayes.slice(0, LG_MOIS).map(ligne).join('')}${trop ? `<li class="lg-mois-plus"><button type="button" class="lg-lien" data-lg-tous="${esc(x.k)}">Voir les ${x.impayes.length - LG_MOIS} mois plus récents</button></li>${x.impayes.slice(LG_MOIS).map(r => ligne(r).replace('<li>', '<li class="lg-cache" hidden>')).join('')}` : ''}</ul>` : '';
+  const cat = x.ton === 'bad' ? 'retard' : x.ton === 'warn' ? 'apayer' : 'ajour';
+  return `<article class="lg-carte" data-ton="${x.ton}" data-cat="${cat}" data-q="${esc(sansAccent(x.nom + ' ' + x.bien))}">
     <div class="lg-haut"><b class="lg-nom">${esc(x.nom)}</b><b class="lg-montant">${x.reste ? money(x.reste) : ''}</b></div>
     <div class="lg-etat">${x.ton === 'ok' ? (x.dernier ? 'À jour · dernier paiement ' + monthLabel(x.dernier.month) : 'À jour') : esc(x.etat)}</div>
     ${x.bien ? `<div class="lg-bien">${esc(x.bien)}</div>` : ''}${btns}${plus}</article>`;
@@ -187,11 +196,41 @@ function carteLoyer(x) {
 function vuePersonnes(u) {
   const G = groupesLoyers(u); if (!G.length) return '';
   const du = G.filter(x => x.impayes.length).sort((a, b) => b.jours - a.jours || b.reste - a.reste), ok = G.filter(x => !x.impayes.length);
+  const nRet = du.filter(x => x.ton === 'bad').length, nPay = du.length - nRet, total = du.reduce((s, x) => s + x.reste, 0);
+  if (!etatLoyers.filtre) etatLoyers.filtre = du.length ? 'encaisser' : 'tous';
+  const puce = (k, lib, n) => `<button type="button" class="lg-puce" data-lg-f="${k}" aria-pressed="${etatLoyers.filtre === k}">${lib} <b>${n}</b></button>`;
   return `<div class="lg-vue">
-    ${du.length ? `<h3 class="lg-titre">À encaisser <span>${du.length}</span></h3><div class="lg-liste">${du.map(carteLoyer).join('')}</div>` : '<p class="lg-vide">Tous les loyers sont encaissés.</p>'}
-    ${ok.length ? `<h3 class="lg-titre ok">À jour <span>${ok.length}</span></h3><div class="lg-liste">${ok.map(carteLoyer).join('')}</div>` : ''}
+    <div class="lg-resume">${du.length ? `<b>${money(total)}</b> à encaisser auprès de <b>${du.length}</b> locataire${du.length > 1 ? 's' : ''}` : '<b>Tous les loyers sont encaissés.</b>'}${ok.length ? ` · ${ok.length} à jour` : ''}</div>
+    <div class="lg-outils">
+      <label class="lg-cherche"><span class="sr">Chercher un locataire</span>${icon('search', 18)}<input type="search" id="lg-q" placeholder="Chercher un locataire ou un bien" value="${esc(etatLoyers.q)}" autocomplete="off"></label>
+      <div class="lg-puces" role="group" aria-label="Filtrer">${puce('encaisser', 'À encaisser', du.length)}${nRet ? puce('retard', 'En retard', nRet) : ''}${nPay ? puce('apayer', 'À payer', nPay) : ''}${puce('ajour', 'À jour', ok.length)}${puce('tous', 'Tous', G.length)}</div>
+    </div>
+    <div class="lg-liste">${du.concat(ok).map(carteLoyer).join('')}</div>
+    <p class="lg-rien" hidden>Aucun locataire ne correspond.</p>
+    <div class="lg-pied"><button type="button" class="btn ghost lg-encore" hidden></button><span class="lg-compte small muted"></span></div>
   </div>`;
 }
+function filtrerCartesLoyers() {
+  const v = document.querySelector('.lg-vue'); if (!v) return;
+  const q = sansAccent(etatLoyers.q.trim()), f = etatLoyers.filtre;
+  const ok = c => (f === 'tous' || (f === 'encaisser' ? c.dataset.cat !== 'ajour' : c.dataset.cat === f)) && (!q || c.dataset.q.includes(q));
+  const cartes = [...v.querySelectorAll('.lg-carte')], gardees = cartes.filter(ok);
+  cartes.forEach(c => { c.hidden = true; });
+  gardees.forEach((c, i) => { c.hidden = i >= etatLoyers.vus; });
+  const reste = gardees.length - Math.min(gardees.length, etatLoyers.vus);
+  const b = v.querySelector('.lg-encore'); b.hidden = reste <= 0; b.textContent = `Afficher ${Math.min(LG_PAGE, reste)} de plus`;
+  v.querySelector('.lg-compte').textContent = gardees.length > LG_PAGE ? `${Math.min(gardees.length, etatLoyers.vus)} sur ${gardees.length}` : '';
+  v.querySelector('.lg-rien').hidden = gardees.length > 0;
+  v.querySelectorAll('[data-lg-f]').forEach(p => p.setAttribute('aria-pressed', String(p.dataset.lgF === f)));
+}
+document.addEventListener('click', e => {
+  const p = e.target.closest('[data-lg-f]');
+  if (p) { etatLoyers.filtre = p.dataset.lgF; etatLoyers.vus = LG_PAGE; filtrerCartesLoyers(); return; }
+  if (e.target.closest('.lg-encore')) { etatLoyers.vus += LG_PAGE; filtrerCartesLoyers(); return; }
+  const t = e.target.closest('[data-lg-tous]');
+  if (t) { const ul = t.closest('ul'); ul.querySelectorAll('.lg-cache').forEach(li => { li.hidden = false; }); t.closest('li').remove(); }
+});
+document.addEventListener('input', e => { if (e.target.id !== 'lg-q') return; etatLoyers.q = e.target.value; etatLoyers.vus = LG_PAGE; filtrerCartesLoyers(); });
 
 function poserVueLoyers() {
   if (!/^#\/manage\/rents(\?|$)/.test(location.hash)) return;
@@ -205,7 +244,7 @@ function poserVueLoyers() {
   ancre.before(bascule);
   const vue = document.createElement('div'); vue.innerHTML = html; const el = vue.firstElementChild;
   wrap.before(el);
-  appliquerVueLoyers();
+  appliquerVueLoyers(); filtrerCartesLoyers();
 }
 function appliquerVueLoyers() {
   const c = document.querySelector('.main > .content'); if (!c) return;

@@ -90,6 +90,8 @@ function regrouperMenu(html, u) {
   return html.slice(0, n0) + '<nav class="nav-simple">' + nav + html.slice(n1);
 }
 document.addEventListener('click', e => {
+  const plus = e.target.closest('[data-sd-plus]');
+  if (plus) { plus.closest('.sd-afaire').querySelectorAll('.sd-cache').forEach(li => { li.hidden = false; }); plus.remove(); return; }
   const b = e.target.closest('.ng-t'); if (!b) return;
   const g = b.closest('.ng'), id = b.dataset.ng, ouvert = !g.classList.contains('ouvert');
   g.classList.toggle('ouvert', ouvert); b.setAttribute('aria-expanded', String(ouvert));
@@ -102,6 +104,11 @@ document.addEventListener('click', e => {
 const lireListe = (k, u) => { try { return DB.K[k] ? gMine(k, u) : []; } catch (e) { return []; } };
 const moisCourant = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); };
 
+/* « Awa Diop, Moussa Sy et 32 autres » : jamais de liste interminable. */
+function resumeNoms(noms, max = 2, sep = ', ') {
+  const u = noms; if (u.length <= max) return u.join(sep);
+  return u.slice(0, max).join(sep) + ` et ${u.length - max} autre${u.length - max > 1 ? 's' : ''}`;
+}
 function tachesDuJour(u) {
   const t = [], auj = new Date(), mc = moisCourant(), dansJours = n => { const d = new Date(); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
   const leases = lireListe('leases', u), biens = lireListe('properties', u);
@@ -109,12 +116,18 @@ function tachesDuJour(u) {
   /* Loyers en retard : mois passé, ou mois en cours après le jour d'échéance. */
   const retard = lireListe('rents', u).filter(r => !r.paidAt && r.month && (r.month < mc || (r.month === mc && auj.getDate() > (+(bail(r.leaseId) || {}).dueDay || 5))));
   const parBail = new Map(); retard.forEach(r => { const k = r.leaseId || r.id; const x = parBail.get(k) || {n: 0, reste: 0, r}; x.n++; x.reste += rRest(r); parBail.set(k, x); });
-  [...parBail.values()].sort((a, b) => b.reste - a.reste).slice(0, 3).forEach(({n, reste, r}) => {
+  /* Peu de retards : une ligne par locataire. Beaucoup : une seule ligne avec le total et quelques noms. */
+  const enRetard = [...parBail.values()].sort((a, b) => b.reste - a.reste);
+  if (enRetard.length <= 2) enRetard.forEach(({n, reste, r}) => {
     const l = bail(r.leaseId) || {}, p = bien(l.propertyId || r.propertyId);
     t.push({ton: 'bad', ic: 'alert', titre: `${n > 1 ? n + ' loyers en retard' : 'Loyer de ' + monthLabel(r.month) + ' non reçu'} · ${money(reste)}`,
       detail: [l.tenant, p && p.title].filter(Boolean).join(' · '), btn: 'Encaisser ou relancer', lien: '#/manage/rents?f=retard'});
   });
-  if (parBail.size > 3) t.push({ton: 'bad', ic: 'alert', titre: `${parBail.size - 3} autre${parBail.size > 4 ? 's' : ''} locataire${parBail.size > 4 ? 's' : ''} en retard`, detail: 'Tous les loyers en retard, au même endroit', btn: 'Voir', lien: '#/manage/rents?f=retard'});
+  else {
+    const total = enRetard.reduce((s, x) => s + x.reste, 0), noms = enRetard.map(x => (bail(x.r.leaseId) || {}).tenant).filter(Boolean);
+    t.push({ton: 'bad', ic: 'alert', titre: `${enRetard.length} locataires en retard · ${money(total)}`,
+      detail: resumeNoms(noms, 2), btn: 'Voir et encaisser', lien: '#/manage/rents?f=retard'});
+  }
   /* Visites à confirmer */
   const vis = DB.filterItems(DB.K.visits, v => v.ownerId === u.id && v.status === 'attente').sort((a, b) => String(a.date) < String(b.date) ? -1 : 1);
   if (vis.length) {
@@ -126,11 +139,11 @@ function tachesDuJour(u) {
   /* Travaux signalés et pas encore pris en charge */
   const tk = lireListe('tickets', u).filter(x => x.status === 'ouvert');
   if (tk.length) t.push({ton: 'info', ic: 'settings', titre: tk.length > 1 ? `${tk.length} problèmes signalés à traiter` : 'Un problème signalé à traiter',
-    detail: tk.slice(0, 2).map(x => x.title).filter(Boolean).join(' · '), btn: 'Voir les travaux', lien: '#/manage/tickets?f=encours'});
+    detail: resumeNoms(tk.map(x => x.title).filter(Boolean), 2, ' · '), btn: 'Voir les travaux', lien: '#/manage/tickets?f=encours'});
   /* Factures échues non payées */
   const fac = lireListe('docs', u).filter(d => d.type === 'FAC' && !/pay|annul/i.test(d.status || '') && d.due && d.due < auj.toISOString().slice(0, 10));
   if (fac.length) t.push({ton: 'gold', ic: 'card', titre: fac.length > 1 ? `${fac.length} factures impayées après échéance` : `Facture ${fac[0].ref || ''} impayée après échéance`,
-    detail: fac.slice(0, 2).map(d => d.client).filter(Boolean).join(' · '), btn: 'Voir les factures', lien: '#/manage/docs?f=impayee'});
+    detail: resumeNoms(fac.map(d => d.client).filter(Boolean), 2), btn: 'Voir les factures', lien: '#/manage/docs?f=impayee'});
   /* Mandats qui expirent dans les 30 jours */
   const mdt = lireListe('mandates', u).filter(m => m.status === 'actif' && m.end && m.end <= dansJours(30));
   if (mdt.length) t.push({ton: 'gold', ic: 'file', titre: mdt.length > 1 ? `${mdt.length} mandats expirent bientôt` : `Le mandat ${mdt[0].ref || ''} expire le ${dateFr(mdt[0].end)}`,
@@ -179,7 +192,7 @@ function blocAccueil(u) {
    Locataire : le retard est déjà en bandeau rouge et dans « Mon loyer » ; la liste
    « Mon logement » répétait « Mon bail » et les actions rapides.
    Client : « Mon espace » est caché tant que tout y est à zéro. */
-const DEJA_DANS_AFAIRE = /loyer|visite|maintenance|problème|intervention|travaux/i;
+const DEJA_DANS_AFAIRE = /loyer|visite|maintenance|problème|intervention|travaux|mandat|facture/i;
 function nettoyerAccueil(c, u) {
   if (!u || typeof c !== 'string') return c;
   const path = (location.hash || '').replace('#', '').split('?')[0];
@@ -200,7 +213,9 @@ function nettoyerAccueil(c, u) {
             const p = sec.querySelector('.pd-sub'); if (p) p.textContent = 'Ce qui demande votre attention, avec le bouton pour le faire'; }
         }
         if (ul) extra.forEach(a => {
-          const titre = (a.querySelector('b') || {}).textContent || '', sous = (a.querySelector('.sub') || {}).textContent || '';
+          const titre = ((a.querySelector('b') || {}).textContent || '').replace(/\bbails\b/g, 'baux');
+          const brut = (a.querySelector('.sub') || {}).textContent || '', parts = brut.split(/,\s*/);
+          const sous = parts.length > 3 ? resumeNoms(parts, 2) : brut;
           const ic = /revers/i.test(titre) ? 'repeat' : /devis|factur/i.test(titre) ? 'card' : /bail|contrat|préavis|caution/i.test(titre) ? 'file' : 'checkCircle';
           const li = document.createElement('li');
           li.innerHTML = `<span class="pd-ic gold">${icon(ic, 20)}</span><div class="sd-txt"><b>${esc(titre)}</b>${sous ? `<span>${esc(sous)}</span>` : ''}</div><a class="btn sm" href="${esc(a.getAttribute('href') || '#')}">${/revers/i.test(titre) ? 'Reverser' : /devis/i.test(titre) ? 'Relancer le client' : 'Voir'}</a>`;
@@ -225,6 +240,15 @@ function nettoyerAccueil(c, u) {
   if (cli) {
     const h = [...d.querySelectorAll('h2')].find(x => /^Mon espace$/.test(x.textContent.trim())), sec = h && h.closest('section');
     if (sec && [...sec.querySelectorAll('.pd-val')].every(b => /^0$/.test(b.textContent.trim()))) sec.remove();
+  }
+  /* Beaucoup de choses à faire : 5 lignes, puis « Voir les N autres ». */
+  if (pro) {
+    const ul = d.querySelector('.sd-afaire .sd-liste'), L = ul ? [...ul.children] : [];
+    if (L.length > 5) {
+      L.slice(5).forEach(li => { li.hidden = true; li.classList.add('sd-cache'); });
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'sd-plus'; b.dataset.sdPlus = '1';
+      b.textContent = `Voir les ${L.length - 5} autres`; ul.after(b);
+    }
   }
   /* Les actions rapides passent sur toute la largeur (4 sur une ligne), là où était la rangée du bas. */
   if (pro || loc) {
