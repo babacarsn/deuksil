@@ -58,3 +58,17 @@ a.pd-mini[href*="leases"] .pd-ic{background:#FFF6E5!important;color:#B54708!impo
 /* Petites flèches : gris neutre partout, la couleur reste réservée à l'icône */
 .ds-go{background:#F2F4F7!important;color:#475467!important;box-shadow:none!important}
 .qa-grid .quick-card[href*="property/new"] .ic-bubble,.qa-grid .quick-card[href*="/new"]:not([href*="tickets"]) .ic-bubble{background:#EEF1F5!important;color:#0C2745!important}
+
+/* --- 3. Carte profil en bas du menu : photo, nom, « Mon profil » et flèche de déconnexion --- */
+.side-user{padding:10px 10px 10px 12px!important;border-radius:14px!important;background:rgba(255,255,255,.06)!important;border:1px solid rgba(255,255,255,.08)!important}
+.side-user > .row{display:flex;align-items:center;gap:10px;flex-wrap:nowrap}
+.side-user > .row > div{flex:1;min-width:0;display:flex!important;flex-wrap:wrap;align-items:baseline;column-gap:4px}
+.side-user > .row > div > div:first-child{flex-basis:100%}
+.side-user > .row > div > div:first-child{color:#fff!important}
+.side-user > .row > div > .small.muted{flex-basis:100%;font-size:.76rem!important;color:rgba(255,255,255,.62)!important}
+.side .side-user a.su-profil{display:inline!important;padding:0!important;margin:0!important;background:none!important;border-radius:0!important;font-size:.76rem!important;font-weight:500!important;color:rgba(255,255,255,.62)!important;text-decoration:none;white-space:nowrap}
+.side .side-user a.su-profil:hover{color:#F5B83D!important;text-decoration:underline}
+.side-user .su-sortir{flex:none;width:36px;height:36px;border-radius:10px;display:grid;place-items:center;cursor:pointer;
+  background:transparent;color:rgba(255,255,255,.72);border:1px solid rgba(255,255,255,.16);transition:background .15s,color .15s,border-color .15s}
+.side-user .su-sortir:hover{background:rgba(240,68,56,.16);color:#FDA29B;border-color:rgba(240,68,56,.45)}
+.side-user .su-sortir:focus-visible{outline:2px solid #F5B83D;outline-offset:2px}

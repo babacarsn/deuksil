@@ -81,8 +81,9 @@ function shellApp(u, content) {
       <div class="side-user">
         <div class="row">${avatarHtml(u, 36)}
           <div style="min-width:0"><div style="font-weight:600;font-size:.88rem;overflow:hidden;text-overflow:ellipsis">${esc(title)}</div>
-          <div class="small muted">${roleLabel}</div></div></div>
-        <button class="btn sm block" style="margin-top:11px" data-action="logout">Se déconnecter</button>
+          <div class="small muted">${roleLabel}</div>
+          <a class="su-profil" href="${(MENUS[u.role].find(m => /profile/.test(m[0])) || [u.role === 'tenant' || u.role === 'client' ? '#/client/profile' : '#/owner/profile'])[0]}">Mon profil</a></div>
+          <button class="su-sortir" data-action="logout" aria-label="Se déconnecter" title="Se déconnecter">${icon('logout', 18)}</button></div>
       </div>
       <div class="side-foot">DEUKSIL © ${new Date().getFullYear()} · Sénégal</div>
     </aside>
