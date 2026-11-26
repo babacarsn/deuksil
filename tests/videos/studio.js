@@ -133,7 +133,9 @@ async function filmer({id, qui = null, hash = '#/', titre, espace, scenario, pre
     async aller(hash, ms = 900) { await page.evaluate(h => { location.hash = h; }, hash); await attendre(ms); },
     async defiler(y, ms = 900) { await page.evaluate(v => window.scrollTo({top: v, behavior: 'smooth'}), y); await attendre(ms); },
     async defilerVers(cible) { const loc = await t.trouver(cible); await loc.evaluate(el => el.scrollIntoView({behavior: 'smooth', block: 'center'})); await attendre(900); },
-    async affiche() { await t.sansLegende(); fs.writeFileSync(path.join(sortie, id + '.jpg'), await page.screenshot({type: 'jpeg', quality: 86})); }
+    /* Vignette de la page Aide : 640 px de large (légère, nette sur les écrans haute densité). */
+    async affiche() { await t.sansLegende(); const tmp = path.join(sortie, id + '.grand.jpg'); fs.writeFileSync(tmp, await page.screenshot({type: 'jpeg', quality: 90}));
+      execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', tmp, '-vf', 'scale=640:-2', '-q:v', '6', path.join(sortie, id + '.jpg')]); fs.rmSync(tmp, {force: true}); }
   };
   await cdp.send('Page.startScreencast', {format: 'jpeg', quality: 92, maxWidth: L, maxHeight: H, everyNthFrame: 1});
   const debut = Date.now();

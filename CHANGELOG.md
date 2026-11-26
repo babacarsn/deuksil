@@ -2,6 +2,7 @@
 
 ## 26 novembre 2026 — Aide : tutoriels vidéo
 
+- **Chargement à la demande** : les pages ne chargent que 3 Ko pour l'aide ; le code de la page Aide (19 Ko) et les vignettes ne sont téléchargés qu'à la première visite de « Aide », et une vidéo seulement quand on ouvre son tutoriel. Vignettes réduites à 640 px (1,3 Mo → 330 Ko).
 - Bouton **« Aide »** à la fin du menu de chaque espace (ordinateur et téléphone) et dans l'en-tête du site public.
 - Page **`#/aide`** : les tutoriels de l'espace de la personne en premier, onglets pour les autres espaces, recherche (« facture », « visite »…), lecteur vidéo avec les étapes écrites et un bouton « Ouvrir cet écran » ; lien direct `#/aide?video=<id>`.
 - **18 vidéos** (`videos/guides/`) tournées sur l'application avec des données fictives : rechercher, favoris et alertes, demander une visite, créer son compte, publier un bien, visites, bail, encaisser un loyer et quittance, devis puis facture, dépense, équipe, propriétaire mandant, mandat, reversement, espace locataire, maintenance, relevés du mandant, profil et CNI.
