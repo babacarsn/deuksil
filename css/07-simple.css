@@ -156,7 +156,34 @@ form[data-etapes] .field[hidden],form[data-etapes] [hidden]{display:none!importa
 .lg-rien{padding:18px;border-radius:16px;background:var(--surface-2,#F3F6FA);color:var(--muted);text-align:center}
 .lg-lien{border:0;background:none;padding:4px 0;color:var(--ink);font:600 .88rem inherit;font-family:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 .sd-plus{margin-top:6px;align-self:flex-start;border:0;background:none;padding:8px 0;color:var(--ink);font:600 .95rem inherit;font-family:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
-@media (max-width:640px){.lg-puces{flex-wrap:nowrap;overflow-x:auto;margin:0 -16px;padding:0 16px 4px;scrollbar-width:none}.lg-puce{flex:0 0 auto}}
+@media (max-width:640px){.lg-puces{flex-wrap:wrap}.lg-puce{height:38px;padding:0 12px}}
 .lg-mois[hidden]{display:none!important}
 .lg-mode-personne .table-wrap + div{display:none!important}
 @media (max-width:640px){.lg-mode-personne .kpis{display:none}}
+
+/* --- Téléphone : rien ne défile de côté. Les rangées de biens passent à la ligne (2 par ligne),
+   6 au plus sur l'accueil (« Voir tous » mène à la liste complète) ; plus de flèches de carrousel. --- */
+@media (max-width:640px){
+  .hx-grid,.hx-car{grid-auto-flow:row!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-auto-columns:auto!important;overflow:visible!important;scroll-snap-type:none!important;margin:0!important;padding:0!important;gap:12px!important}
+  .hx-car .hx-card:nth-child(n+7){display:none}
+  .hx-nav{display:none!important}
+  .hx-card h3{font-size:.95rem;line-height:1.25;overflow-wrap:anywhere}
+}
+@media (max-width:340px){.hx-grid,.hx-car{grid-template-columns:1fr!important}}
+
+/* Cartes de paiement (locataire) : les étiquettes passent à la ligne, le montant reste entier */
+.bcard .top{flex-wrap:wrap;row-gap:6px}
+.bcard .top .badge{white-space:normal;text-align:left}
+.bcard .top .amt{margin-left:auto;white-space:nowrap}
+
+/* Téléphone : les onglets passent à la ligne au lieu de défiler ; recherche des loyers pleine largeur ;
+   petit graphique des finances qui tient sur 320 px. */
+@media (max-width:760px){
+  .tabs,.gtabs{flex-wrap:wrap!important;overflow:visible!important}
+  .gtabs{margin:0 0 14px!important;padding:2px 0!important}
+  .tabs button{white-space:normal}
+  .lg-cherche{flex:1 1 100%;min-width:0}
+  .card > div[style*="align-items:flex-end;height:120px"]{gap:6px!important}
+  .card > div[style*="align-items:flex-end;height:120px"] > div{min-width:0}
+  .card > div[style*="align-items:flex-end;height:120px"] .small{font-size:.72rem}
+}
