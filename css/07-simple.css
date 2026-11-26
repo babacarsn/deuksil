@@ -57,3 +57,7 @@
   .sd-txt span{white-space:normal}
   .sd-tete .btn{flex:1 1 100%;min-height:44px}
 }
+
+/* Accueils épurés : rangées de petites cartes à 1 ou 2 éléments */
+.pd-duo.sd-duo-1{grid-template-columns:1fr!important}
+.pd-duo.sd-duo-2{grid-template-columns:repeat(2,minmax(0,1fr))!important}

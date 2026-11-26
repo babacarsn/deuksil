@@ -171,6 +171,68 @@ function blocAccueil(u) {
   return h;
 }
 
+/* --- 3. Accueils épurés : chaque information une seule fois ------------------
+   Agence / propriétaire : « À traiter » est fondu dans « À faire aujourd'hui » (ce
+   qu'il a en plus — reversements, devis, baux… — y est repris avec son lien), et
+   « Mon portefeuille / Mon patrimoine » (raccourcis déjà dans le menu) disparaît.
+   Propriétaire : « Total encaissé ce mois » répétait « Revenus locatifs ».
+   Locataire : le retard est déjà en bandeau rouge et dans « Mon loyer » ; la liste
+   « Mon logement » répétait « Mon bail » et les actions rapides.
+   Client : « Mon espace » est caché tant que tout y est à zéro. */
+const DEJA_DANS_AFAIRE = /loyer|visite|maintenance|problème|intervention|travaux/i;
+function nettoyerAccueil(c, u) {
+  if (!u || typeof c !== 'string') return c;
+  const path = (location.hash || '').replace('#', '').split('?')[0];
+  const pro = !u.member && ['agency', 'owner'].includes(u.role) && !(typeof estMandant === 'function' && estMandant(u)) && path === '/' + u.role.replace('agency', 'agency') + '/dashboard';
+  const loc = u.role === 'tenant' && path === '/tenant/home';
+  const cli = path === '/client/dashboard';
+  if (!pro && !loc && !cli) return c;
+  const t = document.createElement('template'); t.innerHTML = c; const d = t.content;
+  const ote = sel => d.querySelectorAll(sel).forEach(e => e.remove());
+  if (pro) {
+    const liste = d.querySelector('.sd-afaire .sd-liste'), todo = d.querySelector('.pd-todo');
+    if (todo) {
+      const extra = [...todo.querySelectorAll('a.trow')].filter(a => !DEJA_DANS_AFAIRE.test(a.textContent));
+      if (extra.length) {
+        let ul = liste;
+        if (!ul) {  /* « Rien d'urgent » : on crée la liste */
+          const sec = d.querySelector('.sd-afaire'); if (sec) { ul = document.createElement('ul'); ul.className = 'sd-liste'; sec.appendChild(ul);
+            const p = sec.querySelector('.pd-sub'); if (p) p.textContent = 'Ce qui demande votre attention, avec le bouton pour le faire'; }
+        }
+        if (ul) extra.forEach(a => {
+          const titre = (a.querySelector('b') || {}).textContent || '', sous = (a.querySelector('.sub') || {}).textContent || '';
+          const ic = /revers/i.test(titre) ? 'repeat' : /devis|factur/i.test(titre) ? 'card' : /bail|contrat|préavis|caution/i.test(titre) ? 'file' : 'checkCircle';
+          const li = document.createElement('li');
+          li.innerHTML = `<span class="pd-ic gold">${icon(ic, 20)}</span><div class="sd-txt"><b>${esc(titre)}</b>${sous ? `<span>${esc(sous)}</span>` : ''}</div><a class="btn sm" href="${esc(a.getAttribute('href') || '#')}">${/revers/i.test(titre) ? 'Reverser' : /devis/i.test(titre) ? 'Relancer le client' : 'Voir'}</a>`;
+          ul.appendChild(li);
+        });
+        const nb = d.querySelector('.sd-afaire .sd-nb'), n = ul ? ul.children.length : 0;
+        if (nb) nb.textContent = n; else if (n) { const ok = d.querySelector('.sd-afaire .sd-tete .pd-ic'); if (ok) ok.outerHTML = `<span class="sd-nb">${n}</span>`; }
+      }
+    }
+    ote('.pd-todo'); ote('.pd-pat');
+    ote('.pd-duo a.pd-mini[href="#/manage/fpay"]');
+  }
+  if (loc) {
+    ote('.pd-todo'); ote('.pd-pat');
+    ote('.pd-duo a.pd-mini[href^="#/tenant/rents?f=retard"]'); ote('.pd-duo a.pd-mini[href="#/tenant/rents"]');
+  }
+  if (cli) {
+    const h = [...d.querySelectorAll('h2')].find(x => /^Mon espace$/.test(x.textContent.trim())), sec = h && h.closest('section');
+    if (sec && [...sec.querySelectorAll('.pd-val')].every(b => /^0$/.test(b.textContent.trim()))) sec.remove();
+  }
+  /* Les actions rapides passent sur toute la largeur (4 sur une ligne), là où était la rangée du bas. */
+  if (pro || loc) {
+    const pd = d.querySelector('.pd'), act = pd && pd.querySelector('.pd-actions'), bas = pd && pd.querySelector(':scope > .pd-bottom');
+    if (act && pd) {
+      if (bas) { bas.replaceWith(act); } else if (act.parentElement !== pd) { const top = pd.querySelector(':scope > .pd-top'); if (top) top.after(act); else pd.appendChild(act); }
+    }
+    pd && pd.querySelectorAll(':scope > .pd-bottom').forEach(b => { if (!b.textContent.trim()) b.remove(); });
+  }
+  d.querySelectorAll('.pd-duo').forEach(x => { x.classList.toggle('sd-duo-1', x.children.length === 1); x.classList.toggle('sd-duo-2', x.children.length === 2); });
+  return t.innerHTML;
+}
+
 (() => {
   const _shellSimple = shellApp;
   shellApp = function (u, content) {
@@ -181,6 +243,7 @@ function blocAccueil(u) {
           && path === '/' + (u.role === 'agency' ? 'agency' : 'owner') + '/dashboard' && typeof c === 'string' && !c.includes('sd-afaire'))
         c = c.replace(/(<div class="pd"[^>]*>)/, m => m + blocAccueil(u));
     } catch (e) {}
+    try { c = nettoyerAccueil(c, u); } catch (e) {}
     const html = _shellSimple(u, c);
     try { return u ? regrouperMenu(html, u) : html; } catch (e) { return html; }
   };

@@ -7,6 +7,7 @@
 - **« À faire aujourd'hui »** sur l'accueil de l'agence et du propriétaire, sous la bannière photo : loyers en retard, visites à confirmer, problèmes signalés, factures impayées après échéance, mandats qui expirent dans 30 jours — chaque ligne avec son bouton qui ouvre le bon écran déjà filtré.
 - **« Bien démarrer »** pour un compte neuf (CNI, premier bien, premier propriétaire pour l'agence, premier locataire) : barre de progression, la carte disparaît quand tout est fait.
 - Même style que le reste du tableau de bord (cartes, icônes, couleurs) ; boutons pleine largeur sur téléphone.
+- **Accueils épurés, chaque information une seule fois** : « À traiter » est fondu dans « À faire aujourd'hui » (reversements et devis y sont repris) ; « Mon portefeuille » / « Mon patrimoine » (raccourcis déjà dans le menu) retirés ; propriétaire : « Total encaissé ce mois » (même chiffre que « Revenus locatifs ») retiré ; locataire : « À traiter », la carte « Loyers en retard », « Loyer mensuel » et la liste « Mon logement » retirés (déjà dans le bandeau rouge, « Mon loyer » et « Mon bail ») ; client : « Mon espace » caché tant que tout y est à zéro. Actions rapides sur toute la largeur.
 
 ## 26 novembre 2026 — Aide : tutoriels vidéo
 
