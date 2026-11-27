@@ -188,3 +188,54 @@ function ficheRetest() {
 }
 new MutationObserver(() => { try { ficheRetest(); } catch (e) { console.warn('[DEUKSIL] fiche', e); } })
   .observe(document.getElementById('app') || document.body, {childList: true, subtree: true});
+
+/* --- 7. Baux terminés : pas de faux « loyer non reçu », pas de caution jamais reçue « à restituer » --- */
+/* État d'un loyer : un loyer jamais dû (bail terminé avant son échéance, aucun versement) n'est
+   ni « en retard » ni « à venir ». La règle d'échéance est echeanceLoyer / loyerDu (99r-simple). */
+rentState = (function (prec) {
+  return function (r) {
+    if (r && !r.paidAt && typeof loyerDu === 'function' && !loyerDu(r)) return ['Non dû · bail terminé', 'info'];
+    return prec.apply(this, arguments);
+  };
+})(rentState);
+
+/* Fin de bail : en plus des mois suivants, l'échéance du dernier mois n'est retirée que si elle
+   tombe le jour du départ ou après, et qu'aucun versement n'a été reçu (un impayé reste une dette). */
+terminerBail = (function (prec) {
+  return function (l, fin) {
+    const r = prec.apply(this, arguments);
+    try {
+      const f = String(fin || ymd()).slice(0, 10), bail = DB.findItem(DB.K.leases, l.id) || {...l, status: 'termine', endedAt: f};
+      DB.filterItems(DB.K.rents, x => x.leaseId === l.id && !x.paidAt && rPaid(x) === 0 && echeanceLoyer(x, bail) >= f)
+        .forEach(x => DB.deleteItem(DB.K.rents, x.id));
+    } catch (e) { console.warn('[DEUKSIL] fin de bail', e); }
+    return r;
+  };
+})(terminerBail);
+
+/* Caution : « détenue » seulement si elle a été reçue. Un bail sans suivi de caution (créé avant
+   ce suivi) est considéré comme payé s'il a déjà reçu un loyer ; sinon la caution est « attendue ».
+   Un bail terminé sans caution reçue n'affiche donc plus « caution à restituer ». */
+cautionDe = (function (prec) {
+  return function (u, l) {
+    const c = prec(u, l);
+    if (l && !l.cautionStatut && +l.deposit > 0 && !l.cautionRecue) {
+      const unLoyerPaye = DB.getData(DB.K.rents).some(r => r.leaseId === l.id && (r.paidAt || rPaid(r) > 0));
+      if (!unLoyerPaye) c.statut = 'attendue';
+    }
+    return c;
+  };
+})(cautionDe);
+/* Nouveau bail d'un propriétaire (comme pour une agence) : caution « attendue » jusqu'à sa réception. */
+DB.addItem = (function (prec) {
+  return function (k, item) {
+    const x = prec.apply(DB, arguments);
+    try {
+      if (k === DB.K.leases && x && +x.deposit > 0 && !x.cautionStatut && !x.cautionRecue) {
+        const owner = DB.findItem(DB.K.users, x.ownerId);
+        if (owner && owner.role !== 'agency') DB.updateItem(DB.K.leases, x.id, {cautionChez: x.cautionChez || 'bailleur', cautionStatut: 'attendue'});
+      }
+    } catch (e) { console.warn('[DEUKSIL] caution', e); }
+    return x;
+  };
+})(DB.addItem);

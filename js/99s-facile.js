@@ -159,13 +159,12 @@ function groupesLoyers(u) {
   rents.forEach(r => { const k = r.leaseId || ('x' + r.id); if (!g.has(k)) g.set(k, []); g.get(k).push(r); });
   return [...g.entries()].map(([k, rs]) => {
     const l = leases.find(x => x.id === k) || {}, p = DB.findItem(DB.K.properties, l.propertyId || (rs[0] || {}).propertyId) || {};
-    const du = +l.dueDay || 5;
-    const impayes = rs.filter(r => rRest(r) > 0 && r.month && r.month <= mc).sort((a, b) => a.month < b.month ? -1 : 1);
+    const impayes = rs.filter(r => rRest(r) > 0 && r.month && r.month <= mc && loyerDu(r, leases.find(x => x.id === r.leaseId))).sort((a, b) => a.month < b.month ? -1 : 1);
     const reste = impayes.reduce((s, r) => s + rRest(r), 0), vieux = impayes[0];
     let ton = 'ok', etat = 'À jour', jours = 0;
     if (vieux) {
-      const [ya, mo] = vieux.month.split('-').map(Number), ech = new Date(ya, mo - 1, Math.min(du, new Date(ya, mo, 0).getDate()));
-      jours = Math.floor((auj - ech) / 864e5);
+      const [ya, mo, jo] = echeanceLoyer(vieux, leases.find(x => x.id === vieux.leaseId)).split('-').map(Number), ech = new Date(ya, mo - 1, jo);
+      jours = Math.floor((new Date(auj.getFullYear(), auj.getMonth(), auj.getDate()) - ech) / 864e5);
       if (jours > 0) { ton = 'bad'; etat = `En retard de ${jours} jour${jours > 1 ? 's' : ''}`; }
       else { ton = 'warn'; etat = 'À payer avant le ' + ech.toLocaleDateString('fr-FR', {day: 'numeric', month: 'short'}); }
     }

@@ -115,6 +115,25 @@ document.addEventListener('click', e => {
 const lireListe = (k, u) => { try { return DB.K[k] ? gMine(k, u) : []; } catch (e) { return []; } };
 const moisCourant = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); };
 
+/* Échéance d'un loyer : le jour d'échéance du mois, ou le début du bail s'il est plus tard
+   (un bail commencé le 26 ne doit pas le loyer « au 5 » du même mois). */
+function echeanceLoyer(r, l) {
+  l = l || DB.findItem(DB.K.leases, r.leaseId);
+  const j = Math.min(28, Math.max(1, +(l && l.dueDay) || 5));
+  let e = `${r.month}-${String(j).padStart(2, '0')}`;
+  if (l && l.start && String(l.start).slice(0, 10) > e) e = String(l.start).slice(0, 10);
+  return e;
+}
+/* Un loyer est dû, sauf si le bail s'est terminé ce jour-là ou avant (un bail terminé le jour
+   même de son début ne doit rien) ; un loyer qui a déjà reçu un versement reste toujours dû. */
+function loyerDu(r, l) {
+  l = l || DB.findItem(DB.K.leases, r.leaseId);
+  if (!l || l.status === 'actif' || rPaid(r) > 0) return true;
+  const fin = String(l.endedAt || '').slice(0, 10);
+  return !fin || fin > echeanceLoyer(r, l);
+}
+const loyerEnRetard = (r, l) => !r.paidAt && rRest(r) > 0 && r.month && loyerDu(r, l) && echeanceLoyer(r, l) < ymd();
+
 /* « Awa Diop, Moussa Sy et 32 autres » : jamais de liste interminable. */
 function resumeNoms(noms, max = 2, sep = ', ') {
   const u = noms; if (u.length <= max) return u.join(sep);
@@ -124,8 +143,8 @@ function tachesDuJour(u) {
   const t = [], auj = new Date(), mc = moisCourant(), dansJours = n => { const d = new Date(); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
   const leases = lireListe('leases', u), biens = lireListe('properties', u);
   const bail = id => leases.find(l => l.id === id), bien = id => biens.find(p => p.id === id) || (DB.findItem(DB.K.properties, id) || null);
-  /* Loyers en retard : mois passé, ou mois en cours après le jour d'échéance. */
-  const retard = lireListe('rents', u).filter(r => !r.paidAt && r.month && (r.month < mc || (r.month === mc && auj.getDate() > (+(bail(r.leaseId) || {}).dueDay || 5))));
+  /* Loyers en retard : échéance passée (jamais avant le début du bail), bail pas terminé avant l'échéance. */
+  const retard = lireListe('rents', u).filter(r => loyerEnRetard(r, bail(r.leaseId)));
   const parBail = new Map(); retard.forEach(r => { const k = r.leaseId || r.id; const x = parBail.get(k) || {n: 0, reste: 0, r}; x.n++; x.reste += rRest(r); parBail.set(k, x); });
   /* Peu de retards : une ligne par locataire. Beaucoup : une seule ligne avec le total et quelques noms. */
   const enRetard = [...parBail.values()].sort((a, b) => b.reste - a.reste);
