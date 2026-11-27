@@ -1,5 +1,10 @@
 # DEUKSIL — Historique des modifications
 
+## 27 novembre 2026 (3) — Nom de domaine officiel deuksil.com
+
+- Adresse officielle du site : `https://deuksil.com` (`siteUrl` dans `js/00-config.js`). Les liens des e-mails (confirmation, mot de passe oublié) et le retour de la connexion Google y mènent.
+- Réglages Supabase et Google à faire : voir `README_CONFIGURATION_SUPABASE.md`, section « nom de domaine officiel deuksil.com ».
+
 ## 27 novembre 2026 (2) — Derniers défauts du retest avant la mise en production
 
 - **Finances de l'agence (PRO-32)** : les loyers d'un bien inscrit dans un mandat (même sans fiche mandant) ne comptent plus dans le « Résultat de l'agence » ; tableau par bien « le net revient au mandant » ; accueil « Encaissé ce mois · dont X pour vos mandants ».

@@ -2,7 +2,7 @@
 
 Ce dossier contient **tout** ce qu'il faut pour configurer et mettre en service DEUKSIL sur Supabase.
 
-> **Mise en ligne (Supabase + Gemini, site `https://deuksil.vercel.app`) : `README_SUPABASE_GEMINI.md`.**
+> **Mise en ligne (Supabase + Gemini, site `https://deuksil.com`) : `README_SUPABASE_GEMINI.md`.**
 >
 > **Pour configurer, un seul fichier suffit : `README_CONFIGURATION.md`** — toutes les commandes et tous les réglages, de bout en bout, dans l'ordre. Les documents ci-dessous sont des compléments.
 

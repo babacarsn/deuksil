@@ -37,7 +37,7 @@ async function installer(page) {
     const l = document.createElement('div'); l.id = 'studio-legende'; document.body.appendChild(l);
     const k = document.createElement('div'); k.id = 'studio-carton'; document.body.appendChild(k);
     // Les vidéos montrent l'adresse du site, pas celle du banc d'essai local.
-    const remplacer = n => { if (n.nodeType === 3 && /localhost:\d+/.test(n.nodeValue)) n.nodeValue = n.nodeValue.replace(/https?:\/\/localhost:\d+/g, 'https://deuksil.vercel.app'); else if (n.childNodes) n.childNodes.forEach(remplacer); };
+    const remplacer = n => { if (n.nodeType === 3 && /localhost:\d+/.test(n.nodeValue)) n.nodeValue = n.nodeValue.replace(/https?:\/\/localhost:\d+/g, 'https://deuksil.com'); else if (n.childNodes) n.childNodes.forEach(remplacer); };
     new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(remplacer))).observe(document.body, {childList: true, subtree: true});
   }, [CSS, CURSEUR]);
 }

@@ -6,11 +6,27 @@
 |---|---|
 | Projet Supabase | `fqrmulupzaqmvjoybela` |
 | Branche à tester | `test` — https://deuksil-git-test-babacarsns-projects.vercel.app |
-| Site en ligne (inchangé tant que `test` n'est pas fusionnée) | https://deuksil.vercel.app |
+| Site en ligne (nom de domaine officiel) | https://deuksil.com (aussi https://deuksil.vercel.app) |
 
 > La branche `test` utilise **la même base Supabase** que le site en ligne : ce que vous appliquez ici vaut pour les deux. Les deux migrations ne cassent rien pour le site en ligne actuel (aucune table, colonne ni donnée supprimée).
 
 ---
+
+## 27 novembre 2026 — nom de domaine officiel deuksil.com
+
+Le site répond maintenant sur **https://deuksil.com**. Le site y renvoie les liens des e-mails (confirmation, mot de passe oublié) et la connexion Google. Sans ces réglages : liens d'e-mail renvoyés vers l'ancienne adresse, et assistant / création de comptes refusés depuis deuksil.com.
+
+1. **Authentication → URL Configuration**
+   - *Site URL* : `https://deuksil.com`
+   - *Redirect URLs* : ajouter `https://deuksil.com/**` et `https://www.deuksil.com/**` (garder `https://deuksil.vercel.app/**` et l'adresse de test).
+2. **Secret des fonctions** `DEUKSIL_ORIGINES` (s'il est défini) : il doit contenir deuksil.com, sinon l'assistant et la création des accès sont refusés depuis deuksil.com :
+   ```bash
+   supabase secrets set DEUKSIL_ORIGINES="https://deuksil.com,https://www.deuksil.com,https://deuksil.vercel.app,https://deuksil-git-test-babacarsns-projects.vercel.app"
+   ```
+3. Si la connexion Google est activée : Google Cloud → ID client OAuth → *Origines JavaScript autorisées* : ajouter `https://deuksil.com` et `https://www.deuksil.com`. (L'URI de redirection `https://fqrmulupzaqmvjoybela.supabase.co/auth/v1/callback` ne change pas.) Écran de consentement OAuth : ajouter `deuksil.com` aux domaines autorisés.
+4. **Authentication → Emails → modèles** : si un modèle contient l'adresse `deuksil.vercel.app` écrite en dur, la remplacer par `{{ .SiteURL }}`.
+
+✅ Sur https://deuksil.com : « Mot de passe oublié » envoie un e-mail dont le lien ouvre deuksil.com ; la connexion Google revient sur deuksil.com ; l'assistant répond.
 
 ## 27 novembre 2026 — corrections du retest (à faire en premier)
 
@@ -167,9 +183,9 @@ Sans cela, la création des comptes est refusée **depuis le site de test** (« 
 
 1. **Secret des fonctions** (les deux adresses, séparées par une virgule) :
    ```bash
-   supabase secrets set DEUKSIL_ORIGINES="https://deuksil.vercel.app,https://deuksil-git-test-babacarsns-projects.vercel.app"
+   supabase secrets set DEUKSIL_ORIGINES="https://deuksil.com,https://www.deuksil.com,https://deuksil.vercel.app,https://deuksil-git-test-babacarsns-projects.vercel.app"
    ```
-2. **Authentication → URL Configuration → Redirect URLs** : ajouter `https://deuksil-git-test-babacarsns-projects.vercel.app/**` (garder celle du site en ligne ; **ne pas** changer la Site URL).
+2. **Authentication → URL Configuration → Redirect URLs** : ajouter `https://deuksil-git-test-babacarsns-projects.vercel.app/**` (garder celles du site en ligne).
 3. Si la connexion Google est activée : Google Cloud → ID client OAuth → *Origines JavaScript autorisées* : ajouter `https://deuksil-git-test-babacarsns-projects.vercel.app`.
 
 ✅ `supabase secrets list` montre `DEUKSIL_ORIGINES`. Sur le site de test : « Mot de passe oublié » envoie un code qui fonctionne.
@@ -186,6 +202,7 @@ select email, role from public.profiles where cni = '<13 chiffres>';
 -- Libérer la CNI d'un compte de TEST (seulement un compte de test)
 update public.profiles set cni = null where email = '<compte de test>';
 ```
+
 
 ## Étape 7 — Accès des testeurs au site de test (Vercel)
 

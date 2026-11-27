@@ -11,7 +11,7 @@ Dernière mise à jour : 5 novembre 2026.
 | Lieu | Contient | Se met à jour |
 |---|---|---|
 | **GitHub**, branche `main` | Le code : site, `supabase/` (migrations, fonctions), documentation | Par Pull Request uniquement |
-| **Vercel** | Le site en ligne (`https://deuksil.vercel.app`) | **Automatiquement** à chaque fusion dans `main` |
+| **Vercel** | Le site en ligne (`https://deuksil.com`, aussi joignable par `https://deuksil.vercel.app`) | **Automatiquement** à chaque fusion dans `main` |
 | **Supabase** (projet `fqrmulupzaqmvjoybela`) | Base de données, fonctions serveur, secrets | **À la main**, par la personne Supabase |
 
 **À retenir : fusionner dans `main` ne déploie PAS Supabase.** La base, les fonctions et les secrets se déploient séparément (voir §6).
@@ -91,9 +91,9 @@ Il vérifie les empreintes, la syntaxe JavaScript et l'absence de clé secrète.
 
 ### D. Juste après la fusion (production)
 - [ ] Vercel → Deployments : le dernier déploiement de `main` est « Ready »
-- [ ] Ouvrir `https://deuksil.vercel.app`, recharger en vidage de cache (Ctrl+Maj+R) ; sur téléphone, rouvrir l'application installée
+- [ ] Ouvrir `https://deuksil.com`, recharger en vidage de cache (Ctrl+Maj+R) ; sur téléphone, rouvrir l'application installée
 - [ ] Connexion avec un compte réel, puis un parcours simple (voir un bien, envoyer un message)
-- [ ] Ouvrir `https://deuksil.vercel.app/supabase/config.toml` → doit donner une erreur 404 (preuve que `supabase/` n'est pas publié)
+- [ ] Ouvrir `https://deuksil.com/supabase/config.toml` → doit donner une erreur 404 (preuve que `supabase/` n'est pas publié)
 - [ ] Assistant IA (§4.F)
 
 ### E. Supabase : base et sécurité (personne Supabase)
@@ -121,7 +121,7 @@ select policyname from pg_policies where tablename = 'objects' and schemaname = 
 
 Réglages du tableau de bord à contrôler :
 - [ ] API : schémas exposés = `public` uniquement ; *Max rows* = 1000
-- [ ] Authentication : *Site URL* = `https://deuksil.vercel.app` ; *Redirect URLs* contient cette adresse ; confirmation d'e-mail activée ; inscriptions anonymes désactivées
+- [ ] Authentication : *Site URL* = `https://deuksil.com` ; *Redirect URLs* contient `https://deuksil.com/**`, `https://www.deuksil.com/**` et `https://deuksil.vercel.app/**` ; confirmation d'e-mail activée ; inscriptions anonymes désactivées
 - [ ] E-mails : SMTP personnalisé configuré ; modèles `supabase/templates/confirmation.html` et `recovery.html` collés
 - [ ] Une inscription de test reçoit bien un e-mail avec un code à 6 chiffres
 - [ ] Sauvegarde récente de la base et des fichiers avant toute migration en production (`supabase/sauvegarde/`, voir `README_SUPABASE.md` §17)
@@ -171,7 +171,7 @@ Dépannage :
 | `GEMINI_PAYANT` | Débloque les fonctions qui envoient des données personnelles à Gemini | **Ne pas créer** en offre gratuite. `oui` seulement si la facturation Gemini est activée |
 | `GEMINI_MODEL` | Modèle utilisé | Facultatif (défaut : `gemini-flash-latest`) |
 | `GEMINI_URL` | Adresse de l'API Gemini | **Ne pas définir** |
-| `DEUKSIL_ORIGINES` | Sites autorisés à appeler les fonctions | Recommandé : `https://deuksil.vercel.app` (plusieurs : séparés par des virgules). Défaut : tous les sites |
+| `DEUKSIL_ORIGINES` | Sites autorisés à appeler les fonctions | Recommandé : `https://deuksil.com,https://www.deuksil.com,https://deuksil.vercel.app` (plusieurs : séparés par des virgules). Défaut : tous les sites |
 | `DEUKSIL_CLE_PUBLIQUE` | Clé publique (`sb_publishable_…`) | Seulement si les connexions échouent en 401 |
 | `DEUKSIL_IA_PAR_MINUTE` | Limite d'appels de l'assistant par minute | Facultatif (défaut : 40) |
 | `DEUKSIL_CLE_NETTOYAGE` | Protège la fonction de nettoyage des fichiers | 32 caractères aléatoires ou plus |

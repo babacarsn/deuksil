@@ -49,7 +49,7 @@ function monde(u, opts = {}) {
   let modaleOuverte = null;
   let dernierHtml = '';
   const modal = (t, h) => { modaleOuverte = t; dernierHtml = h || ''; journal.push('modal:' + t); }, closeModal = () => { modaleOuverte = null; journal.push('closeModal'); };
-  const DEUKSIL_CONFIG = {siteUrl: 'https://deuksil.vercel.app'};
+  const DEUKSIL_CONFIG = {siteUrl: 'https://deuksil.com'};
   let fonction = async function (nom) { const e = ${JSON.stringify(opts.erreurFonction || '')}; if (e) throw new Error(e); return {ok: 1}; };
   let compteMandant = async function () { return {id: 'mandant1'}; };
   const H = {};
@@ -191,7 +191,7 @@ function cliquerPublier(x, id) { let stop = false; const ev = {target: {closest:
   { const x = monde({role: 'agency'});
     x.montrer()({firstName: 'Moussa', lastName: 'Ndiaye', email: 'moussa@agence.sn', phone: '77 123 45 67', role: 'agent'}, 'Abcd-Efgh-Ij7');
     const h = x.html();
-    ok(x.modale() === 'Accès créé : identifiants à transmettre' && h.includes('moussa@agence.sn') && h.includes('Abcd-Efgh-Ij7') && h.includes('https://deuksil.vercel.app/#/login')
+    ok(x.modale() === 'Accès créé : identifiants à transmettre' && h.includes('moussa@agence.sn') && h.includes('Abcd-Efgh-Ij7') && h.includes('https://deuksil.com/#/login')
       && h.includes('https://wa.me/221771234567?text=') && h.includes('mailto:moussa%40agence.sn') && h.includes('(agent)'), 'Agent créé : fiche d\'identifiants (adresse, identifiant, mot de passe, WhatsApp, e-mail)', h.slice(0, 300)); }
   { const x = monde({role: 'agency'});
     x.montrer()({firstName: 'Awa', email: 'awa@mail.sn', phone: '', ownerRec: 'f1', mandantOf: 'a1', role: 'owner'}, 'Zz12-Yy34-Xx7');
