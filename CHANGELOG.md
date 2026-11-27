@@ -1,5 +1,17 @@
 # DEUKSIL — Historique des modifications
 
+## 27 novembre 2026 (2) — Derniers défauts du retest avant la mise en production
+
+- **Finances de l'agence (PRO-32)** : les loyers d'un bien inscrit dans un mandat (même sans fiche mandant) ne comptent plus dans le « Résultat de l'agence » ; tableau par bien « le net revient au mandant » ; accueil « Encaissé ce mois · dont X pour vos mandants ».
+- **Accueil** : choix Louer / Acheter / Tout avant la recherche (VIS-02) ; nombre de villes = villes qui ont des annonces (VIS-01).
+- **Mes alertes** : bouton « Modifier » (CLI-17).
+- **Relance d'un impayé** : modèle de message toujours affiché, prêt à envoyer (PRO-28).
+- **Contrat de vente** : plus de période d'un an ni de « Renouveler » ; un acte signé n'a plus de date de fin, réparation dans la migration du 27/11 (PRO-29).
+- **Agent soumis à validation** : le récapitulatif dit « envoyée à votre agence » et « Envoyer pour validation » (AGT-09).
+- **Assistant** : guide des écrans par profil (le locataire est envoyé vers « Signaler un problème », LOC-24) ; bouton de l'assistant aussi pour le visiteur (VIS-35).
+- **Mandant** : « Télécharger le relevé (PDF) » sur « Mes relevés », identique à la page (AGE-23).
+- **Fiche** : « Voir sur une carte » mène à la carte de la fiche ; vérifiés par l'adresse #/annonce/… : propriétaire sur sa propre annonce (PRO-07), adresse et référence (VIS-09), photos en grand (VIS-10).
+
 ## 27 novembre 2026 — Corrections du retest (7 défauts majeurs)
 
 - **Administration** : messages de contact et signalements relus à chaque ouverture ; les signalements envoyés sans compte apparaissent aussi dans « Signalements » ; si la base ne reconnaît pas le compte comme administrateur, un bandeau dit pourquoi (au lieu d'un 0). Côté base : un réglage « double authentification » absent ne cache plus les messages (migration `20261127000100_recette_27nov.sql`).

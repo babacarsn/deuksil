@@ -20,9 +20,10 @@
 | Alertes : le client n'était jamais prévenu d'une nouvelle annonce | même migration (déclencheur `prevenir_alertes`) |
 | F3 loué resté « En discussion » et visible dans la recherche | même migration (déclencheur `bien_loue_par_bail` + réparation) |
 | Loyer « non reçu » d'un bail terminé le jour de son début | même migration (retrait des échéances jamais dues, sans versement) |
+| Acte de vente « expiré » au bout d'un an, avec « Renouveler » | même migration (un acte signé n'a plus de date de fin) |
 | Comparateur, fiche (photos, carte, partage), caution, accueil | Rien (site uniquement) |
 
-**A. Appliquer la migration** (après une sauvegarde, étape 0) : SQL Editor → coller tout `supabase/migrations/20261127000100_recette_27nov.sql` → Run. Rejouable sans risque. Testée sur un PostgreSQL vierge avec `supabase/tests-cni/recette-27nov.sh` (17 scénarios réussis ; ne jamais lancer ce script sur la production).
+**A. Appliquer la migration** (après une sauvegarde, étape 0) : SQL Editor → coller tout `supabase/migrations/20261127000100_recette_27nov.sql` → Run. Rejouable sans risque. Testée sur un PostgreSQL vierge avec `supabase/tests-cni/recette-27nov.sh` (19 scénarios réussis, et les 65 scénarios existants toujours réussis ; ne jamais lancer ce script sur la production).
 
 ✅ Contrôles :
 ```sql
