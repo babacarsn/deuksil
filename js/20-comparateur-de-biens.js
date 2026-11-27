@@ -1,27 +1,36 @@
 /* ==========================================================================
    VUE : comparateur de biens
+   Un seul tableau (pas de pages), un bouton « Retirer » par bien, le meilleur
+   prix et la plus grande surface mis en valeur.
    ========================================================================== */
 route(/^\/compare$/, () => {
   const u = Auth.current();
   const items = compareIds.map(id => DB.findItem(DB.K.properties, id)).filter(Boolean);
-  const body = page('Comparer les biens', `${items.length} bien${items.length > 1 ? 's' : ''} sélectionné${items.length > 1 ? 's' : ''}`,
-      `<a class="btn ghost sm" href="#/search">${icon('arrowLeft', 14)} Retour à la recherche</a>`) +
-    (items.length < 2 ? `<div class="empty"><b>Sélectionnez au moins deux biens</b><p class="small">Cochez « Comparer » sur les annonces depuis la page de recherche.</p><a class="btn sm" href="#/search">Aller à la recherche</a></div>`
-    : `<div class="table-wrap"><table><thead><tr><th>Critère</th>${items.map(p => `<th>${esc(p.title)}</th>`).join('')}</tr></thead><tbody>
-        <tr><td>Photo</td>${items.map(p => `<td>${photoHtml(p, {style: 'width:120px;border-radius:10px'})}</td>`).join('')}</tr>
-        <tr><td>Prix</td>${items.map(p => `<td><b>${money(p.price)}${p.transaction === 'location' ? ' / mois' : ''}</b></td>`).join('')}</tr>
-        <tr><td>Prix au m²</td>${items.map(p => `<td>${money(pricePerSqm(p))}</td>`).join('')}</tr>
-        <tr><td>Transaction</td>${items.map(p => `<td>${TRANSACTION_LABEL[p.transaction]}</td>`).join('')}</tr>
-        <tr><td>Type</td>${items.map(p => `<td style="text-transform:capitalize">${esc(p.type)}</td>`).join('')}</tr>
-        <tr><td>Localisation</td>${items.map(p => `<td>${esc(p.quartier)}, ${esc(p.city)}</td>`).join('')}</tr>
-        <tr><td>Surface</td>${items.map(p => `<td>${p.surface} m²</td>`).join('')}</tr>
-        <tr><td>Chambres</td>${items.map(p => `<td>${p.transaction === 'terrain' ? '—' : p.rooms}</td>`).join('')}</tr>
-        <tr><td>Salles de bain</td>${items.map(p => `<td>${p.transaction === 'terrain' ? '—' : p.baths}</td>`).join('')}</tr>
-        <tr><td>Meublé</td>${items.map(p => `<td>${p.furnished ? 'Oui' : 'Non'}</td>`).join('')}</tr>
-        <tr><td>Parking</td>${items.map(p => `<td>${p.parking ? 'Oui' : 'Non'}</td>`).join('')}</tr>
-        <tr><td>Statut</td>${items.map(p => `<td>${badge(STATUS_LABEL[p.status], STATUS_TONE[p.status])}</td>`).join('')}</tr>
-        <tr><td>Vues</td>${items.map(p => `<td>${p.views || 0}</td>`).join('')}</tr>
-        <tr><td></td>${items.map(p => `<td><a class="btn sm" href="#/property/${p.id}">Voir le bien</a></td>`).join('')}</tr>
+  const lieu = p => [...new Set([p.quartier, p.city].filter(Boolean))].join(', ') || p.region || '—';
+  const loyer = p => p.transaction === 'location';
+  const prix = items.map(p => +p.price || 0), surf = items.map(p => +p.surface || 0);
+  const minPrix = Math.min(...prix.filter(Boolean)), maxSurf = Math.max(...surf);
+  const ligne = (lib, f) => `<tr><td>${lib}</td>${items.map(p => `<td>${f(p)}</td>`).join('')}</tr>`;
+  const body = page('Comparer les biens', `${items.length} bien${items.length > 1 ? 's' : ''} sélectionné${items.length > 1 ? 's' : ''} · 3 au maximum`,
+      `<a class="btn ghost sm" href="#/search">${icon('arrowLeft', 14)} Retour à la recherche</a>${items.length ? ` <button class="btn ghost sm" data-action="clear-compare">Tout retirer</button>` : ''}`) +
+    (items.length < 2 ? `<div class="empty"><b>${items.length ? 'Ajoutez au moins un autre bien' : 'Sélectionnez au moins deux biens'}</b><p class="small">Cochez « Comparer » sur les annonces depuis la page de recherche.</p><a class="btn sm" href="#/search">Aller à la recherche</a></div>`
+    : `<div class="cmp-wrap"><table class="cmp-table" data-enh="sans-pages"><thead><tr><th>Critère</th>${items.map(p => `<th><div class="cmp-tete">
+          ${p.photos && p.photos.length ? `<img src="${esc(p.photos[0])}" alt="" loading="lazy">` : `<div class="cmp-ph">${typeof sceneSvg === 'function' ? sceneSvg(p) : ''}</div>`}
+          <b>${esc(p.title)}</b>
+          <div class="cmp-actions"><a class="btn sm" href="#/property/${p.id}">Voir le bien</a>
+          <button class="btn ghost sm" data-action="toggle-compare" data-id="${p.id}" aria-label="Retirer ${esc(p.title)} de la comparaison">${icon('close', 13)} Retirer</button></div>
+        </div></th>`).join('')}</tr></thead><tbody>
+        ${ligne('Prix', p => `<b class="${+p.price === minPrix && items.length > 1 ? 'cmp-mieux' : ''}">${money(p.price)}${loyer(p) ? ' / mois' : ''}</b>`)}
+        ${ligne('Prix au m²', p => +p.surface ? money(pricePerSqm(p)) : '—')}
+        ${ligne('Transaction', p => esc(TRANSACTION_LABEL[p.transaction] || p.transaction))}
+        ${ligne('Type', p => `<span style="text-transform:capitalize">${esc(p.type)}</span>`)}
+        ${ligne('Localisation', p => esc(lieu(p)))}
+        ${ligne('Surface', p => +p.surface ? `<span class="${+p.surface === maxSurf && items.length > 1 ? 'cmp-mieux' : ''}">${p.surface} m²</span>` : '—')}
+        ${ligne('Chambres', p => p.transaction === 'terrain' ? '—' : (p.rooms || 0))}
+        ${ligne('Salles de bain', p => p.transaction === 'terrain' ? '—' : (p.baths || 0))}
+        ${ligne('Meublé', p => p.furnished ? 'Oui' : 'Non')}
+        ${ligne('Parking', p => p.parking ? 'Oui' : 'Non')}
+        ${ligne('Disponibilité', p => badge(STATUS_LABEL[p.status] || p.status, STATUS_TONE[p.status]))}
       </tbody></table></div>`);
   return u && u.role !== 'admin' ? shellApp(u, body) : shellPublic(`<div class="wrap section" style="border:0">${body}</div>`);
 });
