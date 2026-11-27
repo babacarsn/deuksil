@@ -72,13 +72,27 @@ async function filmer({id, qui = null, hash = '#/', titre, espace, scenario, pre
     async trouver(cible) { try { return await t._trouver(cible); } catch (e) { e.message = 'cible ' + JSON.stringify(cible) + ' : ' + e.message.split('\n')[0]; throw e; } },
     async _trouver(cible) {
       let loc;
+      let grp = null;
+      // Menu regroupé : un lien dans un groupe fermé → on ouvre d'abord le groupe, à l'écran.
+      if (typeof cible !== 'string' && cible.dans === '#sidebar') {
+        grp = await page.evaluate(txt => {
+          const a = [...document.querySelectorAll('#sidebar .ng a')].find(x => x.textContent.trim().includes(txt) && !x.offsetParent);
+          const g = a && a.closest('.ng'); const b = g && g.querySelector('.ng-t'); return b ? b.getAttribute('data-ng') : null;
+        }, cible.texte);
+        if (grp) {
+          const b = page.locator(`#sidebar .ng-t[data-ng="${grp}"]`).first();
+          await t.vers(b);
+          await page.evaluate(p => { const o = document.getElementById('studio-onde'); o.style.left = p.x + 'px'; o.style.top = p.y + 'px'; o.classList.remove('on'); void o.offsetWidth; o.classList.add('on'); }, pos);
+          await b.click(); await attendre(600);
+        }
+      }
       if (typeof cible === 'string') loc = page.locator(cible).first();
       else {
         const base = cible.dans ? page.locator(cible.dans) : page;
-        const tous = base.locator(cible.role || 'a, button, label, [role="tab"], .chip, summary, [data-action]:not(form)', {hasText: cible.texte}).filter({visible: true});
+        const tous = base.locator(cible.role || (grp ? 'a' : 'a, button, label, [role="tab"], .chip, summary, [data-action]:not(form)'), {hasText: cible.texte}).filter({visible: true});
         await tous.first().waitFor({state: 'visible', timeout: 6000});
         // Le plus petit élément qui contient le texte (le bouton, pas son conteneur).
-        const tailles = await tous.evaluateAll(els => els.map(e => e.textContent.trim().length));
+        const tailles = await tous.evaluateAll(els => els.map(e => e.textContent.trim().length * 2 + (e.tagName === 'A' ? 0 : 1)));   // à égalité : le lien
         const i = tailles.indexOf(Math.min(...tailles));
         loc = tous.nth(i);
       }

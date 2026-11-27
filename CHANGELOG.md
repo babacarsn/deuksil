@@ -1,5 +1,11 @@
 # DEUKSIL — Historique des modifications
 
+## 27 novembre 2026 (4) — Tutoriels de la page Aide retournés sur le site actuel
+
+- Les 18 vidéos de « Aide » montraient l'ancien menu et les anciens formulaires : toutes retournées sur l'application actuelle (menu regroupé, formulaires en étapes, blocs blancs), avec des noms fictifs réalistes (plus de « TEST » à l'écran).
+- Étapes écrites et durées mises à jour ; les vidéos portent un numéro de version (`VERSION_VIDEOS` dans `js/aide-page.js`) pour que le navigateur ne garde pas les anciennes.
+- Studio : un lien rangé dans un groupe fermé du menu ouvre d'abord le groupe, à l'écran.
+
 ## 27 novembre 2026 (3) — Nom de domaine officiel deuksil.com
 
 - Adresse officielle du site : `https://deuksil.com` (`siteUrl` dans `js/00-config.js`). Les liens des e-mails (confirmation, mot de passe oublié) et le retour de la connexion Google y mènent.

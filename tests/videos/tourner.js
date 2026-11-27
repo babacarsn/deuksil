@@ -10,6 +10,21 @@ const T0 = '2026-11-02T09:00:00Z';
 
 /* Données fictives plus riches que celles du banc : des annonces avec de vraies photos. */
 function enrichir(D, ID) {
+  /* Noms fictifs mais réalistes (pas de « TEST » à l'écran). */
+  const P = (id, o) => { const x = D.profiles.find(y => y.id === id); if (x) Object.assign(x, o); };
+  P(ID.agence, {first_name: 'Mamadou', last_name: 'Sarr', agency_name: 'Teranga Immobilier'});
+  P(ID.agent, {first_name: 'Fatou', last_name: 'Sow'});
+  P(ID.mandant, {first_name: 'Abdoulaye', last_name: 'Ba'});
+  P(ID.locataire, {first_name: 'Aminata', last_name: 'Diallo'});
+  P(ID.client, {first_name: 'Khady', last_name: 'Ndiaye'});
+  P(ID.proprio, {first_name: 'Ousmane', last_name: 'Faye'});
+  P(ID.gestionnaire, {first_name: 'Mariama', last_name: 'Gueye'});
+  (D.owner_records || []).forEach(r => { if (r.id === ID.fiche) r.name = 'Abdoulaye Ba'; });
+  const titre = {[ID.p1]: 'Appartement F3 meublé Almadies', [ID.p2]: 'Studio lumineux Plateau', [ID.p3]: 'Villa 5 pièces avec piscine, Mermoz'};
+  D.properties.forEach(p => { if (titre[p.id]) p.title = titre[p.id]; p.title = p.title.replace(/\bTEST\b\s*|UAT\s*/g, ''); });
+  (D.leases || []).forEach(l => { if (/TEST/i.test(l.tenant)) l.tenant = 'Aminata Diallo'; });
+  (D.tickets || []).forEach(t => { t.title = t.title.replace(/TEST\s*/g, ''); });
+  (D.docs || []).forEach(d => { if (d.client) d.client = d.client.replace(/TEST\s*/g, ''); });
   const ann = (id, o) => ({id, owner_id: ID.proprio, title: '', type: 'appartement', transaction: 'location', price: 0, region: 'Dakar', city: 'Dakar', commune: '', quartier: '',
     surface: 80, rooms: 2, baths: 1, status: 'disponible', listing_status: 'publiee', description: 'Logement lumineux, proche des commerces et des transports.', amenities: ['Climatisation', 'Gardien'],
     photos: [], views: 12, contacts: 2, verif_level: 'none', published_at: T0, extra: {}, created_at: T0, updated_at: T0, ...o});
@@ -138,6 +153,7 @@ const SCENES = {
     await t.choisir('form[data-action="g-lease"] [name="propertyId"]', 'c0000000-0000-4000-8000-000000000012');
     await t.saisir('form[data-action="g-lease"] [name="tenant"]', 'Awa Ndiaye');
     await t.saisir('form[data-action="g-lease"] [name="phone"]', '771234567');
+    await t.clic({texte: 'Suivant', dans: 'form[data-action="g-lease"]'}, 'Cliquez sur <b>Suivant</b>');
     await t.legende('Le loyer, la caution, le début et la durée');
     await t.saisir('form[data-action="g-lease"] [name="rent"]', '200000');
     await t.saisir('form[data-action="g-lease"] [name="deposit"]', '400000');
@@ -158,7 +174,8 @@ const SCENES = {
     await t.affiche();
     await t.clic({texte: 'Enregistrer le paiement', dans: '.modal'});
     await t.legende('Le loyer passe à « Payé ». Un paiement partiel est aussi accepté', 2400);
-    await t.clic('[data-action="g-receipt"]', 'Cliquez sur <b>Quittance</b>');
+    const ouverte = await t.page.locator('.modal', {hasText: 'Quittance de loyer'}).filter({visible: true}).count();
+    if (!ouverte) await t.clic('[data-action="g-receipt"]', 'Cliquez sur <b>Quittance</b>');
     await t.legende('La quittance est prête : <b>Télécharger le PDF</b> pour l\'envoyer au locataire', 3000);
     await t.fermer();
   }},
@@ -168,12 +185,14 @@ const SCENES = {
     await t.legende('Le client, puis les lignes : désignation, quantité, prix');
     await t.saisir('.modal [name="client"]', 'Société Teranga Services');
     await t.saisir('.modal [name="clientPhone"]', '338201234');
+    await t.clic({texte: 'Suivant', dans: '.modal'});
     await t.saisir('.modal [name="l0"]', 'Frais de dossier');
     await t.saisir('.modal [name="q0"]', '1');
     await t.saisir('.modal [name="p0"]', '50000');
     await t.saisir('.modal [name="l1"]', 'État des lieux');
     await t.saisir('.modal [name="q1"]', '1');
     await t.saisir('.modal [name="p1"]', '25000');
+    await t.clic({texte: 'Suivant', dans: '.modal'});
     await t.choisir('.modal [name="tax"]', '18');
     await t.legende('Le total HT, la TVA et le total TTC s\'affichent', 2200);
     await t.affiche();
@@ -248,12 +267,14 @@ const SCENES = {
     await t.defilerVers('form[data-action="m-new"]');
     await t.legende('Choisissez le propriétaire : sa commission est reprise');
     await t.choisir('form[data-action="m-new"] [name="ownerId2"]', {index: 0});
-    await t.legende('Cochez les biens confiés et les services');
-    await t.cocher('form[data-action="m-new"] [name^="p_"]');
-    await t.cocher('form[data-action="m-new"] [name="s_0"]');
-    await t.cocher('form[data-action="m-new"] [name="s_1"]');
     await t.saisir('form[data-action="m-new"] [name="start"]', '2026-12-01', {lent: 20});
     await t.saisir('form[data-action="m-new"] [name="end"]', '2027-11-30', {lent: 20});
+    await t.clic({texte: 'Suivant', dans: 'form[data-action="m-new"]'}, 'Cliquez sur <b>Suivant</b>');
+    await t.legende('Cochez les biens confiés et les services');
+    await t.cocher('form[data-action="m-new"] [name^="p_"]');
+    await t.siPresent('form[data-action="m-new"] [name="s_0"]', () => t.cocher('form[data-action="m-new"] [name="s_0"]'));
+    await t.siPresent('form[data-action="m-new"] [name="s_1"]', () => t.cocher('form[data-action="m-new"] [name="s_1"]'));
+    await t.clic({texte: 'Suivant', dans: 'form[data-action="m-new"]'});
     await t.affiche();
     await t.clic({texte: 'Créer le mandat', dans: '#app'});
     await t.clic('[data-action="m-view"]', 'Cliquez sur <b>Voir</b> pour l\'aperçu et le PDF à faire signer');
@@ -284,7 +305,7 @@ const SCENES = {
     await t.attendre(1800);
   }},
   maintenance: {qui: 'locataire', hash: '#/tenant/home', titre: 'Signaler un problème dans le logement', espace: 'Locataire', async scenario(t) {
-    await t.clic({texte: 'Maintenance', dans: '#sidebar'}, 'Ouvrez <b>Maintenance</b>');
+    await t.clic({texte: 'Signaler un problème', dans: '#sidebar'}, 'Ouvrez <b>Signaler un problème</b>');
     await t.legende('Décrivez le problème : titre, catégorie, urgence');
     await t.saisir('form[data-action="t-ticket"] [name="title"]', 'Fuite sous l\'évier de la cuisine');
     await t.choisir('form[data-action="t-ticket"] [name="category"]', 'Plomberie');
@@ -326,7 +347,7 @@ const SCENES = {
   for (const id of ids) {
     const sc = SCENES[id]; if (!sc) { console.log('inconnue :', id); continue; }
     try {
-      const r = await filmer({id, sortie: SORTIE, preparer: prep(sc.preparer), ...sc});
+      const r = await filmer({id, sortie: SORTIE, ...sc, preparer: prep(sc.preparer)});
       console.log(`OK  ${id} : ${r.duree.toFixed(1)} s, ${(r.taille / 1024).toFixed(0)} Ko, ${r.images} images${r.erreurs.length ? ' · erreurs page : ' + r.erreurs.slice(0, 3).join(' / ') : ''}`);
     } catch (e) { console.log(`ÉCHEC ${id} : ${e.message.split('\n')[0]}`); }
   }
