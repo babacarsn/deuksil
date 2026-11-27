@@ -395,3 +395,9 @@ document.addEventListener('click', async e => {
 });
 new MutationObserver(() => { try { boutonsReleveMandant(); } catch (e) { console.warn('[DEUKSIL] relevé', e); } })
   .observe(document.getElementById('app') || document.body, {childList: true, subtree: true});
+/* « Voir sur une carte » (ligne d'adresse) : amène à la carte de la fiche, plutôt que de quitter le site. */
+document.addEventListener('click', e => {
+  const a = e.target.closest && e.target.closest('#detail-grid p a[href*="google.com/maps"]'); if (!a || a.closest('.fb-carte')) return;
+  const carte = document.querySelector('.fb-carte'); if (!carte) return;
+  e.preventDefault(); carte.scrollIntoView({behavior: 'smooth', block: 'center'});
+});
