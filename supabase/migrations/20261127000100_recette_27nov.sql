@@ -21,6 +21,8 @@
 -- 4. Loyer « non reçu » pour un bail terminé avant l'échéance (retest
 --    PRO-05). → les échéances jamais dues (aucun versement, échéance le jour
 --      de la fin du bail ou après) des baux terminés sont retirées.
+-- 5. Acte de vente « expiré » au bout d'un an (retest PRO-29). → un acte de vente
+--    signé n'a plus de date de fin ; les promesses gardent leur date limite.
 --
 -- Rejouable sans risque. Ne supprime que les échéances de loyer jamais dues
 -- décrites au point 4 (aucun versement enregistré).
@@ -128,3 +130,11 @@ delete from public.rents r
    and jsonb_typeof(r.payments) = 'array' and jsonb_array_length(r.payments) = 0
    and greatest(to_date(r.month || '-' || lpad(least(greatest(l.due_day, 1), 28)::text, 2, '0'), 'YYYY-MM-DD'), l.start)
        >= (l.ended_at at time zone 'Africa/Dakar')::date;
+
+-- --- 5. Actes de vente : pas de date de fin ----------------------------------------
+-- Un acte de vente signé recevait une « fin » un an plus tard : il passait « expiré »
+-- et l'espace recevait « Le contrat expire dans 30 jours » (retest PRO-29).
+-- Les promesses de vente gardent leur date limite.
+update public.contracts
+   set "end" = null, status = case when status = 'expiré' then 'actif' else status end
+ where type = 'vente' and coalesce(extra ->> 'genre', '') <> 'promesse' and "end" is not null;

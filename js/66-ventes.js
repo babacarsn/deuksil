@@ -70,8 +70,8 @@ function contratDeVente(u, d, genre) {
   const dejaRef = genre === 'promesse' ? d.promiseRef : d.actRef;
   if (dejaRef && DB.findItem(DB.K.contracts, c => c.ref === dejaRef)) return null;
   const debut = genre === 'promesse' ? (d.promiseAt || ymd()) : (d.signedAt || ymd());
-  const fin = genre === 'promesse' ? (d.deadline || addDays(debut, 90).slice(0, 10))
-                                   : addDays(debut, 365).slice(0, 10);
+  /* Un acte de vente signé n'a pas de fin : pas d'échéance, pas de renouvellement. */
+  const fin = genre === 'promesse' ? (d.deadline || addDays(debut, 90).slice(0, 10)) : '';
   const c = DB.addItem(DB.K.contracts, {
     ownerId: u.id, ref: nref('CTR', 'contracts'), type: 'vente',
     party: d.buyer, clientId: d.clientId || '', propertyId: d.propertyId,

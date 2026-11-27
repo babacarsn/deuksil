@@ -72,4 +72,14 @@ $P -v ON_ERROR_STOP=1 -f "$M" >/dev/null 2>&1
 egal "Bail terminé le jour du début : ses échéances jamais dues sont retirées" "" "select count(*) from public.rents where lease_id='$L2';" "0" postgres
 egal "Un loyer avec un acompte n'est jamais retiré" "" "select count(*) from public.rents where lease_id='$L1';" "1" postgres
 
+echo "--- 5. Actes de vente ---"
+$P <<SQL
+insert into public.contracts(owner_id, type, party, start, "end", amount, status, extra) values
+ ('$A','vente','Acheteur acte','2025-10-01','2026-10-01',90000000,'expiré','{"genre":"acte"}'),
+ ('$A','vente','Acheteur promesse','2026-11-01','2027-01-30',50000000,'actif','{"genre":"promesse"}');
+SQL
+$P -v ON_ERROR_STOP=1 -f "$M" >/dev/null 2>&1
+egal "Acte de vente : plus de date de fin, plus « expiré »" "" "select coalesce(\"end\"::text,'aucune') || '/' || status from public.contracts where party='Acheteur acte';" "aucune/actif" postgres
+egal "Promesse de vente : garde sa date limite" "" "select \"end\"::text from public.contracts where party='Acheteur promesse';" "2027-01-30" postgres
+
 echo; echo "Retest 27/11 : $ok réussis, $ko échoués"

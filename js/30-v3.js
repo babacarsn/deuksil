@@ -60,11 +60,13 @@ vueGestion(['providers', 'contracts'], function (u, tab) {
     <div class="field"><label>Charges</label><input class="input" type="number" min="0" name="charges" value="0"></div></div>
     <div class="field"><label>Conditions particulières</label><textarea name="conditions"></textarea></div><button class="btn">Créer (brouillon)</button></form>` +
     gTable(['N°', 'Type', 'Partie', 'Période', 'Montant', 'Statut', ''], list.slice().reverse().map(c => `<tr><td class="small"><b>${c.ref}</b></td><td class="small">${CTYPE[c.type]}</td><td class="small">${esc(c.party)}</td>
-      <td class="small muted">${dateFr(c.start)} → ${dateFr(c.end)}${soon(c) ? '<br>' + badge('Expire dans ' + daysBetween(now(), c.end) + ' j', 'warn') : ''}</td><td>${money(c.amount)}</td><td>${badge(c.status, CTONE[c.status])}</td>
+      <td class="small muted">${c.type === 'vente' ? (c.genre === 'promesse' ? `Promesse du ${dateFr(c.start)}<br>à signer avant le ${dateFr(c.end)}` : `Vente signée le ${dateFr(c.start)}`)
+        : `${dateFr(c.start)} → ${dateFr(c.end)}${soon(c) ? '<br>' + badge('Expire dans ' + daysBetween(now(), c.end) + ' j', 'warn') : ''}`}</td><td>${money(c.amount)}</td>
+      <td>${c.type === 'vente' && c.status === 'actif' ? badge(c.genre === 'promesse' ? 'promesse en cours' : 'signée', 'ok') : badge(c.status, CTONE[c.status])}</td>
       <td><div class="row" style="gap:6px"><button class="btn ghost sm" data-action="g3-cview" data-id="${c.id}">Voir</button>
       ${c.status === 'brouillon' ? `<button class="btn sm" data-action="g3-activate" data-id="${c.id}">Activer</button>` : ''}
-      ${['actif', 'expiré'].includes(c.status) ? `<button class="btn sm" data-action="g3-renew" data-id="${c.id}">Renouveler</button>` : ''}
-      ${c.status === 'actif' ? `<button class="btn ghost sm" data-action="g3-cancel" data-id="${c.id}">Résilier</button>` : ''}</div></td></tr>`), ['Aucun contrat', 'Créez un contrat de location, un mandat de gestion, de vente ou de prestation.']);
+      ${['actif', 'expiré'].includes(c.status) && c.type !== 'vente' ? `<button class="btn sm" data-action="g3-renew" data-id="${c.id}">Renouveler</button>` : ''}
+      ${c.status === 'actif' && (c.type !== 'vente' || c.genre === 'promesse') ? `<button class="btn ghost sm" data-action="g3-cancel" data-id="${c.id}">${c.type === 'vente' ? 'Annuler la promesse' : 'Résilier'}</button>` : ''}</div></td></tr>`), ['Aucun contrat', 'Créez un contrat de location, un mandat de gestion, de vente ou de prestation.']);
 });
 document.addEventListener('click', e => {
   const el = e.target.closest('[data-action^="g3-"]'), u = Auth.current(); if (!el || el.tagName === 'FORM') return;
@@ -80,7 +82,7 @@ document.addEventListener('click', e => {
   if (a === 'g3-cview' && c) modal(c.ref, `<div class="card pad-s">${contractHtml(c, u)}</div><div style="margin-top:12px">${dlLink(contractHtml(c, u), c.ref)}</div>`);
   if (a === 'g3-activate' && c) { DB.updateItem(DB.K.contracts, id, {status: 'actif'}); audit('Contrat activé', c.ref); toast('Contrat activé.'); render(); }
   if (a === 'g3-cancel' && c) confirmDialog({title: 'Résilier le contrat', message: c.ref + ' sera marqué comme résilié.', confirmLabel: 'Résilier', danger: true, onConfirm: () => { DB.updateItem(DB.K.contracts, id, {status: 'résilié'}); audit('Contrat résilié', c.ref); render(); }});
-  if (a === 'g3-renew' && c) {
+  if (a === 'g3-renew' && c && c.type !== 'vente') {
     const n = DB.addItem(DB.K.contracts, {...c, id: undefined, createdAt: undefined, ref: nref('CTR', 'contracts'), start: c.end, end: addDays(c.end, 365).slice(0, 10), status: 'actif'});
     DB.updateItem(DB.K.contracts, id, {status: 'renouvelé'}); audit('Contrat renouvelé', `${c.ref} → ${n.ref}`); render(); autoFileThen('contract', n, 'Renouvelé : ' + n.ref);
   }
