@@ -20,7 +20,7 @@ function dashStats(u) {
   const impayes = retards.reduce((s, r) => s + rRest(r), 0)
     + gMine('docs', u).filter(d => d.type === 'FAC' && dRest(d) > 0 && d.due < ymd()).reduce((s, d) => s + dRest(d), 0);
   const depenses = gMine('expenses', u).filter(x => x.date.slice(0, 7) === m).reduce((s, x) => s + x.amount, 0)
-    + gMine('tickets', u).filter(t => !t.expenseId && (t.createdAt || '').slice(0, 7) === m).reduce((s, t) => s + t.cost, 0);
+    + gMine('tickets', u).filter(t => !t.expenseId && (t.createdAt || '').slice(0, 7) === m).reduce((s, t) => s + (+t.cost || 0), 0);
   return {props, nUnits, occUnits, vacantes: nUnits - occUnits, attendus, encaisses, ventes, impayes, depenses, net: encaisses - depenses, retards, actifs};
 }
 /* « À traiter » : uniquement ce qui demande une action aujourd'hui */

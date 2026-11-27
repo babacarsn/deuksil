@@ -77,7 +77,7 @@ vueGestion(['docs', 'fpay', 'expenses', 'finance', 'audit'], function (u, tab) {
   const rents = gMine('rents', u).filter(r => rPaid(r) > 0), tk = gMine('tickets', u), leaseProp = id => (DB.findItem(DB.K.leases, id) || {}).propertyId;
   const inc = {}, out = {}, add = (o, k, v) => o[k] = (o[k] || 0) + v;
   rents.forEach(r => rPays(r).forEach(x => add(inc, String(x.date).slice(0, 7), +x.amount || 0))); horsVentes(pays).forEach(p => add(inc, p.createdAt.slice(0, 7), p.amount));
-  exps.forEach(x => add(out, x.date.slice(0, 7), x.amount)); tk.filter(t => !t.expenseId).forEach(t => add(out, (t.createdAt || now()).slice(0, 7), t.cost));
+  exps.forEach(x => add(out, x.date.slice(0, 7), +x.amount || 0)); tk.filter(t => !t.expenseId).forEach(t => add(out, (t.createdAt || now()).slice(0, 7), +t.cost || 0));
   const I = Object.values(inc).reduce((a, b) => a + b, 0), O = Object.values(out).reduce((a, b) => a + b, 0);
   const unpaid = fac.reduce((s, d) => s + dRest(d), 0) + gMine('rents', u).filter(r => !r.paidAt && rentState(r)[1] === 'bad').reduce((s, r) => s + rRest(r), 0);
   const ms = [...Array(6)].map((_, i) => { const d = new Date(); d.setMonth(d.getMonth() - 5 + i); return d.toISOString().slice(0, 7); }), mx = Math.max(1, ...ms.map(m => Math.max(inc[m] || 0, out[m] || 0)));
@@ -85,7 +85,7 @@ vueGestion(['docs', 'fpay', 'expenses', 'finance', 'audit'], function (u, tab) {
   <div class="card" style="margin:18px 0"><b class="small">Revenus (bleu) et dépenses (doré), 6 derniers mois</b><div style="display:flex;gap:14px;align-items:flex-end;height:120px;margin-top:10px">${ms.map(m => `<div style="flex:1;text-align:center"><div style="display:flex;gap:3px;align-items:flex-end;height:96px"><i style="flex:1;background:var(--brand);height:${(inc[m] || 0) / mx * 100}%"></i><i style="flex:1;background:var(--gold);height:${(out[m] || 0) / mx * 100}%"></i></div><span class="small muted">${m.slice(5)}/${m.slice(2, 4)}</span></div>`).join('')}</div></div>` +
     gTable(['Bien', 'Revenus', 'Dépenses', 'Net', 'Rentabilité'], props.map(p => {
       const r = rents.filter(x => leaseProp(x.leaseId) === p.id).reduce((s, x) => s + rPaid(x), 0) + horsVentes(pays).filter(x => x.propertyId === p.id).reduce((s, x) => s + x.amount, 0);
-      const c = exps.filter(x => x.propertyId === p.id).reduce((s, x) => s + x.amount, 0) + tk.filter(x => x.propertyId === p.id && !x.expenseId).reduce((s, x) => s + x.cost, 0);
+      const c = exps.filter(x => x.propertyId === p.id).reduce((s, x) => s + (+x.amount || 0), 0) + tk.filter(x => x.propertyId === p.id && !x.expenseId).reduce((s, x) => s + (+x.cost || 0), 0);
       return `<tr><td class="small"><b>${esc(p.title)}</b></td><td>${money(r)}</td><td>${money(c)}</td><td><b style="color:var(--${r - c < 0 ? 'bad' : 'ok'})">${money(r - c)}</b></td><td>${p.price && p.transaction !== 'location' ? ((r - c) / p.price * 100).toFixed(1) + ' %' : '—'}</td></tr>`;
     }), ['Aucun bien', 'Ajoutez des biens pour suivre leur rentabilité.']);
 });

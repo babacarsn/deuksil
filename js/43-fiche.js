@@ -39,7 +39,7 @@ function bFin(u, p, year) {
   const Y = String(year), rents = encLoyers(bRents(u, p), Y);
   const fact = horsVentes(gMine('fpay', u)).filter(x => x.propertyId === p.id && x.createdAt.startsWith(Y)).reduce((s, x) => s + x.amount, 0);
   const dep = bExp(u, p).filter(x => x.date.startsWith(Y)).reduce((s, x) => s + x.amount, 0)
-    + bTick(u, p).filter(t => !t.expenseId && (t.createdAt || '').startsWith(Y)).reduce((s, t) => s + t.cost, 0);
+    + bTick(u, p).filter(t => !t.expenseId && (t.createdAt || '').startsWith(Y)).reduce((s, t) => s + (+t.cost || 0), 0);
   const impayes = bRents(u, p).filter(r => !r.paidAt && rentState(r)[1] === 'bad').reduce((s, r) => s + rRest(r), 0);
   return {rev: rents + fact, dep, impayes, net: rents + fact - dep};
 }
