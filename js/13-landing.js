@@ -75,7 +75,7 @@ route(/^\/(?:#[\w-]+)?$/, () => {
 
   <section class="section"><div class="wrap stat-band">
     ${[[DB.getData(DB.K.properties).length, 'biens référencés'], [DB.getData(DB.K.users).length, 'comptes actifs'],
-       [Object.values(LOCATIONS).reduce((s, c) => s + Object.keys(c).length, 0), 'villes couvertes'],
+       [new Set(DB.getData(DB.K.properties).filter(p => p.listingStatus === 'publiee').map(p => p.city).filter(Boolean)).size, 'villes avec des annonces'],
        [DB.getData(DB.K.visits).length, 'visites organisées']]
       .map(([n, l]) => `<div><div class="n">${n}</div><div class="muted small">${l}</div></div>`).join('')}
   </div></section>

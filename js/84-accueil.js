@@ -162,9 +162,12 @@ function hxProfils() {
 }
 /* Chiffres clés : totaux réels calculés par la base (public.chiffres_publics),
    et non comptés dans la partie des données visible par le visiteur. */
+/* Villes où au moins une annonce est en ligne (et non les 47 départements de la liste). */
+function villesAvecAnnonces() { return new Set(published().map(p => sansAccentsVille(p.city || p.region)).filter(Boolean)).size; }
+const sansAccentsVille = v => String(v || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 function hxChiffres() {
   const K = DB.chiffres; if (!K) return '';
-  const C = [['home', K.biens, 'biens référencés'], ['users', K.comptes, 'comptes actifs'], ['pin', Object.values(LOCATIONS).reduce((n, c) => n + Object.keys(c).length, 0), 'villes couvertes'], ['calendar', K.visites, 'visites organisées']];
+  const C = [['home', K.biens, 'biens référencés'], ['users', K.comptes, 'comptes actifs'], ['pin', villesAvecAnnonces(), villesAvecAnnonces() > 1 ? 'villes avec des annonces' : 'ville avec des annonces'], ['calendar', K.visites, 'visites organisées']];
   return `<section class="hx-sec hx-stats" aria-label="DEUKSIL en chiffres">${C.map(([ic, n, l]) =>
     `<div class="hx-stat"><span class="hx-stat-ic">${icon(ic, 26)}</span><span><b>${(+n || 0).toLocaleString('fr-FR')}</b><span>${l}</span></span></div>`).join('')}</section>`;
 }
