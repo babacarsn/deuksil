@@ -275,7 +275,7 @@ const listable = p => {
   // lectures seules de la mémoire, sans copie : listable est appelée pour chaque annonce
   const us = lireMem(DB.K.units).filter(x => x.propertyId === p.id && x.status !== 'archivee');
   if (us.length) return us.some(x => x.status === 'libre');
-  if (['loue', 'vendu', 'archive', 'maintenance'].includes(p.status)) return false;
+  if (['loue', 'vendu', 'archive', 'maintenance', 'liberation'].includes(p.status)) return false;   // « libération à confirmer » : pas encore libre (comme la recherche)
   return !lireMem(DB.K.leases).some(l => l.propertyId === p.id && !l.unitId && l.status === 'actif');
 };
 /* Annonces visibles. Le résultat est gardé tant que biens, unités, baux et comptes n'ont pas
