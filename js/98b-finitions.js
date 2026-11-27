@@ -53,6 +53,15 @@ const slugTitre = t => String(t || 'bien').normalize('NFD').replace(/[̀-ͯ]/g, 
   .replace(/m²/g, 'm2').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60) || 'bien';
 function annonceHref(p) { return p ? `#/annonce/${slugTitre(p.title)}-${refPublique(p.id)}` : '#/search'; }
 function bienDeRef(ref) { return DB.getData(DB.K.properties).find(p => refPublique(p.id) === ref) || null; }
+/* Identifiant du bien de la fiche ouverte, quelle que soit son adresse : #/annonce/<titre>-<référence>
+   (liens de la recherche et de l'accueil), #/property/<id> ou #/bien/<id>. Les retouches de la fiche
+   (photos en grand, carte, partage, signalement) ne reconnaissaient que #/property/. */
+function idBienDeLaPage() {
+  const h = (location.hash || '').split('?')[0];
+  let m = h.match(/^#\/(?:property|bien)\/([\w-]+?)(?:\/apercu)?$/); if (m) return m[1];
+  m = h.match(/^#\/annonce\/(?:[a-z0-9-]+-)?([a-z0-9]{7})$/); const p = m && bienDeRef(m[1]);
+  return p ? p.id : null;
+}
 const routeFiche = () => routes.find(r => r.re.source === '^\\/property\\/([\\w-]+)$');
 routes.unshift({re: /^\/annonce\/([a-z0-9-]+)$/, fn: s => {
   const p = bienDeRef(String(s).split('-').pop());

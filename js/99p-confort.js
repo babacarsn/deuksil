@@ -45,7 +45,7 @@ window.addEventListener('click', e => {
   if (Auth.current()) return;
   const b = e.target.closest && e.target.closest('[data-action]'); if (!b) return;
   const a = b.dataset.action;
-  if (a === 'g5-report') { e.preventDefault(); e.stopImmediatePropagation(); signalerSansCompte(b.dataset.id || ((location.hash.match(/#\/property\/([\w-]+)/) || [])[1])); return; }
+  if (a === 'g5-report') { e.preventDefault(); e.stopImmediatePropagation(); signalerSansCompte(b.dataset.id || idBienDeLaPage()); return; }
   if (!MOTIF_VISITEUR[a]) return;
   e.preventDefault(); e.stopImmediatePropagation();
   const h = location.hash || '#/';
@@ -148,9 +148,9 @@ document.addEventListener('input', e => { const i = e.target; if (i && i.type ==
 const refAnnonce = id => 'DK-' + String(id || '').replace(/-/g, '').slice(0, 8).toUpperCase();
 const vuesComptees = new Set();
 function ficheBien() {
-  const m = (location.hash || '').match(/^#\/property\/([\w-]+)/); if (!m) return;
+  const id = idBienDeLaPage(); if (!id) return;
   const g = document.querySelector('#detail-grid:not([data-cf])'); if (!g) return;
-  const p = DB.findItem(DB.K.properties, m[1]); if (!p) return;
+  const p = DB.findItem(DB.K.properties, id); if (!p) return;
   g.dataset.cf = '1';
   const u = Auth.current(), owner = DB.findItem(DB.K.users, p.ownerId) || {}, T = u && (u.member ? DB.findItem(DB.K.users, u.member.parentId) : u);
   const chezMoi = !!(T && T.id === p.ownerId);
@@ -308,7 +308,7 @@ function retouchesConfort() {
   const app = document.getElementById('app'); if (!app) return;
   asterisques(app); const mo = document.querySelector('.modal'); if (mo) asterisques(mo);
   motifConnexion(); ficheBien(); rechercheConfort(); espacesConfort(); titreOnglet();
-  if (!/^#\/property\//.test(location.hash)) document.querySelectorAll('.cf-barre').forEach(x => x.remove());
+  if (!idBienDeLaPage()) document.querySelectorAll('.cf-barre').forEach(x => x.remove());
 }
 if (typeof MutationObserver === 'function' && document.body) {
   let prevu = false;

@@ -405,7 +405,7 @@
   }, true);
 
   // Galerie de la fiche : toutes les photos, visionneuse en grand.
-  const routeBien = () => (location.hash.match(/^#\/(?:property|bien)\/([\w-]+)/) || [])[1];
+  const routeBien = () => (typeof idBienDeLaPage === 'function' ? idBienDeLaPage() : (location.hash.match(/^#\/(?:property|bien)\/([\w-]+)/) || [])[1]);
   function bienAffiche() { const id = routeBien(); return id ? DB.findItem(DB.K.properties, id) || (typeof bienDeRef === 'function' ? bienDeRef(id) : null) : null; }
   function galerie() {
     const g = document.querySelector('#app .gallery:not([data-ph-gal])'); if (!g) return;
