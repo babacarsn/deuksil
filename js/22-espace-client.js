@@ -122,14 +122,24 @@ route(/^\/client\/visits$/, () => {
       : `<div class="empty"><b>Aucune demande envoyée</b><p class="small">Demandez une visite depuis la fiche d'un bien.</p></div>`));
 });
 
+/* Une annonce correspond-elle à une alerte ? Mêmes critères que la recherche et que la
+   base, qui prévient le client à la publication (app.alerte_correspond, migration du 27/11). */
+function alerteCorrespond(c, p) {
+  c = c || {}; const n = v => (+v > 0 ? +v : 0);
+  return (!c.transaction || p.transaction === c.transaction || (c.transaction === 'vente' && p.transaction === 'terrain'))
+    && (!c.type || p.type === c.type) && (!c.region || p.region === c.region) && (!c.city || p.city === c.city) && (!c.quartier || p.quartier === c.quartier)
+    && (!n(c.min) || p.price >= n(c.min)) && (!n(c.max) || p.price <= n(c.max)) && (!n(c.rooms) || (p.rooms || 0) >= n(c.rooms))
+    && (!n(c.baths) || (p.baths || 0) >= n(c.baths)) && (!n(c.surface) || (p.surface || 0) >= n(c.surface))
+    && (!c.furnished || p.furnished) && (!c.parking || p.parking);
+}
 route(/^\/client\/alerts$/, () => {
   const u = Auth.guard('client'); if (!u) return false;
   const alerts = DB.filterItems(DB.K.searches, s => s.userId === u.id);
   return shellApp(u, page('Mes alertes', 'Vous êtes prévenu dès qu\'une annonce correspond à vos critères.', `<a class="btn sm" href="#/search">Créer une alerte depuis la recherche</a>`) +
     (alerts.length ? `<div class="stack">${alerts.map(a => {
-      const c = a.criteria, n = published().filter(p => (!c.type || p.type === c.type) && (!c.region || p.region === c.region) && (!c.min || p.price >= c.min) && (!c.max || p.price <= c.max)).length;
+      const c = a.criteria || {}, n = published().filter(p => !['loue', 'vendu'].includes(p.status) && alerteCorrespond(c, p)).length;
       return `<div class="card row-between"><div><b>${esc(a.name)}</b>
-        <div class="small muted">${[c.transaction && TRANSACTION_LABEL[c.transaction], c.type, c.region, c.min && `à partir de ${money(c.min)}`, c.max && `jusqu'à ${money(c.max)}`].filter(Boolean).join(' · ')}</div>
+        <div class="small muted">${[c.transaction && TRANSACTION_LABEL[c.transaction], c.type, c.quartier || c.city || c.region, +c.min && `à partir de ${money(c.min)}`, +c.max && `jusqu'à ${money(c.max)}`, +c.rooms && `${c.rooms} ch. min.`].filter(Boolean).join(' · ')}</div>
         <div class="small" style="color:var(--brand)">${n} annonce${n > 1 ? 's' : ''} correspondante${n > 1 ? 's' : ''}</div></div>
         <div class="row"><button class="btn soft sm" data-action="run-alert" data-id="${a.id}">Voir les résultats</button>
         <button class="btn ghost sm" data-action="del-alert" data-id="${a.id}">Supprimer</button></div></div>`;

@@ -300,7 +300,7 @@ document.addEventListener('click', e => {
     case 'validate': {
       stop(); const p = DB.updateItem(DB.K.properties, id, {listingStatus: 'publiee'});
       notify(p.ownerId, `Votre annonce « ${p.title} » a été validée et publiée.`, `#/property/${p.id}`);
-      DB.getData(DB.K.searches).forEach(s => { if (!s.criteria.type || s.criteria.type === p.type) notify(s.userId, `Nouvelle annonce correspondant à « ${s.name} » : ${p.title}.`, `#/property/${p.id}`); });
+      /* Les clients dont une alerte correspond sont prévenus par la base à la publication (app.prevenir_alertes). */
       logActivity(`Annonce validée : ${p.title}`); toast('Annonce publiée.'); render(); break;
     }
     case 'reject': {
