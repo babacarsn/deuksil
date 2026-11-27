@@ -239,3 +239,11 @@ DB.addItem = (function (prec) {
     return x;
   };
 })(DB.addItem);
+
+/* --- Accueil : Louer / Acheter avant de chercher (VIS-02) ---------------------------- */
+document.addEventListener('click', e => {
+  const b = e.target.closest && e.target.closest('[data-sp-mode]'); if (!b) return;
+  e.preventDefault();
+  searchState = {...searchState, transaction: b.dataset.spMode, page: 1};
+  b.parentElement.querySelectorAll('[data-sp-mode]').forEach(x => x.setAttribute('aria-checked', String(x === b)));
+});

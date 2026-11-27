@@ -125,7 +125,10 @@ function activityHtml(u) {
   if (!n.length) return '';
   return `<div class="activity"><div class="ah"><span>${icon('bolt', 20)} Mon activité récente</span><a href="#" data-action="notifications">Voir tout</a></div><div class="ag">${n.map(x => { const [i, c] = ic(x.text); return `<div class="ai"><span class="ci" style="color:${c}">${icon(i, 19)}</span><div><b>${esc(x.text.length > 46 ? x.text.slice(0, 44) + '…' : x.text)}</b><span>${dateFr(x.createdAt)}</span></div></div>`; }).join('')}</div></div>`;
 }
-const searchPill = () => `<form class="searchpill" data-action="home-search">${icon('search', 22)}<input name="q" placeholder="Rechercher une ville, un quartier, un bien…" autocomplete="off" aria-label="Rechercher"><button type="button" data-action="home-filters" aria-label="Filtres">${icon('sliders', 22)}</button></form>`;
+/* Louer / Acheter / Tout : choisi avant la recherche (retest VIS-02). « Acheter » inclut les terrains. */
+const modeRecherche = () => `<div class="sp-mode" role="radiogroup" aria-label="Je souhaite">${[['location', 'Louer'], ['vente', 'Acheter'], ['', 'Tout']].map(([v, l]) =>
+  `<button type="button" role="radio" data-sp-mode="${v}" aria-checked="${(searchState.transaction || '') === v}">${l}</button>`).join('')}</div>`;
+const searchPill = () => modeRecherche() + `<form class="searchpill" data-action="home-search">${icon('search', 22)}<input name="q" placeholder="Rechercher une ville, un quartier, un bien…" autocomplete="off" aria-label="Rechercher"><button type="button" data-action="home-filters" aria-label="Filtres">${icon('sliders', 22)}</button></form>`;
 
 /* ---------- Accueil public ---------- */
 const landingRoute = routes.find(r => r.re.test('/')), _landing = landingRoute.fn;
