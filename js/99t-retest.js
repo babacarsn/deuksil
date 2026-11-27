@@ -292,3 +292,39 @@ document.addEventListener('submit', e => {
   DB.updateItem(DB.K.searches, a.id, {name: nom.slice(0, 120), criteria});
   closeModal(); toast('Alerte modifiée : vous serez prévenu des nouvelles annonces qui correspondent.'); render();
 });
+
+/* --- Assistant : il connaît les écrans de chaque espace (LOC-24) et le visiteur l'a aussi (VIS-35) ---
+   Le serveur garde au plus 3 000 caractères de consignes : le guide reste court, propre au profil. */
+const GUIDE_ECRANS = {
+  tenant: `Espace locataire : « Mon logement » (accueil), « Loyer & paiements » (loyers, reçus, quittances), « Signaler un problème » (fuite, panne, réparation : formulaire avec catégorie, urgence et photo ; sur téléphone, bouton jaune « Signaler » au centre de la barre du bas ; le bailleur suit la demande et son état s'affiche), « Documents » (bail, quittances), « Messages » (écrire au bailleur). Un problème dans le logement se déclare TOUJOURS par « Signaler un problème », jamais par Messages.`,
+  client: `Espace client : « Rechercher » (filtres, « Créer une alerte », case « Comparer » sur 2 ou 3 annonces), « Favoris & alertes » (cœur sur une annonce ; « Mes alertes » : modifier ou supprimer), « Mes visites », « Messages », « Documents ».`,
+  owner: `Espace propriétaire : « Mes biens » (publier un bien en 3 étapes), « Locataires & loyers » (baux, loyers par personne : Encaisser, Relancer ; travaux), « Argent & documents » (devis, factures, dépenses, paiements reçus), « Messages ».`,
+  agency: `Espace agence : « Biens & ventes » (biens, publier, visites, clients, ventes), « Propriétaires » (mandants, mandats, reversements), « Locations » (locataires, baux, loyers, travaux), « Argent & documents » (devis, factures, commissions, rapports), « Équipe » (agents, droits), « Messages ».`,
+  visiteur: `Visiteur non connecté : « Rechercher » (Louer, Acheter, filtres), fiche d'une annonce (photos en grand, carte du quartier, « Voir le numéro », « Demander une visite » après connexion, « Partager », « Signaler »), « Créer un compte » (gratuit), « Aide » (vidéos par profil), « Nous écrire » (page Contact).`
+};
+aiChatRules = (function (prec) {
+  return function () {
+    const base = prec.apply(this, arguments), u = Auth.current();
+    const g = GUIDE_ECRANS[u ? (u.role === 'manager' || u.role === 'agent' ? 'agency' : u.role) : 'visiteur'];
+    return g ? `${base}\nÉcrans de son espace (donne toujours le nom exact de l'écran) : ${g}` : base;
+  };
+})(aiChatRules);
+/* Réponses de secours (assistant indisponible) : le locataire qui a un problème est envoyé au bon écran. */
+localAssistantReply = (function (prec) {
+  return function (text) {
+    const t = String(text || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''), u = Auth.current();
+    if (u && u.role === 'tenant' && /(probleme|panne|fuite|signal|repar|casse|plomb|electri|degat)/.test(t))
+      return {reply: 'Pour un problème dans votre logement : ouvrez « Signaler un problème » (sur téléphone, le bouton jaune « Signaler » au centre de la barre du bas), décrivez-le, choisissez l\'urgence et ajoutez une photo. Votre bailleur est prévenu et vous suivez l\'avancement au même endroit.'};
+    const r = prec.apply(this, arguments);
+    if (r && r.reply) r.reply = r.reply.replace(/, tant que votre abonnement est actif/g, '');
+    return r;
+  };
+})(localAssistantReply);
+/* Le bouton de l'assistant sur les pages publiques (accueil, recherche, fiche…), comme dans les espaces. */
+shellPublic = (function (prec) {
+  return function (content) {
+    const h = prec.apply(this, arguments);
+    if (typeof h !== 'string' || /class="ai-fab[ "]/.test(h)) return h;
+    return h + `<button class="ai-fab ai-fab-public" data-action="open-ai-chat" aria-label="Assistant DEUKSIL">${icon('sparkle', 34)}</button>`;
+  };
+})(shellPublic);
