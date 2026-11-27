@@ -18,7 +18,8 @@ const DEUKSIL_CONFIG = {
      Un champ vide s'affiche « à compléter » : à renseigner avant l'ouverture. */
   editeur: {
     raisonSociale: '', formeJuridique: '', adresse: '', ninea: '', rccm: '',
-    directeurPublication: '', email: 'deuksilcontact@gmail.com', hebergeurSite: '',
+    directeurPublication: '', email: 'deuksilcontact@gmail.com',
+    hebergeurSite: 'Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, États-Unis (vercel.com)',
     regionDonnees: ''          // région du projet Supabase, ex. 'eu-west-3 (Paris)'
   }
 };
