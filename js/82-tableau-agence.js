@@ -24,7 +24,8 @@ function paStats(u) {
     impayes: retards.reduce((x, r) => x + rRest(r), 0),
     aReverser: comptes.reduce((x, k) => x + Math.max(0, k.c.solde), 0),
     nbAReverser: comptes.filter(k => k.c.solde > 0).length,
-    mois, revenus: mois.map(x => monthIncome(u, x)), coms: mois.map(comDuMois)};
+    mois, revenus: mois.map(x => monthIncome(u, x)), coms: mois.map(comDuMois),
+    pourMandants: typeof encaisseMandantsMois === 'function' ? encaisseMandantsMois(u, m) : 0};
 }
 
 function paCommissions(d) {
@@ -47,7 +48,7 @@ function paMinis(d) {
     <span class="pd-ic ${tone === 'bad' ? 'warn' : tone === 'gold' ? 'warn' : 'ok'}">${icon(ic, 22)}</span>
     <span class="pd-lab">${lab}</span><b class="pd-val${bad ? ' bad' : ''}">${val}</b><span class="pd-foot">${foot}</span></a>`;
   return `<div class="pd-duo pa-quad">
-    ${mini('#/manage/rents', 'ok', 'wallet', 'Encaissé ce mois', money(d.s.encaisses), 'Loyers et factures, hors ventes')}
+    ${mini('#/manage/rents', 'ok', 'wallet', 'Encaissé ce mois', money(d.s.encaisses), d.pourMandants ? `Dont ${money(d.pourMandants)} pour vos mandants` : 'Loyers et factures, hors ventes')}
     ${mini('#/manage/rents', n ? 'bad' : 'ok', n ? 'alert' : 'checkCircle', 'Loyers impayés', money(d.impayes), n ? pluriel(n, 'loyer') + ' en retard' : 'Aucun retard', !!n)}
     ${mini('#/manage/transfers', d.aReverser ? 'gold' : 'ok', 'repeat', 'Solde à reverser', money(d.aReverser), d.nbAReverser ? pluriel(d.nbAReverser, 'propriétaire') + ' à payer' : 'Tous les comptes sont à jour')}
     ${mini('#/manage/mandates', 'info', 'file', 'Mandats actifs', String(d.mandats.length), pluriel(d.owners.length, 'propriétaire') + ' mandant' + (d.owners.length > 1 ? 's' : ''))}

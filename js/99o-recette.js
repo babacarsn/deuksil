@@ -322,9 +322,20 @@ repData = (function (prec) {
     return r;
   };
 })(repData);
+/* Biens gérés pour un mandant : rattachés à sa fiche, ou inscrits dans un mandat de gestion actif. */
+function biensDesMandants(u) {
+  return new Set([...myProps(u).filter(p => p.clientOwnerId).map(p => p.id),
+    ...gMine('mandates', u).filter(m => m.status === 'actif').flatMap(m => Array.isArray(m.properties) ? m.properties : [])]);
+}
+/* Loyers encaissés ce mois-ci (versements datés du mois) pour les biens des mandants. */
+function encaisseMandantsMois(u, mois) {
+  const mand = biensDesMandants(u), lp = id => (DB.findItem(DB.K.leases, id) || {}).propertyId;
+  return gMine('rents', u).filter(r => mand.has(lp(r.leaseId) || r.propertyId))
+    .reduce((s, r) => s + rPays(r).filter(p => String(p.date || '').startsWith(mois)).reduce((t, p) => t + (+p.amount || 0), 0), 0);
+}
 /* Finances d'une agence : l'argent des mandants n'est pas son résultat. */
 function kpisFinanceAgence(u) {
-  const props = myProps(u), mand = new Set(props.filter(p => p.clientOwnerId).map(p => p.id)), lp = id => (DB.findItem(DB.K.leases, id) || {}).propertyId;
+  const props = myProps(u), mand = biensDesMandants(u), lp = id => (DB.findItem(DB.K.leases, id) || {}).propertyId;
   const docs = gMine('docs', u).filter(d => d.type === 'FAC'), pays = horsVentes(gMine('fpay', u));
   const loyers = gMine('rents', u).flatMap(r => rPays(r).map(p => ({bien: lp(r.leaseId), m: +p.amount || 0})));
   const pourMandants = loyers.filter(x => mand.has(x.bien)).reduce((s, x) => s + x.m, 0) + pays.filter(p => pourLeMandant(p)).reduce((s, p) => s + p.amount, 0);
@@ -342,7 +353,14 @@ function kpisFinanceAgence(u) {
 retoucheGestion(['finance'], function (h, u) {
   if (!u || u.role !== 'agency' && !(u.member && (DB.findItem(DB.K.users, u.member.parentId) || {}).role === 'agency')) return h;
   const T = u.member ? DB.findItem(DB.K.users, u.member.parentId) : u;
-  return h.replace(/<div class="kpis">[\s\S]*?<\/div>\s*(?=<div class="card")/, kpisFinanceAgence(T));
+  h = h.replace(/<div class="kpis">[\s\S]*?<\/div>\s*(?=<div class="card")/, kpisFinanceAgence(T));
+  /* Tableau par bien : « Net » d'un bien de mandant = ce qui revient au mandant, pas à l'agence. */
+  const mand = biensDesMandants(T);
+  myProps(T).filter(p => mand.has(p.id)).forEach(p => {
+    const fiche = DB.findItem(DB.K.owners, p.clientOwnerId), qui = fiche ? fiche.name : 'mandant';
+    h = h.split(`<tr><td class="small"><b>${esc(p.title)}</b></td>`).join(`<tr><td class="small"><b>${esc(p.title)}</b><br><span class="muted">Bien de ${esc(qui)} : le net lui revient</span></td>`);
+  });
+  return h;
 });
 /* Accueil de la Gestion : compteurs justes. */
 if (typeof GMETA === 'object') {
