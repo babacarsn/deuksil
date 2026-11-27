@@ -247,3 +247,48 @@ document.addEventListener('click', e => {
   searchState = {...searchState, transaction: b.dataset.spMode, page: 1};
   b.parentElement.querySelectorAll('[data-sp-mode]').forEach(x => x.setAttribute('aria-checked', String(x === b)));
 });
+
+/* --- Mes alertes : modifier une alerte (CLI-17) --------------------------------------- */
+function formulaireAlerte(a) {
+  const c = a.criteria || {}, opt = (v, l, cur) => `<option value="${esc(v)}" ${String(cur || '') === v ? 'selected' : ''}>${esc(l)}</option>`;
+  const villes = c.region ? Object.keys(LOCATIONS[c.region] || {}) : [], quartiers = c.region && c.city ? (LOCATIONS[c.region] || {})[c.city] || [] : [];
+  return `<form data-alerte-form="${a.id}" novalidate>
+    <div class="field"><label>Nom de l'alerte <span class="req">*</span></label><input class="input" name="name" maxlength="120" value="${esc(a.name || '')}" required></div>
+    <div class="field"><label>Je souhaite</label><select class="input" name="transaction">${opt('', 'Louer ou acheter', c.transaction)}${opt('location', 'Louer', c.transaction)}${opt('vente', 'Acheter', c.transaction)}</select></div>
+    <div class="field"><label>Type de bien</label><select class="input" name="type">${opt('', 'Tous', c.type)}${PROPERTY_TYPES.map(t => opt(t, t[0].toUpperCase() + t.slice(1), c.type)).join('')}</select></div>
+    <div class="form-grid">
+      <div class="field"><label>Région</label><select class="input" name="region" data-alerte-region>${opt('', 'Toutes', c.region)}${Object.keys(LOCATIONS).map(r => opt(r, r, c.region)).join('')}</select></div>
+      <div class="field"><label>Ville</label><select class="input" name="city" data-alerte-ville>${opt('', 'Toutes', c.city)}${villes.map(v => opt(v, v, c.city)).join('')}</select></div>
+      <div class="field"><label>Quartier</label><select class="input" name="quartier">${opt('', 'Tous', c.quartier)}${quartiers.map(q => opt(q, q, c.quartier)).join('')}</select></div>
+      <div class="field"><label>Chambres (min.)</label><input class="input" type="number" min="0" name="rooms" value="${+c.rooms || ''}" placeholder="0"></div>
+      <div class="field"><label>Budget minimum (FCFA)</label><input class="input" type="number" min="0" name="min" value="${+c.min || ''}" placeholder="0"></div>
+      <div class="field"><label>Budget maximum (FCFA)</label><input class="input" type="number" min="0" name="max" value="${+c.max || ''}" placeholder="Sans limite"></div>
+    </div>
+    <div class="f-zone-err"></div>
+    <div class="row" style="justify-content:flex-end;gap:8px;margin-top:6px"><button type="button" class="btn ghost" data-action="close-modal">Annuler</button><button class="btn">Enregistrer</button></div></form>`;
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest && e.target.closest('[data-alerte-modifier]'); if (!b) return;
+  e.preventDefault(); const u = Auth.current(), a = u && DB.findItem(DB.K.searches, x => x.id === b.dataset.alerteModifier && x.userId === u.id); if (!a) return;
+  modal('Modifier l\'alerte', formulaireAlerte(a));
+});
+document.addEventListener('change', e => {
+  const f = e.target.closest && e.target.closest('form[data-alerte-form]'); if (!f) return;
+  const reg = f.querySelector('[name="region"]').value, vil = f.querySelector('[name="city"]'), qua = f.querySelector('[name="quartier"]');
+  const remplir = (sel, L, lib) => { sel.innerHTML = `<option value="">${lib}</option>` + L.map(v => `<option value="${esc(v)}">${esc(v)}</option>`).join(''); };
+  if (e.target.name === 'region') { remplir(vil, reg ? Object.keys(LOCATIONS[reg] || {}) : [], 'Toutes'); remplir(qua, [], 'Tous'); }
+  if (e.target.name === 'city') remplir(qua, reg && vil.value ? (LOCATIONS[reg] || {})[vil.value] || [] : [], 'Tous');
+});
+document.addEventListener('submit', e => {
+  const f = e.target.closest && e.target.closest('form[data-alerte-form]'); if (!f) return;
+  e.preventDefault();
+  const u = Auth.current(), a = u && DB.findItem(DB.K.searches, x => x.id === f.dataset.alerteForm && x.userId === u.id); if (!a) return;
+  const d = formData(f), nom = String(d.name || '').trim(), min = +d.min || 0, max = +d.max || 0, fautes = [];
+  if (nom.length < 2) fautes.push(['name', 'Donnez un nom à l\'alerte.']);
+  if (min && max && min > max) fautes.push(['max', 'Le budget maximum doit être supérieur au minimum.']);
+  if (fautes.length) return erreursIci(f, fautes);
+  const criteria = {...(a.criteria || {}), transaction: d.transaction || '', type: d.type || '', region: d.region || '', city: d.city || '', quartier: d.quartier || '',
+    rooms: +d.rooms || '', min: min || '', max: max || '', page: 1};
+  DB.updateItem(DB.K.searches, a.id, {name: nom.slice(0, 120), criteria});
+  closeModal(); toast('Alerte modifiée : vous serez prévenu des nouvelles annonces qui correspondent.'); render();
+});

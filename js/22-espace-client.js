@@ -142,6 +142,7 @@ route(/^\/client\/alerts$/, () => {
         <div class="small muted">${[c.transaction && TRANSACTION_LABEL[c.transaction], c.type, c.quartier || c.city || c.region, +c.min && `à partir de ${money(c.min)}`, +c.max && `jusqu'à ${money(c.max)}`, +c.rooms && `${c.rooms} ch. min.`].filter(Boolean).join(' · ')}</div>
         <div class="small" style="color:var(--brand)">${n} annonce${n > 1 ? 's' : ''} correspondante${n > 1 ? 's' : ''}</div></div>
         <div class="row"><button class="btn soft sm" data-action="run-alert" data-id="${a.id}">Voir les résultats</button>
+        <button class="btn ghost sm" data-alerte-modifier="${a.id}">Modifier</button>
         <button class="btn ghost sm" data-action="del-alert" data-id="${a.id}">Supprimer</button></div></div>`;
     }).join('')}</div>` : `<div class="empty"><b>Aucune alerte</b><p class="small">Lancez une recherche puis enregistrez-la pour être alerté.</p></div>`));
 });
