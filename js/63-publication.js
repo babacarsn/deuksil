@@ -105,11 +105,12 @@ function recapPublication(form) {
       ${equipements.length ? ligne('Équipements', equipements.join(', ')) : ''}
       ${d.availableFrom ? ligne('Disponible le', dateFr(d.availableFrom)) : ''}
     </div>
-    <p class="recap-n small">Une fois publiée, l'annonce est <b>immédiatement visible</b> dans la
-      recherche. Vous pourrez la modifier, la mettre en pause ou l'archiver à tout moment.</p>
+    ${aValiderParLAgence() ? `<p class="recap-n small">Votre annonce est <b>envoyée à votre agence</b>, qui la vérifie avant la mise en ligne :
+      elle apparaîtra dans la recherche dès sa validation. Vous serez prévenu.</p>` : `<p class="recap-n small">Une fois publiée, l'annonce est <b>immédiatement visible</b> dans la
+      recherche. Vous pourrez la modifier, la mettre en pause ou l'archiver à tout moment.</p>`}
     <div class="recap-b">
       <button type="button" class="btn ghost" data-action="pub-non">Annuler</button>
-      <button type="button" class="btn" data-action="pub-oui">${icon('check', 16)} Publier l'annonce</button>
+      <button type="button" class="btn" data-action="pub-oui">${icon('check', 16)} ${aValiderParLAgence() ? 'Envoyer pour validation' : 'Publier l\'annonce'}</button>
     </div>
   </div>`;
 }
@@ -176,3 +177,6 @@ document.addEventListener('click', e => {
     bienEnAttente = null;
   }
 }, true);
+
+/* Un agent soumis à validation (réglage de l'agence) : son annonce part « à valider », pas en ligne (AGT-09). */
+function aValiderParLAgence() { try { return typeof doitValider === 'function' && !!doitValider(Auth.current()); } catch (e) { return false; } }
