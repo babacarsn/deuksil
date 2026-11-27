@@ -1,4 +1,4 @@
-# DEUKSIL — Supabase : ce qu'il faut configurer pour les modifications récentes (11, 12 et 22 novembre 2026)
+# DEUKSIL — Supabase : ce qu'il faut configurer pour les modifications récentes (11, 12, 22 et 27 novembre 2026)
 
 **Pour la personne qui gère Supabase.** Ce document ne reprend PAS l'installation d'origine (déjà faite) : il liste seulement ce que les modifications récentes demandent côté Supabase, **dans l'ordre**, avec un contrôle (✅) après chaque étape.
 
@@ -9,6 +9,34 @@
 | Site en ligne (inchangé tant que `test` n'est pas fusionnée) | https://deuksil.vercel.app |
 
 > La branche `test` utilise **la même base Supabase** que le site en ligne : ce que vous appliquez ici vaut pour les deux. Les deux migrations ne cassent rien pour le site en ligne actuel (aucune table, colonne ni donnée supprimée).
+
+---
+
+## 27 novembre 2026 — corrections du retest (à faire en premier)
+
+| Modification (site) | Ce qu'il faut côté Supabase |
+|---|---|
+| Messages de contact et signalements « 0 » dans l'administration | **Migration `20261127000100_recette_27nov.sql`** |
+| Alertes : le client n'était jamais prévenu d'une nouvelle annonce | même migration (déclencheur `prevenir_alertes`) |
+| F3 loué resté « En discussion » et visible dans la recherche | même migration (déclencheur `bien_loue_par_bail` + réparation) |
+| Loyer « non reçu » d'un bail terminé le jour de son début | même migration (retrait des échéances jamais dues, sans versement) |
+| Comparateur, fiche (photos, carte, partage), caution, accueil | Rien (site uniquement) |
+
+**A. Appliquer la migration** (après une sauvegarde, étape 0) : SQL Editor → coller tout `supabase/migrations/20261127000100_recette_27nov.sql` → Run. Rejouable sans risque. Testée sur un PostgreSQL vierge avec `supabase/tests-cni/recette-27nov.sh` (17 scénarios réussis ; ne jamais lancer ce script sur la production).
+
+✅ Contrôles :
+```sql
+-- 2 lignes : bien_loue_par_bail, prevenir_alertes
+select tgname from pg_trigger where tgname in ('bien_loue_par_bail', 'prevenir_alertes');
+-- 1 ligne, valeur « non » (sauf si la double authentification des admins est activée)
+select * from app.reglages where cle = 'admin_mfa_obligatoire';
+-- Le compte administrateur : rôle « admin », statut « actif »
+select id, email, role, status from public.profiles where role = 'admin';
+-- 0 : plus aucun bien « disponible / en discussion » avec un bail actif
+select count(*) from public.properties p where p.status not in ('loue','vendu','archive')
+  and exists (select 1 from public.leases l where l.property_id = p.id and l.unit_id is null and l.status = 'actif');
+```
+Puis, connecté comme administrateur sur le site : **Messages de contact** et **Signalements** doivent montrer les messages envoyés. Si la base ne reconnaît pas le compte comme administrateur, un bandeau rouge en haut de ces écrans donne la raison exacte.
 
 ---
 

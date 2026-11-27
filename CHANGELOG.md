@@ -1,5 +1,15 @@
 # DEUKSIL — Historique des modifications
 
+## 27 novembre 2026 — Corrections du retest (7 défauts majeurs)
+
+- **Administration** : messages de contact et signalements relus à chaque ouverture ; les signalements envoyés sans compte apparaissent aussi dans « Signalements » ; si la base ne reconnaît pas le compte comme administrateur, un bandeau dit pourquoi (au lieu d'un 0). Côté base : un réglage « double authentification » absent ne cache plus les messages (migration `20261127000100_recette_27nov.sql`).
+- **Alertes** : la base prévient elle-même le client quand une annonce correspondante est publiée (une fois par annonce et par alerte) ; le compteur « annonces correspondantes » suit les mêmes critères.
+- **Comparer** : la case se coche à la souris (le lien de la carte passait par-dessus) ; page Comparer avec « Retirer », sans pages, première colonne fixe sur téléphone.
+- **Fiche annonce** : photos en grand, bloc de partage et signalement fonctionnent aussi depuis la recherche (adresse `#/annonce/…`, qui n'était pas reconnue) ; nouvelle carte « Emplacement » (zone du quartier) et vrai bouton « Partager ».
+- **Mentions légales** : hébergeur renseigné ; les informations de la société restent à fournir.
+- **Bien loué** : un bail actif met le bien en « loué » (base) et le F3 est réparé ; l'accueil ne montre plus de bien en « libération à confirmer ».
+- **Baux terminés** : une seule règle d'échéance (jamais avant le début du bail, pas due si le bail s'est terminé avant) ; plus de faux « loyer non reçu » ; caution « détenue » seulement si elle a été reçue.
+
 ## 26 novembre 2026 — Plus simple à utiliser (design inchangé)
 
 - **Icônes en « 3D doux » et blocs blancs sur toutes les pages** : chaque icône garde sa couleur de sens avec un léger bombé, un reflet et une petite ombre de sa couleur ; les compteurs teintés des pages Loyers, Baux, Reversements, Ventes, Unités…, l'assistant de recherche et les cartes de résultats deviennent blancs. Vérifié : plus aucun dégradé dans les blocs des 4 espaces (seule la photo de la bannière client garde son ombre pour la lisibilité).
