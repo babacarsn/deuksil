@@ -116,23 +116,27 @@ function iaoRelanceLocale(d) {
 }
 async function iaoRelance(id) {
   const u = Auth.current(), r = DB.findItem(DB.K.rents, id); if (!u || !r) return;
-  const l = DB.findItem(DB.K.leases, r.leaseId) || {}, du = DB.filterItems(DB.K.rents, x => x.leaseId === r.leaseId && !x.paidAt && rentState(x)[1] === 'bad').sort((a, b) => a.month < b.month ? -1 : 1);
+  const l = DB.findItem(DB.K.leases, r.leaseId) || {};
+  let du = DB.filterItems(DB.K.rents, x => x.leaseId === r.leaseId && !x.paidAt && rentState(x)[1] === 'bad').sort((a, b) => a.month < b.month ? -1 : 1);
+  if (!du.length) du = [r];   // loyer pas encore en retard : le message parle de celui-ci, jamais d'un mois vide
   const d = {locataire: String(l.tenant || 'Madame, Monsieur').split(' ')[0], bien: (gProp(l.propertyId) || {}).title || 'le logement', bailleur: iaoMoi(),
     mois_impayes: du.map(x => monthLabel(x.month)), reste_du: du.reduce((s, x) => s + x.amount - rPaid(x), 0),
-    jours_de_retard: du.length ? Math.max(0, daysBetween(du[0].month + '-05', ymd())) : 0, relances_deja_faites: du.reduce((m, x) => Math.max(m, +x.reminders || 0), 0)};
+    jours_de_retard: Math.max(0, daysBetween(typeof echeanceLoyer === 'function' ? echeanceLoyer(du[0], l) : du[0].month + '-05', ymd())), relances_deja_faites: du.reduce((m, x) => Math.max(m, +x.reminders || 0), 0)};
   modal('Message de relance', `<div id="iao-rel">${iaoAttente('L\'assistant rédige un message adapté au retard…')}</div>`);
   let txt, note = '';
-  try { txt = (await iaoTache('relance', d)).trim(); } catch (e) { txt = iaoRelanceLocale(d); note = iaoErreur(e) + ' Voici un modèle à adapter.'; }
+  try { txt = (await iaoTache('relance', d)).trim(); } catch (e) { txt = ''; note = iaoErreur(e); }
+  if (!txt) { txt = iaoRelanceLocale(d); note = (note ? note + ' ' : '') + 'Voici un modèle prêt à envoyer, que vous pouvez modifier ci-dessous.'; }
   const box = $('#iao-rel'); if (!box) return;
   const tel = iaoTel(l.phone), loc = typeof locataireDuBail === 'function' ? locataireDuBail(l) : null;
   box.innerHTML = `${note ? `<p class="small muted">${esc(note)}</p>` : ''}<p class="small muted">${esc(l.tenant || '')} · ${d.mois_impayes.length} loyer(s) en retard · ${money(d.reste_du)}</p>
-    <textarea id="iao-rel-txt" rows="9">${esc(txt)}</textarea>
+    <label class="small" for="iao-rel-txt" style="display:block;font-weight:600;margin:6px 0 4px">Message au locataire</label>
+    <textarea id="iao-rel-txt" class="input" rows="9" style="width:100%;min-height:190px">${esc(txt)}</textarea>
     <div class="row" style="gap:8px;flex-wrap:wrap;justify-content:flex-end;margin-top:10px">
       <button type="button" class="btn ghost sm" data-iao="copier">Copier</button>
       ${tel ? `<a class="btn ghost sm" id="iao-wa" target="_blank" rel="noopener" href="#">${icon('phone', 14)} WhatsApp</a>` : ''}
       ${loc ? `<button type="button" class="btn sm" data-iao="rel-envoyer">Envoyer dans son espace</button>` : ''}</div>
     ${loc ? '' : '<p class="small muted" style="margin-top:8px">Ce locataire n\'a pas encore d\'accès à son espace : utilisez WhatsApp ou copiez le message.</p>'}`;
-  const ta = $('#iao-rel-txt');
+  const ta = $('#iao-rel-txt'); try { ta.focus({preventScroll: false}); ta.setSelectionRange(0, 0); } catch (e) {}
   box.querySelector('[data-iao="copier"]').onclick = e => iaoCopier(ta.value, e.currentTarget);
   const wa = $('#iao-wa'); if (wa) { const maj = () => { wa.href = `https://wa.me/${tel}?text=${encodeURIComponent(ta.value)}`; }; maj(); ta.addEventListener('input', maj); }
   const env = box.querySelector('[data-iao="rel-envoyer"]');
