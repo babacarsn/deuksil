@@ -328,3 +328,70 @@ shellPublic = (function (prec) {
     return h + `<button class="ai-fab ai-fab-public" data-action="open-ai-chat" aria-label="Assistant DEUKSIL">${icon('sparkle', 34)}</button>`;
   };
 })(shellPublic);
+
+/* --- Mandant : son relevé en PDF (retest AGE-23 : « pas de PDF côté mandant ») -------------
+   Le PDF reprend exactement ce que la page affiche (chiffres et tableaux), agence par agence. */
+function blocsReleves(c) {
+  /* Une page peut montrer plusieurs agences : un bloc par jeu de compteurs. */
+  const kpis = [...c.querySelectorAll(':scope > .kpis, :scope > * > .kpis')].filter(k => !k.closest('.adm-diag'));
+  return kpis.map(k => {
+    const titre = (() => { let e = k.previousElementSibling; while (e) { if (e.matches('h2.fin-agence')) return e.textContent.trim(); if (e.matches('hr')) return ''; e = e.previousElementSibling; } return ''; })();
+    const tables = []; let e = k.nextElementSibling;
+    while (e && !e.matches('hr') && !e.querySelector('.kpis') && !e.matches('.kpis')) {
+      if (e.matches('h3')) tables.push({titre: e.textContent.trim(), tete: [], lignes: []});
+      const t = e.matches('table') ? e : e.querySelector('table');
+      if (t && tables.length && !tables[tables.length - 1].tete.length) {
+        tables[tables.length - 1].tete = [...t.querySelectorAll('thead th')].map(x => x.textContent.trim());
+        tables[tables.length - 1].lignes = [...t.querySelectorAll('tbody tr')].map(tr => [...tr.cells].map(x => x.textContent.replace(/\s+/g, ' ').trim()));
+      }
+      e = e.nextElementSibling;
+    }
+    const net = el => (el ? el.textContent : '').replace(/\s+/g, ' ').trim();
+    const chiffres = [...k.querySelectorAll('.kpi, .kpi-rich')].map(x => {
+      const v = net(x.querySelector('.n')), l = net(x.querySelector('.l')), plus = net(x.querySelector('.kvar'));
+      return [l + (plus ? ' (' + plus + ')' : ''), v];
+    }).filter(r => r[0] && r[1]);
+    /* Les remarques affichées sous les tableaux (commission de la période…) vont en bas du PDF. */
+    const notes = []; let n2 = k.nextElementSibling;
+    while (n2 && !n2.matches('hr') && !n2.matches('.kpis')) { if (n2.matches('p.small') && net(n2)) notes.push(net(n2)); n2 = n2.nextElementSibling; }
+    return {k, titre, chiffres, tables, notes};
+  });
+}
+async function pdfReleveMandant(bloc) {
+  const u = Auth.current(); if (!u) return;
+  const fiche = DB.findItem(DB.K.owners, u.ownerRec) || {}, agence = DB.findItem(DB.K.users, fiche.ownerId) || null;
+  await loadPdf();
+  const ref = `REL-${ymd().slice(0, 7)}-${String(u.id).slice(-4).toUpperCase()}`;
+  const [doc, y0] = pdfBegin('RELEVÉ DE GESTION', ref, now(), 'Relevé ' + displayName(u));
+  const emetteur = agence ? issuerLines(issuer(agence)) : [bloc.titre || 'Votre agence'];
+  let y = pdfParties(doc, y0, {t: 'Agence', lines: emetteur}, {t: 'Propriétaire', lines: [displayName(u), u.phone && 'Tél : ' + u.phone, u.email].filter(Boolean)});
+  y = pdfTable(doc, y, [{h: 'Synthèse', w: 120}, {h: 'Montant', w: 60, a: 'r'}], bloc.chiffres);
+  for (const t of bloc.tables) {
+    if (!t.lignes.length || !t.tete.length) continue;
+    if (y > 240) { doc.addPage(); y = 20; }
+    doc.setFont('helvetica', 'bold').setFontSize(10).setTextColor(15, 48, 87).text(T(t.titre), 15, y + 6); y += 9;
+    const n = t.tete.length, w = 180 / n;
+    y = pdfTable(doc, y, t.tete.map((h, i) => ({h, w, a: /montant|loyer|net|reste|commission|fcfa/i.test(h) || (t.lignes[0] && /FCFA/.test(t.lignes[0][i] || '')) ? 'r' : 'l'})), t.lignes);
+  }
+  pdfPara(doc, y, null, [...(bloc.notes || []), 'Relevé établi à partir des encaissements et reversements enregistrés par votre agence sur DEUKSIL à la date indiquée.'].join('\n'));
+  const f = pdfEnd(doc, agence || u, `releve-${ymd()}`);
+  await saveFile(f.name, f.blob);
+}
+function boutonsReleveMandant() {
+  if (location.hash.split('?')[0] !== '#/mandant/releves') return;
+  const c = document.querySelector('.main > .content'); if (!c) return;
+  blocsReleves(c).forEach((b, i) => {
+    if (b.k.previousElementSibling && b.k.previousElementSibling.classList.contains('rl-pdf')) return;
+    b.k.insertAdjacentHTML('beforebegin', `<div class="rl-pdf"><button type="button" class="btn sm" data-releve-pdf="${i}">${icon('file', 15)} Télécharger le relevé (PDF)</button></div>`);
+  });
+}
+document.addEventListener('click', async e => {
+  const b = e.target.closest && e.target.closest('[data-releve-pdf]'); if (!b) return;
+  e.preventDefault(); const c = document.querySelector('.main > .content'), bloc = c && blocsReleves(c)[+b.dataset.relevePdf]; if (!bloc) return;
+  b.disabled = true; const t = b.innerHTML; b.textContent = 'Préparation du PDF…';
+  try { await pdfReleveMandant(bloc); toast('Relevé téléchargé.'); }
+  catch (err) { console.warn('[DEUKSIL] relevé PDF', err); toast('PDF indisponible pour le moment. Réessayez.', 'bad'); }
+  finally { b.disabled = false; b.innerHTML = t; }
+});
+new MutationObserver(() => { try { boutonsReleveMandant(); } catch (e) { console.warn('[DEUKSIL] relevé', e); } })
+  .observe(document.getElementById('app') || document.body, {childList: true, subtree: true});

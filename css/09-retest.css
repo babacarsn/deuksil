@@ -54,3 +54,4 @@
 
 /* Assistant sur les pages publiques : au-dessus de la barre « Écrire / Visiter » de la fiche sur téléphone */
 @media (max-width:760px){.ai-fab-public{bottom:calc(16px + env(safe-area-inset-bottom))}body:has(.cf-barre) .ai-fab-public{bottom:calc(84px + env(safe-area-inset-bottom))}}
+.rl-pdf{display:flex;justify-content:flex-end;margin:0 0 10px}

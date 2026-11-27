@@ -5,7 +5,7 @@
    - Tout le reste (index.html, images, manifeste) : « réseau d'abord » ; la copie locale
      ne sert que hors connexion. Les données (Supabase) ne passent jamais par ici.
    VERSION est mise à jour par outils/versionner-site.js à chaque publication. */
-const VERSION = 'deuksil-sw-c1e438c2cf';
+const VERSION = 'deuksil-sw-c25953a28d';
 const CACHE = 'deuksil-fichiers';
 
 self.addEventListener('install', e => { self.skipWaiting(); });
