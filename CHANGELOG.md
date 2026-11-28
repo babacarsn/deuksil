@@ -1,5 +1,11 @@
 # DEUKSIL — Historique des modifications
 
+## 28 novembre 2026 — Connexion Google : la session ne s'ouvrait pas
+
+- Défaut : après « Continuer avec Google », la page se rechargeait et l'on restait déconnecté. Le retour se faisait sur l'adresse fixe du site alors que la connexion avait commencé sur une autre (www.deuksil.com ↔ deuksil.com, ancienne adresse) : le code de sécurité gardé par le navigateur ne correspondait plus. Les retours (Google, lien de confirmation, mot de passe oublié) se font maintenant sur la page en cours.
+- Au retour : un nouveau compte est conduit à « Compléter mon profil » (type de compte, téléphone, CNI, et désormais un mot de passe facultatif pour se connecter aussi par e-mail) ; un compte existant va dans son espace ; un échec affiche sa raison sur la page de connexion.
+- Supabase : *Redirect URLs* doit contenir `https://www.deuksil.com/**` (voir le guide).
+
 ## 27 novembre 2026 (4) — Tutoriels de la page Aide retournés sur le site actuel
 
 - Les 18 vidéos de « Aide » montraient l'ancien menu et les anciens formulaires : toutes retournées sur l'application actuelle (menu regroupé, formulaires en étapes, blocs blancs), avec des noms fictifs réalistes (plus de « TEST » à l'écran).

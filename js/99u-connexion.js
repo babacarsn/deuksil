@@ -1,0 +1,64 @@
+/* ==========================================================================
+   99u-connexion.js — Retour de connexion (Google, lien reçu par e-mail)
+   Bug (28/11) : après « Continuer avec Google », la page se rechargeait et l'on
+   restait déconnecté, ou l'on arrivait sur l'accueil public sans aller plus loin.
+   1. Le retour se faisait sur l'adresse fixe du site (deuksil.com) alors que la
+      connexion avait commencé ailleurs (www.deuksil.com, ancienne adresse) : le
+      code de sécurité gardé par le navigateur ne correspondait plus et la session
+      ne s'ouvrait pas. Le retour se fait maintenant sur la page même
+      (js/47-google.js, adresseDeRetour).
+   2. Au retour, la personne est conduite où elle doit aller : « Compléter mon
+      profil » pour un nouveau compte (téléphone, type de compte, mot de passe…),
+      sinon son espace. Si la connexion a échoué, elle voit pourquoi au lieu
+      d'une page qui se recharge sans rien dire.
+   ========================================================================== */
+(() => {
+  const MESSAGES = [
+    [/Database error saving new user|duplicate|already/i, 'Impossible de créer le compte : cette adresse e-mail ou ce numéro de CNI est déjà utilisé par un autre compte. Connectez-vous avec votre e-mail et votre mot de passe.'],
+    [/code verifier|invalid flow state|flow_state|both auth code and code verifier/i, 'La connexion a été commencée sur une autre adresse du site ou un autre navigateur. Recommencez « Continuer avec Google » depuis cette page.'],
+    [/expired|invalid/i, 'Le lien de connexion a expiré ou a déjà servi. Recommencez la connexion.'],
+    [/access_denied|cancel/i, 'Connexion Google annulée.']
+  ];
+  const clair = m => { const t = (MESSAGES.find(([re]) => re.test(m || '')) || [])[1]; return t || ('La connexion n\'a pas abouti' + (m ? ' : ' + m : '.')); };
+
+  /* Ce que l'adresse contient au chargement (supabase-js la nettoie ensuite). */
+  const q = new URLSearchParams(location.search);
+  const h = new URLSearchParams((location.hash.match(/[#&](error[^#]*)$/) || [])[1] || '');
+  const erreur = q.get('error_description') || h.get('error_description') || q.get('error') || h.get('error') || '';
+  const avecCode = q.has('code');
+  let depuisGoogle = false;
+  try { depuisGoogle = !!sessionStorage.getItem('deuksil_retour_google'); sessionStorage.removeItem('deuksil_retour_google'); } catch (e) {}
+  if (!erreur && !avecCode && !depuisGoogle) return;
+
+  const nettoyer = () => {
+    try {
+      const u = new URL(location.href);
+      ['code', 'error', 'error_code', 'error_description', 'state'].forEach(k => u.searchParams.delete(k));
+      let hash = u.hash.replace(/[#&]error[^#]*$/, '');
+      if (!hash || hash === '#') hash = '#/';
+      history.replaceState(null, '', u.pathname + (u.searchParams.toString() ? '?' + u.searchParams : '') + hash);
+    } catch (e) {}
+  };
+  const suite = () => {
+    nettoyer();
+    const u = Auth.current();
+    if (u) {
+      const aCompleter = typeof profilACompleter === 'function' && profilACompleter(u);
+      if (aCompleter) { go('#/completer-profil'); toast('Bienvenue sur DEUKSIL : complétez votre profil pour continuer.'); return; }
+      const ici = location.hash.replace(/\?.*$/, '');
+      if (!ici || ici === '#/' || ici === '#/login' || ici === '#/register') go(Auth.home(u));
+      return;
+    }
+    if (erreur || depuisGoogle || avecCode) {
+      try { sessionStorage.setItem('deuksil_login_motif', clair(erreur)); } catch (e) {}
+      go('#/login'); toast(clair(erreur), 'bad');
+    }
+  };
+  /* Attendre le premier affichage (session lue, données chargées). */
+  const t0 = Date.now();
+  (function attendre() {
+    if (typeof DB !== 'undefined' && DB.pret) return setTimeout(suite, 50);
+    if (Date.now() - t0 > 20000) return;
+    setTimeout(attendre, 100);
+  })();
+})();

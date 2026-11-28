@@ -199,7 +199,7 @@ window.addEventListener('submit', async e => {
   try { effacerErreursChamps(f); } catch (err) {}
   memoire.ecrire(CLE_REINIT, {email, t: Date.now()});
   occupe(f, true);
-  const {error} = await SB.auth.resetPasswordForEmail(email, {redirectTo: (DEUKSIL_CONFIG.siteUrl || location.origin + location.pathname).replace(/#.*$/, '')});
+  const {error} = await SB.auth.resetPasswordForEmail(email, {redirectTo: adresseDeRetour()});
   occupe(f, false);
   if (error && /rate|too many|seconds/i.test(error.message || '')) return etatForm(f, 'bad', 'Trop de demandes', messageAuth(error));
   if (error) return etatForm(f, 'bad', 'Envoi impossible', esc(messageAuth(error)));

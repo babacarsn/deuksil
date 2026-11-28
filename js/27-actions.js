@@ -60,7 +60,7 @@ function askVisit(pid) {
 async function startRegistration(data) {
   const email = String(data.email || '').trim().toLowerCase();
   const {data: r, error} = await SB.auth.signUp({email, password: data.password, options: {
-    emailRedirectTo: (DEUKSIL_CONFIG.siteUrl || location.origin + location.pathname) + '#/verifier-email',
+    emailRedirectTo: adresseDeRetour() + '#/verifier-email',
     data: {role: data.role, first_name: (data.firstName || '').trim(), last_name: (data.lastName || '').trim(), phone: (data.phone || '').trim(),
       cni: (data.cni || '').replace(/\s/g, ''), agency_name: (data.agencyName || '').trim(), address: (data.address || '').trim(),
       ninea: (data.ninea || '').trim(), rccm: (data.rccm || '').trim(), cgu: !!data.cgu}}});

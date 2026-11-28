@@ -13,7 +13,7 @@ const DEUKSIL_CONFIG = {
      Supabase (Authentication → Providers → Google). */
   googleActif: true,
   /* Adresse publique du site (redirections après connexion Google ou lien e-mail). */
-  siteUrl: 'https://deuksil.com',   // adresse officielle du site (retours de connexion Google et liens des e-mails)
+  siteUrl: 'https://www.deuksil.com',   // adresse officielle (deuksil.com y renvoie) ; les retours Google et e-mail se font sur la page en cours
   /* Éditeur du site (mentions légales, politique de confidentialité).
      Un champ vide s'affiche « à compléter » : à renseigner avant l'ouverture. */
   editeur: {

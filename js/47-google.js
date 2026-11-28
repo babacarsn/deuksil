@@ -27,6 +27,10 @@ document.head.insertAdjacentHTML('beforeend', '<style>'
   + '.g-note{font-size:.76rem;color:var(--muted);line-height:1.5;margin:12px 0 0}'
   + '</style>');
 
+/* Adresse de retour des connexions Google et des liens e-mail : la page en cours. */
+function adresseDeRetour() {
+  return (/^https?:$/.test(location.protocol) ? location.origin + location.pathname : (DEUKSIL_CONFIG.siteUrl || '')).replace(/#.*$/, '');
+}
 async function connexionGoogle() {
   if (!DEUKSIL_CONFIG.googleActif) {
     modal('Continuer avec Google', `<div class="g-head">${gLogo(20)} <span>Connexion avec Google</span></div>
@@ -35,7 +39,11 @@ async function connexionGoogle() {
       <div class="row" style="gap:10px;margin-top:14px;flex-wrap:wrap"><button class="btn" data-action="close-modal">Utiliser mon e-mail</button><a class="btn ghost" href="#/register" data-action="close-modal">Créer un compte</a></div>`);
     return;
   }
-  const retour = (DEUKSIL_CONFIG.siteUrl || location.origin + location.pathname).replace(/#.*$/, '');
+  /* Retour sur l'adresse même où l'on se trouve : le code de sécurité (PKCE) est gardé par ce
+     navigateur pour CETTE adresse ; un retour sur une autre (deuksil.com ↔ www, ancienne adresse)
+     ne pouvait pas ouvrir la session : « le compte disparaît ». */
+  const retour = adresseDeRetour();
+  try { sessionStorage.setItem('deuksil_retour_google', String(Date.now())); } catch (e) {}
   const {error} = await SB.auth.signInWithOAuth({provider: 'google', options: {redirectTo: retour, queryParams: {prompt: 'select_account'}}});
   if (error) toast(messageAuth(error), 'bad');   // sinon le navigateur part chez Google
 }
@@ -64,6 +72,10 @@ route(/^\/completer-profil$/, () => {
       <div class="form-grid">
         <div class="field"><label for="cp-tel">Téléphone ${req}</label><input class="input" id="cp-tel" name="phone" type="tel" inputmode="tel" placeholder="77 123 45 67" value="${esc(u.phone || '')}" autocomplete="tel" required></div>
         <div class="field"><label for="cp-cni">Numéro de CNI (facultatif)</label><input class="input" id="cp-cni" name="cni" inputmode="numeric" maxlength="13" placeholder="13 chiffres" value="${esc(u.cni || '')}" ${u.cni ? 'readonly' : ''}></div></div>
+      <p class="wiz-q" style="margin-top:6px">Mot de passe <span class="small muted" style="font-weight:500">(facultatif : pour vous connecter aussi avec votre e-mail, sans Google)</span></p>
+      <div class="form-grid">
+        <div class="field"><label for="cp-mdp">Mot de passe</label><input class="input" id="cp-mdp" name="nouveau" type="password" minlength="8" autocomplete="new-password" placeholder="8 caractères minimum"></div>
+        <div class="field"><label for="cp-mdp2">Confirmer</label><input class="input" id="cp-mdp2" name="confirme" type="password" minlength="8" autocomplete="new-password" placeholder="Retapez le mot de passe"></div></div>
       <div class="field"><label class="check" style="align-items:flex-start;font-weight:500"><input type="checkbox" name="cgu" value="oui" required style="margin-top:2px">
         <span>J'accepte les <a href="#/legal/cgu" target="_blank">conditions d'utilisation</a> et la <a href="#/legal/confidentialite" target="_blank">politique de confidentialité</a> de DEUKSIL. ${req}</span></label></div>
       <div class="f-zone-err"></div>
@@ -86,12 +98,15 @@ window.addEventListener('submit', async e => {
   const cniSaisie = t('cni').replace(/\s/g, '');
   if (cniSaisie && !/^\d{13}$/.test(cniSaisie)) return erreurIci(f, 'cni', 'Le numéro de CNI comporte 13 chiffres (ou laissez le champ vide).');
   if (!d.cgu) return erreurIci(f, 'cgu', 'Acceptez les conditions d\'utilisation pour continuer.');
+  const mdp = String(d.nouveau || ''), mdp2 = String(d.confirme || '');
+  if (mdp || mdp2) { const refus = typeof refusNouveauMotDePasse === 'function' ? refusNouveauMotDePasse(mdp, mdp2) : (mdp.length < 8 ? 'Mot de passe : 8 caractères minimum.' : mdp !== mdp2 ? 'Les deux mots de passe ne correspondent pas.' : ''); if (refus) return erreurIci(f, 'nouveau', refus); }
   const b = f.querySelector('button:not([type="button"])'); b.disabled = true;
   try {
     if (d.role !== u.role) { const {error} = await SB.rpc('changer_type_compte', {nouveau: d.role}); if (error) throw error; }
     const patch = {phone: t('phone'), cgu_acceptees_le: new Date().toISOString(), ...(u.cni || !cniSaisie ? {} : {cni: cniSaisie}),
       ...(d.role === 'agency' ? {agency_name: t('agencyName'), address: t('address')} : {})};
     const {error} = await SB.from('profiles').update(patch).eq('id', u.id); if (error) throw error;
+    if (mdp) { const r = await SB.auth.updateUser({password: mdp}); if (r.error) throw r.error; }
   } catch (err) {
     b.disabled = false;
     return erreurIci(f, /cni/i.test(err.message || '') || err.code === '23505' ? 'cni' : '', err.code === '23505' ? 'Ce numéro de CNI est déjà utilisé par un autre compte.' : messageErreur(err));

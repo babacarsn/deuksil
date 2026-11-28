@@ -16,9 +16,10 @@
 
 Le site répond maintenant sur **https://deuksil.com**. Le site y renvoie les liens des e-mails (confirmation, mot de passe oublié) et la connexion Google. Sans ces réglages : liens d'e-mail renvoyés vers l'ancienne adresse, et assistant / création de comptes refusés depuis deuksil.com.
 
-1. **Authentication → URL Configuration**
-   - *Site URL* : `https://deuksil.com`
-   - *Redirect URLs* : ajouter `https://deuksil.com/**` et `https://www.deuksil.com/**` (garder `https://deuksil.vercel.app/**` et l'adresse de test).
+1. **Authentication → URL Configuration** (indispensable pour « Continuer avec Google » et les liens des e-mails)
+   - *Site URL* : `https://www.deuksil.com` (deuksil.com renvoie vers www)
+   - *Redirect URLs* : `https://www.deuksil.com/**`, `https://deuksil.com/**`, `https://deuksil.vercel.app/**` et `https://deuksil-git-test-babacarsns-projects.vercel.app/**`.
+   - Le site demande à revenir sur l'adresse où la personne se trouve : si cette adresse manque dans la liste, Supabase renvoie vers la *Site URL* et la connexion Google ne s'ouvre pas (« la page se recharge et le compte disparaît »).
 2. **Secret des fonctions** `DEUKSIL_ORIGINES` (s'il est défini) : il doit contenir deuksil.com, sinon l'assistant et la création des accès sont refusés depuis deuksil.com :
    ```bash
    supabase secrets set DEUKSIL_ORIGINES="https://deuksil.com,https://www.deuksil.com,https://deuksil.vercel.app,https://deuksil-git-test-babacarsns-projects.vercel.app"
