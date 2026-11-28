@@ -119,8 +119,8 @@ Deno.serve(async (req) => {
       app_metadata: meta,
     });
     if (error) {
-      const deja = /already|exists|registered|duplicate/i.test(error.message);
-      return refus(req, deja ? 409 : 400, deja ? 'Un compte existe déjà avec cette adresse e-mail ou ce numéro de CNI.' : 'Création du compte impossible : ' + error.message);
+      const deja = /already|exists|registered|duplicate|Database error/i.test(error.message);
+      return refus(req, deja ? 409 : 400, deja ? 'Un compte existe déjà avec cette adresse e-mail, ce numéro de téléphone ou ce numéro de CNI.' : 'Création du compte impossible : ' + error.message);
     }
     await admin.from('audit_log').insert({ owner_id: moi.id, actor_id: moi.id, who: 'gerer-acces', action: 'Accès créé', detail: `${role} · ${email}` });
     return repondre(req, 200, { id: cree.user!.id, motDePasse });

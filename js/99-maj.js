@@ -4,9 +4,8 @@
       https (ou localhost) et pas dans une fenêtre intégrée.
    2. Chaque fois que l'application revient au premier plan (au plus toutes
       les 2 minutes), elle compare les fichiers publiés (ETag / date / taille)
-      à ceux du démarrage. Si un fichier a changé, elle se recharge : tout de
-      suite si personne n'est en train de saisir, sinon un bandeau propose
-      « Mettre à jour ». Les données de l'utilisateur restent en place.
+      à ceux du démarrage. Si un fichier a changé, un bandeau propose
+      « Mettre à jour » : la page ne se recharge jamais d'elle-même.
    ========================================================================= */
 (() => {
   const servi = /^https:$/.test(location.protocol) || ['localhost', '127.0.0.1'].includes(location.hostname);
@@ -42,7 +41,9 @@
     if (Date.now() - dernier < 120000) return; dernier = Date.now();
     const s = await signature(); if (!s) return;
     if (depart === null) { depart = s; return; }
-    if (s !== depart) saisieEnCours() ? proposer() : recharger();
+    /* La page ne se recharge jamais d'elle-même : un bandeau propose la mise à jour,
+       la personne choisit le moment (rien de ce qu'elle lit ou saisit n'est perdu). */
+    if (s !== depart) proposer();
   }
   window.verifierMiseAJour = () => { dernier = 0; return verifier(); };
   window.addEventListener('load', () => setTimeout(() => { dernier = 0; verifier(); }, 3000));

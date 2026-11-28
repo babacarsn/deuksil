@@ -109,6 +109,7 @@ window.addEventListener('submit', async e => {
     if (mdp) { const r = await SB.auth.updateUser({password: mdp}); if (r.error) throw r.error; }
   } catch (err) {
     b.disabled = false;
+    if (/téléphone/i.test(err.message || '')) return erreurIci(f, 'phone', err.message);
     return erreurIci(f, /cni/i.test(err.message || '') || err.code === '23505' ? 'cni' : '', err.code === '23505' ? 'Ce numéro de CNI est déjà utilisé par un autre compte.' : messageErreur(err));
   }
   await DB.relire(DB.K.users);

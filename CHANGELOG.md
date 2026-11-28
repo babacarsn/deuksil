@@ -1,5 +1,11 @@
 # DEUKSIL — Historique des modifications
 
+## 28 novembre 2026 (2) — Téléphone unique, page stable, mot de passe oublié
+
+- Un numéro de téléphone = un compte : la base refuse un numéro déjà utilisé (comparé sur ses 9 derniers chiffres : « +221 77… » = « 77… »), à l'inscription, à la création d'un accès et à la modification du profil ; l'inscription le dit avant l'envoi (`telephone_libre`). Migration `20261128000100_telephone_unique.sql`, tests `supabase/tests-cni/telephone-unique.sh` (7/7).
+- La page ne se rafraîchit plus d'elle-même : une nouvelle version publiée affiche un bandeau « Mettre à jour » (plus de rechargement automatique) ; le rafraîchissement des données (retour sur l'onglet, toutes les minutes) ne redessine la page que s'il y a du nouveau, à la même position.
+- Mot de passe oublié : le lien de l'e-mail menait à l'accueil sans proposer de nouveau mot de passe (l'évènement de récupération arrivait avant que le site n'écoute) et ne marchait que dans le navigateur de la demande. Le lien mène maintenant à « Nouveau mot de passe » (sans code à saisir), un lien avec jeton marche sur tout appareil, et les codes de 6 à 10 chiffres sont acceptés. Modèles d'e-mails à mettre à jour : voir le guide.
+
 ## 28 novembre 2026 — Connexion Google : la session ne s'ouvrait pas
 
 - Défaut : après « Continuer avec Google », la page se rechargeait et l'on restait déconnecté. Le retour se faisait sur l'adresse fixe du site alors que la connexion avait commencé sur une autre (www.deuksil.com ↔ deuksil.com, ancienne adresse) : le code de sécurité gardé par le navigateur ne correspondait plus. Les retours (Google, lien de confirmation, mot de passe oublié) se font maintenant sur la page en cours.

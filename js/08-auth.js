@@ -23,7 +23,7 @@ const messageAuth = e => {
   if (!e) return '';
   if (MESSAGES_AUTH[e.message]) return MESSAGES_AUTH[e.message];
   if (/rate limit|too many/i.test(e.message || '')) return 'Trop de tentatives. Patientez quelques minutes avant de réessayer.';
-  if (/Database error saving new user/i.test(e.message || '')) return 'Impossible de créer le compte : cette adresse e-mail ou ce numéro de CNI est déjà utilisé.';
+  if (/Database error saving new user/i.test(e.message || '')) return 'Impossible de créer le compte : cette adresse e-mail, ce numéro de téléphone ou ce numéro de CNI est déjà utilisé par un autre compte.';
   if (/Failed to fetch|NetworkError/i.test(e.message || '')) return 'Connexion au serveur impossible. Vérifiez votre connexion.';
   return e.message || 'Erreur d\'authentification.';
 };

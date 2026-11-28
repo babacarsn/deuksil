@@ -56,7 +56,7 @@ async function demarrer() {
   SB.auth.onAuthStateChange((evt, session) => {
     DB.session = session;
     if (evt === 'TOKEN_REFRESHED' || evt === 'USER_UPDATED') return;
-    if (evt === 'PASSWORD_RECOVERY') { setTimeout(() => go('#/reinitialiser-mot-de-passe'), 0); return; }
+    if (evt === 'PASSWORD_RECOVERY') { window.__recuperationMdp = true; setTimeout(() => go('#/reinitialiser-mot-de-passe'), 0); return; }
     const id = session ? session.user.id : null;
     if (id === derniere) return;
     derniere = id;
@@ -67,8 +67,16 @@ async function demarrer() {
     if (document.visibilityState !== 'visible' || !DB.session || document.querySelector('.modal')) return;
     const a = document.activeElement; if (a && a.matches && a.matches('input, textarea, select')) return;
     await DB.attendre();
+    const empreinte = () => tables.map(k => { try { return JSON.stringify(DB.getData(DB.K[k])); } catch (e) { return ''; } }).join('|');
+    const avant = empreinte();
     await Promise.all(tables.map(k => DB.relire(DB.K[k])));
+    /* Rien de nouveau : la page n'est pas redessinée (elle ne « saute » plus toute seule).
+       Du nouveau : elle l'est, à la même position de lecture. */
+    if (empreinte() === avant || document.querySelector('.modal')) return;
+    const a2 = document.activeElement; if (a2 && a2.matches && a2.matches('input, textarea, select')) return;
+    const y = window.scrollY;
     render();
+    requestAnimationFrame(() => window.scrollTo(0, y));
   };
   document.addEventListener('visibilitychange', () => { if (Date.now() - (DB.chargeLe || 0) > 30000) { DB.chargeLe = Date.now(); rafraichir(Object.keys(TABLE_DE).filter(k => k !== 'users')); } });
   setInterval(() => rafraichir(['notifications', 'messages', 'tmsgs', 'visits']), 60000);

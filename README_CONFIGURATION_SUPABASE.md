@@ -12,6 +12,65 @@
 
 ---
 
+## 28 novembre 2026 — téléphone unique, e-mails, retours de connexion
+
+Projet Supabase : `fqrmulupzaqmvjoybela`. Faire une sauvegarde avant.
+
+### 1. Un numéro de téléphone = un compte (SQL)
+
+SQL Editor → coller **tout** `20261128000100_telephone_unique.sql` → **Run** (rejouable sans risque).
+
+Les comptes qui partagent DÉJÀ un numéro ne sont pas modifiés. Pour les voir :
+
+```sql
+select app.tel_court(phone) as numero, count(*) as comptes, string_agg(email || ' (' || role || ')', ', ') as qui
+from public.profiles where app.tel_court(phone) is not null and doublon_de is null
+group by 1 having count(*) > 1;
+```
+
+Contrôle : `select public.telephone_libre('77 000 00 00');` répond `true` ou `false`.
+
+### 2. URL de retour (connexion Google, liens des e-mails) — indispensable
+
+Authentication → URL Configuration :
+- *Site URL* : `https://www.deuksil.com`
+- *Redirect URLs* : `https://www.deuksil.com/**`, `https://deuksil.com/**`, `https://deuksil.vercel.app/**`, `https://deuksil-git-test-babacarsns-projects.vercel.app/**`
+
+### 3. Modèles d'e-mails : le code ET un lien qui marche sur tous les appareils
+
+Authentication → Emails → Templates.
+
+**Reset Password** (mot de passe oublié) — remplacer le contenu par :
+
+```html
+<h2>Réinitialiser votre mot de passe DEUKSIL</h2>
+<p>Votre code : <b style="font-size:20px;letter-spacing:3px">{{ .Token }}</b></p>
+<p>Saisissez-le sur la page « Nouveau mot de passe », ou cliquez sur ce lien (il marche aussi sur un autre téléphone ou ordinateur) :</p>
+<p><a href="{{ .SiteURL }}/#/reinitialiser-mot-de-passe?token_hash={{ .TokenHash }}&type=recovery">Choisir un nouveau mot de passe</a></p>
+<p>Si vous n'avez rien demandé, ignorez cet e-mail.</p>
+```
+
+**Confirm signup** (inscription) — remplacer le contenu par :
+
+```html
+<h2>Bienvenue sur DEUKSIL</h2>
+<p>Votre code de confirmation : <b style="font-size:20px;letter-spacing:3px">{{ .Token }}</b></p>
+<p>Ou cliquez sur ce lien : <a href="{{ .SiteURL }}/#/verifier-email?token_hash={{ .TokenHash }}&type=email">Confirmer mon adresse</a></p>
+```
+
+(Sans `{{ .Token }}` dans le modèle, l'e-mail ne contient pas de code et la page « Saisir le code » ne peut pas servir.)
+
+### 4. Fonction gerer-acces (message plus clair pour un téléphone déjà pris)
+
+```bash
+supabase functions deploy gerer-acces
+```
+
+### Vérifier sur le site
+- Inscription avec un numéro déjà utilisé : message « Ce numéro de téléphone est déjà utilisé… ».
+- « Mot de passe oublié » : l'e-mail contient un code et un lien ; le lien ouvert sur un autre appareil mène directement à « Choisissez votre nouveau mot de passe ».
+- « Continuer avec Google » : la session s'ouvre ; un nouveau compte arrive sur « Compléter mon profil ».
+
 ## 27 novembre 2026 — nom de domaine officiel deuksil.com
 
 Le site répond maintenant sur **https://deuksil.com**. Le site y renvoie les liens des e-mails (confirmation, mot de passe oublié) et la connexion Google. Sans ces réglages : liens d'e-mail renvoyés vers l'ancienne adresse, et assistant / création de comptes refusés depuis deuksil.com.

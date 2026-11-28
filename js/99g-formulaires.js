@@ -199,21 +199,51 @@ window.addEventListener('submit', async e => {
   try { effacerErreursChamps(f); } catch (err) {}
   memoire.ecrire(CLE_REINIT, {email, t: Date.now()});
   occupe(f, true);
-  const {error} = await SB.auth.resetPasswordForEmail(email, {redirectTo: adresseDeRetour()});
+  const {error} = await SB.auth.resetPasswordForEmail(email, {redirectTo: adresseDeRetour() + '#/reinitialiser-mot-de-passe'});
   occupe(f, false);
   if (error && /rate|too many|seconds/i.test(error.message || '')) return etatForm(f, 'bad', 'Trop de demandes', messageAuth(error));
   if (error) return etatForm(f, 'bad', 'Envoi impossible', esc(messageAuth(error)));
   /* Même réponse que le compte existe ou non : on ne révèle pas qui est inscrit. */
-  etatForm(f, 'ok', 'Code envoyé', `Si un compte correspond à <b>${esc(email)}</b>, vous allez recevoir un code à 6 chiffres par e-mail. Il est valable 15 minutes. Pensez à regarder vos courriers indésirables.`,
+  etatForm(f, 'ok', 'Code envoyé', `Si un compte correspond à <b>${esc(email)}</b>, vous allez recevoir un e-mail avec un code (et un lien) pour choisir un nouveau mot de passe. Il n'est valable que pendant une durée limitée. Pensez à regarder vos courriers indésirables.`,
     `<a class="btn sm" href="#/reinitialiser-mot-de-passe">Saisir le code</a>`);
 }, true);
 
+/* Paramètres du lien reçu par e-mail (#/page?token_hash=…&type=…). */
+const paramsLien = () => new URLSearchParams((location.hash.split('?')[1]) || '');
+/* Lien « Réinitialiser » reçu par e-mail, ouvert sur n'importe quel appareil : il porte
+   un jeton (token_hash) vérifié ici, sans le code de sécurité du navigateur d'origine. */
+let verifLienEnCours = false;
+async function verifierLienRecuperation(th) {
+  if (verifLienEnCours) return; verifLienEnCours = true;
+  const {data, error} = await SB.auth.verifyOtp({token_hash: th, type: 'recovery'});
+  verifLienEnCours = false;
+  history.replaceState(null, '', location.pathname + location.search + '#/reinitialiser-mot-de-passe');
+  if (error) { toast('Ce lien a expiré ou a déjà servi : demandez un nouveau code.', 'bad'); go('#/mot-de-passe-oublie'); return; }
+  window.__recuperationMdp = true; DB.session = data.session; render();
+}
 route(/^\/reinitialiser-mot-de-passe$/, () => {
   const mem = memoire.lire(CLE_REINIT) || {};
+  const th = paramsLien().get('token_hash');
+  if (th) {
+    setTimeout(() => verifierLienRecuperation(th), 0);
+    return pageCompte({badge: 'Récupération du compte', titre: 'Vérification du lien…', lede: 'Un instant : nous vérifions le lien reçu par e-mail.', corps: '<div class="spinner"></div>'});
+  }
+  /* Arrivée par le lien de l'e-mail : la session de récupération est ouverte, il ne
+     reste qu'à choisir le nouveau mot de passe (aucun code à saisir). */
+  if (window.__recuperationMdp && DB.session) {
+    return pageCompte({badge: 'Récupération du compte', titre: 'Nouveau mot de passe', lede: 'Votre adresse est vérifiée. Choisissez votre nouveau mot de passe.', retour: ['#/login', 'Retour à la connexion'],
+      corps: `<form data-action="mdp-reinit" data-mode="lien" novalidate>
+        ${champMdp('mr-mdp', 'nouveau', 'Nouveau mot de passe')}
+        ${champMdp('mr-mdp2', 'confirme', 'Confirmer le mot de passe')}
+        <p class="small fhint" style="margin:-4px 0 14px">8 caractères minimum, avec au moins une lettre et un chiffre.</p>
+        <div class="f-zone-err"></div>
+        <button class="btn block">Enregistrer le mot de passe</button>
+      </form>`});
+  }
   return pageCompte({badge: 'Récupération du compte', titre: 'Nouveau mot de passe', lede: 'Saisissez le code reçu par e-mail, puis choisissez votre nouveau mot de passe.', retour: ['#/mot-de-passe-oublie', 'Recevoir un autre code'],
     corps: `<form data-action="mdp-reinit" novalidate>
       ${champ('mr-id', 'Adresse e-mail', `<input class="input" id="mr-id" name="email" type="email" autocomplete="username" value="${esc(mem.email || '')}" required>`)}
-      ${champ('mr-code', 'Code à 6 chiffres', '<input class="input f-code" id="mr-code" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="••••••" required>')}
+      ${champ('mr-code', 'Code reçu par e-mail', '<input class="input f-code" id="mr-code" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="••••••" required>')}
       ${champMdp('mr-mdp', 'nouveau', 'Nouveau mot de passe')}
       ${champMdp('mr-mdp2', 'confirme', 'Confirmer le mot de passe')}
       <p class="small fhint" style="margin:-4px 0 14px">8 caractères minimum, avec au moins une lettre et un chiffre.</p>
@@ -226,15 +256,17 @@ window.addEventListener('submit', async e => {
   const f = e.target.closest && e.target.closest('form[data-action="mdp-reinit"]'); if (!f) return;
   e.preventDefault(); e.stopImmediatePropagation();
   const d = formData(f), email = String(d.email || '').trim().toLowerCase(), code = String(d.code || '').replace(/\D/g, '');
-  if (!RE_EMAIL.test(email)) return erreurIci(f, 'email', 'Saisissez l\'adresse e-mail de votre compte.');
-  if (code.length !== 6) return erreurIci(f, 'code', 'Le code comporte 6 chiffres.');
+  const parLien = f.dataset.mode === 'lien';
+  if (!parLien && !RE_EMAIL.test(email)) return erreurIci(f, 'email', 'Saisissez l\'adresse e-mail de votre compte.');
+  if (!parLien && (code.length < 6 || code.length > 10)) return erreurIci(f, 'code', 'Saisissez le code reçu par e-mail (6 chiffres ou plus).');
   const refus = refusNouveauMotDePasse(d.nouveau, d.confirme);
   if (refus) return erreurIci(f, /correspondent/.test(refus) ? 'confirme' : 'nouveau', refus);
   try { effacerErreursChamps(f); } catch (err) {}
   occupe(f, true, 'Vérification…');
-  const v = await SB.auth.verifyOtp({email, token: code, type: 'recovery'});
+  const v = parLien ? {data: {session: DB.session}} : await SB.auth.verifyOtp({email, token: code, type: 'recovery'});
   if (v.error) { occupe(f, false); return erreurIci(f, 'code', messageAuth(v.error)); }
   const {error} = await SB.auth.updateUser({password: d.nouveau});
+  window.__recuperationMdp = false;
   occupe(f, false);
   if (error) return erreurIci(f, 'nouveau', messageAuth(error));
   memoire.oublier(CLE_REINIT); f.reset();
@@ -249,13 +281,25 @@ window.addEventListener('submit', async e => {
 
 /* --- 4. Vérification de l'adresse e-mail ----------------------------------- */
 route(/^\/verifier-email$/, () => {
+  /* Lien de confirmation avec jeton (#/verifier-email?token_hash=…&type=email) : vérifié ici. */
+  const thv = paramsLien().get('token_hash');
+  if (thv) {
+    setTimeout(async () => {
+      const {data, error} = await SB.auth.verifyOtp({token_hash: thv, type: paramsLien().get('type') === 'signup' ? 'signup' : 'email'});
+      history.replaceState(null, '', location.pathname + location.search + '#/verifier-email');
+      if (error) { toast('Ce lien a expiré ou a déjà servi : saisissez le code, ou demandez-en un nouveau.', 'bad'); render(); return; }
+      DB.session = data.session; await DB.charger(); const u2 = Auth.current();
+      toast('Adresse confirmée : bienvenue sur DEUKSIL.'); go(u2 ? Auth.home(u2) : '#/login');
+    }, 0);
+    return pageCompte({badge: 'Sécurité du compte', titre: 'Vérification du lien…', lede: 'Un instant : nous confirmons votre adresse e-mail.', corps: '<div class="spinner"></div>'});
+  }
   const u = Auth.current(), email = (u && !u.member && u.email) || memoire.lire(CLE_VERIF) || '';
   const fait = u && DB.session && DB.session.user && DB.session.user.email_confirmed_at;
   return pageCompte({badge: 'Sécurité du compte', titre: 'Vérifiez votre adresse e-mail', retour: u ? [Auth.home(u), 'Retour à mon espace'] : ['#/login', 'Retour à la connexion'],
-    lede: fait ? 'Votre adresse e-mail est confirmée.' : 'Saisissez le code à 6 chiffres envoyé à votre adresse e-mail pour activer votre compte.',
+    lede: fait ? 'Votre adresse e-mail est confirmée.' : 'Saisissez le code envoyé à votre adresse e-mail pour activer votre compte.',
     corps: fait ? `<a class="btn block" href="${Auth.home(u)}">Aller à mon espace</a>` : `<form data-action="email-verif" novalidate>
       ${champ('ve-email', 'Adresse e-mail', `<input class="input" id="ve-email" name="email" type="email" autocomplete="email" value="${esc(email)}" required>`)}
-      ${champ('ve-code', 'Code à 6 chiffres', '<input class="input f-code" id="ve-code" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="••••••" required>')}
+      ${champ('ve-code', 'Code reçu par e-mail', '<input class="input f-code" id="ve-code" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="••••••" required>')}
       <div class="f-zone-err"></div>
       <button class="btn block">Vérifier mon adresse</button>
     </form>
@@ -266,7 +310,7 @@ window.addEventListener('submit', async e => {
   e.preventDefault(); e.stopImmediatePropagation();
   const d = formData(f), email = String(d.email || '').trim().toLowerCase(), code = String(d.code || '').replace(/\D/g, '');
   if (!RE_EMAIL.test(email)) return erreurIci(f, 'email', 'Adresse e-mail invalide.');
-  if (code.length !== 6) return erreurIci(f, 'code', 'Le code comporte 6 chiffres.');
+  if (code.length < 6 || code.length > 10) return erreurIci(f, 'code', 'Saisissez le code reçu par e-mail (6 chiffres ou plus).');
   try { effacerErreursChamps(f); } catch (err) {}
   occupe(f, true, 'Vérification…');
   const {data, error} = await SB.auth.verifyOtp({email, token: code, type: 'signup'});

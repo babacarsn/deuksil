@@ -13,13 +13,23 @@
    d'après js/02c-schema.js ; un champ sans colonne va dans « extra » (jsonb).
    Fichiers (data:) : envoyés dans Supabase Storage avant l'écriture de la ligne.
    ========================================================================== */
+/* Retour de connexion (Google, lien reçu par e-mail) : l'adresse et le type de retour sont
+   notés AVANT que supabase-js ne les lise et ne les efface (js/99u-connexion.js s'en sert). */
+window.__retourAuth = (() => {
+  let verif = ''; try { verif = localStorage.getItem('deuksil-auth-code-verifier') || ''; } catch (e) {}
+  return {search: location.search, hash: location.hash, recuperation: /PASSWORD_RECOVERY/.test(verif)};
+})();
 const SB = (() => {
   const C = typeof DEUKSIL_CONFIG !== 'undefined' ? DEUKSIL_CONFIG : {};
   if (!window.supabase || !C.supabaseUrl || !C.supabaseAnonKey) return null;
-  return supabase.createClient(C.supabaseUrl, C.supabaseAnonKey, {
+  const sb = supabase.createClient(C.supabaseUrl, C.supabaseAnonKey, {
     auth: {persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'pkce', storageKey: 'deuksil-auth'},
     global: {headers: {'x-client-info': 'deuksil-web'}}
   });
+  /* Lien « mot de passe oublié » : l'évènement arrive pendant le démarrage, avant que le
+     site n'écoute (js/76-demarrage.js) ; on le retient dès maintenant. */
+  sb.auth.onAuthStateChange(evt => { if (evt === 'PASSWORD_RECOVERY') window.__recuperationMdp = true; });
+  return sb;
 })();
 
 /* Collection de l'interface → table Supabase. Les autres clés restent en mémoire. */

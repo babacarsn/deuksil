@@ -12,9 +12,21 @@
       sinon son espace. Si la connexion a échoué, elle voit pourquoi au lieu
       d'une page qui se recharge sans rien dire.
    ========================================================================== */
+/* Un numéro de téléphone = un compte : vérifié avant d'envoyer l'inscription
+   (la base refuse de toute façon un doublon ; ici le message est clair). */
+if (typeof startRegistration === 'function') {
+  const _inscrire = startRegistration;
+  startRegistration = async function (data) {
+    try {
+      const {data: libre, error} = await SB.rpc('telephone_libre', {tel: String((data && data.phone) || '')});
+      if (!error && libre === false) return {error: 'Ce numéro de téléphone est déjà utilisé par un autre compte DEUKSIL. Utilisez un autre numéro, ou connectez-vous au compte existant (« Mot de passe oublié » si besoin).'};
+    } catch (e) { /* vérification indisponible : la base tranchera */ }
+    return _inscrire(data);
+  };
+}
 (() => {
   const MESSAGES = [
-    [/Database error saving new user|duplicate|already/i, 'Impossible de créer le compte : cette adresse e-mail ou ce numéro de CNI est déjà utilisé par un autre compte. Connectez-vous avec votre e-mail et votre mot de passe.'],
+    [/Database error saving new user|duplicate|already/i, 'Impossible de créer le compte : cette adresse e-mail, ce numéro de téléphone ou ce numéro de CNI est déjà utilisé par un autre compte. Connectez-vous à ce compte (« Mot de passe oublié » si besoin).'],
     [/code verifier|invalid flow state|flow_state|both auth code and code verifier/i, 'La connexion a été commencée sur une autre adresse du site ou un autre navigateur. Recommencez « Continuer avec Google » depuis cette page.'],
     [/expired|invalid/i, 'Le lien de connexion a expiré ou a déjà servi. Recommencez la connexion.'],
     [/access_denied|cancel/i, 'Connexion Google annulée.']
@@ -22,10 +34,14 @@
   const clair = m => { const t = (MESSAGES.find(([re]) => re.test(m || '')) || [])[1]; return t || ('La connexion n\'a pas abouti' + (m ? ' : ' + m : '.')); };
 
   /* Ce que l'adresse contient au chargement (supabase-js la nettoie ensuite). */
-  const q = new URLSearchParams(location.search);
-  const h = new URLSearchParams((location.hash.match(/[#&](error[^#]*)$/) || [])[1] || '');
+  const R = window.__retourAuth || {search: location.search, hash: location.hash};
+  const q = new URLSearchParams(R.search);
+  const h = new URLSearchParams((R.hash.match(/[#&](error[^#]*)$/) || [])[1] || '');
   const erreur = q.get('error_description') || h.get('error_description') || q.get('error') || h.get('error') || '';
   const avecCode = q.has('code');
+  /* Lien « mot de passe oublié » : supabase-js signale la récupération (PASSWORD_RECOVERY)
+     pendant son démarrage, avant que le site n'écoute ; on la repère donc ici, tôt. */
+  if (avecCode && (R.recuperation || /^#\/reinitialiser-mot-de-passe/.test(R.hash))) window.__recuperationMdp = true;
   let depuisGoogle = false;
   try { depuisGoogle = !!sessionStorage.getItem('deuksil_retour_google'); sessionStorage.removeItem('deuksil_retour_google'); } catch (e) {}
   if (!erreur && !avecCode && !depuisGoogle) return;
@@ -42,6 +58,7 @@
   const suite = () => {
     nettoyer();
     const u = Auth.current();
+    if (u && window.__recuperationMdp) { go('#/reinitialiser-mot-de-passe'); render(); return; }
     if (u) {
       const aCompleter = typeof profilACompleter === 'function' && profilACompleter(u);
       if (aCompleter) { go('#/completer-profil'); toast('Bienvenue sur DEUKSIL : complétez votre profil pour continuer.'); return; }

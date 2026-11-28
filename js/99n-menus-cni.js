@@ -338,7 +338,8 @@ document.addEventListener('click', e => {
     catch (e) {
       const m = String((e && e.message) || '');
       let clair = '';
-      if (/Requested function was not found|NOT_FOUND|404/i.test(m)) clair = `La fonction serveur « ${nom} » n'est pas déployée sur Supabase : création d'accès impossible pour l'instant. Prévenez la personne qui gère Supabase (supabase functions deploy ${nom}).`;
+      if (/Database error (creating|saving) new user|déjà utilisé/i.test(m)) clair = /téléphone/i.test(m) ? m : 'Création impossible : cette adresse e-mail, ce numéro de téléphone ou ce numéro de CNI est déjà utilisé par un autre compte DEUKSIL.';
+      else if (/Requested function was not found|NOT_FOUND|404/i.test(m)) clair = `La fonction serveur « ${nom} » n'est pas déployée sur Supabase : création d'accès impossible pour l'instant. Prévenez la personne qui gère Supabase (supabase functions deploy ${nom}).`;
       else if (/Failed to send a request|Failed to fetch|NetworkError|Load failed/i.test(m)) clair = `La fonction serveur « ${nom} » est injoignable (connexion, ou adresse du site non autorisée dans DEUKSIL_ORIGINES). Réessayez ; si cela continue, prévenez la personne qui gère Supabase.`;
       if (!clair) throw e;
       const err = new Error(clair); err.code = 'P0001'; throw err;
