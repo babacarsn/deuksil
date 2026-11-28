@@ -79,3 +79,34 @@ if (typeof startRegistration === 'function') {
     setTimeout(attendre, 100);
   })();
 })();
+
+/* ==========================================================================
+   Après « Publier » : on arrive sur l'annonce publiée (vue des visiteurs),
+   avec un bandeau « Votre annonce est en ligne » : Gérer ce bien · Partager.
+   ========================================================================== */
+(() => {
+  const css = document.createElement('style');
+  css.textContent = `.pub-ok{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:#E9F7EF;border:1px solid #B7E1C7;color:#14532D;border-radius:14px;padding:12px 16px;margin:14px 0}
+.pub-ok .pub-ok-t{flex:1 1 260px;min-width:0;font-weight:600}.pub-ok .pub-ok-t span{display:block;font-weight:400;font-size:.88rem;color:#256B42}
+.pub-ok .btn{white-space:nowrap}`;
+  document.head.appendChild(css);
+  const avant = afterRender;
+  afterRender = function () {
+    const r = avant.apply(this, arguments);
+    try {
+      const pid = window.__vientDePublier;
+      if (!pid) return r;
+      const ici = typeof idBienDeLaPage === 'function' ? idBienDeLaPage() : null;
+      if (ici !== pid) { if (!/^#\/(annonce|property)\//.test(location.hash)) window.__vientDePublier = null; return r; }
+      const app = document.querySelector('#app'); if (!app || app.querySelector('.pub-ok')) return r;
+      const contenu = app.querySelector('.main .content'); if (!contenu) return r;
+      const bien = DB.findItem(DB.K.properties, pid), enLigne = !bien || bien.listingStatus === 'publiee';
+      const retour = contenu.querySelector(':scope > .gback');
+      (retour || contenu).insertAdjacentHTML(retour ? 'afterend' : 'afterbegin', `<div class="pub-ok" role="status">${icon('check', 20)}
+        <div class="pub-ok-t">${enLigne ? 'Votre annonce est en ligne' : 'Votre annonce est envoyée pour validation'}<span>${enLigne ? 'Voici ce que voient les visiteurs.' : 'Voici ce que verront les visiteurs dès qu\'elle sera validée.'}</span></div>
+        <button type="button" class="btn sm ghost" data-fb-partager="${esc(pid)}">${icon('share' in ICONS ? 'share' : 'arrowRight', 15)} Partager</button>
+        <a class="btn sm" href="#/bien/${esc(pid)}">Gérer ce bien</a></div>`);
+    } catch (e) {}
+    return r;
+  };
+})();

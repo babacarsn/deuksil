@@ -164,7 +164,12 @@ document.addEventListener('click', e => {
     try { DB.updateItem(DB.K.properties, pid, {publishedAt: now()}); } catch (err) {}
     const p = DB.findItem(DB.K.properties, pid);
     toast(`« ${(p && p.title) || 'Votre annonce'} » est en ligne.`);
-    go('#/bien/' + pid);
+    /* Direction : l'annonce publiée, telle que les visiteurs la voient (un bandeau
+       propose de gérer le bien ou de le partager) — js/99u-connexion.js. */
+    if (p && p.listingStatus === 'publiee') {
+      window.__vientDePublier = pid;
+      go(typeof annonceHref === 'function' ? annonceHref(p) : '#/property/' + pid);
+    } else go(demande || '#/bien/' + pid);   /* en attente de validation : pas encore visible des visiteurs */
   } else {
     go(demande);
   }

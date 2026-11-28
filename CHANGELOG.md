@@ -1,5 +1,10 @@
 # DEUKSIL — Historique des modifications
 
+## 28 novembre 2026 (3) — Après « Publier » : direction l'annonce publiée
+
+- Une annonce publiée mène directement à sa page publique, telle que les visiteurs la voient, avec un bandeau « Votre annonce est en ligne » : Partager · Gérer ce bien (propriétaire, agence, sur ordinateur et téléphone). Une annonce d'agent en attente de validation garde l'ancien parcours.
+- Tutoriel « Publier un bien » retourné en conséquence.
+
 ## 28 novembre 2026 (2) — Téléphone unique, page stable, mot de passe oublié
 
 - Un numéro de téléphone = un compte : la base refuse un numéro déjà utilisé (comparé sur ses 9 derniers chiffres : « +221 77… » = « 77… »), à l'inscription, à la création d'un accès et à la modification du profil ; l'inscription le dit avant l'envoi (`telephone_libre`). Migration `20261128000100_telephone_unique.sql`, tests `supabase/tests-cni/telephone-unique.sh` (7/7).

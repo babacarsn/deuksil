@@ -29,7 +29,7 @@ const GUIDES = [
   {id: 'creer-compte', pour: ['visiteur'], titre: 'Créer son compte', duree: '0:42',
     resume: 'S\'inscrire comme client, propriétaire ou agence, puis confirmer son adresse e-mail.', lien: '#/register',
     etapes: ['Cliquez sur « Créer un compte ».', 'Choisissez votre profil : client, propriétaire ou agence.', 'Renseignez vos informations et un mot de passe (8 caractères, lettres et chiffres).', 'Saisissez le code reçu par e-mail pour activer le compte.']},
-  {id: 'publier', pour: ['owner', 'agency', 'agent'], titre: 'Publier un bien', duree: '1:01',
+  {id: 'publier', pour: ['owner', 'agency', 'agent'], titre: 'Publier un bien', duree: '1:02',
     resume: 'Créer une annonce avec photos, prix et adresse, puis la mettre en ligne.', lien: '#/owner/property/new',
     etapes: ['Cliquez sur « Ajouter un bien ».', 'Remplissez le titre, le type, location ou vente, et le prix.', 'Indiquez la ville, la commune et le quartier.', 'Ajoutez vos photos (20 au plus) : la première sert de couverture.', 'Vérifiez le récapitulatif puis publiez. Un agent : l\'annonce part en validation chez l\'agence.', 'Votre numéro de CNI est demandé avant la première publication.']},
   {id: 'visites', pour: ['owner', 'agency', 'agent'], titre: 'Répondre aux demandes de visite', duree: '0:20',
@@ -81,7 +81,7 @@ const lienGuide = (g, u) => {
   if (!u && g.lien !== '#/search' && g.lien !== '#/register') return '#/login';
   return g.lien;
 };
-const VERSION_VIDEOS = '20261127';   // à changer à chaque nouveau tournage (le navigateur reprend les vidéos à jour)
+const VERSION_VIDEOS = '20261128';   // à changer à chaque nouveau tournage (le navigateur reprend les vidéos à jour)
 const urlVideo = (id, ext) => `videos/guides/${id}.${ext}?v=${VERSION_VIDEOS}`;
 
 /* --- Page #/aide ------------------------------------------------------------------ */
